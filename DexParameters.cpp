@@ -12,7 +12,6 @@
 
 #include <useful.h>
 #include <screen.h>
-#include <3dMatrix.h>
 #include <Timers.h>
 #include "ConfigParser.h" 
 
@@ -33,11 +32,6 @@
 #include "DexGlObjects.h"
 #include "DexApparatus.h"
 #include "Dexterous.h"
-
-// These are constants that should probably be placed in the Vector3 class.
-const float iVector[3] = { 1.0, 0.0, 0.0 };
-const float jVector[3] = { 0.0, 1.0, 0.0 };
-const float kVector[3] = { 0.0, 0.0, 1.0 };
 
 // Parameters used when waiting for the hand to be at a target.
 float defaultPositionTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.

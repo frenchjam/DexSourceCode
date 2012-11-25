@@ -22,6 +22,8 @@
 #include "DexSounds.h"
 #include "DexTracker.h"
 
+#include "VectorsMixin.h" 
+
 
 /********************************************************************************/
 
@@ -30,7 +32,7 @@
 // to send messages to the ground.
 //
 
-class DexApparatus {
+class DexApparatus : public VectorsMixin {
 
 	private:
 

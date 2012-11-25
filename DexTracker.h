@@ -17,6 +17,7 @@
 
 #include <codasys.h>
 #include <CodaUtilities.h>
+#include <DexTimers.h>
 
 
 #include "Dexterous.h"
@@ -67,7 +68,7 @@ class DexVirtualTracker : public DexTracker {
 
 private:
 
-	Timer		oscillate_timer;
+	DexTimer	oscillate_timer;
 
 	int			next_sample;
 	bool		acquisition_on;
@@ -144,7 +145,7 @@ private:
 
 	bool		acquisitionOn;
 	bool		overrun;
-	Timer		acquisitionTimer;
+	DexTimer	acquisitionTimer;
 	
 protected:
 

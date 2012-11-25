@@ -233,7 +233,7 @@ void DexMouseTracker::Initialize( void ) {
 void DexMouseTracker::StartAcquisition( float max_duration ) { 
 	acquisitionOn = true; 
 	overrun = false;
-	TimerSet( &acquisitionTimer, max_duration );
+	DexTimerSet( acquisitionTimer, max_duration );
 }
 
 void DexMouseTracker::StopAcquisition( void ) {
@@ -299,17 +299,17 @@ int DexMouseTracker::Update( void ) {
 	for ( int j = 1; j < nMarkers; j++ ) {
 		currentMarkerFrame.marker[j].visibility = true;
 		for ( int k = 0; k < 3; k++ ) {
-			currentMarkerFrame.marker[j].position[k] = cos( TimerElapsedTime( &acquisitionTimer ) );
+			currentMarkerFrame.marker[j].position[k] = cos( DexTimerElapsedTime( acquisitionTimer ) );
 		}
 	}
 
 	// Store the time series of data.
-	if ( TimerTimeout( &acquisitionTimer ) ) {
+	if ( DexTimerTimeout( acquisitionTimer ) ) {
 		acquisitionOn = false;
 		overrun =true;
 	}
 	if ( acquisitionOn && nAcqFrames < DEX_MAX_DATA_FRAMES ) {
-		recordedMarkerFrames[ nAcqFrames ].time = TimerElapsedTime( &acquisitionTimer );
+		recordedMarkerFrames[ nAcqFrames ].time = DexTimerElapsedTime( acquisitionTimer );
 		for ( int j = 0; j < nMarkers; j++ ) {
 			recordedMarkerFrames[nAcqFrames].marker[j].visibility = currentMarkerFrame.marker[j].visibility;
 			for ( int k = 0; k < 3; k++ ) {

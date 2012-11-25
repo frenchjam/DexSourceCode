@@ -1,4 +1,8 @@
 /*********************************************************************************/
+/*                                                                               */
+/*                                   DexApparatus.cpp                            */
+/*                                                                               */
+/*********************************************************************************/
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -14,7 +18,6 @@
 
 #include <useful.h>
 #include <screen.h>
-#include <3dMatrix.h>
 #include <DexTimers.h>
 
 #include <CodaUtilities.h>
@@ -106,9 +109,10 @@ int DexApparatus::CalibrateTargets( void ) {
 			if ( status == IDRETRY ) trg--;
 		}
 		else {
-			targetPosition[trg][X] = position[X];
-			targetPosition[trg][Y] = position[Y];
-			targetPosition[trg][Z] = position[Z];
+			CopyVector( targetPosition[trg], position );
+//			targetPosition[trg][X] = position[X];
+//			targetPosition[trg][Y] = position[Y];
+//			targetPosition[trg][Z] = position[Z];
 		}
 	}
 
@@ -135,9 +139,10 @@ bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFram
 	//  to zero. 
 	// TO DO: This will be replaced by an algorithm to compute the position and orientation
 	//  of the manipulandum based on 8 markers (or those that are visible).
-	pos[X] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[X];
-	pos[Y] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Y];
-	pos[Z] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Z];
+//	pos[X] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[X];
+//	pos[Y] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Y];
+//	pos[Z] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Z];
+	CopyVector( pos, marker_frame.marker[CODA_MANIPULANDUM_MARKER].position );
 
 	// A single marker cannot define an orientation. Here we simulate rotations of the
 	// manipulandum by computing an angle based on the distance from the origin and
@@ -198,13 +203,8 @@ void DexApparatus::Update( void ) {
 	// Update the current state of the manipulandum;
 	if ( GetManipulandumPosition( pos, ori ) ) {
 		
-		manipulandumPosition[X] = pos[X];
-		manipulandumPosition[Y] = pos[Y];
-		manipulandumPosition[Z] = pos[Z];
-		manipulandumOrientation[X] = ori[X];
-		manipulandumOrientation[Y] = ori[Y];
-		manipulandumOrientation[Z] = ori[Z];
-		manipulandumOrientation[M] = ori[M];
+		CopyVector( manipulandumPosition, pos );
+		CopyQuaternion( manipulandumOrientation, ori );
 		manipulandumVisible = true;
 		
 	}
@@ -241,22 +241,22 @@ void DexApparatus::Update( void ) {
 
 int DexApparatus::SignalError( unsigned int mb_type, const char *message ) {
 		
-	Timer move_timer;
+	DexTimer move_timer;
 
 	for ( int blinks = 0; blinks < N_ERROR_BLINKS; blinks++ ) {
 		
 		targets->SetTargetState( 0x55555555 );
-		TimerSet( &move_timer, BLINK_PERIOD );
-		while( !TimerTimeout( &move_timer ) ) Update();
+		DexTimerSet( move_timer, BLINK_PERIOD );
+		while( !DexTimerTimeout( move_timer ) ) Update();
 		targets->SetTargetState( ~0x55555555 );
-		TimerSet( &move_timer, BLINK_PERIOD );
-		while( !TimerTimeout( &move_timer ) ) Update();
+		DexTimerSet( move_timer, BLINK_PERIOD );
+		while( !DexTimerTimeout( move_timer ) ) Update();
 		
 	}
 	
 	targets->SetTargetState( ~0x00000000 );
-	TimerSet( &move_timer, BLINK_PERIOD );
-	while( !TimerTimeout( &move_timer ) ) Update();
+	DexTimerSet( move_timer, BLINK_PERIOD );
+	while( !DexTimerTimeout( move_timer ) ) Update();
 	
 	monitor->SendEvent( message );
 	return( MessageBox( NULL, message, "DEX Message", mb_type ) );
@@ -486,9 +486,9 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 //
 void DexApparatus::Wait( double duration ) {
 	
-	Timer move_timer;
-	TimerSet( &move_timer, duration );
-	while( !TimerTimeout( &move_timer ) ) Update(); // This does the updating.
+	DexTimer move_timer;
+	DexTimerSet( move_timer, duration );
+	while( !DexTimerTimeout( move_timer ) ) Update(); // This does the updating.
 	
 }
 
@@ -506,8 +506,9 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 	DexTimer hold_timer;
 	DexTimer timeout_timer;
 	
-	// This will hold the orientation of the manipulandum with respect
-	//  to the specified desired orientation.
+	// These will hold the position and orientation of the manipulandum with respect
+	//  to the specified desired target position and the specified orientation.
+	Vector3 difference;
 	float orientation;
 
 	bool led_state = 0;
@@ -567,15 +568,17 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			// The apparatus class has an Update() method that acquires the most recent 
 			// marker positions and computes the position and orientation of the maniplandum.
 			Update();
+
+			SubtractVectors( difference, targetPosition[target_id], manipulandumPosition );
 			
 		} while ( 
 			// Stay here until the manipulandum is at the target, or until timeout.
 			// It is assumed that targetPosition[][] contains the position of each 
 			//  target LED in the current tracker reference frame, and that the 
 			//  manipulandum position is being updated as noted above.
-			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) > position_tolerance[X] ||
-			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) > position_tolerance[Y] ||
-			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) > position_tolerance[Z] ||
+			abs( difference[X] ) > position_tolerance[X] ||
+			abs( difference[Y] ) > position_tolerance[Y] ||
+			abs( difference[Z] ) > position_tolerance[Z] ||
 			orientation > orientation_tolerance ||
 			!manipulandumVisible
 			);
@@ -594,11 +597,12 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			}
 			// Continue to update the current manipulandum position.
 			Update();
+			SubtractVectors( difference, targetPosition[target_id], manipulandumPosition );
 			
 		} while ( 
-			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) <= position_tolerance[X] &&
-			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) <= position_tolerance[Y] &&
-			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) <= position_tolerance[Z] &&
+			abs( difference[X] ) <= position_tolerance[X] &&
+			abs( difference[Y] ) <= position_tolerance[Y] &&
+			abs( difference[Z] ) <= position_tolerance[Z] &&
 			orientation < orientation_tolerance &&
 			manipulandumVisible
 			);
@@ -702,12 +706,9 @@ void DexApparatus::StopAcquisition( void ) {
 	nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition, DEX_MAX_DATA_FRAMES );
 	// Compute the manipulandum positions.
 	for ( int i = 0; i < nAcqFrames; i++ ) {
-		for ( int k = 0; k < 3; k++ ) {
-			// Here I should compute the manipulandum position and orientation.
-			// Instead I just take the first marker as the manipulandum position.
-			acquiredManipulandumState[i].position[k] = acquiredPosition[i].marker[0].position[k];
-			acquiredManipulandumState[i].visibility = acquiredPosition[i].marker[0].visibility;
-		}
+		// Here I should compute the manipulandum position and orientation.
+		acquiredManipulandumState[i].visibility = acquiredPosition[i].marker[0].visibility;
+		CopyVector( acquiredManipulandumState[i].position, acquiredPosition[i].marker[0].position );
 	}
 	// Send the recording by telemetry to the ground for monitoring.
 	monitor->SendRecording( acquiredManipulandumState, nAcqFrames, INVISIBLE );
@@ -855,7 +856,7 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	int first, last;
 	
 	double N = 0.0, Sxy[3][3], sd;
-	double delta[3], mean[3], direction[3], vect[3];
+	Vector3 delta, mean, direction, vect;
 
 	// TO DO: Should normalize the direction vector here.
 	direction[X] = dirX;
@@ -870,16 +871,11 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 
 	// Compute the mean position. 
 	N = 0.0;
-	mean[X] = mean[Y] = mean[Z] = 0.0;
+	CopyVector( mean, zeroVector );
 	for ( i = first; i < last; i++ ) {
 		if ( acquiredManipulandumState[i].visibility ) {
-
 			N++;
-			// TO DO: Implement vector operations as functions.
-			mean[X] += acquiredManipulandumState[i].position[X];
-			mean[Y] += acquiredManipulandumState[i].position[Y];
-			mean[Z] += acquiredManipulandumState[i].position[Z];
-
+			AddVectors( mean, mean, acquiredManipulandumState[i].position );
 		}
 	}
 	// If there is no valid position data, signal an error.
@@ -891,26 +887,16 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	else {
 	
 		// This is the mean.
-		mean[X] /= N;
-		mean[Y] /= N;
-		mean[Z] /= N;
+		ScaleVector( mean, mean, 1.0 / N );;
 
 		// Compute the sums required for the variance calculation.
-		// This is a matrix assignment to zero. 
-		// TO DO: Implement as a vector function.
-		for ( k = 0; k < 3; k++ ) {
-			for ( m = 0; m < 3; m++ ) {
-				Sxy[k][m] = 0.0;
-			}
-		}
+		CopyMatrix( Sxy, zeroMatrix );
 		N = 0.0;
 
 		for ( i = first; i < last; i ++ ) {
 			if ( acquiredManipulandumState[i].visibility ) {
 				N++;
-				delta[X] = acquiredManipulandumState[i].position[X] - mean[X];
-				delta[Y] = acquiredManipulandumState[i].position[Y] - mean[Y];
-				delta[Z] = acquiredManipulandumState[i].position[Z] - mean[Z];
+				SubtractVectors( delta, acquiredManipulandumState[i].position, mean );
 				for ( k = 0; k < 3; k++ ) {
 					for ( m = 0; m < 3; m++ ) {
 						Sxy[k][m] += delta[k] * delta[m];
@@ -922,7 +908,11 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		// If we have some data, compute the directional variance and then
 		// the standard deviation along that direction;
 		// This is just a scalar times a matrix.
-		// TO DO; Implement as a vector function.
+
+		// Sxy has to be a double or we risk underflow when computing the sums.
+		// The Vectors package is for float vectors, so we implement the operations
+		//  directly here.
+		// TO DO: Implement vector function for double matrices.
 		for ( k = 0; k < 3; k++ ) {
 			vect[k] = 0;
 			for ( m = 0; m < 3; m++ ) {
@@ -930,7 +920,7 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 			}
 		}
 		// This is a matrix multiply.
-		// TO DO: Implement as a vector function.
+		// TO DO: Implement vector function for double matrices.
 		for ( k = 0; k < 3; k++ ) {
 			for ( m = 0; m < 3; m++ ) {
 				vect[k] += Sxy[m][k] * direction[m];
@@ -939,7 +929,7 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		// Compute the length of the vector, which is the variance along 
 		// the specified direction. Then take the square root of that 
 		// magnitude to get the standard deviation along that direction.
-		sd = sqrt( sqrt( vect[X] * vect[X] + vect[Y] * vect[Y] + vect[Z] * vect[Z] ) );
+		sd = sqrt( VectorNorm( vect ) );
 
 		// Check if the computed value is in the desired range.
 		error = ( sd < min || sd > max );

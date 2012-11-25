@@ -29,7 +29,6 @@
 
 #include <useful.h>
 #include <screen.h>
-#include <3dMatrix.h>
 #include <DexTimers.h>
 #include "ConfigParser.h" 
 
@@ -170,8 +169,8 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, jVector, NULL );
-	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, kVector, NULL );
+	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->jVector, NULL );
+	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->kVector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Indicate to the subject that they are done.
