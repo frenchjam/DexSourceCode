@@ -169,7 +169,7 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	if ( direction == VERTICAL ) apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, 0.0, 1.0, 0.0, NULL );
+	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, 0.0, 1.0, 0.0, NULL );
 	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, 0.0, 0.0, 1.0, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	

@@ -820,8 +820,8 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 
 	int first, last;
 	
-	double N = 0.0, Sxy[3][3];
-	double delta[3], initial[3], direction[3], vect[3];
+	double N = 0.0, Sxy[3][3], sd;
+	double delta[3], mean[3], direction[3], vect[3];
 
 	direction[X] = dirX;
 	direction[Y] = dirY;
@@ -831,67 +831,82 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	// First we should look for the start and end of the actual movement based on 
 	// events such as when the subject reaches the first target. For the moment we
 	// take the full trial.
-	first = 0;
 	last = nAcqFrames;
+	for ( first = 0; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
 
-	// Measure the position variation from the starting position;
-	for ( i = first; i < last; i++ ) if ( acquiredManipulandumState[i].visibility ) break;
-
-	// I will implement vector operations as functions.
-	initial[X] = acquiredManipulandumState[i].position[X];
-	initial[Y] = acquiredManipulandumState[i].position[Y];
-	initial[Z] = acquiredManipulandumState[i].position[Z];
-	
-	// Compute the sums required for the variance calculation.
+	// Compute the mean position.
 	N = 0.0;
-	// This is a matrix assignment to zero. Will be implemented as a vector function.
-	for ( k = 0; k < 3; k++ ) {
-		for ( m = 0; m < 3; m++ ) {
-			Sxy[k][m] = 0.0;
+	mean[X] = mean[Y] = mean[Z] = 0.0;
+	for ( i = first; i < last; i++ ) {
+		if ( acquiredManipulandumState[i].visibility ) {
+
+			N++;
+			// I will implement vector operations as functions.
+			mean[X] += acquiredManipulandumState[i].position[X];
+			mean[Y] += acquiredManipulandumState[i].position[Y];
+			mean[Z] += acquiredManipulandumState[i].position[Z];
+
 		}
 	}
+	// If there is no valid position data, signal an error.
+	if ( N <= 0.0 ) {
+		monitor->SendEvent( "Movement extent - No valid data." );
+		sd = 0.0;
+		error = true;
+	}
+	else {
+	
+		// This is the mean.
+		mean[X] /= N;
+		mean[Y] /= N;
+		mean[Z] /= N;
 
-	for ( i = i; i < last; i ++ ) {
-		if ( acquiredManipulandumState[i].visibility ) {
-			N++;
-			delta[X] = acquiredManipulandumState[i].position[X] - initial[X];
-			delta[Y] = acquiredManipulandumState[i].position[Y] - initial[Y];
-			delta[Z] = acquiredManipulandumState[i].position[Z] - initial[Z];
-			for ( k = 0; k < 3; k++ ) {
-				for ( m = 0; m < 3; m++ ) {
-					Sxy[k][m] += delta[k] * delta[m];
+		// Compute the sums required for the variance calculation.
+		// This is a matrix assignment to zero. Will be implemented as a vector function.
+		for ( k = 0; k < 3; k++ ) {
+			for ( m = 0; m < 3; m++ ) {
+				Sxy[k][m] = 0.0;
+			}
+		}
+		N = 0.0;
+
+		for ( i = first; i < last; i ++ ) {
+			if ( acquiredManipulandumState[i].visibility ) {
+				N++;
+				delta[X] = acquiredManipulandumState[i].position[X] - mean[X];
+				delta[Y] = acquiredManipulandumState[i].position[Y] - mean[Y];
+				delta[Z] = acquiredManipulandumState[i].position[Z] - mean[Z];
+				for ( k = 0; k < 3; k++ ) {
+					for ( m = 0; m < 3; m++ ) {
+						Sxy[k][m] += delta[k] * delta[m];
+					}
 				}
 			}
 		}
-	}
-	
-	// If there is no valid position data, just exit normally.
-	// We assume that a visibility check would be done elsewhere.
-	if ( N <= 0.0 ) {
-		monitor->SendEvent( "Movement extent - No valid data." );
-		return( NORMAL_EXIT );
-	}
-	
-	// If we have some data, compute the directional variance and then
-	// the standard deviation along that direction;
-	// This is just a scalar times a matrix.
-	for ( k = 0; k < 3; k++ ) {
-		vect[k] = 0;
-		for ( m = 0; m < 3; m++ ) {
-			Sxy[k][m] /= N;
+		
+		// If we have some data, compute the directional variance and then
+		// the standard deviation along that direction;
+		// This is just a scalar times a matrix.
+		for ( k = 0; k < 3; k++ ) {
+			vect[k] = 0;
+			for ( m = 0; m < 3; m++ ) {
+				Sxy[k][m] /= N;
+			}
 		}
-	}
-	// This is a matrix multiply.
-	for ( k = 0; k < 3; k++ ) {
-		for ( m = 0; m < 3; m++ ) {
-			vect[k] += Sxy[m][k] * direction[m];
+		// This is a matrix multiply.
+		for ( k = 0; k < 3; k++ ) {
+			for ( m = 0; m < 3; m++ ) {
+				vect[k] += Sxy[m][k] * direction[m];
+			}
 		}
+		sd = sqrt( sqrt( vect[X] * vect[X] + vect[Y] * vect[Y] + vect[Z] * vect[Z] ) );
+
+		// Check if the computed value is in the desired range.
+		error = ( sd < min || sd > max );
+
 	}
-	float sd = sqrt( sqrt( vect[X] * vect[X] + vect[Y] * vect[Y] + vect[Z] * vect[Z] ) );
 
 	
-	// Check if the computed value is in the desired range.
-	error = ( sd < min || sd > max );
 	
 	
 	// If not, signal the error to the subject.
@@ -902,9 +917,10 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		
 		// If the user provided a message to signal a visibilty error, use it.
 		// If not, generate a generic message.
-		if ( msg ) fmt = msg;
-		else fmt = "Movement extent outside range.\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, sd, min, max, dirX, dirY, dirZ );
+		if ( !msg ) msg = "Movement extent outside range.";
+		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
+		else fmt = "%s\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, sd, min, max, dirX, dirY, dirZ );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
