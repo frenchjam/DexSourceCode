@@ -34,15 +34,29 @@
 #include "DexApparatus.h"
 #include "Dexterous.h"
 
+// These are constants that should probably be placed in the Vector3 class.
+const float iVector[3] = { 1.0, 0.0, 0.0 };
+const float jVector[3] = { 0.0, 1.0, 0.0 };
+const float kVector[3] = { 0.0, 0.0, 1.0 };
+
 // Parameters used when waiting for the hand to be at a target.
-double defaultTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
-double waitBlinkPeriod = 0.2;						// LED blink rate when out of zone.
-double waitHoldPeriod = 1.0;						// Required hold time in zone.
-double waitTimeLimit = 10.0;						// Signal time out if we wait this long.
+float defaultPositionTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
+float defaultOrientationTolerance = 30.0;					// Measured in degrees.
+
+float waitBlinkPeriod = 0.2;						// LED blink rate when out of zone.
+float waitHoldPeriod = 1.0;						// Required hold time in zone.
+float waitTimeLimit = 10.0;						// Signal time out if we wait this long.
 
 char *TargetBarString[] = { "Left", "Right" };
 char *PostureString[] = { "Seated", "Supine" };
 char *TappingSurfaceString[] = { "Extended", "Folded" };
+
+// Null orientation of the manipulandum when in the upright (seated) posture.
+// Orientations are expressed as quaternions.
+const float uprightNullOrientation[4] = { 0.0, 0.0, 0.0, 1.0 };
+// Null orientation of the manipulandum when in the supine position.
+// TO DO: This is wrong. Need to compute the required quaternion.
+const float supineNullOrientation[4] = { ROOT2, 0.0, 0.0, ROOT2 }; 
 
 /***************************************************************************/
 

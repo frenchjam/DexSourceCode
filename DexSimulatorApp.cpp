@@ -77,14 +77,14 @@ double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement
 double targetedMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 
 // Oscillation trial parameters.
-int upper_target = 3;						// Targets showing desired amplitude of cyclic movement.
-int lower_target = 1;
-int center_target = 2;
+int oscillationUpperTarget = 11;						// Targets showing desired amplitude of cyclic movement.
+int oscillationLowerTarget = 3;
+int oscillationCenterTarget = 7;
 double oscillationTime = 10.0;
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 
 // Collision trial parameters;
-int collisionInitialTarget = 2;
+int collisionInitialTarget = 7;
 int collisionSequenceN = 10;
 double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
@@ -123,8 +123,9 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( target_sequence[0] );
-	else status = apparatus->WaitUntilAtHorizontalTarget( target_sequence[0] ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( target_sequence[0], uprightNullOrientation );
+	// NOTE: Here I set a tight tolerance on the manipulandum orientation to show how it works.
+	else status = apparatus->WaitUntilAtHorizontalTarget( target_sequence[0], supineNullOrientation, defaultPositionTolerance, 1.0 ); 
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Start acquiring data.
@@ -169,8 +170,8 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, 0.0, 1.0, 0.0, NULL );
-	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, 0.0, 0.0, 1.0, NULL );
+	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, jVector, NULL );
+	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, kVector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Indicate to the subject that they are done.
@@ -190,10 +191,10 @@ int RunOscillations( DexApparatus *apparatus ) {
 	
 	// Light up the central target.
 	apparatus->TargetsOff();
-	apparatus->TargetOn( center_target );
+	apparatus->TargetOn( oscillationCenterTarget );
 	
 	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtTarget( 2 );
+	status = apparatus->WaitUntilAtVerticalTarget( oscillationCenterTarget );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Start acquiring data.
@@ -204,8 +205,8 @@ int RunOscillations( DexApparatus *apparatus ) {
 	
 	// Show the limits of the oscillation movement by lighting 2 targets.
 	apparatus->TargetsOff();
-	apparatus->TargetOn( lower_target );
-	apparatus->TargetOn( upper_target );
+	apparatus->TargetOn( oscillationLowerTarget );
+	apparatus->TargetOn( oscillationUpperTarget );
 	
 	// Measure data during oscillations performed over a fixed duration.
 	apparatus->Wait( oscillationTime );
@@ -245,7 +246,7 @@ int RunCollisions( DexApparatus *apparatus ) {
 		apparatus->Wait( movementTime );
 		
 		// Now wait until the subject gets to the target before moving on.
-		status = apparatus->WaitUntilAtTarget( collisionInitialTarget );
+		status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget );
 		if ( status == IDABORT ) exit( ABORT_EXIT );
 		
 		apparatus->TargetsOff();
@@ -343,7 +344,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			sscanf( line, "%s %d", token, &target );
 			
 			// Wait until the subject gets to the target before moving on.
-			status = apparatus->WaitUntilAtTarget( target );
+			status = apparatus->WaitUntilAtVerticalTarget( target );
 			if ( status == ABORT_EXIT ) exit( status );
 		}
 		

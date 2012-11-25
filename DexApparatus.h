@@ -105,7 +105,9 @@ class DexApparatus {
 	
 		// Flow control
 		virtual void Wait( double seconds );
-		virtual int  WaitUntilAtTarget( int targetID, double *tolerance = defaultTolerance );
+		virtual int	 WaitUntilAtTarget( int target_id, const float desired_orientation[4], 
+										float position_tolerance[3], float orientation_tolerance, 
+										float hold_time, float timeout, char *msg  );
 
 		// Hardware configuration
 		virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
@@ -113,6 +115,7 @@ class DexApparatus {
 		// Post hoc tests of data validity.
 		virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
 		virtual int CheckMovementAmplitude(  float min, float max, float dirX, float dirY, float dirZ, const char *msg = NULL );
+		virtual int CheckMovementAmplitude(  float min, float max, const float direction[3], char *msg = NULL );
 
 		// Logging and signalling events to the ground.
 		virtual void SignalConfiguration( void );
@@ -153,9 +156,8 @@ class DexApparatus {
 
 		virtual int fWaitSubjectReady( const char *format = "Ready to continue?", ... );
 
-		virtual int  WaitUntilAtVerticalTarget( int target_id, double *tolerance = defaultTolerance );
-		virtual int  WaitUntilAtHorizontalTarget( int target_id, double *tolerance = defaultTolerance );
-
+		virtual int  WaitUntilAtVerticalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
+		virtual int  WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
 
 };
 
@@ -244,7 +246,7 @@ public:
 
 	void Wait( double seconds );
 	int  WaitSubjectReady( const char *message = "Ready to continue?" );
-	int  WaitUntilAtTarget( int targetID, double *tolerance = defaultTolerance );
+	int	 WaitUntilAtTarget( int target_id, float tolerance[3], float hold_time, float timeout, char *msg  );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 

@@ -132,12 +132,23 @@ int DexApparatus::CalibrateTargets( void ) {
 bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame ) {
 
 	// Take a singe marker as the position of the manipulandum and set the orientation
-	//  to zero. This will be replaced by an algorithm to compute the position and orientation
+	//  to zero. 
+	// TO DO: This will be replaced by an algorithm to compute the position and orientation
 	//  of the manipulandum based on 8 markers (or those that are visible).
 	pos[X] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[X];
 	pos[Y] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Y];
 	pos[Z] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Z];
-	ori[X] = ori[Y] = ori[Z] = 0.0; ori[M] = 1.0;
+
+	// A single marker cannot define an orientation. Here we simulate rotations of the
+	// manipulandum by computing an angle based on the distance from the origin and
+	//  rotating around Z proportional to that distance.
+	// TO DO: Compute the maniplulandum orientation from  the marker data.
+	float distance = sqrt( pos[X] * pos[X] + pos[Y] * pos[Y] + pos[Z] * pos[Z] );
+	float angle = distance / 1000.0 * PI;
+	ori[X] = 0.0;
+	ori[Y] = 0.0;
+	ori[Z] = sin( 0.5 * angle );
+	ori[M] = cos( 0.5 * angle );
 
 	// If the manipulandum is not visible (at least 3 markers), return false.
 	return( marker_frame.marker[CODA_MANIPULANDUM_MARKER].visibility );
@@ -146,10 +157,10 @@ bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFram
 // Get the current position and orientation of the manipulandum.
 bool DexApparatus::GetManipulandumPosition( float *pos, float *ori ) {
 	CodaFrame marker_frame;
-	// Here we ask for the current position of the markers from the tracker.
 	// Make sure that the tracker has had a chance to update before doing so.
 	// This is probably only an issue for the simulated trackers.
 	if ( int exit_status = tracker->Update() ) exit( exit_status );
+	// Here we ask for the current position of the markers from the tracker.
 	tracker->GetCurrentMarkerFrame( marker_frame );
 	// Compute the position vector and orientation quaternion from the markers.
 	return( ComputeManipulandumPosition( pos, ori, marker_frame ) );
@@ -166,9 +177,9 @@ bool DexApparatus::GetFramePosition( double *pos ) {
 /***************************************************************************/
 
 // 
-// This method updates the stored state of the manipulandum.
-// For the moment, only the position is recorded.
-// In the future, we will sample all the sensors.
+// This method gets called periodically during wait cycles.
+// It calls the update methods for each of the subsystems.
+// It updates the stored state of the manipulandum.
 //
 
 void DexApparatus::Update( void ) {
@@ -272,6 +283,7 @@ int DexApparatus::fSignalError( unsigned int mb_type, const char *format, ... ) 
 // It is not a command that will generate a single script command.
 // Rather, by calling this command, the primitives required to generate the 
 // behavior will be written to the script.
+// Thus, the Dex interpreter does not have to handle this command directly.
 
 int DexApparatus::SignalNormalCompletion( const char *message ) {
 		
@@ -318,6 +330,8 @@ int DexApparatus::WaitSubjectReady( const char *message ) {
 	monitor->SendEvent( "WaitSubjectReady - %s", message );
 	// There is a problem here. Update should be called while waiting for the subject's
 	// response. Update() could perhaps be run in a thread.
+	// But in the real system, the subsystems will presumably run in background 
+	// threads, so this is not an issue.
 	int response = MessageBox( NULL, message, "DEX", MB_OKCANCEL | MB_ICONQUESTION );
 	Update();
 	if ( response == IDCANCEL ) {
@@ -386,7 +400,7 @@ void DexApparatus::SignalEvent( const char *msg ) {
 // This should be some sort of hardware check. 
 
 // The first three routines perform the actual checks and return the current state.
-// These are dummy routines that will be overlayed by actual hardware routines in the derived classes.
+// TO DO: These are dummy routines that will be overlayed by actual hardware routines in the derived classes.
 
 DexTargetBarConfiguration DexApparatus::BarPosition( void ) {
 	return( TargetBarUnknown );
@@ -483,19 +497,25 @@ void DexApparatus::Wait( double duration ) {
 //
 // Wait until the manipulandum is placed at a target position.
 //
-int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
+int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientation[4],
+									float position_tolerance[3], float orientation_tolerance,
+									float hold_time, float timeout, char *msg  ) {
 	
 	// These are objects of my own making, based on the Windows clock.
 	DexTimer blink_timer;
 	DexTimer hold_timer;
 	DexTimer timeout_timer;
 	
+	// This will hold the orientation of the manipulandum with respect
+	//  to the specified desired orientation.
+	float orientation;
+
 	bool led_state = 0;
 	int  mb_reply;
 	
 	// Log that the method has started.
 	monitor->SendEvent( "WaitUntilAtTarget - Start." );
-	DexTimerSet( timeout_timer, waitTimeLimit );
+	DexTimerSet( timeout_timer, timeout );
 	while ( 1 ) {
 		
 		led_state = 0;
@@ -504,10 +524,20 @@ int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
 		DexTimerSet( blink_timer, waitBlinkPeriod );
 		do {
 			
+			// TO DO: This should compute the orientation error from the desired orientation 
+			// that is specified as an input. Right now it measures the orientation 
+			// error from the upright null position.
+			orientation = acos( manipulandumOrientation[M] ) * 2.0 * 180 / PI ;
 			if ( DexTimerTimeout( timeout_timer ) ) {
 				
 				// Timeout has been reached. Signal the error to the user.
-				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "Time to reach target exceeded.\n  Max time: %.2f", 10.0 );
+				if ( !msg ) msg = "Time to reach target exceeded.\nIs the manipulandum visible?\nIs the manipulandum upright?\n\n";
+				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
+					"%s\n  Target ID: %d\n  Desired orientation: <%.3f %.3f %.3f %.3f>\n  Max time: %.2f\n  Manipulandum Visible? %s\n  Orientation Error: %.0f degrees",
+					msg, target_id,
+					desired_orientation[X], desired_orientation[Y],
+					desired_orientation[Z], desired_orientation[M],
+					timeout, ( manipulandumVisible ? "yes" : "no" ), orientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
 					monitor->SendEvent( "Manual Abort from WaitUntilAtTarget." );
@@ -529,7 +559,8 @@ int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
 			// This toggles the target LED on and off to attract attention.
 			if ( DexTimerTimeout( blink_timer ) ) {
 				TargetsOff();
-				if ( led_state = !led_state ) TargetOn( target_id );
+				led_state = !led_state;
+				if ( led_state ) TargetOn( target_id );
 				DexTimerSet( blink_timer, waitBlinkPeriod );
 			}
 			
@@ -542,15 +573,19 @@ int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
 			// It is assumed that targetPosition[][] contains the position of each 
 			//  target LED in the current tracker reference frame, and that the 
 			//  manipulandum position is being updated as noted above.
-			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) > tolerance[X] ||
-			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) > tolerance[Y] ||
-			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) > tolerance[Z] ||
-			(!manipulandumVisible)
+			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) > position_tolerance[X] ||
+			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) > position_tolerance[Y] ||
+			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) > position_tolerance[Z] ||
+			orientation > orientation_tolerance ||
+			!manipulandumVisible
 			);
+
 		// Target goes on steady if the manipulandum is in the zone.
 		TargetsOff();
 		TargetOn( target_id );
-		DexTimerSet( hold_timer, waitHoldPeriod );
+		// Set a timer to determine if the manipulandum is in the right position 
+		// for a long enough time.
+		DexTimerSet( hold_timer, hold_time );
 		do {
 			// If the manipulandum has been in the zone long enough, return with SUCCESS.
 			if ( DexTimerTimeout( hold_timer ) ) {
@@ -561,10 +596,11 @@ int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
 			Update();
 			
 		} while ( 
-			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) <= tolerance[X] ||
-			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) <= tolerance[Y] ||
-			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) <= tolerance[Z] ||
-			(!manipulandumVisible)
+			abs( targetPosition[target_id][X] - manipulandumPosition[X] ) <= position_tolerance[X] &&
+			abs( targetPosition[target_id][Y] - manipulandumPosition[Y] ) <= position_tolerance[Y] &&
+			abs( targetPosition[target_id][Z] - manipulandumPosition[Z] ) <= position_tolerance[Z] &&
+			orientation < orientation_tolerance &&
+			manipulandumVisible
 			);
 
 		// If we get here, it means that we did not stay in the zone long enough.
@@ -579,12 +615,12 @@ int DexApparatus::WaitUntilAtTarget( int target_id, double *tolerance ) {
 
 // Convenience methods for my own use.
 
-int DexApparatus::WaitUntilAtVerticalTarget( int target_id, double *tolerance ) {
-	return( WaitUntilAtTarget( target_id, tolerance ) );
+int DexApparatus::WaitUntilAtVerticalTarget( int target_id, const float desired_orientation[4], float position_tolerance[3], float orientation_tolerance, float hold_time, float timeout, char *msg ) {
+	return( WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg ) );
 }
 
-int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, double *tolerance ) {
-	return( WaitUntilAtTarget( nVerticalTargets + target_id, tolerance ) );
+int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4], float position_tolerance[3], float orientation_tolerance, float hold_time, float timeout, char *msg ) {
+	return( WaitUntilAtTarget( nVerticalTargets + target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg  ) );
 }
 
 /*********************************************************************************/
@@ -653,7 +689,8 @@ void DexApparatus::Beep( int tone, int volume, float duration ) {
 /*********************************************************************************/
 
 // These are the acqusition routines according to my design. 
-// Will be updated to the new specification where SaveAcqusition does not exist.
+// TO DO: Should be updated to the new specification where SaveAcqusition 
+// does not exist.
 void DexApparatus::StartAcquisition( float max_duration ) {
 	tracker->StartAcquisition( max_duration );
 	monitor->SendEvent( "Acquisition started. Max duration: %f seconds.", max_duration );
@@ -679,7 +716,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	
 	FILE *fp;
 	
-	// Automatically generate a file name.
+	// TO DO: Automatically generate a file name.
 	// Here we use the same name each time, but just add the tag.
 	char filename[1024];
 	sprintf( filename, "DexSimulatorOutput.%s.csv", tag );
@@ -780,9 +817,9 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 
 		// If the user provided a message to signal a visibilty error, use it.
 		// If not, generate a generic message.
-		if ( msg ) fmt = msg;
-		else fmt = "Manipulandum Visibility Error:\n  Total Time Invisible:   %.3f (%.3f)\n  Longest Gap:             %.3f (%.3f)";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt,
+		if ( !msg ) msg = "Manipulandum Visibility Error.";
+		fmt = "%s\n  Total Time Invisible:   %.3f (%.3f)\n  Longest Gap:             %.3f (%.3f)";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg,
 			overall_time, max_cumulative_dropout_time, max_time_gap, max_continuous_dropout_time );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
@@ -806,9 +843,6 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 //  threshold values for each of the protocols. For instance, what would be the expected SD for 
 //  a set of targeted movements?
 
-// This version sets separate limits for X, Y and Z. It needs to be modified to the V2 
-// specification of min and max displacement amplitude and a movement direction.
-
 int DexApparatus::CheckMovementAmplitude(  float min, float max, 
 										   float dirX, float dirY, float dirZ,
 										   const char *msg ) {
@@ -823,10 +857,10 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	double N = 0.0, Sxy[3][3], sd;
 	double delta[3], mean[3], direction[3], vect[3];
 
+	// TO DO: Should normalize the direction vector here.
 	direction[X] = dirX;
 	direction[Y] = dirY;
 	direction[Z] = dirZ;
-	// Should normalize the direction vector here.
 
 	// First we should look for the start and end of the actual movement based on 
 	// events such as when the subject reaches the first target. For the moment we
@@ -834,14 +868,14 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	last = nAcqFrames;
 	for ( first = 0; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
 
-	// Compute the mean position.
+	// Compute the mean position. 
 	N = 0.0;
 	mean[X] = mean[Y] = mean[Z] = 0.0;
 	for ( i = first; i < last; i++ ) {
 		if ( acquiredManipulandumState[i].visibility ) {
 
 			N++;
-			// I will implement vector operations as functions.
+			// TO DO: Implement vector operations as functions.
 			mean[X] += acquiredManipulandumState[i].position[X];
 			mean[Y] += acquiredManipulandumState[i].position[Y];
 			mean[Z] += acquiredManipulandumState[i].position[Z];
@@ -862,7 +896,8 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		mean[Z] /= N;
 
 		// Compute the sums required for the variance calculation.
-		// This is a matrix assignment to zero. Will be implemented as a vector function.
+		// This is a matrix assignment to zero. 
+		// TO DO: Implement as a vector function.
 		for ( k = 0; k < 3; k++ ) {
 			for ( m = 0; m < 3; m++ ) {
 				Sxy[k][m] = 0.0;
@@ -887,6 +922,7 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		// If we have some data, compute the directional variance and then
 		// the standard deviation along that direction;
 		// This is just a scalar times a matrix.
+		// TO DO; Implement as a vector function.
 		for ( k = 0; k < 3; k++ ) {
 			vect[k] = 0;
 			for ( m = 0; m < 3; m++ ) {
@@ -894,11 +930,15 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 			}
 		}
 		// This is a matrix multiply.
+		// TO DO: Implement as a vector function.
 		for ( k = 0; k < 3; k++ ) {
 			for ( m = 0; m < 3; m++ ) {
 				vect[k] += Sxy[m][k] * direction[m];
 			}
 		}
+		// Compute the length of the vector, which is the variance along 
+		// the specified direction. Then take the square root of that 
+		// magnitude to get the standard deviation along that direction.
 		sd = sqrt( sqrt( vect[X] * vect[X] + vect[Y] * vect[Y] + vect[Z] * vect[Z] ) );
 
 		// Check if the computed value is in the desired range.
@@ -906,9 +946,6 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 
 	}
 
-	
-	
-	
 	// If not, signal the error to the subject.
 	// Here I take the approach of calling a method to signal the error.
 	// We agree instead that the routine should either return a null pointer
@@ -918,6 +955,8 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		// If the user provided a message to signal a visibilty error, use it.
 		// If not, generate a generic message.
 		if ( !msg ) msg = "Movement extent outside range.";
+		// The message could be different depending on whether the maniplulandum
+		// was not moved enough, or if it just could not be seen.
 		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
 		else fmt = "%s\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>";
 		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, sd, min, max, dirX, dirY, dirZ );
@@ -933,6 +972,12 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	return( NORMAL_EXIT );
 	
 }
+
+// Same as above, but with a array as an input to specify the direction.
+int DexApparatus::CheckMovementAmplitude(  float min, float max, const float direction[3], char *msg ) {
+	return ( CheckMovementAmplitude( min, max, direction[X], direction[Y], direction[Z], msg ) );
+}
+
 /***************************************************************************/
 /*                                                                         */
 /*                             DexCodaApparatus                            */
@@ -1123,8 +1168,8 @@ void DexCompiler::Wait( double duration ) {
 	fprintf( fp, "Wait\t%.6f\n", duration );
 }
 
-int DexCompiler::WaitUntilAtTarget( int targetID, double *tolerance ) {
-	fprintf( fp, "WaitUntilAtTarget\t%d\t%.6f\t%.6f\t%.6f\n", targetID, tolerance[X],  tolerance[Y],  tolerance[Z] );
+int	 DexCompiler::WaitUntilAtTarget( int target_id, float tolerance[3], float hold_time, float timeout, char *msg  ) {
+	fprintf( fp, "WaitUntilAtTarget\t%d\t%.6f\t%.6f\t%.6f\n", target_id, tolerance[X],  tolerance[Y],  tolerance[Z] );
 	return( 0 );
 }
 

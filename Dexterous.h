@@ -91,11 +91,16 @@ extern TargetArrayConfiguration targetArrayConfiguration[MAX_TARGET_CONFIGURATIO
 
 // Parameters used when waiting for the hand to be at a target.
 
-extern double defaultTolerance[3];	// Zone considered to be at the target.
-extern double waitBlinkPeriod;			// LED blink rate when out of zone.
-extern double waitHoldPeriod;				// Required hold time in zone.
-extern double waitTimeLimit;				// Signal time out if we wait this long.
- 
+extern float defaultPositionTolerance[3];	// Zone considered to be at the target.
+extern float defaultOrientationTolerance;
+
+extern float waitBlinkPeriod;		// LED blink rate when out of zone.
+extern float waitHoldPeriod;		// Required hold time in zone.
+extern float waitTimeLimit;			// Signal time out if we wait this long.
+
+extern const float iVector[3], jVector[3], kVector[3];
+extern const float uprightNullOrientation[4], supineNullOrientation[4]; 
+
 // Possible protocols.
 
 enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS };
