@@ -21,6 +21,8 @@ const Vector3 VectorsMixin::iVector = { 1.0, 0.0, 0.0 };
 const Vector3 VectorsMixin::jVector = { 0.0, 1.0, 0.0 };
 const Vector3 VectorsMixin::kVector = { 0.0, 0.0, 1.0 };
 
+const Quaternion VectorsMixin::nullQuaternion = {0.0, 0.0, 0.0, 1.0};
+
 const Matrix3x3 VectorsMixin::identityMatrix = {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
 const Matrix3x3 VectorsMixin::zeroMatrix =     {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
 
@@ -71,6 +73,9 @@ float VectorsMixin::VectorNorm( const Vector3 vector ) {
 	return( sqrtf( vector[X] * vector[X] + vector[Y] * vector[Y] + vector[Z] * vector[Z] ) );
 }
 
+float VectorsMixin::DotProduct( const Vector3 v1, const Vector3 v2 ) {
+	return( v1[X] * v2[X] + v1[Y] * v2[Y] + v1[Z] * v2[Z] );
+}
 
 
 

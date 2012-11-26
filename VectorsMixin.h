@@ -27,6 +27,7 @@ public:
 	static const int M;
 
 	static const Vector3 zeroVector;
+	static const Quaternion nullQuaternion;
 	static const Matrix3x3 identityMatrix;
 	static const Matrix3x3 zeroMatrix;
 
@@ -44,6 +45,7 @@ public:
 	void CopyMatrix( double destination[3][3], const Matrix3x3 source );
 
 	float VectorNorm( const Vector3 vector );
+	float DotProduct( const Vector3 v1, const Vector3 v2 );
 
 };
 
