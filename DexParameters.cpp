@@ -35,7 +35,9 @@
 
 // Parameters used when waiting for the hand to be at a target.
 float defaultPositionTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
-float defaultOrientationTolerance = 30.0;					// Measured in degrees.
+float defaultOrientationTolerance = 60.0;					// Measured in degrees.
+// The tolerance on the orientation above is set very high for the simulator,
+// because the simulator intentionally makes the manipulandum rotate as you move toward the higher targets.
 
 float waitBlinkPeriod = 0.2;						// LED blink rate when out of zone.
 float waitHoldPeriod = 1.0;						// Required hold time in zone.

@@ -10,31 +10,11 @@
 #include <memory.h>
 #include <process.h>
 
-#include <useful.h>
-#include <screen.h>
-#include <3dMatrix.h>
-#include <Timers.h>
-#include "ConfigParser.h" 
-#include <2dMatrix.h>
-#include <Regression.h>
-
 #include <CodaUtilities.h>
 
-#include <gl/gl.h>
-#include <gl/glu.h>
-
-#include "OpenGLUseful.h"
-#include "OpenGLColors.h"
-#include "OpenGLWindows.h"
-#include "OpenGLObjects.h"
-#include "OpenGLViewpoints.h"
-#include "OpenGLTextures.h"
-
-#include "AfdObjects.h"
-#include "CodaObjects.h"
-#include "DexGlObjects.h"
+//#include "DexTimers.h"
 #include "DexTracker.h"
-#include "Dexterous.h"
+//#include "Dexterous.h"
 
 /***************************************************************************/
 
@@ -140,7 +120,7 @@ void DexCodaTracker::StopAcquisition( void ) {
   CodaAcqStop();
 
 	// Determine how many frames were actually acquired.
-  nAcqFrames = CodaAcqGetNumFramesMarker();
+	nAcqFrames = CodaAcqGetNumFramesMarker();
 	if (CodaAcqGetMultiMarker(&coda_multi_acq_frame) == CODA_ERROR)
 	{
 		MessageBox( NULL, "Could not get CODA data.", "DEX", MB_OK );
@@ -216,7 +196,7 @@ DexMouseTracker::DexMouseTracker( void ) {
 
 	nMarkers = 1;
 	nFrames = 1000;
-	samplePeriod = 0.5;
+	samplePeriod = 0.010;
 	acquisitionOn = false;
 	overrun = false;
 
@@ -233,26 +213,68 @@ void DexMouseTracker::Initialize( void ) {
 void DexMouseTracker::StartAcquisition( float max_duration ) { 
 	acquisitionOn = true; 
 	overrun = false;
+	nAcqFrames = 0;
 	DexTimerSet( acquisitionTimer, max_duration );
+	Update();
 }
 
 void DexMouseTracker::StopAcquisition( void ) {
 	acquisitionOn = false;
+	duration = DexTimerElapsedTime( acquisitionTimer );
 }
 
 int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) {
 
+	int n_frames;
+	int previous_frame;
+	int next_frame;
+
+	Vector3	jump, delta;
+	double	time, interval, offset, relative;
+
+
 	// Copy data into an array.
-	for ( int i = 0; i < nAcqFrames; i++ ) {
-		frames[i].time = recordedMarkerFrames[i].time;
+	previous_frame = 0;
+	next_frame = 0;
+
+	// Fill an array of frames at a constant frequency by interpolating the
+	// frames that were taken at a variable frequency in real time.
+	for ( n_frames = 0; n_frames < max_frames; n_frames++ ) {
+
+		// Compute the time of each slice at a constant sampling frequency.
+		time = (double) n_frames * samplePeriod;
+		frames[n_frames].time = (float) time;
+
+		// See if we have caught up with the real-time data.
+		if ( time > recordedMarkerFrames[next_frame].time ) previous_frame = next_frame;
+		// Find the next real-time frame that has a time stamp later than this one.
+		// It could be that this true already.
+		while ( recordedMarkerFrames[next_frame].time <= time && next_frame < nAcqFrames ) next_frame++;
+		// If we reached the end of the real-time samples, then we are done.
+		if ( next_frame >= nAcqFrames ) break;
+
+		// Compute the time difference between the two adjacent real-time frames.
+		interval = recordedMarkerFrames[next_frame].time - recordedMarkerFrames[previous_frame].time;
+		// Compute the time between the current frame and the previous real_time frame.
+		offset = time - recordedMarkerFrames[previous_frame].time;
+		// Use the relative time to interpolate.
+		relative = offset / interval;
+
 		for ( int j = 0; j < nMarkers; j++ ) {
-			frames[i].marker[j].visibility = recordedMarkerFrames[i].marker[j].visibility;
-			for ( int k = 0; k < 3; k++ ) {
-				frames[i].marker[j].position[k] = recordedMarkerFrames[i].marker[j].position[k];
+			frames[n_frames].marker[j].visibility = 
+				recordedMarkerFrames[previous_frame].marker[j].visibility &&
+				recordedMarkerFrames[next_frame].marker[j].visibility;
+			if ( frames[n_frames].marker[j].visibility ) {
+				SubtractVectors( jump, 
+									recordedMarkerFrames[next_frame].marker[j].position,
+									recordedMarkerFrames[previous_frame].marker[j].position );
+				ScaleVector( delta, jump, (float) relative );
+				AddVectors( frames[n_frames].marker[j].position, recordedMarkerFrames[previous_frame].marker[j].position, delta );
 			}
 		}
 	}
-	return( nAcqFrames );
+
+	return( n_frames );
 
 }
 
@@ -286,8 +308,8 @@ int DexMouseTracker::Update( void ) {
 	RECT rect;
 	GetWindowRect( GetDesktopWindow(), &rect );
 
-	double z = (double)  -100 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 240.0;
-	double y = (double)   mouse_position.y / (double) ( rect.bottom - rect.top ) * 240.0;
+	float z =  (double) -100 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 240.0;
+	float y =  (double)  mouse_position.y / (double) ( rect.bottom - rect.top ) * 240.0;
 
 	// Marker 0 follows the mouse.
 	currentMarkerFrame.marker[0].position[Z] = z;
@@ -299,7 +321,7 @@ int DexMouseTracker::Update( void ) {
 	for ( int j = 1; j < nMarkers; j++ ) {
 		currentMarkerFrame.marker[j].visibility = true;
 		for ( int k = 0; k < 3; k++ ) {
-			currentMarkerFrame.marker[j].position[k] = cos( DexTimerElapsedTime( acquisitionTimer ) );
+			currentMarkerFrame.marker[j].position[k] = (float) cos( DexTimerElapsedTime( acquisitionTimer ) );
 		}
 	}
 
@@ -308,8 +330,8 @@ int DexMouseTracker::Update( void ) {
 		acquisitionOn = false;
 		overrun =true;
 	}
-	if ( acquisitionOn && nAcqFrames < DEX_MAX_DATA_FRAMES ) {
-		recordedMarkerFrames[ nAcqFrames ].time = DexTimerElapsedTime( acquisitionTimer );
+	if ( acquisitionOn && nAcqFrames < DEX_MAX_MARKER_FRAMES ) {
+		recordedMarkerFrames[ nAcqFrames ].time = (float) DexTimerElapsedTime( acquisitionTimer );
 		for ( int j = 0; j < nMarkers; j++ ) {
 			recordedMarkerFrames[nAcqFrames].marker[j].visibility = currentMarkerFrame.marker[j].visibility;
 			for ( int k = 0; k < 3; k++ ) {

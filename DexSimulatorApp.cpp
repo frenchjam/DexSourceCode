@@ -76,11 +76,16 @@ double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement
 double targetedMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 
 // Oscillation trial parameters.
-int oscillationUpperTarget = 11;						// Targets showing desired amplitude of cyclic movement.
+int oscillationUpperTarget = 9;						// Targets showing desired amplitude of cyclic movement.
 int oscillationLowerTarget = 3;
-int oscillationCenterTarget = 7;
+int oscillationCenterTarget = 6;
 double oscillationTime = 10.0;
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
+double oscillationMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+int	oscillationMinCycles = 6;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+int oscillationMaxCycles = 0;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+float cycleHysteresis = 10.0;
 
 // Collision trial parameters;
 int collisionInitialTarget = 7;
@@ -188,6 +193,21 @@ int RunOscillations( DexApparatus *apparatus ) {
 	
 	int status = 0;
 	
+	// Tell the subject which configuration should be used.
+	status = apparatus->fWaitSubjectReady( 
+		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
+		PostureString[PostureSeated], TargetBarString[TargetBarRight], TappingSurfaceString[TappingFolded] );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Verify that it is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	status = apparatus->SelectAndCheckConfiguration( PostureSeated, TargetBarRight, TappingFolded );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Tell the subject which configuration should be used.
+	status = apparatus->fWaitSubjectReady( "Move to the flashing target.\nWhen 2 new targets appear, make oscillating\nmovements at approx. 1 Hz. " );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Light up the central target.
 	apparatus->TargetsOff();
 	apparatus->TargetOn( oscillationCenterTarget );
@@ -216,6 +236,21 @@ int RunOscillations( DexApparatus *apparatus ) {
 	// Save the data and show it,
 	apparatus->SaveAcquisition( "OSCI" );
 	
+	// Check the quality of the data.
+	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	// Check that we got a reasonable amount of movement.
+	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, apparatus->jVector, NULL );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	// Check that we got a reasonable amount of movement.
+	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, apparatus->jVector, cycleHysteresis, NULL );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );

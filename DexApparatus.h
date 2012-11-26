@@ -36,7 +36,10 @@ class DexApparatus : public VectorsMixin {
 
 	private:
 
+
 	protected:
+
+		unsigned long currentTargetState;
 
 	public:
 
@@ -52,6 +55,8 @@ class DexApparatus : public VectorsMixin {
 		// An object that handles the sound generating hardware.
 		DexSounds				*sounds;
 
+		DexTimer	trialTimer;
+
 		// The position of each of the visible targets in tracker coordinates.
 		float	targetPosition[DEX_MAX_TARGETS][3];
 		char	*targetPositionFilename;
@@ -64,8 +69,10 @@ class DexApparatus : public VectorsMixin {
 
 		// After an acquisition, the full data set is retrieved from
 		// the tracker and analog system and stored here.
-		CodaFrame			acquiredPosition[DEX_MAX_DATA_FRAMES];			// Markers
-		ManipulandumState	acquiredManipulandumState[DEX_MAX_DATA_FRAMES];	// Manipulandum Position
+		CodaFrame			acquiredPosition[DEX_MAX_MARKER_FRAMES];			// Markers
+		ManipulandumState	acquiredManipulandumState[DEX_MAX_MARKER_FRAMES];	// Manipulandum Position
+		DexEvent			eventList[DEX_MAX_EVENTS];
+		int					nEvents;
 
 		DexApparatus( int n_vertical_targets = N_VERTICAL_TARGETS, 
 					  int n_horizontal_targets = N_HORIZONTAL_TARGETS,
@@ -117,11 +124,28 @@ class DexApparatus : public VectorsMixin {
 		// Post hoc tests of data validity.
 		virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
 		virtual int CheckMovementAmplitude(  float min, float max, float dirX, float dirY, float dirZ, const char *msg = NULL );
-		virtual int CheckMovementAmplitude(  float min, float max, const float direction[3], char *msg = NULL );
+		virtual int CheckMovementAmplitude(  float min, float max, const Vector3 direction, char *msg = NULL );
 
-		// Logging and signalling events to the ground.
+		int CheckMovementCycles(  int min_cycles, int max_cycles, 
+												float dirX, float dirY, float dirZ,
+												float hysteresis, const char *msg );
+		int CheckMovementCycles(  int min_cycles, int max_cycles, 
+												const Vector3 direction,
+												float hysteresis, const char *msg );
+		int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg );
+
+		// Signalling events to the ground.
 		virtual void SignalConfiguration( void );
 		virtual void SignalEvent( const char *msg );
+
+		// Logging events locally for post hoc analyses
+		virtual void ClearEventLog( void );
+		virtual void LogTargetEvent( unsigned int bits );
+		virtual void LogSoundEvent( int tone, int volume );
+		virtual void LogEvent( int event );
+		virtual int TimeToFrame( float elapsed_time );
+		virtual void FindAnalysisEventRange( int &first, int &last );
+		virtual void FindAnalysisFrameRange( int &first, int &last );
 		
 		// The user-accessible methods require the following methods.
 
@@ -151,6 +175,7 @@ class DexApparatus : public VectorsMixin {
 		virtual void VerticalTargetOn( int n );
 		virtual void HorizontalTargetOn( int n );
 		virtual void TargetsOff( void );
+		virtual int  DecodeTargetBits( unsigned long bits );
 
 		virtual void SoundOn( int tone, int volume );
 		virtual void SoundOff( void );

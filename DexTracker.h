@@ -11,23 +11,17 @@
 #ifndef DexTrackerH
 #define DexTrackerH
 
-#include <OpenGLObjects.h>
-#include <OpenGLUseful.h>
-#include <OpenGLColors.h>
-
 #include <codasys.h>
 #include <CodaUtilities.h>
 #include <DexTimers.h>
-
-
+#include <DexTracker.h>
 #include "Dexterous.h"
-#include "DexMonitor.h"
-#include "DexTargets.h"
+#include "VectorsMixin.h" 
 
 
 /********************************************************************************/
 
-class DexTracker {
+class DexTracker : public VectorsMixin {
 
 	private:
 
@@ -53,7 +47,7 @@ class DexTracker {
 		virtual bool	GetCurrentMarkerFrame( CodaFrame &frame );
 
 		CodaFrame		currentMarkerFrame;
-		CodaFrame		recordedMarkerFrames[DEX_MAX_DATA_FRAMES];
+		CodaFrame		recordedMarkerFrames[DEX_MAX_MARKER_FRAMES];
 
 		virtual double	GetSamplePeriod( void );
 		virtual int		GetNumberOfCodas( void );
@@ -62,6 +56,7 @@ class DexTracker {
 
 };
 
+#if 0
 /********************************************************************************/
 
 class DexVirtualTracker : public DexTracker {
@@ -96,6 +91,8 @@ public:
 
 };
 
+#endif
+
 /********************************************************************************/
 
 class DexCodaTracker : public DexTracker {
@@ -111,8 +108,8 @@ private:
 	codaFLOAT fPosition[ CODA_MAX_MARKERS * 3 ];
 
 	CODA_ACQ_DATA_MULTI_STRUCT coda_multi_acq_frame;
-	codaBYTE bInViewMulti[ CODA_MAX_MARKERS * DEX_MAX_DATA_FRAMES];
-	codaFLOAT fPositionMulti[ CODA_MAX_MARKERS * DEX_MAX_DATA_FRAMES * 3 ];
+	codaBYTE bInViewMulti[ CODA_MAX_MARKERS * DEX_MAX_MARKER_FRAMES];
+	codaFLOAT fPositionMulti[ CODA_MAX_MARKERS * DEX_MAX_MARKER_FRAMES * 3 ];
 
 
 protected:
@@ -146,6 +143,7 @@ private:
 	bool		acquisitionOn;
 	bool		overrun;
 	DexTimer	acquisitionTimer;
+	double		duration;
 	
 protected:
 

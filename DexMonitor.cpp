@@ -503,7 +503,6 @@ DexMonitorServer::DexMonitorServer( int n_vertical_targets, int n_horizontal_tar
 	
 	// For demonstration purposes, we pipe the data packets to a program that will display
 	//  them. In the real thing, the packets should be sent to ground and displayed there.
-	//	fp = _popen( "..\\DexMonitorApp\\debug\\DexMonitorApp", "wt" );
 	fp = stdout;
 	
 	DexUDPInitServer( &udp_parameters, NULL );

@@ -27,7 +27,8 @@
 #define DEX_MAX_CODAS 8
 #define DEX_MAX_MARKERS 28
 #define DEX_MAX_TARGETS 32
-#define DEX_MAX_DATA_FRAMES 20000
+#define DEX_MAX_MARKER_FRAMES 20000
+#define DEX_MAX_EVENTS 20000
 
 #define N_MARKERS 28
 #define N_VERTICAL_TARGETS 13
@@ -43,6 +44,7 @@
 #define BEEP_DURATION 0.200
 
 #define INVISIBLE -999.999
+#define TARGETS_OFF -1
 
 #define HORIZONTAL	0
 #define VERTICAL	1
@@ -136,6 +138,30 @@ typedef struct {
 	float	time;
 
 } ManipulandumState;
+
+// Event codes that are kept in a local buffer. 
+// They are useful for analizing the data on the ground.
+// Here we define some special ones used by DexApparatus.
+// By convention, the system events will be negative and 
+// users can define positive events in the scripts.
+
+#define TARGET_EVENT -1
+#define SOUND_EVENT -2
+#define BEGIN_ANALYSIS -3
+#define END_ANALYSIS -4
+#define ACQUISITION_START -5
+#define ACQUISITION_STOP -6
+#define TRIGGER_MOVEMENT -7
+
+typedef struct {
+
+	float			time;
+	int				event;
+	unsigned char	target_bits;
+	unsigned int	tone;
+	unsigned int	volume;
+
+} DexEvent;
 
 #define CODA_MANIPULANDUM_MARKER 0
 #define CODA_FRAME_MARKER 5

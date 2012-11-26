@@ -71,9 +71,9 @@ public:
 
 	void SetManipulandumPosition( float pos[3] );
 
-	float recordedTime[DEX_MAX_DATA_FRAMES];
-	float recordedPosition[DEX_MAX_DATA_FRAMES * 3];
-	float recordedOrientation[DEX_MAX_DATA_FRAMES * 3];
+	float recordedTime[DEX_MAX_MARKER_FRAMES];
+	float recordedPosition[DEX_MAX_MARKER_FRAMES * 3];
+	float recordedOrientation[DEX_MAX_MARKER_FRAMES * 3];
 	int	  nAcqFrames;
 
 	void PlotAcquisition( float *positions, float *orientations, int frames, float availability_flag );

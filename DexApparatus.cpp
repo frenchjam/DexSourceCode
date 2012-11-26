@@ -394,6 +394,68 @@ void DexApparatus::SignalEvent( const char *msg ) {
 	
 }
 
+// Log events locally, for use by post hoc tests.
+
+void DexApparatus::LogTargetEvent( unsigned int bits ) {
+	eventList[nEvents].event = TARGET_EVENT;
+	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
+	eventList[nEvents].target_bits = bits;
+	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
+}
+
+void DexApparatus::LogSoundEvent( int tone, int volume ) {
+	eventList[nEvents].event = SOUND_EVENT;
+	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
+	eventList[nEvents].tone = tone;
+	eventList[nEvents].volume = volume;
+	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
+}
+
+void DexApparatus::LogEvent( int event ) {
+	eventList[nEvents].event = event;
+	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
+	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
+}
+
+void DexApparatus::ClearEventLog( void ) {
+	nEvents = 0.0;
+}
+
+// Calculate the approximate marker frame where the event occured.
+
+int DexApparatus::TimeToFrame( float elapsed_time ) {
+	return( (int) floor( elapsed_time / tracker->samplePeriod ) );
+}
+
+// Find the events that determine the interval of analysis,
+// based on the event markers BEGIN_ANALYSIS and END_ANAYLYSIS.
+
+void DexApparatus::FindAnalysisEventRange( int &first, int &last ) {
+
+	// Search backwards for the starting event. If we don't find one, start at 0;
+	for ( first = nEvents - 1; first > 0; first-- ) {
+		if ( eventList[first].event == BEGIN_ANALYSIS ) break;
+	}
+	// Search forward for the ending event. If we dont find it, take the last event.
+	for ( last = first; last < nEvents - 1; last++ ) {
+		if ( eventList[last].event == END_ANALYSIS ) break;
+	}
+}
+
+// Find the corresponding marker frames.
+
+void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
+
+	int first_event, last_event;
+
+	FindAnalysisEventRange( first_event, last_event );
+	first = TimeToFrame( eventList[first_event].time );
+	last = TimeToFrame( eventList[last_event].time );
+
+}
+
+
+
 /*********************************************************************************/
 
 // Check to see if the apparatus is in the correct configuration.
@@ -637,8 +699,9 @@ int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, const float desire
 
 void DexApparatus::SetTargetState( unsigned long target_state ) {
 	targets->SetTargetState( target_state );
+	currentTargetState = target_state;
+	LogTargetEvent( target_state );
 }
-
 
 // The following are convenience methods for my own use.
 
@@ -647,7 +710,7 @@ void DexApparatus::TargetsOff( void ) {
 }
 
 void DexApparatus::TargetOn( int id ) {
-	SetTargetState( 0x00000001L << id );
+	SetTargetState( currentTargetState | ( 0x00000001L << id ) );
 }
 
 void DexApparatus::VerticalTargetOn( int id ) {
@@ -658,12 +721,20 @@ void DexApparatus::HorizontalTargetOn( int id ) {
 	TargetOn( nVerticalTargets + id );
 }
 
+int DexApparatus::DecodeTargetBits( unsigned long bits ) {
+	for ( int i = 0; i < nTargets; i++ ) {
+		if ( ( 0x01 << i ) & bits ) return( i );
+	}
+	return( TARGETS_OFF );
+}
+
 /*********************************************************************************/
 
 // Initiate a constant tone. Will continue until stopped.
 // This is the lowest level routine to be implemented in the DEX scripting language.
 void DexApparatus::SetSoundState( int tone, int volume ) {
 	sounds->SetSoundState( tone, volume );
+	LogSoundEvent( tone, volume );
 }
 
 // The following are convenience methods for my use, built on SetSoundState().
@@ -696,19 +767,31 @@ void DexApparatus::Beep( int tone, int volume, float duration ) {
 // TO DO: Should be updated to the new specification where SaveAcqusition 
 // does not exist.
 void DexApparatus::StartAcquisition( float max_duration ) {
+	// Reset the list of target and sound events.
+	nEvents = 0;
+	// Tell the tracker to start acquiring.
 	tracker->StartAcquisition( max_duration );
+	// Keep track of how long we have been acquiring.
+	DexTimerSet( trialTimer, max_duration );
+	// Tell the ground what we just did.
 	monitor->SendEvent( "Acquisition started. Max duration: %f seconds.", max_duration );
+	// Note the time of the acqisition start.
+	LogEvent( ACQUISITION_START );
 }
 void DexApparatus::StopAcquisition( void ) {
+	LogEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	monitor->SendEvent( "Acquisition terminated." );
 	// Retrieve the marker data.
-	nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition, DEX_MAX_DATA_FRAMES );
+	nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition, DEX_MAX_MARKER_FRAMES );
 	// Compute the manipulandum positions.
 	for ( int i = 0; i < nAcqFrames; i++ ) {
 		// Here I should compute the manipulandum position and orientation.
 		acquiredManipulandumState[i].visibility = acquiredPosition[i].marker[0].visibility;
+		acquiredManipulandumState[i].time = acquiredPosition[i].time;
 		CopyVector( acquiredManipulandumState[i].position, acquiredPosition[i].marker[0].position );
+		CopyVector( acquiredManipulandumState[i].orientation, nullQuaternion );
+
 	}
 	// Send the recording by telemetry to the ground for monitoring.
 	monitor->SendRecording( acquiredManipulandumState, nAcqFrames, INVISIBLE );
@@ -780,6 +863,8 @@ int DexApparatus::CheckOverrun(  const char *msg ) {
 int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time, 
 								    double max_continuous_dropout_time,
 								    const char *msg ) {
+
+	int first, last;
 	
 	// Arguments are in seconds, but it's easier to work in samples.
 	int max_dropout_samples = max_continuous_dropout_time / tracker->GetSamplePeriod();
@@ -790,10 +875,12 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 	
 	// Keep track of the longest continuous dropout.
 	int max_gap = 0;
-	
 	bool interval_exceeded = false;
+
+	// Limit the range of frames used in the analysis, if specified in the script.
+	FindAnalysisFrameRange( first, last );
 	
-	for ( int i = 0; i < nAcqFrames; i ++ ) {
+	for ( int i = first; i < last; i ++ ) {
 		if ( ! acquiredManipulandumState[i].visibility ) {
 			overall++;
 			continuous++;
@@ -864,10 +951,9 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	direction[Z] = dirZ;
 
 	// First we should look for the start and end of the actual movement based on 
-	// events such as when the subject reaches the first target. For the moment we
-	// take the full trial.
-	last = nAcqFrames;
-	for ( first = 0; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+	for ( first = first; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
 
 	// Compute the mean position. 
 	N = 0.0;
@@ -966,6 +1052,213 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 // Same as above, but with a array as an input to specify the direction.
 int DexApparatus::CheckMovementAmplitude(  float min, float max, const float direction[3], char *msg ) {
 	return ( CheckMovementAmplitude( min, max, direction[X], direction[Y], direction[Z], msg ) );
+}
+
+/********************************************************************************************/
+
+//
+// Checks the number of oscillations in the specified direction.
+// Cycles are counted by counting the number of zero crossings in the
+// positive direction. The hysteresis parameter is used to reject noise.
+// 
+
+int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, 
+										   float dirX, float dirY, float dirZ,
+										   float hysteresis, const char *msg ) {
+	
+	const char *fmt;
+	bool  error = false;
+
+	float	displacement = 0.0;
+	bool	positive = false;
+	int		cycles = 0;
+
+	Vector3 direction, mean, delta;
+	
+	int i;
+
+	int first, last;
+	
+	double N = 0.0;
+
+	// Just make sure that the user gave a positive value for hysteresis.
+	hysteresis = fabs( hysteresis );
+
+	// TO DO: Should normalize the direction vector here.
+	direction[X] = dirX;
+	direction[Y] = dirY;
+	direction[Z] = dirZ;
+
+	// First we should look for the start and end of the actual movement based on 
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+	for ( first = first; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
+
+	// Compute the mean position. 
+	N = 0.0;
+	CopyVector( mean, zeroVector );
+	for ( i = first; i < last; i++ ) {
+		if ( acquiredManipulandumState[i].visibility ) {
+			N++;
+			AddVectors( mean, mean, acquiredManipulandumState[i].position );
+		}
+	}
+	// If there is no valid position data, signal an error.
+	if ( N <= 0.0 ) {
+		monitor->SendEvent( "Movement cycles - No valid data." );
+		cycles = 0;
+		error = true;
+	}
+	else {
+	
+		// This is the mean.
+		ScaleVector( mean, mean, 1.0 / N );
+
+		// Step through the trajectory, counting positive zero crossings.
+		for ( i = first; i < last; i ++ ) {
+			// Compute the displacements around the mean.
+			if ( acquiredManipulandumState[i].visibility ) {
+				SubtractVectors( delta, acquiredManipulandumState[i].position, mean );
+				displacement = DotProduct( delta, direction );
+			}
+			// If on the positive side of the mean, just look for the negative transition.
+			if ( positive ) {
+				if ( displacement < - hysteresis ) positive = false;
+			}
+			// If on the negative side, look for the positive transition.
+			// If we find one, count another cycle.
+			else {
+				if ( displacement > hysteresis ) {
+					positive = true;
+					cycles++;
+				}
+			}
+		}
+
+		// Check if the computed number of cycles is in the desired range.
+		error = ( cycles < min_cycles || cycles > max_cycles );
+
+	}
+
+	// If not, signal the error to the subject.
+	// Here I take the approach of calling a method to signal the error.
+	// We agree instead that the routine should either return a null pointer
+	// if there is no error, or return the error message as a static string.
+	if ( error ) {
+		
+		// If the user provided a message to signal a visibilty error, use it.
+		// If not, generate a generic message.
+		if ( !msg ) msg = "Movement cycles outside range.";
+		// The message could be different depending on whether the maniplulandum
+		// was not moved enough, or if it just could not be seen.
+		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
+		else fmt = "%s\n Measured cycles: %d\n Desired range: %d - %d\n Direction: < %.2f %.2f %.2f>";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
+		
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		
+	}
+	
+	// This is my means of signalling the event.
+	monitor->SendEvent( "Movement extent OK.\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>", cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
+	return( NORMAL_EXIT );
+	
+}
+
+// Same as above, but with a array as an input to specify the direction.
+int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, const Vector3 direction, float hysteresis, const char *msg ) {
+	return ( CheckMovementCycles( min_cycles, max_cycles, direction[X], direction[Y], direction[Z], hysteresis, msg ) );
+}
+
+/********************************************************************************************/
+
+//
+// Checks that the tangential velocity is zero when the cue to start a movement occurs.
+// Movement triggers must be marked by LogEvent( TRIGGER_MOVEMENT );
+// 
+// TO DO: Not yet tested!
+
+int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, float threshold, float filter_constant, const char *msg ) {
+	
+	const char *fmt;
+	bool  error = false;
+
+	int		early_starts = 0;
+	int		first, last;
+	int		i, j, index;
+	int		hold_frames = (int) floor( hold_time / tracker->samplePeriod );
+
+	int N = 0;
+	double tangential_velocity[DEX_MAX_MARKER_FRAMES];
+	Vector3 delta;
+
+	// First we should look for the start and end of the actual movement based on 
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+	for ( first = first; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
+
+	// Compute the instantaneous tangential velocity. 
+	for ( i = first + 1; i < last; i++ ) {
+		if ( acquiredManipulandumState[i].visibility && acquiredManipulandumState[i-1].visibility) {
+			SubtractVectors( delta, acquiredManipulandumState[i].position, acquiredManipulandumState[i-1].position );
+			ScaleVector( delta, delta, 1.0 / tracker->GetSamplePeriod() );
+			tangential_velocity[i] = VectorNorm( delta );
+			N++;
+		}
+		else {
+			tangential_velocity[i] = tangential_velocity[i-1];
+		}
+	}
+	// If there is no valid position data, signal an error.
+	if ( N <= 0.0 ) {
+		monitor->SendEvent( "No valid data." );
+		error = true;
+	}
+	else {
+		FindAnalysisEventRange( first, last );
+		for ( i = first; i < last; i++ ) {
+			if ( eventList[i].event == TRIGGER_MOVEMENT ) {
+				index = TimeToFrame( eventList[i].time );
+				for ( j = index; j > index - hold_frames && j > first; j-- ) {
+					if ( tangential_velocity[i] > threshold ) {
+						early_starts++;
+						break;
+					}
+				}
+			}
+		}
+		// Check if the computed number of cycles is in the desired range.
+		error = ( early_starts > max_early_starts );
+
+	}
+
+	// If not, signal the error to the subject.
+	// Here I take the approach of calling a method to signal the error.
+	// We agree instead that the routine should either return a null pointer
+	// if there is no error, or return the error message as a static string.
+	if ( error ) {
+		
+		// If the user provided a message to signal a visibilty error, use it.
+		// If not, generate a generic message.
+		if ( !msg ) msg = "To many false starts.";
+		// The message could be different depending on whether the maniplulandum
+		// was not moved enough, or if it just could not be seen.
+		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
+		else fmt = "%s\n False Starts Detected: %d\nMaximum Allowed: %d";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, early_starts, max_early_starts );
+		
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		
+	}
+	
+	// This is my means of signalling the event.
+	monitor->SendEvent( "Early Starts OK.\n Measured: %d\n Maximum Allowed: %d", early_starts, max_early_starts );
+	return( NORMAL_EXIT );
+	
 }
 
 /***************************************************************************/
@@ -1086,6 +1379,7 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance,
 	// Use a virtual mouse tracker in place of the coda.
 	tracker = new DexMouseTracker();
 	
+	nEvents = 0;
 	tracker->Initialize();
 	TargetsOff();
 	manipulandumVisible = false;
