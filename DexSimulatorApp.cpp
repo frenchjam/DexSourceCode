@@ -93,16 +93,22 @@ int oscillationMaxCycles = 0;	// Maximum cycles along the movement direction (Y)
 float cycleHysteresis = 10.0;
 
 // Collision trial parameters;
-int collisionInitialTarget = 7;
+int collisionInitialTarget = 6;
+int collisionUpTarget = 11;
+int collisionDownTarget = 1;
+
 int collisionSequenceN = 10;
 int collisionSequence[] = { 0, 1, 1, 0, 0, 0, 1, 0, 1, 1 };
 double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
+double collisionMovementThreshold = 10.0;
 
 int exit_status = NORMAL_EXIT;
 
 Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
 Quaternion expected_orientation[2];
+
+float flashTime = 0.3;
 
 /*********************************************************************************/
 
@@ -342,6 +348,10 @@ int RunCollisions( DexApparatus *apparatus ) {
 	Sleep( 1000 );
 	apparatus->StartAcquisition( collisionMaxTrialTime );
 	
+	// Now wait until the subject gets to the target before moving on.
+	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget );
+	if ( status == IDABORT ) exit( ABORT_EXIT );
+
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 	for ( int target = 0; target < collisionSequenceN; target++ ) {
@@ -355,16 +365,20 @@ int RunCollisions( DexApparatus *apparatus ) {
 				
 		apparatus->TargetsOff();
 		if ( collisionSequence[target] ) {
-			apparatus->VerticalTargetOn( 1 );
-			apparatus->MarkEvent( TRIGGER_MOVE_UP );
+			apparatus->VerticalTargetOn( collisionUpTarget );
+			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
 		}
 		else {
-			apparatus->VerticalTargetOn( 11 );
-			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
+			apparatus->VerticalTargetOn( collisionDownTarget );
+			apparatus->MarkEvent( TRIGGER_MOVE_UP );
 		}
 
 		// Allow a fixed time to reach the target before we start blinking.
-		apparatus->Wait( movementTime );
+		apparatus->Wait( flashTime );
+		apparatus->TargetsOff();
+		apparatus->TargetOn( collisionInitialTarget );
+		apparatus->Wait( movementTime - flashTime );
+
 		
 	}
 	
@@ -379,7 +393,8 @@ int RunCollisions( DexApparatus *apparatus ) {
 	apparatus->SaveAcquisition( "COLL" );
 
 	// Check if trial was completed as instructed.
-	apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, 30.0, "Testing." );
+	status = apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, collisionMovementThreshold );
+	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
@@ -396,140 +411,7 @@ int RunTargetCalibration( DexApparatus *apparatus ) {
 	return( exit_status );
 }
 
-/*********************************************************************************/
 
-/* 
-* The DexCompiler apparatus generates a script of the top-level commands.
-* Here we run the set of steps defined by such a script, instead of running 
-* a protocol defined by a C subroutine (as above).
-*/
-
-//  !!!!!!!!!!!!!!!!!!!! THIS IS NOT UP TO DATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   It may not cover all the required commands.
-
-int RunScript( DexApparatus *apparatus, const char *filename ) {
-	
-	FILE *fp;
-	int status = 0;
-	char line[1024];
-	
-	fp = fopen( filename, "r" );
-	if ( !fp ) {
-		char message[1024];
-		sprintf( message, "Error opening script file:\n  %s", filename );
-		MessageBox( NULL, message, "DEX Error", MB_OK );
-		return( ERROR_EXIT );
-	}
-	
-	while ( fgets( line, sizeof( line ), fp ) ) {
-		
-		char token[1024];
-		
-		sscanf( line, "%s", token );
-		
-		if ( !strcmp( token, "SelectAndCheckConfiguration" ) ) {
-			
-			int posture, target_config, tapping_config;
-			sscanf( line, "%s %d %d %d", token, &posture, &target_config, &tapping_config );
-			
-			// Select which configuration of the hardware should be used.
-			// Verify that it is in the correct configuration, and if not, 
-			//  give instructions to the subject about what to do.
-			status = apparatus->SelectAndCheckConfiguration( posture, target_config, tapping_config );
-			if ( status == ABORT_EXIT ) exit( status );
-			
-		}
-		
-		if ( !strcmp( token, "WaitSubjectReady" ) ) {
-			
-			char *prompt = strpbrk( line, " \t" );
-			if ( !prompt ) prompt = "Ready?";
-			else prompt++;
-			
-			// Instruct subject to take the appropriate position in the apparatus
-			//  and wait for confimation that he or she is ready.
-			status = apparatus->WaitSubjectReady( prompt );
-			if ( status == ABORT_EXIT ) exit( status );
-			
-		}
-		
-		if ( !strcmp( token, "WaitUntilAtTarget" ) ) {
-			
-			int target = 0;
-			sscanf( line, "%s %d", token, &target );
-			
-			// Wait until the subject gets to the target before moving on.
-			status = apparatus->WaitUntilAtVerticalTarget( target );
-			if ( status == ABORT_EXIT ) exit( status );
-		}
-		
-		if ( !strcmp( token, "StartAcquisition" ) ) {
-			float max_duration = 120.0;
-			sscanf( line, "%s %f", token, &max_duration );
-			// Start acquiring data.
-			apparatus->StartAcquisition( max_duration );
-		}
-		
-		if ( !strcmp( token, "Wait" ) ) {
-			
-			double duration = 0.0;
-			sscanf( line, "%s %lf", token, &duration );
-			
-			// Collect one second of data while holding at the starting position.
-			apparatus->Wait( duration );
-		}
-		
-		if ( !strcmp( token, "TargetsOff" ) ) {
-			apparatus->TargetsOff();
-		}
-		
-		if ( !strcmp( token, "TargetOn" ) ) {
-			
-			int target = 0;
-			sscanf( line, "%s %d", token, &target );
-			// Light up the next target.
-			apparatus->TargetOn( target );
-			
-		}
-		
-		if ( !strcmp( token, "StopAcquisition" ) ) {
-			// Stop collecting data.
-			apparatus->StopAcquisition();
-		}
-		
-		if ( !strcmp( token, "SaveAcquisition" ) ) {
-			char tag[256];
-			sscanf( line, "%s %s", token, tag );
-			// Save the data.
-			apparatus->SaveAcquisition( tag );
-		}
-		
-		if ( !strcmp( token, "CheckVisibility" ) ) {
-			
-			double cumulative, continuous;
-			sscanf( line, "%s %lf %lf", token, &cumulative, &continuous );
-			
-			// Check the quality of the data.
-			status = apparatus->CheckVisibility( cumulative, continuous, NULL );
-			if ( status == ABORT_EXIT ) exit( status );
-			if ( status == RETRY_EXIT ) return( status );
-		}
-		
-		if ( !strcmp( token, "SignalNormalCompletion" ) ) {
-			
-			char *prompt = strpbrk( line, " \t" );
-			if ( !prompt ) prompt = "Terminated normally.";
-			
-			// Indicate to the subject that they are done.
-			status = apparatus->SignalNormalCompletion( prompt );
-			if ( status == ABORT_EXIT ) exit( status );
-			
-		}
-	}
-	
-	return( NORMAL_EXIT );
-	
-}
 
 /**************************************************************************************/
 
