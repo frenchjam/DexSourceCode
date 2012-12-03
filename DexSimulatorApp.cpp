@@ -42,6 +42,7 @@
 #include "OpenGLViewpoints.h"
 #include "OpenGLTextures.h"
 
+#include "VectorsMixin.h"
 #include "AfdObjects.h"
 #include "CodaObjects.h"
 #include "DexGlObjects.h"
@@ -51,7 +52,11 @@
 #include <Views.h>
 #include <Layouts.h>
 
-int exit_status = NORMAL_EXIT;
+/*********************************************************************************/
+
+// #define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+
+/*********************************************************************************/
 
 int RunTargeted( DexApparatus *apparatus, DexTargetBarConfiguration bar_position, int target_sequence[], int n_targets  );
 int RunOscillations( DexApparatus *apparatus );
@@ -90,8 +95,57 @@ float cycleHysteresis = 10.0;
 // Collision trial parameters;
 int collisionInitialTarget = 7;
 int collisionSequenceN = 10;
+int collisionSequence[] = { 0, 1, 1, 0, 0, 0, 1, 0, 1, 1 };
 double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
+
+int exit_status = NORMAL_EXIT;
+
+Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
+Quaternion expected_orientation[2];
+
+/*********************************************************************************/
+
+int RunInstall( DexApparatus *apparatus ) {
+
+	apparatus->SetQuaterniond( expected_orientation[0], 90.0, apparatus->kVector );
+	apparatus->SetQuaterniond( expected_orientation[1], 45.0, apparatus->iVector );
+
+	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
+	apparatus->CheckTrackerFieldOfView( 0, 0x000f0000, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
+	apparatus->CheckTrackerFieldOfView( 1, 0x000f0000, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
+
+	// Perform the alignment based on those markers.
+	apparatus->PerformTrackerAlignment();
+
+	// Are the Coda bars where we think they should be?
+	apparatus->CheckTrackerPlacement( 0, 
+										expected_position[0], 45.0, 
+										expected_orientation[0], 45.0, 
+										"Placement error - Coda Unit 0." );
+	apparatus->CheckTrackerPlacement( 1, 
+										expected_position[1], 10.0, 
+										expected_orientation[1], 10.0, 
+										"Placement error - Coda Unit 1." );
+
+	// Check that the tracker is still aligned.
+	int status = apparatus->CheckTrackerAlignment( 0x000f0000, 5.0, 2, "Coda misaligned!" );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) exit( status );
+
+	// Prompt the subject to place the manipulandum on the chair.
+	apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
+
+	// Perform a short acquisition to measure where the manipulandum is.
+	apparatus->StartAcquisition( 5.0 );
+	apparatus->Wait( 5.0 );
+	apparatus->StopAcquisition();
+	apparatus->SaveAcquisition( "ALGN" );
+
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	return( NORMAL_EXIT );
+}
 
 /*********************************************************************************/
 
@@ -104,6 +158,11 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
+#ifndef SKIP_PREP
+
+	// Check that the tracker is still aligned.
+	status = apparatus->CheckTrackerAlignment( 0x00000f0000, 5.0, 2, "Coda misaligned!" );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) exit( status );
 	
 	// Tell the subject which configuration should be used.
 	status = apparatus->fWaitSubjectReady( 
@@ -115,6 +174,7 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	//  give instructions to the subject about what to do.
 	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, TappingFolded );
 	if ( status == ABORT_EXIT ) exit( status );
+
 	
 	// Send information about the actual configuration to the ground.
 	// This is redundant, because the SelectAndCheckConfiguration() command will do this as well.
@@ -125,19 +185,28 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
-	
-	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( target_sequence[0], uprightNullOrientation );
-	// NOTE: Here I set a tight tolerance on the manipulandum orientation to show how it works.
-	else status = apparatus->WaitUntilAtHorizontalTarget( target_sequence[0], supineNullOrientation, defaultPositionTolerance, 1.0 ); 
-	if ( status == ABORT_EXIT ) exit( status );
-	
+#endif
+
 	// Start acquiring data.
 	apparatus->StartAcquisition( targetedMaxTrialTime );
-	
+
+	// Wait until the subject gets to the target before moving on.
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( target_sequence[0], uprightNullOrientation );
+	else status = apparatus->WaitUntilAtHorizontalTarget( target_sequence[0], supineNullOrientation, defaultPositionTolerance, 1.0 ); 
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Make sure that the target is turned back on if a timeout occured.
+	// Normally this won't do anything.
+	apparatus->TargetsOff();
+	if ( direction == VERTICAL ) apparatus->VerticalTargetOn( target_sequence[0] );
+	else apparatus->HorizontalTargetOn( target_sequence[0] );
+		
 	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineTime );
 	
+	// Mark the starting point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( BEGIN_ANALYSIS );
+
 	// Step through the list of targets.
 	for ( int target = 1; target < n_targets; target++ ) {
 		
@@ -158,6 +227,9 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 		
 	}
 	
+	// Mark the ending point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( END_ANALYSIS );
+
 	// Collect one final second of data.
 	apparatus->Wait( baselineTime );
 	
@@ -244,7 +316,7 @@ int RunOscillations( DexApparatus *apparatus ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
-	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, apparatus->jVector, NULL );
+	status = apparatus->CheckMovementAmplitude( oscillationMaxMovementExtent, oscillationMaxMovementExtent, apparatus->jVector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
@@ -270,6 +342,8 @@ int RunCollisions( DexApparatus *apparatus ) {
 	Sleep( 1000 );
 	apparatus->StartAcquisition( collisionMaxTrialTime );
 	
+	// Mark the starting point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( BEGIN_ANALYSIS );
 	for ( int target = 0; target < collisionSequenceN; target++ ) {
 		
 		// Ready to start, so light up starting point target.
@@ -278,27 +352,34 @@ int RunCollisions( DexApparatus *apparatus ) {
 		
 		// Allow a fixed time to reach the starting point before we start blinking.
 		apparatus->Wait( movementTime );
-		
-		// Now wait until the subject gets to the target before moving on.
-		status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget );
-		if ( status == IDABORT ) exit( ABORT_EXIT );
-		
+				
 		apparatus->TargetsOff();
-		
-		// Add bee bop
-		// check amplitude after
-		// count cycles
-		
+		if ( collisionSequence[target] ) {
+			apparatus->VerticalTargetOn( 1 );
+			apparatus->MarkEvent( TRIGGER_MOVE_UP );
+		}
+		else {
+			apparatus->VerticalTargetOn( 11 );
+			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
+		}
+
 		// Allow a fixed time to reach the target before we start blinking.
 		apparatus->Wait( movementTime );
 		
 	}
 	
+	apparatus->TargetsOff();
+
+	// Mark the starting point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( END_ANALYSIS );
 	// Stop acquiring.
 	apparatus->StopAcquisition();
 	
 	// Save the data and show it,
 	apparatus->SaveAcquisition( "COLL" );
+
+	// Check if trial was completed as instructed.
+	apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, 30.0, "Testing." );
 	
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
@@ -470,20 +551,26 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Parse command line.
 	
 	if ( strstr( lpCmdLine, "-coda"   ) ) apparatus_type = DEX_CODA_APPARATUS;
+	if ( strstr( lpCmdLine, "-rt"     ) ) apparatus_type = DEX_RTNET_APPARATUS;
 	if ( strstr( lpCmdLine, "-osc"    ) ) protocol = OSCILLATION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-coll"   ) ) protocol = COLLISION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-script" ) ) protocol = RUN_SCRIPT;
 	if ( strstr( lpCmdLine, "-calib"  ) ) protocol = CALIBRATE_TARGETS;
-	
+	if ( strstr( lpCmdLine, "-install"  ) ) protocol = INSTALL_PROCEDURE;
 	
 	switch ( apparatus_type ) {
 		
 	case DEX_MOUSE_APPARATUS:
 		apparatus = new DexMouseApparatus( hInstance );
+		MessageBox( NULL, "Set desired startup state.", "DexSimulatorApp", MB_OK );
 		break;
 		
 	case DEX_CODA_APPARATUS:
 		apparatus = new DexCodaApparatus();
+		break;
+
+  case DEX_RTNET_APPARATUS:
+		apparatus = new DexRTnetApparatus();
 		break;
 		
 	case DEX_COMPILER:
@@ -515,12 +602,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case OSCILLATION_PROTOCOL:
-//		if ( apparatus->type == DEX_VIRTUAL_APPARATUS ) ((DexVirtualTracker *) apparatus->tracker)->SetMovementType( OSCILLATION_PROTOCOL ); 
 		while ( RETRY_EXIT == RunOscillations( apparatus ) );
 		break;
 		
 	case COLLISION_PROTOCOL:
-//		if ( apparatus->type == DEX_VIRTUAL_APPARATUS ) ((DexVirtualTracker *) apparatus->tracker)->SetMovementType( COLLISION_PROTOCOL ); 
 		while ( RETRY_EXIT == RunCollisions( apparatus ) );
 		break;
 		
@@ -534,6 +619,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
 		break;
+
+	case INSTALL_PROCEDURE:
+		while ( RETRY_EXIT == RunInstall( apparatus ) );
+		break;
+
 		
 	}
 	

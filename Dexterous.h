@@ -105,11 +105,11 @@ extern const float uprightNullOrientation[4], supineNullOrientation[4];
 
 // Possible protocols.
 
-enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS };
+enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Possible apparatii.
 
-typedef enum { DEX_GENERIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS, DEX_CODA_APPARATUS, DEX_COMPILER } DexApparatusType;
+typedef enum { DEX_GENERIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS, DEX_CODA_APPARATUS, DEX_RTNET_APPARATUS, DEX_COMPILER } DexApparatusType;
 
 #define DEFAULT_SCRIPT_FILENAME	"DexSampleScript.dex"
 
@@ -139,27 +139,29 @@ typedef struct {
 
 } ManipulandumState;
 
-// Event codes that are kept in a local buffer. 
-// They are useful for analizing the data on the ground.
-// Here we define some special ones used by DexApparatus.
+// Event codes that are kept in a local buffer with a time stamp. 
+// Here we define some special ones used by DexApparatus
+// to compute the post hoc tests on acquired data.
+// Users may also signal other events in the script
+// that may be useful for analizing the data on the ground.
 // By convention, the system events will be negative and 
 // users can define positive events in the scripts.
 
-#define TARGET_EVENT -1
-#define SOUND_EVENT -2
-#define BEGIN_ANALYSIS -3
-#define END_ANALYSIS -4
-#define ACQUISITION_START -5
-#define ACQUISITION_STOP -6
-#define TRIGGER_MOVEMENT -7
+#define TARGET_EVENT		-1	// Will be raised whenever the targets change state.
+#define SOUND_EVENT			-2	// Signals any change of the sound state.
+#define BEGIN_ANALYSIS		-3	// These two signal where in a record analyses such as counting 
+#define END_ANALYSIS		-4	//  the number of cycles in a movement should start and end.
+#define ACQUISITION_START	-5	// Automatically raised when acquisition starts and ends.
+#define ACQUISITION_STOP	-6
+#define TRIGGER_MOVEMENT	-7	// Used to test for false starts.
+#define TRIGGER_MOVE_UP		-8	// Used to test for tapping movements in the wrong direction.
+#define TRIGGER_MOVE_DOWN	-9
 
 typedef struct {
 
 	float			time;
 	int				event;
-	unsigned char	target_bits;
-	unsigned int	tone;
-	unsigned int	volume;
+	unsigned long	param;
 
 } DexEvent;
 

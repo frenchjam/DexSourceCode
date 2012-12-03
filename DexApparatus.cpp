@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "resource.h"
+#include "..\DexSimulatorApp\resource.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,13 +46,12 @@
 
 DexApparatus::DexApparatus( int n_vertical_targets, 
 							int n_horizontal_targets,
-							int n_tones, int n_markers, int n_codas ) {
+							int n_tones, int n_markers ) {
 	
 	type = DEX_GENERIC_APPARATUS;
 	nTargets = n_vertical_targets + n_horizontal_targets;
 	nVerticalTargets = n_vertical_targets;
 	nHorizontalTargets = n_horizontal_targets;
-	nCodas = n_codas;
 	nTones = n_tones;
 	nMarkers = n_markers;
 	
@@ -67,11 +66,19 @@ DexApparatus::Quit( void ) {
 
 /***************************************************************************/
 
-// I need to know where each target LED is to implement WaitAtTarget().
-// I implemented this pair of routines to allow me to calibrate my simulator.
-// The means of setting the positions of the target LEDs is not yet completely
-//  defined, but will probably be done by CheckMarkerAlignment().
+// Need to know where each target LED is to implement WaitAtTarget().
+// This routine should be called at the beginning of each trial,
+// perhaps as part of CheckTrackerAlignment();
+void DexApparatus::SetTargetPositions( void ) {
+	// Default is to read the stored locations back from disk.
+	LoadTargetPositions();
+}
 
+// I implemented this pair of routines to allow me to calibrate my simulator.
+// It is unlikely that the real system will need them. It's just a way to find out
+// and store the position of each target using the manipulandum to point to each one.
+// In the real system, it should be possible to compute the position of each target
+// from the Coda markers on the target frame.
 void DexApparatus::LoadTargetPositions( char *filename ) {
 
 	FILE *fp;
@@ -82,16 +89,14 @@ void DexApparatus::LoadTargetPositions( char *filename ) {
 	fp = fopen( filename, "r" );
 	if ( fp ) {
 		for ( int trg = 0; trg < nTargets; trg++ ) {
-			items = fscanf( fp, "%f, %f, %f\n", &targetPosition[trg][X], &targetPosition[trg][Y], &targetPosition[trg][Z] );
+			items = fscanf( fp, "%f, %f, %f\n", 
+							&targetPosition[trg][X], 
+							&targetPosition[trg][Y], 
+							&targetPosition[trg][Z] );
 		}
 		fclose( fp );
 	}
 }
-
-// It is unlikely that the real system will need this routine. It's just a way to find out
-// and store the position of each target using the manipulandum to point to each one.
-// In the real system, it should be possible to compute the position of each target from the 
-// Coda markers on the target frame.
 
 int DexApparatus::CalibrateTargets( void ) {
 
@@ -110,9 +115,6 @@ int DexApparatus::CalibrateTargets( void ) {
 		}
 		else {
 			CopyVector( targetPosition[trg], position );
-//			targetPosition[trg][X] = position[X];
-//			targetPosition[trg][Y] = position[Y];
-//			targetPosition[trg][Z] = position[Z];
 		}
 	}
 
@@ -130,18 +132,125 @@ int DexApparatus::CalibrateTargets( void ) {
 
 /***************************************************************************/
 
+bool DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
+										   float min_x, float max_x,
+										   float min_y, float max_y,
+										   float min_z, float max_z, const char *msg ) {
+
+	CodaFrame frame;
+	int mrk;
+	unsigned long bit;
+
+	while ( 1) {
+
+		bool out_of_view = false;
+		tracker->GetCurrentMarkerFrameIntrinsic( frame, unit );
+		for ( mrk = 0, bit = 0x01; mrk < nMarkers; mrk++, bit = bit << 1 ) {
+			if ( marker_mask & bit ) {
+				if ( !frame.marker[mrk].visibility ) out_of_view = true;
+				if ( frame.marker[mrk].position[X] < min_x ) out_of_view = true;
+				if ( frame.marker[mrk].position[X] > max_x ) out_of_view = true;
+				if ( frame.marker[mrk].position[Y] < min_y ) out_of_view = true;
+				if ( frame.marker[mrk].position[Y] < max_y ) out_of_view = true;
+				if ( frame.marker[mrk].position[Z] < min_z ) out_of_view = true;
+				if ( frame.marker[mrk].position[Z] < max_z ) out_of_view = true;
+			}
+		}
+		if ( !out_of_view ) return( NORMAL_EXIT );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Coda Unit: %d", msg, unit );
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+
+	}
+}
+
+/***************************************************************************/
+
+int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
+
+	CodaFrame	frame[2];
+
+	Update();
+
+	tracker->GetCurrentMarkerFrameUnit( frame[0], 0 );
+	tracker->GetCurrentMarkerFrameUnit( frame[1], 1 );
+
+	unsigned long bit;
+	int mrk;
+
+	int good = 0;
+	double distance;
+	Vector3 delta;
+
+	for ( mrk = 0, bit = 0x01; mrk < nMarkers; mrk++, bit = bit << 1 ) {
+		if ( bit & marker_mask ) {
+			if ( frame[0].marker[mrk].visibility && frame[1].marker[mrk].visibility ) {
+				SubtractVectors( delta, frame[0].marker[mrk].position, frame[1].marker[mrk].position );
+				distance = VectorNorm( delta );
+				if ( distance < tolerance ) good++;
+			}
+		}
+	}
+
+	if ( good < n_good ) {
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s", msg );
+		if ( response == IDABORT ) {
+			monitor->SendEvent( "Manual Abort from CheckTrackerAlignment()." );
+			return( ABORT_EXIT );
+		}
+		else if ( response == IDIGNORE ) {
+			monitor->SendEvent( "Ignore Error from SelectAndCheckConfiguration." );
+			return( IGNORE_EXIT );
+		}
+		else {
+			monitor->SendEvent( "Retry exit from SelectAndCheckConfiguration." );
+			return( RETRY_EXIT );
+		}
+	}
+	else return( NORMAL_EXIT );
+}
+
+/***************************************************************************/
+
+int DexApparatus::CheckTrackerPlacement( int unit, 
+											const Vector3 expected_pos, float p_tolerance,
+											const Quaternion expected_ori, float o_tolerance,
+											const char *msg ) {
+	Vector3 pos;
+	Quaternion ori;
+	tracker->GetUnitPlacement( unit, pos, ori );
+
+	Vector3 delta_pos;
+	double distance, angle;
+
+	SubtractVectors( delta_pos, pos, expected_pos );
+	distance = VectorNorm( delta_pos );
+	angle = 180.0 * AngleBetween( ori, expected_ori ) / pi;
+	if ( distance > p_tolerance || abs( angle ) > o_tolerance ) {
+		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle ) );
+	}
+	else return( NORMAL_EXIT );
+}
+
+/***************************************************************************/
+
+int DexApparatus::PerformTrackerAlignment( const char *msg ) {
+	if ( tracker->PerformAlignment() ) {
+		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, msg ) );
+	}
+	else return( NORMAL_EXIT );
+}
+
+/***************************************************************************/
+
 // Compute the 3D position vector and 4D orientation quaternion of the manipulandum.
 // Takes as input a pointer to a buffer full of one slice of marker data (marker_frame);
 // Fills in the position vector pos and the orientation quaternion ori.
 bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame ) {
 
-	// Take a singe marker as the position of the manipulandum and set the orientation
-	//  to zero. 
+	// Take a singe marker as the position of the manipulandum and set the orientation to zero. 
 	// TO DO: This will be replaced by an algorithm to compute the position and orientation
 	//  of the manipulandum based on 8 markers (or those that are visible).
-//	pos[X] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[X];
-//	pos[Y] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Y];
-//	pos[Z] = marker_frame.marker[CODA_MANIPULANDUM_MARKER].position[Z];
 	CopyVector( pos, marker_frame.marker[CODA_MANIPULANDUM_MARKER].position );
 
 	// A single marker cannot define an orientation. Here we simulate rotations of the
@@ -159,8 +268,16 @@ bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFram
 	return( marker_frame.marker[CODA_MANIPULANDUM_MARKER].visibility );
 }
 
+// Compute the 3D position of the target frame.
+bool DexApparatus::ComputeTargetFramePosition( Vector3 pos, Quaternion ori, CodaFrame &marker_frame  ) {
+	pos[X] = pos[Y] = pos[Z] = 0.0;
+	ori[X] = ori[Y] = ori[Z] = 0.0; ori[M] = 1;
+	return( true );
+}
+
+
 // Get the current position and orientation of the manipulandum.
-bool DexApparatus::GetManipulandumPosition( float *pos, float *ori ) {
+bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori ) {
 	CodaFrame marker_frame;
 	// Make sure that the tracker has had a chance to update before doing so.
 	// This is probably only an issue for the simulated trackers.
@@ -171,13 +288,6 @@ bool DexApparatus::GetManipulandumPosition( float *pos, float *ori ) {
 	return( ComputeManipulandumPosition( pos, ori, marker_frame ) );
 }
 
-// Get the 3D position of the target frame.
-// This may not be needed, or it may be useful information that could be
-// transmitted to the ground.
-bool DexApparatus::GetFramePosition( double *pos ) {
-	pos[X] = pos[Y] = pos[Z] = 0.0;
-	return( true );
-}
 
 /***************************************************************************/
 
@@ -200,8 +310,11 @@ void DexApparatus::Update( void ) {
 	if ( exit_status = tracker->Update() ) exit( exit_status );
 	if ( exit_status = sounds->Update() ) exit( exit_status );
 	
+	// Here we ask for the current position of the markers from the tracker.
+	tracker->GetCurrentMarkerFrame( currentMarkerFrame );
+
 	// Update the current state of the manipulandum;
-	if ( GetManipulandumPosition( pos, ori ) ) {
+	if ( ComputeManipulandumPosition( pos, ori, currentMarkerFrame ) ) {
 		
 		CopyVector( manipulandumPosition, pos );
 		CopyQuaternion( manipulandumOrientation, ori );
@@ -396,35 +509,34 @@ void DexApparatus::SignalEvent( const char *msg ) {
 
 // Log events locally, for use by post hoc tests.
 
-void DexApparatus::LogTargetEvent( unsigned int bits ) {
-	eventList[nEvents].event = TARGET_EVENT;
-	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
-	eventList[nEvents].target_bits = bits;
-	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
-}
-
-void DexApparatus::LogSoundEvent( int tone, int volume ) {
-	eventList[nEvents].event = SOUND_EVENT;
-	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
-	eventList[nEvents].tone = tone;
-	eventList[nEvents].volume = volume;
-	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
-}
-
-void DexApparatus::LogEvent( int event ) {
-	eventList[nEvents].event = event;
-	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
-	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
-}
-
 void DexApparatus::ClearEventLog( void ) {
 	nEvents = 0.0;
 }
 
+void DexApparatus::MarkEvent( int event, unsigned long param ) {
+	eventList[nEvents].event = event;
+	eventList[nEvents].param = param;
+	eventList[nEvents].time = DexTimerElapsedTime( trialTimer );
+	if ( nEvents < DEX_MAX_EVENTS ) nEvents++;
+}
+
+void DexApparatus::MarkTargetEvent( unsigned int bits ) {
+	MarkEvent( TARGET_EVENT, bits );
+}
+
+void DexApparatus::MarkSoundEvent( int tone, int volume ) {
+	MarkEvent( SOUND_EVENT, ( volume << 4 | tone ) );
+}
+
+
 // Calculate the approximate marker frame where the event occured.
 
 int DexApparatus::TimeToFrame( float elapsed_time ) {
-	return( (int) floor( elapsed_time / tracker->samplePeriod ) );
+	int frame = (int) floor( elapsed_time / tracker->samplePeriod );
+	// Make sure that it is a valid frame.
+	if (frame < 0) frame = 0;
+	if (frame >= nAcqFrames ) frame = nAcqFrames - 1;
+	return( frame );
 }
 
 // Find the events that determine the interval of analysis,
@@ -594,13 +706,14 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			if ( DexTimerTimeout( timeout_timer ) ) {
 				
 				// Timeout has been reached. Signal the error to the user.
-				if ( !msg ) msg = "Time to reach target exceeded.\nIs the manipulandum visible?\nIs the manipulandum upright?\n\n";
+				if ( !msg ) msg = "Time to reach target exceeded.\n Is the manipulandum visible?\n Is the manipulandum upright?\n";
 				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
-					"%s\n  Target ID: %d\n  Desired orientation: <%.3f %.3f %.3f %.3f>\n  Max time: %.2f\n  Manipulandum Visible? %s\n  Orientation Error: %.0f degrees",
+					"%s\n  Target ID: %d\n  Max time: %.2f\n  Manipulandum Visible: %s\n  Desired orientation: <%.3f %.3f %.3f %.3f>\n  Orientation Error: %.0f degrees",
 					msg, target_id,
+					timeout, ( manipulandumVisible ? "yes" : "no" ), 
 					desired_orientation[X], desired_orientation[Y],
 					desired_orientation[Z], desired_orientation[M],
-					timeout, ( manipulandumVisible ? "yes" : "no" ), orientation );
+					orientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
 					monitor->SendEvent( "Manual Abort from WaitUntilAtTarget." );
@@ -700,7 +813,7 @@ int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, const float desire
 void DexApparatus::SetTargetState( unsigned long target_state ) {
 	targets->SetTargetState( target_state );
 	currentTargetState = target_state;
-	LogTargetEvent( target_state );
+	MarkTargetEvent( target_state );
 }
 
 // The following are convenience methods for my own use.
@@ -734,7 +847,7 @@ int DexApparatus::DecodeTargetBits( unsigned long bits ) {
 // This is the lowest level routine to be implemented in the DEX scripting language.
 void DexApparatus::SetSoundState( int tone, int volume ) {
 	sounds->SetSoundState( tone, volume );
-	LogSoundEvent( tone, volume );
+	MarkSoundEvent( tone, volume );
 }
 
 // The following are convenience methods for my use, built on SetSoundState().
@@ -776,10 +889,10 @@ void DexApparatus::StartAcquisition( float max_duration ) {
 	// Tell the ground what we just did.
 	monitor->SendEvent( "Acquisition started. Max duration: %f seconds.", max_duration );
 	// Note the time of the acqisition start.
-	LogEvent( ACQUISITION_START );
+	MarkEvent( ACQUISITION_START );
 }
 void DexApparatus::StopAcquisition( void ) {
-	LogEvent( ACQUISITION_STOP );
+	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	monitor->SendEvent( "Acquisition terminated." );
 	// Retrieve the marker data.
@@ -837,7 +950,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 
 int DexApparatus::CheckOverrun(  const char *msg ) {
 	
-	if ( tracker->CheckOverrun() ) {
+	if ( tracker->CheckAcquisitionOverrun() ) {
 		monitor->SendEvent( "Acquisition overrun." );
 		
 		int response = SignalError( MB_ABORTRETRYIGNORE, msg );
@@ -953,13 +1066,15 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 	// First we should look for the start and end of the actual movement based on 
 	// events such as when the subject reaches the first target. 
 	FindAnalysisFrameRange( first, last );
-	for ( first = first; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
 
 	// Compute the mean position. 
 	N = 0.0;
 	CopyVector( mean, zeroVector );
 	for ( i = first; i < last; i++ ) {
 		if ( acquiredManipulandumState[i].visibility ) {
+			if ( abs( acquiredManipulandumState[i].position[X] ) > 1000 ) {
+				i = i;
+			}
 			N++;
 			AddVectors( mean, mean, acquiredManipulandumState[i].position );
 		}
@@ -1187,7 +1302,7 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 
 	int		early_starts = 0;
 	int		first, last;
-	int		i, j, index;
+	int		i, j, index, frm;
 	int		hold_frames = (int) floor( hold_time / tracker->samplePeriod );
 
 	int N = 0;
@@ -1197,7 +1312,6 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 	// First we should look for the start and end of the actual movement based on 
 	// events such as when the subject reaches the first target. 
 	FindAnalysisFrameRange( first, last );
-	for ( first = first; first < last; first++ ) if ( acquiredManipulandumState[first].visibility ) break;
 
 	// Compute the instantaneous tangential velocity. 
 	for ( i = first + 1; i < last; i++ ) {
@@ -1217,6 +1331,18 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 		error = true;
 	}
 	else {
+
+		// Smooth the tangential velocity using a recursive filter.
+		for ( frm = 1; frm < nAcqFrames; frm++ ) {
+			tangential_velocity[frm] = ( filter_constant * tangential_velocity[frm-1] + tangential_velocity[frm] ) / ( 1.0 + filter_constant );
+		}
+		// Run the filter backwards to eliminate the phase lag.
+		for ( frm = nAcqFrames - 2; frm >= 0; frm-- ) {
+			tangential_velocity[frm] = ( filter_constant * tangential_velocity[frm+1] + tangential_velocity[frm] ) / ( 1.0 + filter_constant );
+		}
+
+		// Step through each marked movement trigger and verify that the velocity is 
+		// close to zero when the trigger was sent.
 		FindAnalysisEventRange( first, last );
 		for ( i = first; i < last; i++ ) {
 			if ( eventList[i].event == TRIGGER_MOVEMENT ) {
@@ -1261,6 +1387,155 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 	
 }
 
+/********************************************************************************************/
+
+//
+// Checks that the maniplandum is close to the specified target when the cue to start a movement occurs.
+// Movement triggers must be marked by LogEvent( TRIGGER_MOVEMENT );
+// 
+// TO DO: Not yet tested!
+
+int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float tolY, float tolZ, int max_bad_positions, const char *msg ) {
+	
+	const char *fmt;
+	bool  error = false;
+
+	int		bad_positions = 0;
+	int		first, last;
+	int		i, index;
+
+	Vector3 delta;
+
+	// First we should look for the start and end of the actual movement based on 
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+
+	// Step through each marked movement trigger and verify that the velocity is 
+	// close to zero when the trigger was sent.
+	FindAnalysisEventRange( first, last );
+	for ( i = first; i < last; i++ ) {
+		if ( eventList[i].event == TRIGGER_MOVEMENT ) {
+			index = TimeToFrame( eventList[i].time );
+			SubtractVectors( delta, acquiredManipulandumState[index].position, targetPosition[target_id] );
+			if ( fabs( delta[X] ) > tolX 
+				 || fabs( delta[Y] ) > tolY 
+				 || fabs( delta[Z] ) > tolZ ) bad_positions++;
+		}
+	}
+	// Check if the computed number of incorrect starting positions is in the desired range.
+	error = ( bad_positions > max_bad_positions );
+
+	// If not, signal the error to the subject.
+	// Here I take the approach of calling a method to signal the error.
+	// We agree instead that the routine should either return a null pointer
+	// if there is no error, or return the error message as a static string.
+	if ( error ) {
+		
+		// If the user provided a message to signal a visibilty error, use it.
+		// If not, generate a generic message.
+		if ( !msg ) msg = "Starting position not respected.";
+		// The message could be different depending on whether the maniplulandum
+		// was not moved enough, or if it just could not be seen.
+		fmt = "%s\n Erroneous Positions Detected: %d\nMaximum Allowed: %d";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, bad_positions, max_bad_positions );
+		
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		
+	}
+	
+	// This is my means of signalling the event.
+	monitor->SendEvent( "Start positions OK.\n Measured: %d\n Maximum Allowed: %d", bad_positions, max_bad_positions );
+	return( NORMAL_EXIT );
+	
+}
+/********************************************************************************************/
+
+//
+// Checks that the maniplandum is close to the specified target when the cue to start a movement occurs.
+// Movement triggers must be marked by LogEvent( TRIGGER_MOVEMENT );
+// 
+// TO DO: Not yet tested!
+
+int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg ) {
+	
+	const char *fmt;
+	bool  error = false;
+
+	int		bad_movements = 0;
+	int		first, last;
+	int		i, index;
+
+	Vector3 dir;
+	dir[X] = dirX;
+	dir[Y] = dirY;
+	dir[Z] = dirZ;
+	float displacement;
+
+	// First we should look for the start and end of the actual movement based on 
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+
+	// Step through each marked movement trigger and verify that the velocity is 
+	// close to zero when the trigger was sent.
+	FindAnalysisEventRange( first, last );
+	for ( i = first; i < last; i++ ) {
+		if ( eventList[i].event == TRIGGER_MOVE_UP ) {
+			index = TimeToFrame( eventList[i].time );
+			while ( index < nAcqFrames ) {
+				displacement = DotProduct( dir, acquiredManipulandumState[index].position );
+				if ( displacement < - threshold ) {
+					bad_movements++;
+					break;
+				}
+				if ( displacement > threshold ) {
+					break;
+				}
+				index++;
+			}
+			index = TimeToFrame( eventList[i].time );
+			while ( index < nAcqFrames ) {
+				displacement = DotProduct( dir, acquiredManipulandumState[index].position );
+				if ( displacement > threshold ) {
+					bad_movements++;
+					break;
+				}
+				if ( displacement < threshold ) {
+					break;
+				}
+				index++;
+			}
+		}
+	}
+	// Check if the computed number of incorrect starting positions is in the desired range.
+	error = ( bad_movements > max_false_directions );
+
+	// If not, signal the error to the subject.
+	// Here I take the approach of calling a method to signal the error.
+	// We agree instead that the routine should either return a null pointer
+	// if there is no error, or return the error message as a static string.
+	if ( error ) {
+		
+		// If the user provided a message to signal a visibilty error, use it.
+		// If not, generate a generic message.
+		if ( !msg ) msg = "To many starts in wrong direction.";
+		// The message could be different depending on whether the maniplulandum
+		// was not moved enough, or if it just could not be seen.
+		fmt = "%s\n Erroneous Positions Detected: %d\nMaximum Allowed: %d";
+		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, bad_movements, max_false_directions );
+		
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		
+	}
+	
+	// This is my means of signalling the event.
+	monitor->SendEvent( "Start directions OK.\n Measured: %d\n Maximum Allowed: %d", bad_movements, max_false_directions );
+	return( NORMAL_EXIT );
+	
+}
 /***************************************************************************/
 /*                                                                         */
 /*                             DexCodaApparatus                            */
@@ -1271,16 +1546,17 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 
 DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets, 
 									 int n_horizontal_targets,
-									 int n_tones, int n_markers, int n_codas ) {
+									 int n_tones, int n_markers ) {
 	
 	type = DEX_CODA_APPARATUS;
 	nTargets = n_vertical_targets + n_horizontal_targets;
-	nCodas = n_codas;
 	nTones = n_tones;
 	nMarkers = n_markers;
+	nCodas = 2;
+	nEvents = 0;
 	
 	// Create a window to monitor the experiment.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, n_codas );
+	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
 	
 	// Initialize target system.
 	targets = new DexScreenTargets();
@@ -1293,8 +1569,60 @@ DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets,
 	
 	// Load the most recently defined target positions.
 	LoadTargetPositions();
+  // Initialize the tracker hardware.
 	tracker->Initialize();
+  // Start with all the targets off.
 	TargetsOff();
+  // Initialize the cached state of the manipulandum.
+	manipulandumVisible = false;
+	
+}
+
+
+/***************************************************************************/
+/*                                                                         */
+/*                             DexRTnetApparatus                           */
+/*                                                                         */
+/***************************************************************************/
+
+// A combination of simulated targets on the computer screen the real CODA tracker.
+
+DexRTnetApparatus::DexRTnetApparatus(  int n_vertical_targets, 
+									   int n_horizontal_targets,
+									   int n_tones, 
+                                       int n_markers ) {
+	
+	type = DEX_RTNET_APPARATUS;
+	nTargets = n_vertical_targets + n_horizontal_targets;
+	nTones = n_tones;
+	nMarkers = n_markers;
+	nEvents = 0;
+
+	DexRTnetTracker *tracker_local;
+		
+	// Initialize target system.
+	targets = new DexScreenTargets();
+	
+	// Initialize target system.
+	sounds = new DexScreenSounds();
+
+	// Use the real Coda tracker.
+	tracker_local = new DexRTnetTracker();
+	tracker = tracker_local;
+
+	// Ask the tracker how many Codas are being used.
+	nCodas = tracker_local->nCodas;
+	
+	// Create a window to monitor the experiment.
+	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
+
+	// Load the most recently defined target positions.
+	LoadTargetPositions();
+  // Initialize the tracker hardware.
+	tracker->Initialize();
+  // Start with all the targets off.
+	TargetsOff();
+  // Initialize the cached state of the manipulandum.
 	manipulandumVisible = false;
 	
 }
@@ -1351,13 +1679,14 @@ BOOL CALLBACK dexApparatusDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance, 
 									 int n_vertical_targets, 
 									 int n_horizontal_targets,
-									 int n_tones, int n_markers, int n_codas ) {
+									 int n_tones, int n_markers ) {
 	
 	type = DEX_MOUSE_APPARATUS;
 	nTargets = n_vertical_targets + n_horizontal_targets;
-	nCodas = n_codas;
 	nTones = n_tones;
 	nMarkers = n_markers;
+	nCodas = 2;
+	nEvents = 0;
 	
 	// Initialize dialog box.
 	dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexApparatusDlgCallback );
@@ -1365,10 +1694,12 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance,
 	CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
 	CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
 	CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
+	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+	CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
 	ShowWindow( dlg, SW_SHOW );
 	
 	// Create a link to monitor the experiment.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, n_codas );
+	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
 	
 	// Initialize target system.
 	targets = new DexScreenTargets( n_vertical_targets, n_horizontal_targets );
@@ -1377,13 +1708,16 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance,
 	sounds = new DexScreenSounds( n_tones );
 	
 	// Use a virtual mouse tracker in place of the coda.
-	tracker = new DexMouseTracker();
+	tracker = new DexMouseTracker( dlg );
 	
-	nEvents = 0;
-	tracker->Initialize();
-	TargetsOff();
-	manipulandumVisible = false;
+	// Load the most recently defined target positions.
 	LoadTargetPositions();
+  // Initialize the tracker hardware.
+	tracker->Initialize();
+  // Start with all the targets off.
+	TargetsOff();
+  // Initialize the cached state of the manipulandum.
+	manipulandumVisible = false;
 	
 }
 

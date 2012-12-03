@@ -331,22 +331,24 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 	}
 	
 	if ( !strcmp( token, "DEX_EVENT" ) ) {
+
 		char *event_message;
 		char datestr[256], timestr[256];
-		int items = sscanf( packet, "%s %8u %s %s", 
-			token, &updateCounter, datestr, timestr );
+		int items = sscanf( packet, "%s %8u %s %s", token, &updateCounter, datestr, timestr );
+
 		event_message = strchr( packet, '*' );
 		if ( !event_message ) event_message = "???";
 		
 		// Display the text of the event.
 		// Should log them to a file as well.
+
 		// Take only the first line of the error message.
-		for ( char *ptr = event_message; *ptr; ptr++ ) {
-			if ( *ptr == '\n' ) {
-				*ptr = 0;
-				break;
-			}
-		}
+//		for ( char *ptr = event_message; *ptr; ptr++ ) {
+//			if ( *ptr == '\n' ) {
+//				*ptr = 0;
+//				break;
+//			}
+//		}
 		// Add a time stamp and print it.
 		fprintf( stderr, "%s %s %s\n", datestr, timestr, event_message );
 		fflush( stderr );
@@ -384,6 +386,7 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 	if ( !strcmp( token, "DEX_RECORDING_START" ) ) {
 		nAcqFrames = 0;
 		sscanf( packet, "%s %d %d", token, &updateCounter, &frames );
+		fprintf( stderr, "Start receiving recording. %d %d\n", updateCounter, frames );
 	}
 	
 	if ( !strcmp( token, "DEX_RECORDING_END" ) ) {
@@ -392,6 +395,8 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 		else {
 			missed_frames = true;
 		}
+		fprintf( stderr, "End   receiving recording. %d %d %d Missed frames: %s\n", 
+			updateCounter, frames, nAcqFrames, (missed_frames ? "YES" : "NO" ) );
 		
 	}
 	
