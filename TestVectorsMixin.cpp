@@ -5,7 +5,7 @@
 #include <VectorsMixin.h>
 #include <math.h>
 
-double noise = 0.01;
+double noise = 0.0;
 
 Matrix3x3	m = {{1.0, 0.0, 0.0}, {0.0, 2.0, 0.0}, {0.0, 0.0, 3.0}};
 Vector3		v = {1.0, 1.0, 1.0};
@@ -13,10 +13,10 @@ Vector3		v = {1.0, 1.0, 1.0};
 Vector3		input[8] = 
 {
 	{1.0, 0.0, 0.0}, 
-	{1.0, 1.0, 0.0}, 
 	{0.0, 1.0, 0.0},  
-	{1.0, 0.0, 1.0}, 
 	{0.0, 0.0, 1.0}, 
+	{1.0, 1.0, 0.0}, 
+	{1.0, 0.0, 1.0}, 
 	{0.0, 1.0, 1.0}, 
 	{1.0, 1.0, 1.0},  
 	{0.0, 0.0, 0.0}
@@ -40,6 +40,9 @@ int main( int argc, char *argv[] ) {
 	Vector3		mv;
 	Matrix3x3  inv;
 	Matrix3x3  res;
+	Matrix3x3  ortho;
+	Matrix3x3  transpose;
+	Quaternion	q;
 
 	Vector3 check;
 	Vector3 delta;
@@ -48,18 +51,20 @@ int main( int argc, char *argv[] ) {
 
 	int i, j;
 
+	printf( "\n**********************************************************************\n\n" );
+	printf( "\nTest matrix multiplication.\n\n" );
 	// Multiply the vector by the matrix (row vectors -> right multiply!).
 	vm.MultiplyVector( mv, v, m );
 	printf( "v:   %s\nM:   %s\nM*v: %s\n", vm.vstr( v ), vm.mstr( m ), vm.vstr( mv ) );
 
 	// Test the matrix inversion. Here we test it on the simple diagonal matrix.
+	printf( "\nTest matrix inversion.\n\n" );
 	printf( "M:          %s\n", vm.mstr( m ) );
 	printf( "Det(M):     %f\n", vm.Determinant( m ) );
 	vm.InvertMatrix( inv, m );
 	printf( "Det(Minv):  %f\n",  vm.Determinant( inv ) );
 	printf( "Minv:       %s\n\n", vm.mstr( inv ) );
-
-
+ 		
 	// Create a set of random matrices.
 	// Invert each one and multiply them together.
 	// The result should be the identity matrix, with determinant = 1.
@@ -78,13 +83,61 @@ int main( int argc, char *argv[] ) {
 			vm.Determinant( m ), vm.Determinant( inv ), vm.Determinant( m ) * vm.Determinant( inv) );
 	}
 
+	printf( "\n**********************************************************************\n\n" );
+	printf( "Test othonormality.\n\n" );
+
+	// See if we can construct an orthonormal matrix from an arbitrary matrix.
+	vm.OrthonormalizeMatrix( ortho, m );
+	vm.TransposeMatrix( transpose, ortho );
+	vm.MultiplyMatrices( res, ortho, transpose );
+	printf( "M:          %s\n", vm.mstr( m ) );
+	printf( "Ortho:      %s\n", vm.mstr( ortho ) );
+	printf( "Transpose:  %s\n", vm.mstr( transpose ) );
+	printf( " O * T      %s\n\n", vm.mstr( res ) );
+ 
+	for ( i = 0; i < 3; i++ ) {
+		for ( j = 0; j < 3; j++ ) {
+			m[i][j] = random();
+		}
+	}
+
+			
+	vm.OrthonormalizeMatrix( ortho, m );
+	vm.TransposeMatrix( transpose, ortho );
+	vm.MultiplyMatrices( res, ortho, transpose );
+	printf( "M:          %s\n", vm.mstr( m ) );
+	printf( "Ortho:      %s\n", vm.mstr( ortho ) );
+	printf( "Transpose:  %s\n", vm.mstr( transpose ) );
+	printf( " O * T      %s\n", vm.mstr( res ) );
+
+	printf( "\n**********************************************************************\n\n" );
+	printf( "Test quaternion calculations.\n\n" );
+	Quaternion q1, q2;
+	double angle1 = 180.0 * random();
+	double angle2 = 180.0 * random();
+	// Compute a random rotation transformation.
+	Vector3	axis;
+	// Random axis;
+	for ( j = 0; j < 3; j++ ) axis[j] = random();
+	// Make it a unit vector.
+	vm.NormalizeVector( axis );
+	vm.SetQuaterniond( q1, angle1, axis );
+	vm.SetQuaterniond( q2, angle2, axis );
+	printf( "Axis %s\nAngle 1: %f  Angle 2: %f\nDifference: %f Angle Between: %f  Error: %f\n\n",
+		vm.vstr( axis ), angle1, angle2, 
+		fabs( angle1 - angle2 ), vm.ToDegrees( vm.AngleBetween( q1, q2 ) ),
+		fabs( angle1 - angle2 - vm.ToDegrees( vm.AngleBetween( q1, q2 ) ) )
+		);
+
+	printf( "\n**********************************************************************\n\n" );
+	printf( "Test orientation identification algorithm.\n\n" );
+
 	// Test the algorithm for finding the orientation of the manipulandum.
 	// Finding the orientation consists of finding the best-fit rotation matrix
 	//  that maps the model marker locations (input) to the measured marker locations (output).
 	// First we test the method for finding the best-fit transformation for the manipulandum at zero.
 
 	// Compute a random rotation transformation.
-	Vector3	axis;
 	// Random axis;
 	for ( j = 0; j < 3; j++ ) axis[j] = random();
 	// Make it a unit vector.
@@ -92,6 +145,17 @@ int main( int argc, char *argv[] ) {
 	// Random angle.
 	double angle = vm.pi * random();
 	vm.SetQuaterniond( rotation, angle, axis );
+	printf( "Angle: %f  Axis: %s  Quaternion: %s\n\n",
+		angle, vm.vstr( axis ), vm.qstr( rotation ) );
+
+	// Compute the equivalent rotation matrix directly by rotating the basis vectors.
+	for ( i = 0; i < 3; i++ ) vm.RotateVector( best[i], rotation, vm.identityMatrix[i] );
+	// Compute the quaternion from that matrix.
+	vm.MatrixToQuaternion( q, best );
+	printf( "Matrix from q: %s %f\n", vm.mstr( best ), vm.Determinant( best ) );
+	printf( "Original quaternion:    %s\n", vm.qstr( rotation ) );
+	printf( "Quaternion from matrix: %s\n", vm.qstr( q ) );
+	printf( "Angular difference:     %f\n\n", vm.ToDegrees( vm.AngleBetween( rotation, q )) );
 
 	// Transform the set of input vectors.
 	for ( i = 0; i < N; i++ ) {
@@ -101,7 +165,19 @@ int main( int argc, char *argv[] ) {
 	}
 	// Compute the best-fit transformation that maps input to output.
 	vm.BestFitTransformation( best, input, output, N );
+	vm.MatrixToQuaternion( q, best );
 	printf( "Best fit: %s %f\n", vm.mstr( best ), vm.Determinant( best ) );
+	printf( "Original quaternion: %s\n", vm.qstr( rotation ) );
+	printf( "Best-fit quaternion: %s\n", vm.qstr( q ) );
+	printf( "Anglular difference: %f\n\n", vm.ToDegrees( vm.AngleBetween( rotation, q ) ) );
+
+
+//	printf( "\nPress <RETURN> to continue ..." );
+//	getchar();
+//	exit( 0 );
+
+	///////////////////////////////////////////////////////////////////////
+	
 	for ( i = 0; i < N; i++ ) {
 		Vector3 check;
 		Vector3 delta;

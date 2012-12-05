@@ -19,7 +19,6 @@ const int VectorsMixin::M = 3;
 
 const double VectorsMixin::pi = 3.14159265358979;
 
-// These are constants that should probably be placed in the Vector3 class.
 const Vector3 VectorsMixin::zeroVector = {0.0, 0.0, 0.0};
 const Vector3 VectorsMixin::iVector = { 1.0, 0.0, 0.0 };
 const Vector3 VectorsMixin::jVector = { 0.0, 1.0, 0.0 };
@@ -30,40 +29,60 @@ const Quaternion VectorsMixin::nullQuaternion = {0.0, 0.0, 0.0, 1.0};
 const Matrix3x3 VectorsMixin::identityMatrix = {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
 const Matrix3x3 VectorsMixin::zeroMatrix =     {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
 
+double VectorsMixin::ToDegrees( double radians ) { return( radians * 180.0 / pi ); }
+double VectorsMixin::ToRadians( double degrees ) { return( degrees * pi / 180.0 ); }
+
+
 void VectorsMixin::CopyVector( Vector3 destination, const Vector3 source ){
 	destination[X] = source[X];
 	destination[Y] = source[Y];
 	destination[Z] = source[Z];
 }
+
 void VectorsMixin::CopyQuaternion( Quaternion destination, const Quaternion source ){
 	destination[X] = source[X];
 	destination[Y] = source[Y];
 	destination[Z] = source[Z];
 	destination[M] = source[M];
 }
+
 void VectorsMixin::AddVectors( Vector3 result, const Vector3 a, const Vector3 b ) {
 	result[X] = a[X] + b[X];
 	result[Y] = a[Y] + b[Y];
 	result[Z] = a[Z] + b[Z];
 }
+
 void VectorsMixin::SubtractVectors( Vector3 result, const Vector3 a, const Vector3 b ) {
 	result[X] = a[X] - b[X];
 	result[Y] = a[Y] - b[Y];
 	result[Z] = a[Z] - b[Z];
 }
+
 void VectorsMixin::ScaleVector( Vector3 result, const Vector3 a, const double scaling ) {
 	result[X] = (float) a[X] * scaling;
 	result[Y] = (float) a[Y] * scaling;
 	result[Z] = (float) a[Z] * scaling;
 }
-void VectorsMixin::MultiplyVector( Vector3 result, Vector3 v, const Matrix3x3 m ) {
-	// I represent vectors as row vectors so that a matrix is an array of rows.
-	// Therefore we normally do right multiplies.
-	for ( int i = 0; i < 3; i++ ) {
-		result[i] = 0.0;
-		for ( int j = 0; j < 3; j++ ) result[i] += v[j] * m[j][i];
-	}
+
+double VectorsMixin::VectorNorm( const Vector3 vector ) {
+	return( sqrt( vector[X] * vector[X] + vector[Y] * vector[Y] + vector[Z] * vector[Z] ) );
 }
+
+void VectorsMixin::NormalizeVector( Vector3 v ) {
+	// Normalize a vector in place.
+	ScaleVector( v, v, 1.0 / VectorNorm(v) );
+}
+
+double VectorsMixin::DotProduct( const Vector3 v1, const Vector3 v2 ) {
+	return( v1[X] * v2[X] + v1[Y] * v2[Y] + v1[Z] * v2[Z] );
+}
+
+void VectorsMixin::ComputeCrossProduct( Vector3 result, const Vector3 v1, const Vector3 v2 ) {
+	result[X] = v1[Y] * v2[Z] - v1[Z] * v2[Y];
+	result[Y] = v1[Z] * v2[X] - v1[X] * v2[Z];
+	result[Z] = v1[X] * v2[Y] - v1[Y] * v2[X];
+}
+
 void VectorsMixin::CopyMatrix( Matrix3x3 destination, const Matrix3x3 source ){
 	for ( int i = 0; i < 3; i++ ) {
 		for ( int j = 0; j < 3; j++ ) {
@@ -78,6 +97,15 @@ void VectorsMixin::CopyMatrix( double destination[3][3], const Matrix3x3 source 
 		}
 	}
 }
+
+void VectorsMixin::TransposeMatrix( Matrix3x3 destination, const Matrix3x3 source ){
+	for ( int i = 0; i < 3; i++ ) {
+		for ( int j = 0; j < 3; j++ ) {
+			destination[j][i] = source[i][j];
+		}
+	}
+}
+
 void VectorsMixin::ScaleMatrix( Matrix3x3 destination, const Matrix3x3 source, const double scaling ){
 	for ( int i = 0; i < 3; i++ ) {
 		for ( int j = 0; j < 3; j++ ) {
@@ -94,7 +122,33 @@ void VectorsMixin::MultiplyMatrices( Matrix3x3 result, const Matrix3x3 left, con
 	}
 }
 
-// Let left and right be matrices of 3-element row vectors.
+void VectorsMixin::OrthonormalizeMatrix( Matrix3x3 result, Matrix3x3 m ) {
+
+	// Make sure that a matrix is orthonormal.
+	// Unfortunately, this seems to make things worse, so I have to think some more.
+	CopyVector( result[X], m[X] );
+	ComputeCrossProduct( result[Z], m[X], m[Y] );
+	ComputeCrossProduct( result[Y], result[Z], m[X] );
+
+	NormalizeVector( result[X] );
+	NormalizeVector( result[Y] );
+	NormalizeVector( result[Z] );
+
+	// Cancel the above until I figure out what is wrong.
+//	CopyMatrix( result, m );
+
+}
+
+void VectorsMixin::MultiplyVector( Vector3 result, Vector3 v, const Matrix3x3 m ) {
+	// I represent vectors as row vectors so that a matrix is an array of rows.
+	// Therefore we normally do right multiplies.
+	for ( int i = 0; i < 3; i++ ) {
+		result[i] = 0.0;
+		for ( int j = 0; j < 3; j++ ) result[i] += v[j] * m[j][i];
+	}
+}
+
+// Let left and right be matrices of N 3-element row vectors.
 // Compute transpose(left) * right, which is necessarily a 3x3 matrix
 void VectorsMixin::CrossVectors( Matrix3x3 result, const Vector3 left[], const Vector3 right[], int rows ) {
 	// Use doubles to compute the sums, to guard againts underflow.
@@ -160,14 +214,17 @@ double VectorsMixin::InvertMatrix( Matrix3x3 result, const Matrix3x3 m ){
 
 }
 
+
 /*************************************************************************************************/
 
-double VectorsMixin::VectorNorm( const Vector3 vector ) {
-	return( sqrt( vector[X] * vector[X] + vector[Y] * vector[Y] + vector[Z] * vector[Z] ) );
+void VectorsMixin::NormalizeQuaternion( Quaternion q ) {
+	double norm = sqrt( q[M] * q[M] + q[X] * q[X] + q[Y] * q[Y] + q[Z] * q[Z] );
+	q[M] /= norm;
+	q[X] /= norm;
+	q[Y] /= norm;
+	q[Z] /= norm;
 }
-double VectorsMixin::DotProduct( const Vector3 v1, const Vector3 v2 ) {
-	return( v1[X] * v2[X] + v1[Y] * v2[Y] + v1[Z] * v2[Z] );
-}
+
 void VectorsMixin::MultiplyQuaternions( Quaternion result, const Quaternion q1, const Quaternion q2 ) {
 
 	result[M] = q1[M] * q2[M] - q1[X] * q2[X] - q1[Y] * q2[Y] - q1[Z] * q2[Z];
@@ -199,14 +256,33 @@ void VectorsMixin::RotateVector( Vector3 result, const Quaternion q, const Vecto
 
 void VectorsMixin::SetQuaternion( Quaternion result, double radians, const Vector3 axis ) {
 
-	// Make sure that the specified axis is a unit vector.
+	// Compute the quaternion, making sure that the specified axis is a unit vector.
 	result[M] = (float) cos( 0.5 * radians );
 	ScaleVector( result, axis, sin( 0.5 * radians ) / VectorNorm( axis ) );
-
-	Vector3 test;
-	RotateVector( test, result, iVector );
+	NormalizeQuaternion( result );
 
 }
+
+void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
+
+	Matrix3x3 ortho;
+	double t, r, s;
+
+	// Extract the orthonormal (rotation) part of the matrix.
+	OrthonormalizeMatrix( ortho, m );
+
+	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
+	r = sqrt( 1.0 + t );
+	s = 0.5 / r;
+
+	result[M] = 0.5 * r;
+	result[X] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
+	result[Y] = ( ortho[Z][X] - ortho[X][Z] ) * s;
+	result[Z] = ( ortho[X][Y] - ortho[Y][X] ) * s;
+	NormalizeQuaternion( result );
+
+}
+
 
 void VectorsMixin::SetQuaterniond( Quaternion result, double degrees, const Vector3 axis ) {
 	SetQuaternion( result, degrees * pi / 180.0, axis );
@@ -221,9 +297,7 @@ double VectorsMixin::AngleBetween( const Quaternion q1, const Quaternion q2 ) {
 	// Compute q1 q2*.
 	conjugate[M] = q2[M]; ScaleVector( conjugate, q2, -1.0 );
 	MultiplyQuaternions( interim, q1, conjugate );
-
-	// Amplitude of the rotation is the scalar part of the result.
-	angle = 2.0 * acos( interim[M] );
+	angle = 2.0 * atan2( VectorNorm( interim ), interim[M] );
 
 	return( angle );
 
