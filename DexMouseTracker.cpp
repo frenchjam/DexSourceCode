@@ -202,7 +202,7 @@ bool DexMouseTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit
 		frame.marker[mrk].visibility = iframe.marker[mrk].visibility;
 		if ( iframe.marker[mrk].visibility ) {
 			SubtractVectors( delta, iframe.marker[mrk].position, offset );
-			MultiplyVector( frame.marker[mrk].position, rotation, delta );
+			MultiplyVector( frame.marker[mrk].position, delta, rotation );
 		}
 	}
 
