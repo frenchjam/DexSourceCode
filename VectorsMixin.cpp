@@ -125,17 +125,18 @@ void VectorsMixin::MultiplyMatrices( Matrix3x3 result, const Matrix3x3 left, con
 void VectorsMixin::OrthonormalizeMatrix( Matrix3x3 result, Matrix3x3 m ) {
 
 	// Make sure that a matrix is orthonormal.
-	// Unfortunately, this seems to make things worse, so I have to think some more.
+	// Take the first direction vector as the X axis.
 	CopyVector( result[X], m[X] );
+	// The second vector is assumed to lie in the XY plane.
+	// Use it to compute the Z direction vector.
 	ComputeCrossProduct( result[Z], m[X], m[Y] );
+	// Now recompute the Y direction vector sure to be normal to X and Z.
 	ComputeCrossProduct( result[Y], result[Z], m[X] );
 
+	// All the direction vectors should be of unit length.
 	NormalizeVector( result[X] );
 	NormalizeVector( result[Y] );
 	NormalizeVector( result[Z] );
-
-	// Cancel the above until I figure out what is wrong.
-//	CopyMatrix( result, m );
 
 }
 
@@ -268,6 +269,9 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 	double t, r, s;
 
 	// Extract the orthonormal (rotation) part of the matrix.
+	// Using this method is perhaps not the best solution. 
+	// But the best solution requires computing eigenvalues and eigenvectors.
+	// So I think that using this method is OK.
 	OrthonormalizeMatrix( ortho, m );
 
 	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
@@ -335,6 +339,8 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 		return( false );
 	}
 
+	// If we have more than 3 markers, the system is over-constrained.
+	// We compute the rotation between model and actual that best fits the data.
 	if ( N > 3 ) {
 
 		// Compute the centroid of the input and output vectors;
@@ -353,11 +359,14 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 			SubtractVectors( actual_delta[i], actual[i], actual_centroid );
 		}
 
+		// Compute the best fit transformation between the two.
 		BestFitTransformation( best, model_delta, actual_delta, N );
-//		printf( "\nBest fit: %s %f\n", mstr( best ), Determinant( best ) );
 		MatrixToQuaternion( orientation, best );
 
 	}
+
+	// If we have only 3 markers, then the system is exactly constrained for 
+	// a rotation. We compute the matrix that maps model to actual.
 	else if ( N == 3 ) {
 
 		Vector3 temp;
@@ -393,6 +402,10 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 
 	}
 
+	// If we have 2 or fewer markers, then we cannot compute an orientation.
+	// But we need to have an orientation to correctly compute the position.
+	// If the caller has specified a default orientation, we use it, and
+	// then compute the position (displacement from zero) as for the other cases.
 	else {
 
 		CopyQuaternion( orientation, default_orientation );
@@ -402,14 +415,19 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 	if ( N == 8 ) {
 		i = i;
 	}
-	// Now compute the displacement.
+	// To compute the position (displacement) we first calculate the model 
+	// marker positions at the actual orientation, then we compute the 
+	// average difference between rotated model and actual to get the displacement.
 	CopyVector( position, zeroVector );
 	for ( i = 0; i < N; i++ ) {
 		Vector3 rotated_model;
 		Vector3 offset;
 
+		// Ideal position of the marker when rotated around zero.
 		RotateVector( rotated_model, orientation, model[i] );
+		// Difference between actual and rotated model.
 		SubtractVectors( offset, actual[i], rotated_model );
+		// Compute the sum on the way to computing the average.
 		AddVectors( position, position, offset );
 	}
 	ScaleVector( position, position, 1.0 / (double) N );
