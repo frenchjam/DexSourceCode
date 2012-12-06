@@ -259,7 +259,6 @@ void VectorsMixin::SetQuaternion( Quaternion result, double radians, const Vecto
 	// Compute the quaternion, making sure that the specified axis is a unit vector.
 	result[M] = (float) cos( 0.5 * radians );
 	ScaleVector( result, axis, sin( 0.5 * radians ) / VectorNorm( axis ) );
-	NormalizeQuaternion( result );
 
 }
 
@@ -279,7 +278,6 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 	result[X] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
 	result[Y] = ( ortho[Z][X] - ortho[X][Z] ) * s;
 	result[Z] = ( ortho[X][Y] - ortho[Y][X] ) * s;
-	NormalizeQuaternion( result );
 
 }
 
@@ -303,6 +301,124 @@ double VectorsMixin::AngleBetween( const Quaternion q1, const Quaternion q2 ) {
 
 }
 
+/***********************************************************************************/
+
+// Compute the position and orientation of a rigid body defined by 3D marker locations.
+// Takes as input the positions of the markers when the rigid body is at the zero
+// position and orientation, and a matching list of the current position of the markers.
+
+// We assume that the caller has created the list from visible marker data only.
+
+// Takes also an optional 'default' orientation that is used when only 1 or 2 markers
+// are provided, to compute the position.
+
+bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientation,
+										 Vector3 model[], Vector3 actual[], int N, Quaternion default_orientation ) {
+
+	Vector3		model_centroid, actual_centroid;
+	Vector3		model_delta[MAX_RIGID_BODY_MARKERS], actual_delta[MAX_RIGID_BODY_MARKERS];
+	Matrix3x3	model_local, actual_local;
+	Matrix3x3	best, exact;
+
+	int i;
+
+	if (N > MAX_RIGID_BODY_MARKERS) N = MAX_RIGID_BODY_MARKERS;
+
+	bool valid = false;
+
+	// Need at least 1 marker if a default orientation is given, and
+	// at least 3 markers if no default orientation is given.
+
+	if ( N < 3 && ! default_orientation ) {
+		position[X] = position[Y] = position[Z] = -999.999;
+		orientation[X] = orientation[Y] = orientation[Z] = orientation[M] = -999.999;
+		return( false );
+	}
+
+	if ( N > 3 ) {
+
+		// Compute the centroid of the input and output vectors;
+		CopyVector( model_centroid, zeroVector );
+		CopyVector( actual_centroid, zeroVector );
+		for ( i = 0; i < N; i++ ) {
+			AddVectors( model_centroid, model_centroid, model[i] );
+			AddVectors( actual_centroid, actual_centroid, actual[i] );
+		}
+		ScaleVector( model_centroid, model_centroid, 1.0 / (double) N );
+		ScaleVector( actual_centroid, actual_centroid, 1.0 / (double) N );
+
+		// Now compute the vector offset of each marker from the centroid.
+		for ( i = 0; i < N; i++ ) {
+			SubtractVectors( model_delta[i], model[i], model_centroid );
+			SubtractVectors( actual_delta[i], actual[i], actual_centroid );
+		}
+
+		BestFitTransformation( best, model_delta, actual_delta, N );
+//		printf( "\nBest fit: %s %f\n", mstr( best ), Determinant( best ) );
+		MatrixToQuaternion( orientation, best );
+
+	}
+	else if ( N == 3 ) {
+
+		Vector3 temp;
+		Matrix3x3 inverse;
+
+		// Use one relative vector to define the X axis.
+		SubtractVectors( model_local[X], model[1], model[0] );
+		NormalizeVector( model_local[X] );
+		// The second relative vector lies in the XY plane.
+		SubtractVectors( temp, model[2], model[0] );
+		// Use these two to compute the Z vector;
+		ComputeCrossProduct( model_local[Z], model_local[X], temp );
+		NormalizeVector( model_local[Z] );
+		// Now compute the Y vector.
+		ComputeCrossProduct( model_local[Y], model_local[Z], model_local[X] );
+		NormalizeVector( model_local[Y] );
+
+		// Use one relative vector to define the X axis.
+		SubtractVectors( actual_local[X], actual[1], actual[0] );
+		NormalizeVector( actual_local[X] );
+		// The second relative vector lies in the XY plane.
+		SubtractVectors( temp, actual[2], actual[0] );
+		// Use these two to compute the Z vector;
+		ComputeCrossProduct( actual_local[Z], actual_local[X], temp );
+		NormalizeVector( actual_local[Z] );
+		// Now compute the Y vector perpendicular to the XZ pair.
+		ComputeCrossProduct( actual_local[Y], actual_local[Z], actual_local[X] );
+		NormalizeVector( actual_local[Y] );
+
+		InvertMatrix( inverse, model_local );
+		MultiplyMatrices( exact, inverse, actual_local );
+		MatrixToQuaternion( orientation, exact );
+
+	}
+
+	else {
+
+		CopyQuaternion( orientation, default_orientation );
+
+	}
+
+	if ( N == 8 ) {
+		i = i;
+	}
+	// Now compute the displacement.
+	CopyVector( position, zeroVector );
+	for ( i = 0; i < N; i++ ) {
+		Vector3 rotated_model;
+		Vector3 offset;
+
+		RotateVector( rotated_model, orientation, model[i] );
+		SubtractVectors( offset, actual[i], rotated_model );
+		AddVectors( position, position, offset );
+	}
+	ScaleVector( position, position, 1.0 / (double) N );
+
+	return( true );
+
+}
+								
+										
 /***********************************************************************************/
 
 // These routines create ascii strings from vector and matrix objects.

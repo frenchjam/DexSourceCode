@@ -19,7 +19,7 @@ Vector3		input[8] =
 	{1.0, 0.0, 1.0}, 
 	{0.0, 1.0, 1.0}, 
 	{1.0, 1.0, 1.0},  
-	{0.0, 0.0, 0.0}
+	{2.0, 2.0, 2.0}
 };
 int N = 8;
 Quaternion rotation;
@@ -50,6 +50,10 @@ int main( int argc, char *argv[] ) {
 
 
 	int i, j;
+
+	vm.SetQuaternion( q, vm.pi / 6, vm.iVector );
+	vm.RotateVector( check, q, input[7] );
+
 
 	printf( "\n**********************************************************************\n\n" );
 	printf( "\nTest matrix multiplication.\n\n" );
@@ -207,23 +211,26 @@ int main( int argc, char *argv[] ) {
 	Vector3 input_centroid;
 	Vector3 output_centroid;
 	double count;
+	int n_sel;
 
 	for ( int combo = 0; combo < 256; combo++ ) {
 
 		// Select the visible output markers and the corresponding inputs.
 		count = 0.0;
+		n_sel = 0;
 		for ( i = 0; i < N; i++ ) {
 			if ( ( 0x01 << i ) & combo ) {
-				vm.CopyVector( selected_input[i], input[i] );
-				vm.CopyVector( selected_output[i], output[i] );
+				vm.CopyVector( selected_input[n_sel], input[n_sel] );
+				vm.CopyVector( selected_output[n_sel], output[n_sel] );
 				count++;
+				n_sel++;
 			}
 		}
 
 		// Compute the centroid of the input and output vectors;
 		vm.CopyVector( input_centroid, vm.zeroVector );
 		vm.CopyVector( output_centroid, vm.zeroVector );
-		for ( i = 0; i < count; i++ ) {
+		for ( i = 0; i < n_sel; i++ ) {
 			vm.AddVectors( input_centroid, input_centroid, selected_input[i] );
 			vm.AddVectors( output_centroid, output_centroid, selected_output[i] );
 		}
@@ -231,7 +238,7 @@ int main( int argc, char *argv[] ) {
 		vm.ScaleVector( output_centroid, output_centroid, 1.0 / count );
 
 		// Now compute the vector offset of each marker from the centroid.
-		for ( i = 0; i < count; i++ ) {
+		for ( i = 0; i < n_sel; i++ ) {
 			vm.SubtractVectors( delta_input[i], selected_input[i], input_centroid );
 			vm.SubtractVectors( delta_output[i], selected_output[i], output_centroid );
 		}
@@ -250,7 +257,7 @@ int main( int argc, char *argv[] ) {
 		// Now compute the displacement.
 		Vector3 average_displacement;
 		vm.CopyVector( average_displacement, vm.zeroVector );
-		for ( i = 0; i < count; i++ ) {
+		for ( i = 0; i < n_sel; i++ ) {
 			Vector3 rotated_input;
 			Vector3 delta;
 
@@ -261,7 +268,13 @@ int main( int argc, char *argv[] ) {
 		vm.ScaleVector( average_displacement, average_displacement, 1.0 / count );
 		vm.SubtractVectors( delta, displacement, average_displacement );
 
-		for ( i = 0; i < count; i++ ) {
+		vm.MatrixToQuaternion( q, best );
+//		printf( "\nBest fit: %s %f\n", vm.mstr( best ), vm.Determinant( best ) );
+//		printf( "Original quaternion: %s\n", vm.qstr( rotation ) );
+//		printf( "Best-fit quaternion: %s\n", vm.qstr( q ) );
+//		printf( "Anglular difference: %f\n", vm.ToDegrees( vm.AngleBetween( rotation, q ) ) );
+
+		for ( i = 0; i < n_sel; i++ ) {
 
 			vm.MultiplyVector( check, selected_input[i], best );
 			vm.AddVectors( check, check, average_displacement );
@@ -278,7 +291,51 @@ int main( int argc, char *argv[] ) {
 		printf( "%s %s %s %f\n", visibility, vm.vstr( displacement), vm.vstr( average_displacement ), vm.VectorNorm( delta ) );
 	}
 
-	printf( "\nPress <RETURN> to exit ..." );
+	/***********************************************************************************************/
+
+	//
+	// Repeat the above, using ComputeRigidBodyPose().
+	//
+
+	Vector3		estimated_displacement;
+	Quaternion	estimated_rotation;
+	bool		visible;
+
+	printf( "\nComputeRigidBodyPose():\n\n" );
+
+	// Try with all possible combinations of 8 markers.
+	for ( combo = 0; combo < 256; combo += 1 ) {
+
+		// Select the visible output markers and the corresponding inputs.
+		int n_markers = 0;
+		for ( i = 0; i < N; i++ ) {
+			if ( ( 0x01 << i ) & combo ) {
+				vm.CopyVector( selected_input[n_markers], input[n_markers] );
+				vm.CopyVector( selected_output[n_markers], output[n_markers] );
+				n_markers++;
+			}
+		}
+
+		// ComputeRigidBodyPose() does it all!
+		visible = vm.ComputeRigidBodyPose( estimated_displacement, estimated_rotation, selected_input, selected_output, n_markers, NULL );
+		
+		// Compute the residual error with the ideal values of position (displacement) and orientation (rotation).
+		vm.SubtractVectors( delta, estimated_displacement, displacement );
+		double displacement_residual = vm.VectorNorm( delta );
+		double rotation_residual = vm.ToDegrees( vm.AngleBetween( rotation, estimated_rotation ) );
+
+
+		// Construct a visibility string.
+		char visibility[16] = "--------";
+		for ( i = 7, j = 0; i >= 0; i--, j++ ) {
+			if ( (0x01 << j) & combo ) visibility[i] = 'O';
+		}
+		printf( "%s %s %s %s %f %f\n", 
+			visibility, vm.vstr( displacement), vm.vstr( estimated_displacement ), 
+			( visible ? "YES" : "NO " ), displacement_residual, rotation_residual );
+	}
+
+	printf( "\nPress <RETURN> to continue ..." );
 	fflush( stdout );
 	getchar();
 

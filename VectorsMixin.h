@@ -14,6 +14,11 @@ typedef float Vector3[3];
 typedef float Quaternion[4];
 typedef float Matrix3x3[3][3];
 
+// I am also putting here support for calculations on 3D rigid bodies.
+// It should probably be a separate class, but I will deal with that later.
+
+#define MAX_RIGID_BODY_MARKERS	256
+
 class VectorsMixin {
 
 protected:	
@@ -73,6 +78,10 @@ public:
 
 	void RotateVector( Vector3 result, const Quaternion q, const Vector3 v );
 	void MatrixToQuaternion( Quaternion result, Matrix3x3 m );
+
+	bool ComputeRigidBodyPose( Vector3 position, Quaternion orientation,
+								Vector3 model[], Vector3 actual[], 
+								int N, Quaternion default_orientation );
 
 	char *vstr( const Vector3 v );
 	char *qstr( const Quaternion q );
