@@ -11,19 +11,13 @@
 #ifndef DexApparatusH
 #define DexApparatusH
 
-#include <OpenGLObjects.h>
-#include <OpenGLUseful.h>
-#include <OpenGLColors.h>
+#include <VectorsMixin.h>
 
-
-#include "Dexterous.h"
-#include "DexMonitor.h"
-#include "DexTargets.h"
-#include "DexSounds.h"
-#include "DexTracker.h"
-
-#include "VectorsMixin.h" 
-
+#include <DexTimers.h>
+#include <DexTargets.h>
+#include <DexSounds.h>
+#include <DexTracker.h>
+#include <DexMonitorServer.h>
 
 /********************************************************************************/
 
@@ -66,9 +60,9 @@ class DexApparatus : public VectorsMixin {
 
 		// To be more efficient, we cache the real-time position 
 		// and orientation of the manipulandum.
-		bool	manipulandumVisible;
-		float	manipulandumPosition[3];
-		float	manipulandumOrientation[4];
+		bool		manipulandumVisible;
+		Vector3		manipulandumPosition;
+		Quaternion	manipulandumOrientation;
 
 		// After an acquisition, the full data set is retrieved from
 		// the tracker and analog system and stored here.

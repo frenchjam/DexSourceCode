@@ -8,8 +8,7 @@
  * Interface to the DEX hardware.
  */
 
-#ifndef DexterousH
-#define DexterousH
+#pragma once
 
 #include "DexUDPServices.h"
 
@@ -116,6 +115,12 @@ typedef enum { DEX_GENERIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS
 
 /********************************************************************************/
 
+// One might ask why I don't use the VectorsMixin module and use the types
+// Vector3 and Quaternion. There is an incompatibilty between the 3dMatrix library
+// used for graphical objects and the new VectorsMixin module. I use arrays of floats
+// here so that Dexterous.h can be inserted into either system.
+
+
 typedef struct {
 
 	float	position[3];
@@ -167,6 +172,3 @@ typedef struct {
 
 #define CODA_MANIPULANDUM_MARKER 0
 #define CODA_FRAME_MARKER 5
-
-
-#endif

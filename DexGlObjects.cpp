@@ -17,7 +17,6 @@
 
 #include <useful.h>
 #include <3dMatrix.h>
-#include <Trackers.h>
 
 #include <OpenGLWindows.h>
 #include <OpenGLObjects.h>

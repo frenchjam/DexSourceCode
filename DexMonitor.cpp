@@ -30,8 +30,6 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 
-#include "OglDisplayInterface.h"
-
 
 #include "OpenGLUseful.h"
 #include "OpenGLColors.h"
@@ -43,8 +41,15 @@
 #include "AfdObjects.h"
 #include "CodaObjects.h"
 #include "DexGlObjects.h"
-#include "DexMonitor.h"
 #include "Dexterous.h"
+
+#include <OglDisplayInterface.h>
+#include <Views.h>
+#include <Layouts.h>
+
+
+#include "DexMonitor.h"
+#include "DexMonitorServer.h"
 
 #include "DexUDPServices.h"
 

@@ -17,6 +17,7 @@
 #include <codasys.h>
 #include <CodaUtilities.h>
 
+#include <VectorsMixin.h>
 #include "DexTracker.h"
 
 /***************************************************************************/

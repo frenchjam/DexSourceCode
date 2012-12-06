@@ -14,6 +14,7 @@
 #include <OpenGLObjects.h>
 #include <OpenGLUseful.h>
 #include <OpenGLColors.h>
+#include <OpenGLViewpoints.h>
 
 #include "Dexterous.h"
 

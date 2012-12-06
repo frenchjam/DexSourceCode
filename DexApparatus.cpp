@@ -18,29 +18,16 @@
 
 #include <useful.h>
 #include <screen.h>
+#include <VectorsMixin.h>
+
+
 #include <DexTimers.h>
-
-#include <CodaUtilities.h>
-
-#include <gl/gl.h>
-#include <gl/glu.h>
-
-#include "OglDisplayInterface.h"
-
-#include "OpenGLUseful.h"
-#include "OpenGLColors.h"
-#include "OpenGLWindows.h"
-#include "OpenGLObjects.h"
-#include "OpenGLViewpoints.h"
-#include "OpenGLTextures.h"
-
-#include "AfdObjects.h"
-#include "CodaObjects.h"
-#include "DexGlObjects.h"
-#include "DexMonitor.h"
-#include "DexApparatus.h"
-#include "DexTargets.h"
+#include "DexMonitorServer.h"
 #include "Dexterous.h"
+#include "DexTargets.h"
+#include "DexTracker.h"
+#include "DexSounds.h"
+#include "DexApparatus.h"
 
 /***************************************************************************/
 

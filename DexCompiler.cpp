@@ -1,6 +1,6 @@
 /*********************************************************************************/
 /*                                                                               */
-/*                                   DexApparatus.cpp                            */
+/*                                   DexCompiler.cpp                             */
 /*                                                                               */
 /*********************************************************************************/
 
@@ -16,31 +16,16 @@
 #include <memory.h>
 #include <process.h>
 
-#include <useful.h>
-#include <screen.h>
-#include <DexTimers.h>
+#include <OpenGLViewpoints.h>
 
-#include <CodaUtilities.h>
+#include <VectorsMixin.h> 
 
-#include <gl/gl.h>
-#include <gl/glu.h>
-
-#include "OglDisplayInterface.h"
-
-#include "OpenGLUseful.h"
-#include "OpenGLColors.h"
-#include "OpenGLWindows.h"
-#include "OpenGLObjects.h"
-#include "OpenGLViewpoints.h"
-#include "OpenGLTextures.h"
-
-#include "AfdObjects.h"
-#include "CodaObjects.h"
-#include "DexGlObjects.h"
-#include "DexMonitor.h"
-#include "DexApparatus.h"
-#include "DexTargets.h"
 #include "Dexterous.h"
+#include "DexMonitorServer.h"
+#include "DexSounds.h"
+#include "DexTargets.h"
+#include "DexTracker.h"
+#include "DexApparatus.h"
 
 /***************************************************************************/
 /*                                                                         */

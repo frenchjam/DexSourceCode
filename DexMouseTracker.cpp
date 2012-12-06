@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <VectorsMixin.h>
 #include "DexTracker.h"
 #include "..\DexSimulatorApp\resource.h"
 

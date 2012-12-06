@@ -30,8 +30,14 @@
 #include "AfdObjects.h"
 #include "CodaObjects.h"
 #include "DexGlObjects.h"
-#include "DexApparatus.h"
+#include <VectorsMixin.h>
+
 #include "Dexterous.h"
+#include "DexMonitorServer.h"
+#include "DexTargets.h"
+#include "DexTracker.h"
+#include "DexSounds.h"
+#include "DexApparatus.h"
 
 // Parameters used when waiting for the hand to be at a target.
 float defaultPositionTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
@@ -53,6 +59,24 @@ const float uprightNullOrientation[4] = { 0.0, 0.0, 0.0, 1.0 };
 // Null orientation of the manipulandum when in the supine position.
 // TO DO: This is wrong. Need to compute the required quaternion.
 const float supineNullOrientation[4] = { ROOT2, 0.0, 0.0, ROOT2 }; 
+
+#define MANIPULANDUM_MARKERS 8
+Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] = 
+{
+	{1.0, 0.0, 0.0}, 
+	{0.0, 1.0, 0.0},  
+	{0.0, 0.0, 1.0}, 
+	{1.0, 1.0, 0.0}, 
+	{1.0, 0.0, 1.0}, 
+	{0.0, 1.0, 1.0}, 
+	{1.0, 1.0, 1.0},  
+	{2.0, 2.0, 2.0}
+};
+int nManipulandumMarkers = MANIPULANDUM_MARKERS;
+int ManipulandumMarkerID[MANIPULANDUM_MARKERS] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+
+
 
 /***************************************************************************/
 

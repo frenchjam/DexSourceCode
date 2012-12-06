@@ -22,35 +22,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <time.h> 
-#include <memory.h>
-#include <process.h>
 
-#include <useful.h>
-#include <screen.h>
-#include <DexTimers.h>
-#include "ConfigParser.h" 
-
-#include <gl/gl.h>
-#include <gl/glu.h>
-
-#include "OpenGLUseful.h"
-#include "OpenGLColors.h"
-#include "OpenGLWindows.h"
-#include "OpenGLObjects.h"
-#include "OpenGLViewpoints.h"
-#include "OpenGLTextures.h"
-
-#include "VectorsMixin.h"
-#include "AfdObjects.h"
-#include "CodaObjects.h"
-#include "DexGlObjects.h"
 #include "DexApparatus.h"
 #include "Dexterous.h"
-
-#include <Views.h>
-#include <Layouts.h>
 
 /*********************************************************************************/
 
