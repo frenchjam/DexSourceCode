@@ -197,12 +197,13 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	// Make the movement a little bit in X as well so that we test the routines in 3D.
 	float x = 60.0 + 5 * sin( y / 80.0);
 
-	// We will make the manipulandum rotate as a function of the distance from 0.
+	// We will make the manipulandum rotate in a strange way as a function of the distance from 0.
+	// This is just so that we can test the routines that compute the manipulandum position and orientation.
 	double theta = y * 90.0 / 240.0;
 	double gamma = z * 60.0 / 240.0;
 
-	SetQuaternion( Ry, theta, iVector );
-	SetQuaternion( Rz, gamma, jVector );
+	SetQuaterniond( Ry, theta, iVector );
+	SetQuaterniond( Rz, gamma, jVector );
 	MultiplyQuaternions( Q, Ry, Rz );
 
 	position[X] = x;
