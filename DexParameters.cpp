@@ -49,9 +49,9 @@ float waitBlinkPeriod = 0.2;						// LED blink rate when out of zone.
 float waitHoldPeriod = 1.0;						// Required hold time in zone.
 float waitTimeLimit = 10.0;						// Signal time out if we wait this long.
 
-char *TargetBarString[] = { "Left", "Right" };
-char *PostureString[] = { "Seated", "Supine" };
-char *TappingSurfaceString[] = { "Extended", "Folded" };
+char *TargetBarString[] = { "Indifferent", "Left", "Right", "Unknown" };
+char *PostureString[] = { "Indifferent", "Seated", "Supine", "Unknown" };
+char *TappingSurfaceString[] = { "Indifferent", "Extended", "Folded", "Unknown" };
 
 // Null orientation of the manipulandum when in the upright (seated) posture.
 // Orientations are expressed as quaternions.

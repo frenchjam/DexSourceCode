@@ -55,24 +55,27 @@
  *  to the side of the box where the target array will be.
  */
 
-#define DONT_CARE	-1
+#define DONT_CARE	0
 
 typedef enum { 
-	TargetBarLeft = 0, 
+	PostureIndifferent = 0,
+	PostureSeated,
+	PostureSupine,
+	PostureUnknown
+} DexSubjectPosture;
+extern	char *PostureString[];
+
+typedef enum { 
+	TargetBarIndifferent = 0, 
+	TargetBarLeft, 
 	TargetBarRight, 
 	TargetBarUnknown,
 	MAX_TARGET_CONFIGURATIONS  
 } DexTargetBarConfiguration;
 extern char *TargetBarString[];
 
-typedef enum { 
-	PostureSeated, 
-	PostureSupine,
-	PostureUnknown
-} DexSubjectPosture;
-extern	char *PostureString[];
-
 typedef enum {
+	TappingIndifferent = 0, 
 	TappingExtended, 
 	TappingFolded,
 	TappingUnknown

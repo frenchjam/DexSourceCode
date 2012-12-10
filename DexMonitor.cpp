@@ -611,7 +611,9 @@ int DexMonitorServer::SendConfiguration( int nCodas, int nTargets,
 	
 	// Send a packet with the current state of the apparatus.
 	
-	sprintf( packet, "DEX_CONFIGURATION %8u %1d %2d [%d %d %d]", messageCounter, nCodas, nTargets, subjectPosture, targetBarConfig, tappingSurfaceConfig );
+	sprintf( packet, "DEX_CONFIGURATION %8u %1d %2d [%d %d %d]", 
+		messageCounter, nCodas, nTargets, 
+		subjectPosture, targetBarConfig, tappingSurfaceConfig );
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
 	
