@@ -38,10 +38,14 @@ class DexApparatus : public VectorsMixin {
 
 	public:
 
-		static const int	leftReferenceMarker;
-		static const int	rightReferenceMarker;
-		static const int	bottomReferenceMarker;
-		static const int	topReferenceMarker;
+		// Identify the 4 reference markers.
+		// I am going to avoid the terms 'left', 'right', 'top' and 'bottom'
+		//  because this leads to confusion between the subject left and right
+		//  or left and right from the viewpoint of the CODAs.
+		static const int	negativeBoxMarker;
+		static const int	positiveBoxMarker;
+		static const int	negativeBarMarker;
+		static const int	positiveBarMarker;
 
 		// Keep track of what type we are.
 		DexApparatusType  type;
@@ -197,13 +201,16 @@ class DexApparatus : public VectorsMixin {
 
 		// Measure the position and orientation of the manipulandum 
 		// based on a frame of Coda marker data.
-		virtual bool ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame );
-		virtual bool ComputeTargetFramePosition( float *pos, float *ori, CodaFrame &marker_frame );
+		virtual bool ComputeManipulandumPosition( float *pos, float *ori, 
+													CodaFrame &marker_frame, 
+													Quaternion default_orientation = NULL );
+		virtual bool ComputeTargetFramePosition( float *pos, float *ori, 
+													CodaFrame &marker_frame );
 
 		// Get the latest marker data and compute from it the manipulandum position and orientation.
-		virtual bool GetManipulandumPosition( Vector3 pos, Quaternion ori );
+		virtual bool GetManipulandumPosition( Vector3 pos, Quaternion ori, Quaternion default_orientation = NULL );
 		// Knowing where the target frame is positioned might also be important.
-//		virtual bool GetFramePosition( Vector3 pos, Quaternion ori );
+		virtual bool GetTargetFramePosition( Vector3 pos, Quaternion ori );
 		
 		// Communicate to the subject that an error has occured and see what he wants to do.
 		virtual int SignalError( unsigned int mb_type, const char *message = "Error." );

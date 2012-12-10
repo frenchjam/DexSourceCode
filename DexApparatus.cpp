@@ -33,10 +33,10 @@
 
 /***************************************************************************/
 
-const int DexApparatus::leftReferenceMarker = 16;
-const int DexApparatus::rightReferenceMarker = 17;
-const int DexApparatus::bottomReferenceMarker = 18;
-const int DexApparatus::topReferenceMarker = 19;
+const int DexApparatus::negativeBoxMarker = 16;
+const int DexApparatus::positiveBoxMarker = 17;
+const int DexApparatus::negativeBarMarker = 18;
+const int DexApparatus::positiveBarMarker = 19;
 
 DexApparatus::DexApparatus( int n_vertical_targets, 
 							int n_horizontal_targets,
@@ -79,16 +79,59 @@ DexApparatus::Quit( void ) {
 // Need to know where each target LED is to implement WaitAtTarget().
 // This routine should be called at the beginning of each trial,
 // perhaps as part of CheckTrackerAlignment();
+
 void DexApparatus::SetTargetPositions( void ) {
-	// Default is to read the stored locations back from disk.
+
+	int trg;
+
+	// Read the stored locations back from disk. 
+	// We assume that they were measured when the target frame was at the origin in 
+	// the upright position, i.e. just after an alignment.
+	
 	LoadTargetPositions();
+
+	// Get the current position and orientation of the target frame.
+	// The target positions will be updated to correspond to the
+	//  positions of the targets in this configuration.
+
+	Vector3		offset;
+	Quaternion	rotation;
+
+	GetTargetFramePosition( offset, rotation );
+	for ( trg = 0; trg < nTargets; trg++ ) {
+		Vector3	hold;
+		RotateVector( hold, rotation, targetPosition[trg] );
+		AddVectors( targetPosition[trg], hold, offset );
+	}
+
+	// The vertical bar might be in either position (left or right).
+	// That's OK for the calculation of the orientation,
+	// but now we need to make sure that the targets on the vertical 
+	// are where the vertical bar is.
+
+	CodaFrame	frame;
+	Vector3	bar_position;
+	Vector3 target_position;
+
+	// Get the current marker positions.
+	tracker->GetCurrentMarkerFrame( frame );
+
+	// Compute the midpoint between the two reference markers on the bar.
+	AddVectors( bar_position, frame.marker[negativeBarMarker].position, frame.marker[positiveBarMarker].position );
+	ScaleVector( bar_position, bar_position, 0.5 );
+	// Compute the midpoint between the top and bottom target, in the new reference frame.
+	AddVectors( target_position, targetPosition[0], targetPosition[nVerticalTargets - 1] );
+	ScaleVector( target_position, target_position, 0.5 );
+	// Compute the offset that will bring the two midpoints together.
+	SubtractVectors( offset, bar_position, target_position );
+
+	for ( trg = 0; trg < nVerticalTargets; trg++ ) {
+		AddVectors( targetPosition[trg], targetPosition[trg], offset );
+	}
 }
 
-// I implemented this pair of routines to allow me to calibrate my simulator.
-// It is unlikely that the real system will need them. It's just a way to find out
-// and store the position of each target using the manipulandum to point to each one.
-// In the real system, it should be possible to compute the position of each target
-// from the Coda markers on the target frame.
+// Load the target positions that were acquired by CalibrateTargets().
+
 void DexApparatus::LoadTargetPositions( char *filename ) {
 
 	FILE *fp;
@@ -107,6 +150,9 @@ void DexApparatus::LoadTargetPositions( char *filename ) {
 		fclose( fp );
 	}
 }
+
+// Find the position of each target by having an operator place the maniplulandum
+// next to each one.
 
 int DexApparatus::CalibrateTargets( void ) {
 
@@ -288,38 +334,62 @@ int DexApparatus::PerformTrackerAlignment( const char *msg ) {
 // Compute the 3D position vector and 4D orientation quaternion of the manipulandum.
 // Takes as input a pointer to a buffer full of one slice of marker data (marker_frame);
 // Fills in the position vector pos and the orientation quaternion ori.
-bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame ) {
+bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame, Quaternion default_orientation ) {
 
-	// Take a singe marker as the position of the manipulandum and set the orientation to zero. 
-	// TO DO: This will be replaced by an algorithm to compute the position and orientation
-	//  of the manipulandum based on 8 markers (or those that are visible).
-	CopyVector( pos, marker_frame.marker[CODA_MANIPULANDUM_MARKER].position );
+	Vector3		selected_model[DEX_MAX_MARKERS];
+	Vector3		selected_actual[DEX_MAX_MARKERS];
 
-	// A single marker cannot define an orientation. Here we simulate rotations of the
-	// manipulandum by computing an angle based on the distance from the origin and
-	//  rotating around Z proportional to that distance.
-	// TO DO: Compute the maniplulandum orientation from  the marker data.
-	float distance = sqrt( pos[X] * pos[X] + pos[Y] * pos[Y] + pos[Z] * pos[Z] );
-	float angle = distance / 1000.0 * PI;
-	ori[X] = 0.0;
-	ori[Y] = 0.0;
-	ori[Z] = sin( 0.5 * angle );
-	ori[M] = cos( 0.5 * angle );
+	bool		visible;
 
-	// If the manipulandum is not visible (at least 3 markers), return false.
-	return( marker_frame.marker[CODA_MANIPULANDUM_MARKER].visibility );
+	// Select the visible output markers and the corresponding inputs.
+	int n_markers = 0;
+	for ( int i = 0; i < nManipulandumMarkers; i++ ) {
+		int mrk = ManipulandumMarkerID[i];
+		if ( marker_frame.marker[mrk].visibility ) {
+			CopyVector( selected_model[n_markers], ManipulandumBody[i] );
+			CopyVector( selected_actual[n_markers], marker_frame.marker[mrk].position );
+			n_markers++;
+		}
+	}
+
+	// ComputeRigidBodyPose() does it all!
+	visible = ComputeRigidBodyPose( pos, ori, 
+									selected_model, selected_actual, n_markers, 
+									default_orientation );
+	return( visible );
+
 }
 
 // Compute the 3D position of the target frame.
-bool DexApparatus::ComputeTargetFramePosition( Vector3 pos, Quaternion ori, CodaFrame &marker_frame  ) {
-	pos[X] = pos[Y] = pos[Z] = 0.0;
-	ori[X] = ori[Y] = ori[Z] = 0.0; ori[M] = 1;
+bool DexApparatus::ComputeTargetFramePosition( Vector3 pos, Quaternion ori, CodaFrame &frame  ) {
+
+	Matrix3x3	box_and_bar;
+	Matrix3x3	ortho;
+
+	// All reference markers have to be visible to compute the position and orientation of the frame.
+	if ( !frame.marker[negativeBoxMarker].visibility ||
+		 !frame.marker[positiveBoxMarker].visibility ||
+		 !frame.marker[negativeBarMarker].visibility ||
+		 !frame.marker[positiveBarMarker].visibility ) 
+	{
+		return( false );
+	}
+	
+	// Position of the frame is just the position of the origin marker on the box.
+	CopyVector( pos, frame.marker[negativeBoxMarker].position );
+
+	// Now compute the orientation of the box/bar combination.
+	SubtractVectors( box_and_bar[0], frame.marker[positiveBoxMarker].position, frame.marker[negativeBoxMarker].position );
+	SubtractVectors( box_and_bar[0], frame.marker[positiveBarMarker].position, frame.marker[negativeBarMarker].position );
+	OrthonormalizeMatrix( ortho, box_and_bar );
+	MatrixToQuaternion( ori, ortho );
+
 	return( true );
 }
 
 
 // Get the current position and orientation of the manipulandum.
-bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori ) {
+bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori, Quaternion default_orientation ) {
 
 	CodaFrame marker_frame;
 	bool visible;
@@ -334,12 +404,27 @@ bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori ) {
 	tracker->GetCurrentMarkerFrame( marker_frame );
 
 	// Compute the position vector and orientation quaternion from the markers.
-	visible = ComputeManipulandumPosition( pos, ori, marker_frame );
+	visible = ComputeManipulandumPosition( pos, ori, marker_frame, default_orientation );
 
 	// For testing purposes, output the computed position and orientation.
 	fprintf( fp, "%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
 		marker_frame.time, visible, pos[X], pos[Y], pos[Z],
 		ori[X], ori[Y], ori[Z], ori[M] );
+
+	return( visible );
+}
+
+// Get the current position and orientation of the target frame.
+bool DexApparatus::GetTargetFramePosition( Vector3 pos, Quaternion ori ) {
+
+	CodaFrame marker_frame;
+	bool visible;
+
+	// Here we ask for the current position of the markers from the tracker.
+	tracker->GetCurrentMarkerFrame( marker_frame );
+
+	// Compute the position vector and orientation quaternion from the markers.
+	visible = ComputeTargetFramePosition( pos, ori, marker_frame );
 
 	return( visible );
 }
@@ -619,18 +704,24 @@ DexTargetBarConfiguration DexApparatus::BarPosition( void ) {
 	double  box_width, projection;
 
 	// ALL reference markers must be visible. 
-	if ( !frame.marker[leftReferenceMarker].visibility ||
-		 !frame.marker[rightReferenceMarker].visibility ||
-		 !frame.marker[bottomReferenceMarker].visibility ||
-		 !frame.marker[topReferenceMarker].visibility ) 
+	// It would probably be OK if we only had 1 bar marker,
+	// but we are going to want to see all 4 for other reasons.
+	if ( !frame.marker[negativeBoxMarker].visibility ||
+		 !frame.marker[positiveBoxMarker].visibility ||
+		 !frame.marker[negativeBarMarker].visibility ||
+		 !frame.marker[positiveBarMarker].visibility ) 
 	{
 		return( TargetBarUnknown );
 	}
 
-	SubtractVectors( box, frame.marker[leftReferenceMarker].position, frame.marker[rightReferenceMarker].position );
+	SubtractVectors( box, 
+					frame.marker[positiveBoxMarker].position, 
+					frame.marker[negativeBoxMarker].position );
 	box_width = VectorNorm( box );
 	NormalizeVector( box );
-	SubtractVectors( bar, frame.marker[topReferenceMarker].position, frame.marker[rightReferenceMarker].position );
+	SubtractVectors( bar, 
+					frame.marker[positiveBarMarker].position, 
+					frame.marker[negativeBoxMarker].position );
 	projection = DotProduct( bar, box );
 	if ( projection > box_width / 2.0 ) return( TargetBarLeft );
 	else return( TargetBarRight );
@@ -645,13 +736,13 @@ DexSubjectPosture DexApparatus::Posture( void ) {
 	tracker->GetCurrentMarkerFrame( frame );
 
 	// Box reference markers must be visible. 
-	if ( !frame.marker[leftReferenceMarker].visibility ||
-		 !frame.marker[rightReferenceMarker].visibility  ) 
+	if ( !frame.marker[negativeBoxMarker].visibility ||
+		 !frame.marker[positiveBoxMarker].visibility  ) 
 	{
 		return( PostureUnknown );
 	}
 
-	if ( frame.marker[leftReferenceMarker].position[X] > frame.marker[rightReferenceMarker].position[X] ) return( PostureSupine );
+	if ( frame.marker[negativeBoxMarker].position[X] > frame.marker[positiveBoxMarker].position[X] ) return( PostureSupine );
 	else return( PostureSeated );
 }
 
