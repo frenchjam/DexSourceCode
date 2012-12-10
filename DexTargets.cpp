@@ -58,7 +58,7 @@ void DexTargets::SetTargetState( unsigned long bit_pattern ) {
 	unsigned long bit;
 	int i;
 	targetState = bit_pattern;
-	for ( i = 0, bit = 0x01; i < nTargets; i++, bit << 1 ) {
+	for ( i = 0, bit = 0x01; i < nTargets; i++, bit = bit << 1 ) {
 		if ( bit & bit_pattern ) {
 			lastTargetOn = i;
 			break;
