@@ -43,7 +43,7 @@ extern "C" {
 // Each packet can contain a 256 byte header plus a limited number of data points.
 #define DEX_UDP_PACKET_SIZE			(DEX_UDP_HEADER_SIZE + DEX_FLOATS_PER_SAMPLE * sizeof( float ) * DEX_SAMPLES_PER_PACKET)
 
-// If I send out UDP packets to soon, one after the other, they get missed.
+// If I send out UDP packets too quickly, one after the other, they get missed.
 // I don't know if one gets overwritten by the next on the send side (i.e. the send doesn't block)
 //  of if it is that on the receive side it can't keep up.
 // After each UDP packet sent I sleep this many milliseconds to work around this problem.

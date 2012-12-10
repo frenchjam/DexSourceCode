@@ -18,7 +18,7 @@ private:
 	// 2D Graphics
 	Display display; 
 	Layout  layout;
-	View		view, xy_view;
+	View	view, xz_view;
 
 	// OpenGL objects representing the CODA bars and target frame.	
 	OpenGLWindow				*window;

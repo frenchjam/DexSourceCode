@@ -53,6 +53,11 @@
 
 #include "DexUDPServices.h"
 
+// #define AUTOSCALE
+
+float plot_min = -200.0;
+float plot_max =  800.0;
+
 /*********************************************************************************/
 
 // This implements the graphical monitoring of the data that is sent from DEX.
@@ -150,10 +155,10 @@ DexMonitor::DexMonitor( int screen_left, int screen_top, int n_vertical_targets,
 	DisplayInit( display );
 	Erase( display );
 	
-	xy_view = CreateView( display );
-	ViewSetDisplayEdgesRelative( xy_view, 0.01, 0.01, 0.30, 0.99 );
-	ViewSetEdges( xy_view, -100.0, -100.0, 300.0, 300.0 );
-	ViewMakeSquare(xy_view);
+	xz_view = CreateView( display );
+	ViewSetDisplayEdgesRelative( xz_view, 0.01, 0.01, 0.30, 0.99 );
+	ViewSetEdges( xz_view, plot_min, plot_min, plot_max, plot_max );
+	ViewMakeSquare(xz_view);
 	
 	layout = CreateLayout( display, 3, 1 );
 	LayoutSetDisplayEdgesRelative( layout, 0.31, 0.01, 0.99, 0.99 );
@@ -220,15 +225,15 @@ void DexMonitor::PlotAcquisition( float *position, float *orientation,
 	Erase( display );
 	
 	
-	if ( missed_frames ) ViewColor( xy_view, RED );
-	else ViewColor( xy_view, GREY4 );
+	if ( missed_frames ) ViewColor( xz_view, RED );
+	else ViewColor( xz_view, GREY4 );
 	
-	ViewBox( xy_view );
+	ViewBox( xz_view );
 	
 	if ( frames > 0 ) {
-		ViewColor( xy_view, RED );
-		ViewPenSize( xy_view, 5 );
-		ViewXYPlotAvailableFloats( xy_view,
+		ViewColor( xz_view, RED );
+		ViewPenSize( xz_view, 5 );
+		ViewXYPlotAvailableFloats( xz_view,
 			&position[Z], 
 			&position[Y], 
 			0, frames - 1, 
@@ -243,6 +248,8 @@ void DexMonitor::PlotAcquisition( float *position, float *orientation,
 		ViewBox( view );
 		
 		if ( frames > 0 ) {
+
+#ifdef AUTOSCALE
 			ViewSetXLimits( view, 0.0, frames );
 			ViewAutoScaleInit( view );
 			ViewAutoScaleAvailableFloats( view,
@@ -251,6 +258,11 @@ void DexMonitor::PlotAcquisition( float *position, float *orientation,
 				sizeof( *position ) * 3, 
 				availability_code );
 			ViewAutoScaleExpand( view, 0.05 );
+#else
+			ViewSetXLimits( view, 0.0, frames );
+			ViewSetYLimits( view, plot_min, plot_max );
+#endif
+			
 			
 			ViewColor( view, BLUE );
 			ViewPlotAvailableFloats( view,
@@ -313,8 +325,8 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 	float x, y, z;
 	float pos[3], ori[4];
 	
-	int   frames, sample, skip;
-	int   i, j, k;
+	int   frames, sample;
+	int   i, j;
 	char  token[256];
 	
 	sscanf( packet, "%s", token );
@@ -376,7 +388,7 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 		if ( acquisition_state ) StartAcquisition();
 		else StopAcquisition();
 		
-		targets->SetTargetState( target_state & 0x0000FFFF ) ;
+		targets->SetTargetState( target_state ) ;
 
 		if ( visibility ) SetManipulandumPosition( pos );
 		
@@ -397,9 +409,7 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 	if ( !strcmp( token, "DEX_RECORDING_END" ) ) {
 		sscanf( packet, "%s %d %d", token, &updateCounter, &frames );
 		if ( frames == nAcqFrames ) missed_frames = false;
-		else {
-			missed_frames = true;
-		}
+		else missed_frames = true;
 		fprintf( stderr, "End   receiving recording. %d %d %d Missed frames: %s\n", 
 			updateCounter, frames, nAcqFrames, (missed_frames ? "YES" : "NO" ) );
 		
@@ -416,16 +426,19 @@ void DexMonitor::ParseInputPacket( char *packet ) {
 	
 	if ( !strcmp( token, "DEX_RECORDING_RECORD" ) ) {
 		
-		sscanf( packet, "%s %d %d", token, &frames, &skip );
+		int frames_in_packet;
+		sscanf( packet, "%s %d", token, &frames_in_packet );
+		fprintf( stderr, "%s %d %d\n", token, frames_in_packet, nAcqFrames );
 		
 		float *ptr = (float *) (packet + DEX_UDP_HEADER_SIZE);
-		for ( i = 0, j = 0, k = 0; i < frames; i += skip, j += DEX_FLOATS_PER_SAMPLE, k++ ) {
-			recordedTime[k] = ptr[j];
-			recordedPosition[k * 3 + X] = ptr[j+1];
-			recordedPosition[k * 3 + Y] = ptr[j+2];
-			recordedPosition[k * 3 + Z] = ptr[j+3];
-		}
-		nAcqFrames = k;
+		j = 0;
+		for ( i = 0, j = 0; i < frames_in_packet; i++, j += DEX_FLOATS_PER_SAMPLE ) {
+			recordedTime[nAcqFrames] = ptr[j];
+			recordedPosition[nAcqFrames * 3 + X] = ptr[j+1];
+			recordedPosition[nAcqFrames * 3 + Y] = ptr[j+2];
+			recordedPosition[nAcqFrames * 3 + Z] = ptr[j+3];
+			nAcqFrames ++;
+		}	
 	}
 }
 
@@ -530,10 +543,13 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 	
 	char packet[DEX_UDP_PACKET_SIZE];
 	float *ptr;
-	int i, j;
-	
+	int i;
+
+	int skip = samples / DEX_SAMPLES_PER_PACKET + 1;
+	int samples_to_send = samples / skip + 1;
+
 	// Send out on a data stream. Could be stdout or a pipe to another process.
-	sprintf( packet, "DEX_RECORDING_START %8u %d", messageCounter, samples );
+	sprintf( packet, "DEX_RECORDING_START %8u %d", messageCounter, samples_to_send );
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
 
@@ -554,20 +570,25 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 	}
 	
 	// Send out a subset of samples to the UDP broadcast.
-	int skip = samples / DEX_SAMPLES_PER_PACKET + 1;
-	ptr = (float *) (packet + DEX_UDP_HEADER_SIZE);
-	sprintf( packet, "DEX_RECORDING_RECORD %8d %d", samples, skip );
-	for ( i = 0, j = 0; i < samples; i += skip, j += DEX_FLOATS_PER_SAMPLE ) {
-		ptr[j] = state[i].time;
-		ptr[j+1] = state[i].position[X];
-		ptr[j+2] = state[i].position[Y];
-		ptr[j+3] = state[i].position[Z];
+	int sample = 0;
+	while ( sample < samples ) {
+		ptr = (float *) (packet + DEX_UDP_HEADER_SIZE);
+		int samples_in_packet = 0;
+		while ( sample < samples && ptr < (float *) ( packet + sizeof( packet ) ) ) {
+			*ptr++ = state[sample].time;
+			*ptr++ = state[sample].position[X];
+			*ptr++ = state[sample].position[Y];
+			*ptr++ = state[sample].position[Z];
+			sample += skip;
+			samples_in_packet++;
+		}
+		sprintf( packet, "DEX_RECORDING_RECORD %8d", samples_in_packet );
+		DexUDPSendPacket( &udp_parameters, packet );
+		Sleep( DEX_UDP_WAIT );
 	}
-	DexUDPSendPacket( &udp_parameters, packet );
-	Sleep( DEX_UDP_WAIT );
 
 	// Signal that we are done on both streams.
-	sprintf( packet, "DEX_RECORDING_END %8u %d", messageCounter, samples );
+	sprintf( packet, "DEX_RECORDING_END %8u %d", messageCounter, samples_to_send );
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
 	DexUDPSendPacket( &udp_parameters, packet );
