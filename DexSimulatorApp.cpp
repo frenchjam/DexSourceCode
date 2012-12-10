@@ -164,9 +164,11 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 
 	// Verify that it is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, TappingFolded );
+	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
+	apparatus->SetTargetPositions();
 	
 	// Send information about the actual configuration to the ground.
 	// This is redundant, because the SelectAndCheckConfiguration() command will do this as well.
@@ -430,7 +432,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case DEX_MOUSE_APPARATUS:
 		apparatus = new DexMouseApparatus( hInstance );
-		MessageBox( NULL, "Set desired startup state.", "DexSimulatorApp", MB_OK );
+//		MessageBox( NULL, "Set desired startup state.", "DexSimulatorApp", MB_OK );
 		break;
 		
 	case DEX_CODA_APPARATUS:
