@@ -249,6 +249,10 @@ public:
 	int		RetrieveMarkerFrames( CodaFrame frames[], int max_frames );
 	bool	GetCurrentMarkerFrame( CodaFrame &frame );
 
+	// Need to add the following.
+	// void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
+	// int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
+
 };
 
 /********************************************************************************/
