@@ -5,6 +5,8 @@
 /***************************************************************************/
 
 // This is a simulated tracker that allows us to work without a CODA.
+// It captures movements of the mouse and converts them into 
+//  simulated movements of a set of CODA markers.
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -13,9 +15,12 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <fMessageBox.h>
+
 #include <VectorsMixin.h>
 #include "DexTracker.h"
 #include "..\DexSimulatorApp\resource.h"
+
 
 /*********************************************************************************/
 
@@ -24,13 +29,30 @@ void DexMouseTracker::Initialize( void ) {
 	overrun = false;
 	nAcqFrames = 0;
 	nPolled = 0;
+
+	char *filename = "DexMouseTrackerDebug.mrk";
+
+	// Open a file to store the positions and orientations that were used by 
+	// GetCurrentMarkerFrame() to simulate the marker positions. This allows us
+	// to compare with the position and orientation computed by DexApparatus
+	// for testing purposes.
+
+	fp = fopen( filename, "w" );
+	if ( !fp ) {
+		fMessageBox( MB_OK, "DexMouseTracker", "Error openning file for write:\n %s", filename );
+		exit( -1 );
+	}
+	fprintf( fp, "Time\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
+
+}
+
+void DexMouseTracker::Quit( void ) {
+	fclose( fp );
 }
 
 /*********************************************************************************/
 
-void DexMouseTracker::GetUnitPlacement( int unit, Vector3 &pos, Quaternion &ori ) {
-
-	Quaternion q1, q2;
+void DexMouseTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation ) {
 
 	// Simulate a placement error by swapping the units;
 	if ( !IsDlgButtonChecked( dlg, IDC_CODA_POSITIONED ) ) {
@@ -39,27 +61,24 @@ void DexMouseTracker::GetUnitPlacement( int unit, Vector3 &pos, Quaternion &ori 
 
 	// Return constant values for the Coda unit placement.
 	// The real tracker will compute these from the Coda transformations.
-	if ( unit == 0 ) {
-		pos[X] = -1000.0;
-		pos[Y] = 0.0;
-		pos[Z] = 2500.0;
-		SetQuaterniond( q1, 90.0, kVector );
-		SetQuaterniond( q2, 30.0, jVector );
-		MultiplyQuaternions( ori, q2, q1 );
-	}
-	else {
-		pos[X] = 0.0;
-		pos[Y] = 900.0;
-		pos[Z] = 2500.0;
-		SetQuaterniond( ori, 45.0, iVector );
-	}
+	CopyVector( offset, SimulatedCodaOffset[unit] );
+	CopyMatrix( rotation, SimulatedCodaRotation[unit] );
 
 }
 
 /*********************************************************************************/
 
-void DexMouseTracker::DoAlignment( const char *msg ) {
+int DexMouseTracker::PerformAlignment ( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive ) {
+
+	// Normally one would fill a record with the marker assignments
+	// for the CODA marker alignment procedure, then execute it.
+	// It should return any errors reported by the CODA.
+
+	// Unchecking the box shows that we did the alignment.
 	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+	// For now I just assume that it will be successful.
+	return( NORMAL_EXIT );
+
 }
 
 /*********************************************************************************/
@@ -84,6 +103,8 @@ bool DexMouseTracker::GetAcquisitionState( void ) {
 bool DexMouseTracker::CheckOverrun( void ) {
 	return( overrun );
 }
+
+/*********************************************************************************/
 
 int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) {
 
@@ -159,16 +180,81 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 
 bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 
-	frame.time = currentMarkerFrame.time;
-	for ( int j = 0; j < nMarkers; j++ ) {
-		frame.marker[j].visibility = true;
-		for ( int k = 0; k < 3; k++ ) {
-			frame.marker[j].position[k] = currentMarkerFrame.marker[j].position[k];
-		}
+
+	POINT mouse_position;
+	GetCursorPos( &mouse_position );
+	RECT rect;
+	GetWindowRect( GetDesktopWindow(), &rect );
+
+	Vector3		position, rotated;
+	Quaternion	Ry, Rz, Q;
+
+	int mrk, id;
+
+	// Map mouse coordinates to world coordinates. This factors used here are empirical.
+	float y =  (double)  mouse_position.y / (double) ( rect.bottom - rect.top ) * 240.0;
+	float z =  (double) -100 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 240.0;
+	// Make the movement a little bit in X as well so that we test the routines in 3D.
+	float x = 60.0 + 5 * sin( y / 80.0);
+
+	// We will make the manipulandum rotate as a function of the distance from 0.
+	double theta = y * 90.0 / 240.0;
+	double gamma = z * 60.0 / 240.0;
+
+	SetQuaternion( Ry, theta, iVector );
+	SetQuaternion( Rz, gamma, jVector );
+	MultiplyQuaternions( Q, Ry, Rz );
+
+	position[X] = x;
+	position[Y] = y;
+	position[Z] = z;
+
+	frame.time = DexTimerElapsedTime( acquisitionTimer );
+
+	// Displace the manipulandum with the mouse and make it rotate.
+	for ( mrk = 0; mrk < nManipulandumMarkers; mrk++ ) {
+		id = ManipulandumMarkerID[mrk];
+		RotateVector( rotated, Q, ManipulandumBody[mrk] );
+		AddVectors( frame.marker[id].position, position, rotated );
+		frame.marker[id].visibility = true;
 	}
+
+	// Displace the wrist with the mouse, but don't rotate it.
+	for ( mrk = 0; mrk < nWristMarkers; mrk++ ) {
+		id = WristMarkerID[mrk];
+		AddVectors( frame.marker[id].position, position, WristBody[mrk] );
+		frame.marker[id].visibility = true;
+	}
+
+	// Just set the target frame markers at their nominal fixed positions.
+	for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
+		id = FrameMarkerID[mrk];
+		CopyVector( frame.marker[id].position, TargetFrameBody[mrk] );
+	}
+
+	// Shift the vertical bar markers to simulate being in the left position.
+	if ( IsDlgButtonChecked( dlg, IDC_LEFT ) ) {
+		frame.marker[FrameMarkerID[2]].position[X] += 300.0;
+		frame.marker[FrameMarkerID[3]].position[X] += 300.0;
+	}
+
+	// TO DO: Transform all the marker positions if the dialog box
+	// says that the apparatus is in the supine position.
+	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) {
+	}
+
+	// Output the position and orientation used to compute the simulated
+	// marker positions. This is for testing only.
+	fprintf( fp, "%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
+		frame.time, position[X], position[Y], position[Z],
+		Q[X], Q[Y], Q[Z], Q[M] );
+
 	return( true );
+
 }
 
+// Get the latest frame of marker data from the specified unit.
+// Marker positions are expressed in the aligned reference frame.
 bool DexMouseTracker::GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit ) {
 
 	GetCurrentMarkerFrame( frame );
@@ -185,25 +271,36 @@ bool DexMouseTracker::GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit ) {
 	return( true );
 }
 
-bool DexMouseTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit ) {
+// Get the latest frame of marker data from the specified unit.
+// Marker positions are expressed in the intrinsic reference frame of the unit.
+// This can probably moved into the base DexTracker class because it is 
+// fairly generic.
 
-	CodaFrame	iframe;
-	int status;
+bool DexMouseTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &iframe, int unit ) {
+
+	CodaFrame	frame;
+	int			status;
+
+	Vector3		offset;
+	Matrix3x3	rotation;
+	Matrix3x3	inverse;
+	Vector3		delta;
 
 	// Retrieve the offset and rotation matrix from the Coda for this unit.
-	// Here I am setting a null transformation.
-	Vector3 offset = { 0.0, 0.0, 0.0 }, delta;
-	// Will need to take the inverse (transpose?) of the rotation matrix.
-	Matrix3x3 rotation = {{1.0, 0.0, 0.0},{0.0, 1.0, 0.0},{0.0, 0.0, 1.0}};
+	GetUnitTransform( unit, offset, rotation );
+	// Inverse of a rotation matrix is just its transpose.
+	TransposeMatrix( inverse, rotation );
 
+	// Get the current frame in aligned coordinates.
 	status = GetCurrentMarkerFrameUnit( frame, unit );
+	// I'm not sure what could go wrong, but signal if it does.
 	if ( !status ) return( false );
-
+	// Compute the position of each maker in intrinsic coordinates.
 	for ( int mrk = 0; mrk < nMarkers; mrk++ ) {
-		frame.marker[mrk].visibility = iframe.marker[mrk].visibility;
-		if ( iframe.marker[mrk].visibility ) {
-			SubtractVectors( delta, iframe.marker[mrk].position, offset );
-			MultiplyVector( frame.marker[mrk].position, delta, rotation );
+		iframe.marker[mrk].visibility = frame.marker[mrk].visibility;
+		if ( frame.marker[mrk].visibility ) {
+			SubtractVectors( delta, frame.marker[mrk].position, offset );
+			MultiplyVector( iframe.marker[mrk].position, delta, inverse );
 		}
 	}
 
@@ -214,39 +311,20 @@ bool DexMouseTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit
 
 int DexMouseTracker::Update( void ) {
 
-	POINT mouse_position;
-	GetCursorPos( &mouse_position );
-	RECT rect;
-	GetWindowRect( GetDesktopWindow(), &rect );
-
-	float z =  (double) -100 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 240.0;
-	float y =  (double)  mouse_position.y / (double) ( rect.bottom - rect.top ) * 240.0;
-
-	// Marker 0 follows the mouse.
-	currentMarkerFrame.marker[0].position[Z] = z;
-	currentMarkerFrame.marker[0].position[Y] = y;
-	currentMarkerFrame.marker[0].position[X] = 60.0;
-	currentMarkerFrame.marker[0].visibility = true;
-
-	// Other markers follow a sinusoid.
-	for ( int j = 1; j < nMarkers; j++ ) {
-		currentMarkerFrame.marker[j].visibility = true;
-		for ( int k = 0; k < 3; k++ ) {
-			currentMarkerFrame.marker[j].position[k] = (float) cos( DexTimerElapsedTime( acquisitionTimer ) );
-		}
-	}
-
 	// Store the time series of data.
 	if ( DexTimerTimeout( acquisitionTimer ) ) {
 		acquisitionOn = false;
 		overrun =true;
 	}
 	if ( acquisitionOn && nPolled < DEX_MAX_MARKER_FRAMES ) {
+
+		CodaFrame	frame;
+		GetCurrentMarkerFrame( frame );
 		recordedMarkerFrames[ nPolled ].time = (float) DexTimerElapsedTime( acquisitionTimer );
 		for ( int j = 0; j < nMarkers; j++ ) {
-			recordedMarkerFrames[nPolled].marker[j].visibility = currentMarkerFrame.marker[j].visibility;
+			recordedMarkerFrames[nPolled].marker[j].visibility = frame.marker[j].visibility;
 			for ( int k = 0; k < 3; k++ ) {
-				recordedMarkerFrames[nPolled].marker[j].position[k] = currentMarkerFrame.marker[j].position[k]; 
+				recordedMarkerFrames[nPolled].marker[j].position[k] = frame.marker[j].position[k]; 
 			}
 		}
 		if ( nPolled < DEX_MAX_MARKER_FRAMES ) nPolled++;

@@ -60,14 +60,14 @@ class DexTracker : public VectorsMixin {
 		virtual bool	GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit );
 		virtual bool	GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit );
 
-		CodaFrame		currentMarkerFrame;
 		CodaFrame		recordedMarkerFrames[DEX_MAX_MARKER_FRAMES];
 
 		virtual double	GetSamplePeriod( void );
 		virtual int		GetNumberOfCodas( void );
 		virtual bool	GetAcquisitionState( void );
 		virtual void	GetUnitPlacement( int unit, Vector3 &pos, Quaternion &ori ) ;
-		virtual bool	PerformAlignment( void ) ;
+		virtual void	GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation ) ;
+		virtual int		PerformAlignment(  int origin, int x_negative, int x_positive, int xy_negative, int xy_positive ) ;
 
 		void			CopyMarkerFrame( CodaFrame &destination, CodaFrame &source );
 
@@ -264,6 +264,8 @@ private:
 	int			nPolled;
 
 	HWND		dlg;
+
+	FILE		*fp;
 	
 protected:
 
@@ -274,6 +276,7 @@ public:
 	}
 
 	void Initialize( void );
+	void Quit( void );
 
 	int  Update( void );
 	void StartAcquisition( float max_duration );
@@ -286,8 +289,8 @@ public:
 	bool GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit );
 	bool GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit );
 
-	void GetUnitPlacement( int unit, Vector3 &pos, Quaternion &ori );
-	void DexMouseTracker::DoAlignment( const char *msg );
+	void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
+	int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
 
 };
 
