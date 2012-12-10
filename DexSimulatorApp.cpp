@@ -71,8 +71,10 @@ int collisionInitialTarget = 6;
 int collisionUpTarget = 11;
 int collisionDownTarget = 1;
 
+#define UP		0
+#define DOWN	1
 int collisionSequenceN = 10;
-int collisionSequence[] = { 0, 1, 1, 0, 0, 0, 1, 0, 1, 1 };
+int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, DOWN, UP, DOWN, UP, UP };
 double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
@@ -81,6 +83,7 @@ int exit_status = NORMAL_EXIT;
 
 Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
 Quaternion expected_orientation[2];
+unsigned int RefMarkerMask = 0x000f0000;
 
 float flashTime = 0.3;
 
@@ -88,32 +91,41 @@ float flashTime = 0.3;
 
 int RunInstall( DexApparatus *apparatus ) {
 
+	int status;
+
+	// Express the expected orientation of each fo the CODA units as a quaternion.
 	apparatus->SetQuaterniond( expected_orientation[0], 90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( expected_orientation[1], 45.0, apparatus->iVector );
+	apparatus->SetQuaterniond( expected_orientation[1],  0.0, apparatus->iVector );
 
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
-	apparatus->CheckTrackerFieldOfView( 0, 0x000f0000, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
-	apparatus->CheckTrackerFieldOfView( 1, 0x000f0000, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
+	status = apparatus->CheckTrackerFieldOfView( 0, RefMarkerMask, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	status = apparatus->CheckTrackerFieldOfView( 1, RefMarkerMask, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform the alignment based on those markers.
-	apparatus->PerformTrackerAlignment();
+	status = apparatus->PerformTrackerAlignment();
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
-	apparatus->CheckTrackerPlacement( 0, 
+	status = apparatus->CheckTrackerPlacement( 0, 
 										expected_position[0], 45.0, 
 										expected_orientation[0], 45.0, 
 										"Placement error - Coda Unit 0." );
-	apparatus->CheckTrackerPlacement( 1, 
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	status = apparatus->CheckTrackerPlacement( 1, 
 										expected_position[1], 10.0, 
 										expected_orientation[1], 10.0, 
 										"Placement error - Coda Unit 1." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the tracker is still aligned.
-	int status = apparatus->CheckTrackerAlignment( 0x000f0000, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) exit( status );
+	status = apparatus->CheckTrackerAlignment( RefMarkerMask, 5.0, 2, "Coda misaligned!" );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum on the chair.
-	apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
+	status = apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform a short acquisition to measure where the manipulandum is.
 	apparatus->StartAcquisition( 5.0 );
@@ -141,8 +153,8 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 #ifndef SKIP_PREP
 
 	// Check that the tracker is still aligned.
-	status = apparatus->CheckTrackerAlignment( 0x00000f0000, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) exit( status );
+	status = apparatus->CheckTrackerAlignment( RefMarkerMask, 5.0, 2, "Coda misaligned!" );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Tell the subject which configuration should be used.
 	status = apparatus->fWaitSubjectReady( 
@@ -340,11 +352,11 @@ int RunCollisions( DexApparatus *apparatus ) {
 		apparatus->TargetsOff();
 		if ( collisionSequence[target] ) {
 			apparatus->VerticalTargetOn( collisionUpTarget );
-			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
+			apparatus->MarkEvent( TRIGGER_MOVE_UP);
 		}
 		else {
 			apparatus->VerticalTargetOn( collisionDownTarget );
-			apparatus->MarkEvent( TRIGGER_MOVE_UP );
+			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
 		}
 
 		// Allow a fixed time to reach the target before we start blinking.
