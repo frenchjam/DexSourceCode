@@ -16,6 +16,8 @@
 #include <memory.h>
 #include <process.h>
 
+#include <fMessageBox.h>
+
 #include <useful.h>
 #include <screen.h>
 #include <VectorsMixin.h>
@@ -31,6 +33,11 @@
 
 /***************************************************************************/
 
+const int DexApparatus::leftReferenceMarker = 16;
+const int DexApparatus::rightReferenceMarker = 17;
+const int DexApparatus::bottomReferenceMarker = 18;
+const int DexApparatus::topReferenceMarker = 19;
+
 DexApparatus::DexApparatus( int n_vertical_targets, 
 							int n_horizontal_targets,
 							int n_tones, int n_markers ) {
@@ -41,10 +48,26 @@ DexApparatus::DexApparatus( int n_vertical_targets,
 	nHorizontalTargets = n_horizontal_targets;
 	nTones = n_tones;
 	nMarkers = n_markers;
-	
+
+	// Open a file to store the positions and orientations that were computed from
+	// the individual marker positions. This allows us
+	// to compare with the position and orientation used by DexMouseTracker
+	// to compute the marker positions. 
+	char *filename = "DexApparatusDebug.mrk";
+
+	fp = fopen( filename, "w" );
+	if ( !fp ) {
+		fMessageBox( MB_OK, "DexApparatus", "Error openning file for write:\n %s", filename );
+		exit( -1 );
+	}
+	fprintf( fp, "Time\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
+
 }
 
 DexApparatus::Quit( void ) {
+
+	fclose( fp );
+
 	tracker->Quit();
 	monitor->Quit();
 	targets->Quit();
@@ -119,7 +142,7 @@ int DexApparatus::CalibrateTargets( void ) {
 
 /***************************************************************************/
 
-bool DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
+int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 										   float min_x, float max_x,
 										   float min_y, float max_y,
 										   float min_z, float max_z, const char *msg ) {
@@ -128,25 +151,49 @@ bool DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 	int mrk;
 	unsigned long bit;
 
+	char info[10240] = "", marker_status[64];
+
 	while ( 1) {
 
-		bool out_of_view = false;
+		bool out = false;
 		tracker->GetCurrentMarkerFrameIntrinsic( frame, unit );
+		sprintf( info, "\n\nUnit: %d\n", unit );
 		for ( mrk = 0, bit = 0x01; mrk < nMarkers; mrk++, bit = bit << 1 ) {
 			if ( marker_mask & bit ) {
-				if ( !frame.marker[mrk].visibility ) out_of_view = true;
-				if ( frame.marker[mrk].position[X] < min_x ) out_of_view = true;
-				if ( frame.marker[mrk].position[X] > max_x ) out_of_view = true;
-				if ( frame.marker[mrk].position[Y] < min_y ) out_of_view = true;
-				if ( frame.marker[mrk].position[Y] < max_y ) out_of_view = true;
-				if ( frame.marker[mrk].position[Z] < min_z ) out_of_view = true;
-				if ( frame.marker[mrk].position[Z] < max_z ) out_of_view = true;
+				sprintf( marker_status, "\n  Marker %d: ", mrk );
+				if ( !frame.marker[mrk].visibility ) {
+					out = true;
+					strcat( marker_status, "Out of View\n" );
+				}
+				else if ( frame.marker[mrk].position[X] < min_x || 
+						  frame.marker[mrk].position[X] > max_x ||
+						  frame.marker[mrk].position[Y] < min_y ||
+						  frame.marker[mrk].position[Y] > max_y ||
+						  frame.marker[mrk].position[Z] < min_z ||
+						  frame.marker[mrk].position[Z] > max_z )  {
+					out = true;
+					strcat( marker_status, "Out of Range in " );
+
+					if ( frame.marker[mrk].position[X] < min_x || 
+						 frame.marker[mrk].position[X] > max_x ) strcat( marker_status, "X" );
+					if ( frame.marker[mrk].position[Y] < min_y || 
+						 frame.marker[mrk].position[Y] > max_y ) strcat( marker_status, "Y" );
+					if ( frame.marker[mrk].position[Z] < min_z || 
+						 frame.marker[mrk].position[Z] > max_z ) strcat( marker_status, "Z" );
+				}
+				else strcat( marker_status, "OK!" );
+				strcat( info, marker_status );
+
 			}
 		}
-		if ( !out_of_view ) return( NORMAL_EXIT );
-		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Coda Unit: %d", msg, unit );
+		if ( !out ) return( NORMAL_EXIT );
+
+		strcat( info, "\n\nNOTE: XYZ refers to intrinsic CODA bar axes." );
+		// Report the error to the user.
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s%s", msg, info );
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
 
 	}
 }
@@ -205,14 +252,17 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 											const char *msg ) {
 	Vector3 pos;
 	Quaternion ori;
-	tracker->GetUnitPlacement( unit, pos, ori );
 
 	Vector3 delta_pos;
 	double distance, angle;
 
+	// Get the placement of the CODA unit, expressed as a position vector and a rotation quaternion.
+	tracker->GetUnitPlacement( unit, pos, ori );
+
+	// Compare with the expected values.
 	SubtractVectors( delta_pos, pos, expected_pos );
 	distance = VectorNorm( delta_pos );
-	angle = 180.0 * AngleBetween( ori, expected_ori ) / pi;
+	angle = ToDegrees( AngleBetween( ori, expected_ori ) );
 	if ( distance > p_tolerance || abs( angle ) > o_tolerance ) {
 		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle ) );
 	}
@@ -222,7 +272,12 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 /***************************************************************************/
 
 int DexApparatus::PerformTrackerAlignment( const char *msg ) {
-	if ( tracker->PerformAlignment() ) {
+	int error_code;
+	// Ask the tracker to perform the alignment.
+	if ( error_code = tracker->PerformAlignment( 1, 2, 3, 4, 5) ) {
+		// If there is an error, report it to the user.
+		// We may need to add information to the message, depending
+		// on what the error was.
 		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, msg ) );
 	}
 	else return( NORMAL_EXIT );
@@ -265,14 +320,28 @@ bool DexApparatus::ComputeTargetFramePosition( Vector3 pos, Quaternion ori, Coda
 
 // Get the current position and orientation of the manipulandum.
 bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori ) {
+
 	CodaFrame marker_frame;
+	bool visible;
+
 	// Make sure that the tracker has had a chance to update before doing so.
 	// This is probably only an issue for the simulated trackers.
+	// Actually, this is probably no longer an issue, since I stopped 
+	// storing the state of the markers in the tracker.
 	if ( int exit_status = tracker->Update() ) exit( exit_status );
+
 	// Here we ask for the current position of the markers from the tracker.
 	tracker->GetCurrentMarkerFrame( marker_frame );
+
 	// Compute the position vector and orientation quaternion from the markers.
-	return( ComputeManipulandumPosition( pos, ori, marker_frame ) );
+	visible = ComputeManipulandumPosition( pos, ori, marker_frame );
+
+	// For testing purposes, output the computed position and orientation.
+	fprintf( fp, "%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
+		marker_frame.time, visible, pos[X], pos[Y], pos[Z],
+		ori[X], ori[Y], ori[Z], ori[M] );
+
+	return( visible );
 }
 
 
@@ -281,14 +350,14 @@ bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori ) {
 // 
 // This method gets called periodically during wait cycles.
 // It calls the update methods for each of the subsystems.
-// It updates the stored state of the manipulandum.
 //
 
 void DexApparatus::Update( void ) {
 	
-	float pos[3], ori[4];
-	bool	acquisition_state;
-	unsigned long target_state;
+	bool			manipulandum_visible;
+	float			pos[3], ori[4];
+	bool			acquisition_state;
+	unsigned long	target_state;
 	
 	int exit_status;
 	
@@ -297,34 +366,16 @@ void DexApparatus::Update( void ) {
 	if ( exit_status = tracker->Update() ) exit( exit_status );
 	if ( exit_status = sounds->Update() ) exit( exit_status );
 	
-	// Here we ask for the current position of the markers from the tracker.
-	tracker->GetCurrentMarkerFrame( currentMarkerFrame );
-
-	// Update the current state of the manipulandum;
-	if ( ComputeManipulandumPosition( pos, ori, currentMarkerFrame ) ) {
-		
-		CopyVector( manipulandumPosition, pos );
-		CopyQuaternion( manipulandumOrientation, ori );
-		manipulandumVisible = true;
-		
-	}
-	else {
-		
-		manipulandumPosition[X] = INVISIBLE;
-		manipulandumPosition[Y] = INVISIBLE;
-		manipulandumPosition[Z] = INVISIBLE;
-		manipulandumOrientation[X] = INVISIBLE;
-		manipulandumOrientation[Y] = INVISIBLE;
-		manipulandumOrientation[Z] = INVISIBLE;
-		manipulandumOrientation[M] = INVISIBLE;
-		manipulandumVisible = false;
-		
-	}
-	
+	// Compute the current state of the manipulandum;
+	// Note that I no longer cache these information.
+	// It is more efficient for the other routines to call them as
+	// necessary.
+	manipulandum_visible = GetManipulandumPosition( pos, ori );
+			
 	// Send state information to the ground.
 	acquisition_state = tracker->GetAcquisitionState();
 	target_state = targets->GetTargetState();
-	monitor->SendState( acquisition_state, target_state, manipulandumVisible, pos, ori );
+	monitor->SendState( acquisition_state, target_state, manipulandum_visible, pos, ori );
 	
 }
 
@@ -557,18 +608,51 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 
 /*********************************************************************************/
 
-// Check to see if the apparatus is in the correct configuration.
-// This should be some sort of hardware check. 
-
-// The first three routines perform the actual checks and return the current state.
-// TO DO: These are dummy routines that will be overlayed by actual hardware routines in the derived classes.
-
+// Compute the position of the vertical target bar with respect to the box.
+// This algorithm should work no matter what the reference frame.
 DexTargetBarConfiguration DexApparatus::BarPosition( void ) {
-	return( TargetBarUnknown );
+
+	CodaFrame	frame;
+	tracker->GetCurrentMarkerFrame( frame );
+
+	Vector3	box, bar;
+	double  box_width, projection;
+
+	// ALL reference markers must be visible. 
+	if ( !frame.marker[leftReferenceMarker].visibility ||
+		 !frame.marker[rightReferenceMarker].visibility ||
+		 !frame.marker[bottomReferenceMarker].visibility ||
+		 !frame.marker[topReferenceMarker].visibility ) 
+	{
+		return( TargetBarUnknown );
+	}
+
+	SubtractVectors( box, frame.marker[leftReferenceMarker].position, frame.marker[rightReferenceMarker].position );
+	box_width = VectorNorm( box );
+	NormalizeVector( box );
+	SubtractVectors( bar, frame.marker[topReferenceMarker].position, frame.marker[rightReferenceMarker].position );
+	projection = DotProduct( bar, box );
+	if ( projection > box_width / 2.0 ) return( TargetBarLeft );
+	else return( TargetBarRight );
+
 }
 
+// This algorithm works only if the alignment has been done with the box in the upright posture.
+
 DexSubjectPosture DexApparatus::Posture( void ) {
-	return( PostureUnknown );
+
+	CodaFrame	frame;
+	tracker->GetCurrentMarkerFrame( frame );
+
+	// Box reference markers must be visible. 
+	if ( !frame.marker[leftReferenceMarker].visibility ||
+		 !frame.marker[rightReferenceMarker].visibility  ) 
+	{
+		return( PostureUnknown );
+	}
+
+	if ( frame.marker[leftReferenceMarker].position[X] > frame.marker[rightReferenceMarker].position[X] ) return( PostureSupine );
+	else return( PostureSeated );
 }
 
 DexTappingSurfaceConfiguration DexApparatus::TappingDeployment( void ) {
@@ -666,11 +750,16 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 	DexTimer blink_timer;
 	DexTimer hold_timer;
 	DexTimer timeout_timer;
+
+	// Holds the current position and orientation of the manipulandum.
+	bool		manipulandum_visible;
+	Vector3		manipulandum_position;
+	Quaternion	manipulandum_orientation;
 	
-	// These will hold the position and orientation of the manipulandum with respect
+	// These will hold the error in position and orientation of the manipulandum with respect
 	//  to the specified desired target position and the specified orientation.
 	Vector3 difference;
-	float orientation;
+	float	misorientation;
 
 	bool led_state = 0;
 	int  mb_reply;
@@ -685,11 +774,11 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 		TargetOn( target_id );
 		DexTimerSet( blink_timer, waitBlinkPeriod );
 		do {
+
+			manipulandum_visible = GetManipulandumPosition( manipulandum_position, manipulandum_orientation );
 			
-			// TO DO: This should compute the orientation error from the desired orientation 
-			// that is specified as an input. Right now it measures the orientation 
-			// error from the upright null position.
-			orientation = acos( manipulandumOrientation[M] ) * 2.0 * 180 / PI ;
+			// Compare the computed orientation to the desired orientation.
+			misorientation = ToDegrees( AngleBetween( desired_orientation, manipulandum_orientation ) ) ;
 			if ( DexTimerTimeout( timeout_timer ) ) {
 				
 				// Timeout has been reached. Signal the error to the user.
@@ -697,10 +786,10 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
 					"%s\n  Target ID: %d\n  Max time: %.2f\n  Manipulandum Visible: %s\n  Desired orientation: <%.3f %.3f %.3f %.3f>\n  Orientation Error: %.0f degrees",
 					msg, target_id,
-					timeout, ( manipulandumVisible ? "yes" : "no" ), 
+					timeout, ( manipulandum_visible ? "yes" : "no" ), 
 					desired_orientation[X], desired_orientation[Y],
 					desired_orientation[Z], desired_orientation[M],
-					orientation );
+					misorientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
 					monitor->SendEvent( "Manual Abort from WaitUntilAtTarget." );
@@ -731,7 +820,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			// marker positions and computes the position and orientation of the maniplandum.
 			Update();
 
-			SubtractVectors( difference, targetPosition[target_id], manipulandumPosition );
+			SubtractVectors( difference, targetPosition[target_id], manipulandum_position );
 			
 		} while ( 
 			// Stay here until the manipulandum is at the target, or until timeout.
@@ -741,8 +830,8 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			abs( difference[X] ) > position_tolerance[X] ||
 			abs( difference[Y] ) > position_tolerance[Y] ||
 			abs( difference[Z] ) > position_tolerance[Z] ||
-			orientation > orientation_tolerance ||
-			!manipulandumVisible
+			misorientation > orientation_tolerance ||
+			!manipulandum_visible
 			);
 
 		// Target goes on steady if the manipulandum is in the zone.
@@ -757,16 +846,16 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 				monitor->SendEvent( "WaitUntilAtTarget - Success." );
 				return( NORMAL_EXIT );
 			}
-			// Continue to update the current manipulandum position.
+			// Continue to perform required updates during the wait period.
 			Update();
-			SubtractVectors( difference, targetPosition[target_id], manipulandumPosition );
+			SubtractVectors( difference, targetPosition[target_id], manipulandum_position );
 			
 		} while ( 
 			abs( difference[X] ) <= position_tolerance[X] &&
 			abs( difference[Y] ) <= position_tolerance[Y] &&
 			abs( difference[Z] ) <= position_tolerance[Z] &&
-			orientation < orientation_tolerance &&
-			manipulandumVisible
+			misorientation < orientation_tolerance &&
+			manipulandum_visible
 			);
 
 		// If we get here, it means that we did not stay in the zone long enough.
@@ -955,12 +1044,12 @@ DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets,
 	
 	// Load the most recently defined target positions.
 	LoadTargetPositions();
-  // Initialize the tracker hardware.
+
+	// Initialize the tracker hardware.
 	tracker->Initialize();
-  // Start with all the targets off.
+
+	// Start with all the targets off.
 	TargetsOff();
-  // Initialize the cached state of the manipulandum.
-	manipulandumVisible = false;
 	
 }
 
@@ -1003,13 +1092,13 @@ DexRTnetApparatus::DexRTnetApparatus(  int n_vertical_targets,
 
 	// Load the most recently defined target positions.
 	LoadTargetPositions();
-  // Initialize the tracker hardware.
+  
+	// Initialize the tracker hardware.
 	tracker->Initialize();
-  // Start with all the targets off.
+  
+	// Start with all the targets off.
 	TargetsOff();
-  // Initialize the cached state of the manipulandum.
-	manipulandumVisible = false;
-	
+  	
 }
 
 /***************************************************************************/
@@ -1097,30 +1186,16 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance,
 	
 	// Load the most recently defined target positions.
 	LoadTargetPositions();
-  // Initialize the tracker hardware.
+  
+	// Initialize the tracker hardware.
 	tracker->Initialize();
-  // Start with all the targets off.
+  
+	// Start with all the targets off.
 	TargetsOff();
-  // Initialize the cached state of the manipulandum.
-	manipulandumVisible = false;
-	
+  
 }
 
 /***************************************************************************/
-
-// To test for the configuration of the hardware we interrogate the dialog box.
-
-DexSubjectPosture DexMouseApparatus::Posture( void ) {
-	return( IsDlgButtonChecked( dlg, IDC_SEATED ) ? PostureSeated : PostureSupine );
-}
-
-DexTargetBarConfiguration DexMouseApparatus::BarPosition( void ) {
-	return( IsDlgButtonChecked( dlg, IDC_LEFT ) ? TargetBarLeft : TargetBarRight );
-}
-
-DexTappingSurfaceConfiguration DexMouseApparatus::TappingDeployment( void ) {
-	return( IsDlgButtonChecked( dlg, IDC_FOLDED ) ? TappingFolded : TappingExtended );
-}
 
 #if 0 // Ingore virtual apparatus for now.
 

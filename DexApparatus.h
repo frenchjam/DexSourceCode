@@ -30,12 +30,18 @@ class DexApparatus : public VectorsMixin {
 
 	private:
 
+		FILE *fp;
 
 	protected:
 
 		unsigned long currentTargetState;
 
 	public:
+
+		static const int	leftReferenceMarker;
+		static const int	rightReferenceMarker;
+		static const int	bottomReferenceMarker;
+		static const int	topReferenceMarker;
 
 		// Keep track of what type we are.
 		DexApparatusType  type;
@@ -56,13 +62,18 @@ class DexApparatus : public VectorsMixin {
 		char	*targetPositionFilename;
 
 		// Cache the latest marker data.
-		CodaFrame	currentMarkerFrame;
+//		CodaFrame	currentMarkerFrame;
 
 		// To be more efficient, we cache the real-time position 
 		// and orientation of the manipulandum.
-		bool		manipulandumVisible;
-		Vector3		manipulandumPosition;
-		Quaternion	manipulandumOrientation;
+
+		// Actually, I am not sure that this is a good idea.
+		// The only routine that uses the manipulandum pose in real time 
+		// is WaitUntilAtTarget(). Might as well compute it only as needed.
+
+//		bool		manipulandumVisible;
+//		Vector3		manipulandumPosition;
+//		Quaternion	manipulandumOrientation;
 
 		// After an acquisition, the full data set is retrieved from
 		// the tracker and analog system and stored here.
@@ -83,9 +94,9 @@ class DexApparatus : public VectorsMixin {
 		int nAcqFrames;
 		int nCodas;
 
-		DexApparatus( int n_vertical_targets = N_VERTICAL_TARGETS, 
-							int n_horizontal_targets = N_HORIZONTAL_TARGETS,
-							int tones = N_TONES, int n_markers = N_MARKERS );
+	DexApparatus ( int n_vertical_targets = N_VERTICAL_TARGETS, 
+	  int n_horizontal_targets = N_HORIZONTAL_TARGETS,
+	  int tones = N_TONES, int n_markers = N_MARKERS );
 
 		// Called inside loops to update current state.
 		// This is strictly local to my simulator.
@@ -173,7 +184,7 @@ class DexApparatus : public VectorsMixin {
 		virtual void FindAnalysisFrameRange( int &first, int &last );
 		
 		// Tracker installation and alignment.
-		virtual bool DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
+		virtual int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 										   float min_x, float max_x,
 										   float min_y, float max_y,
 										   float min_z, float max_z, const char *msg = "Markers not centered in view." );		
@@ -268,9 +279,6 @@ public:
 		int n_vertical_targets = N_VERTICAL_TARGETS, 
 		int n_horizontal_targets = N_HORIZONTAL_TARGETS,
 		int tones = N_TONES, int n_markers = N_MARKERS );
-	DexSubjectPosture Posture( void );
-	DexTargetBarConfiguration BarPosition( void );
-	DexTappingSurfaceConfiguration TappingDeployment( void );	
 
 };
 
