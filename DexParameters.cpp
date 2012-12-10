@@ -60,8 +60,13 @@ const float uprightNullOrientation[4] = { 0.0, 0.0, 0.0, 1.0 };
 // TO DO: This is wrong. Need to compute the required quaternion.
 const float supineNullOrientation[4] = { ROOT2, 0.0, 0.0, ROOT2 }; 
 
-#define MANIPULANDUM_MARKERS 8
-Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] = 
+
+// Position of the markers relative to the control point of the manipulandum.
+// This is used both by DexApparatus to compute the position and orientation of the
+// manipulandum from acquired marker positions, and by DexMouseTracker to simulate
+// where each marker is according to the position of the mouse.
+
+float		ManipulandumBody[MANIPULANDUM_MARKERS][3] = 
 {
 	{1.0, 0.0, 0.0}, 
 	{0.0, 1.0, 0.0},  
@@ -75,8 +80,52 @@ Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] =
 int nManipulandumMarkers = MANIPULANDUM_MARKERS;
 int ManipulandumMarkerID[MANIPULANDUM_MARKERS] = {0, 1, 2, 3, 4, 5, 6, 7};
 
+// The wrist markers also constitute a rigid body. 
+// We can reconstruct the position and orientation of the wrist in the same
+// way as for the manipulandum, but this functionality is not at present
+// needed in the real-time DEX system.
 
+float		WristBody[WRIST_MARKERS][3] = 
+{
+	{1.0, 0.0, 0.0}, 
+	{0.0, 1.0, 0.0},  
+	{0.0, 0.0, 1.0}, 
+	{1.0, 1.0, 0.0}, 
+	{1.0, 0.0, 1.0}, 
+	{0.0, 1.0, 1.0}, 
+	{1.0, 1.0, 1.0},  
+	{2.0, 2.0, 2.0}
+};
+int nWristMarkers = WRIST_MARKERS;
+int WristMarkerID[WRIST_MARKERS] = {8, 9, 10, 11, 12, 13, 14, 15};
 
+// The target frame is not quite a rigig body, because the vertical bar 
+// can move with respect to the horizontal box. But it is convenient to 
+// define the marker positions in the same format for DexMouseTracker.
+
+float		TargetFrameBody[TARGET_FRAME_MARKERS][3] =
+{
+	{  0.0,   0.0,   0.0}, 
+	{300.0,   0.0,   0.0},  
+	{  1.0,   1.0,   0.0},
+	{  0.0, 350.0,   1.0}
+
+};
+int nFrameMarkers = TARGET_FRAME_MARKERS;
+int FrameMarkerID[TARGET_FRAME_MARKERS] = {16, 17, 18, 19};
+
+// DexMouseTracker will return these values when the current
+// Coda transformation is requested.
+
+float		SimulatedCodaOffset[2][3] = {
+	{  1000,    0.0, -2500.0 }, 
+	{   0.0, -900.0, -2500.0 }
+};
+
+float	SimulatedCodaRotation[2][3][3] = {
+	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
+	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+};
 
 /***************************************************************************/
 

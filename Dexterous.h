@@ -81,8 +81,8 @@ extern	char *TappingSurfaceString[];
 
 typedef struct {
 	
-	double position[3];
-	double orientation[3];
+	float position[3];
+	float orientation[4];
 	double targetPos[DEX_MAX_TARGETS][3];
 
 } TargetArrayConfiguration;
@@ -172,3 +172,27 @@ typedef struct {
 
 #define CODA_MANIPULANDUM_MARKER 0
 #define CODA_FRAME_MARKER 5
+
+#define		MANIPULANDUM_MARKERS 8
+extern float		ManipulandumBody[MANIPULANDUM_MARKERS][3];
+extern int nManipulandumMarkers;
+extern int ManipulandumMarkerID[MANIPULANDUM_MARKERS];
+
+#define		WRIST_MARKERS 8
+extern float		WristBody[WRIST_MARKERS][3];
+extern int nWristMarkers;
+extern int WristMarkerID[WRIST_MARKERS];
+
+#define TARGET_FRAME_MARKERS	4
+extern float		TargetFrameBody[TARGET_FRAME_MARKERS][3];
+extern int nFrameMarkers;
+extern int FrameMarkerID[TARGET_FRAME_MARKERS];
+
+extern float SimulatedCodaOffset[2][3];
+extern float SimulatedCodaRotation[2][3][3];
+
+#define RIGHT_BOX_MARKER  16
+#define LEFT_BOX_MARKER	  17
+#define BOTTOM_BAR_MARKER 18
+#define TOP_BAR_MARKER	  19
+
