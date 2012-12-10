@@ -320,7 +320,9 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 int DexApparatus::PerformTrackerAlignment( const char *msg ) {
 	int error_code;
 	// Ask the tracker to perform the alignment.
-	if ( error_code = tracker->PerformAlignment( 1, 2, 3, 4, 5) ) {
+	if ( error_code = tracker->PerformAlignment( negativeBoxMarker, 
+													negativeBoxMarker, positiveBoxMarker, 
+													negativeBarMarker, positiveBarMarker ) ) {
 		// If there is an error, report it to the user.
 		// We may need to add information to the message, depending
 		// on what the error was.
