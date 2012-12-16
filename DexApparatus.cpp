@@ -125,6 +125,8 @@ void DexApparatus::SetTargetPositions( void ) {
 	// Compute the offset that will bring the two midpoints together.
 	SubtractVectors( offset, bar_position, target_position );
 
+	// Shift the target positions to match the position of the target bar.
+	// Only the vertical targets move.
 	for ( trg = 0; trg < nVerticalTargets; trg++ ) {
 		AddVectors( targetPosition[trg], targetPosition[trg], offset );
 	}
@@ -382,7 +384,7 @@ bool DexApparatus::ComputeTargetFramePosition( Vector3 pos, Quaternion ori, Coda
 
 	// Now compute the orientation of the box/bar combination.
 	SubtractVectors( box_and_bar[0], frame.marker[positiveBoxMarker].position, frame.marker[negativeBoxMarker].position );
-	SubtractVectors( box_and_bar[0], frame.marker[positiveBarMarker].position, frame.marker[negativeBarMarker].position );
+	SubtractVectors( box_and_bar[1], frame.marker[positiveBarMarker].position, frame.marker[negativeBarMarker].position );
 	OrthonormalizeMatrix( ortho, box_and_bar );
 	MatrixToQuaternion( ori, ortho );
 
@@ -868,10 +870,6 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 		DexTimerSet( blink_timer, waitBlinkPeriod );
 		do {
 
-			manipulandum_visible = GetManipulandumPosition( manipulandum_position, manipulandum_orientation );
-			
-			// Compare the computed orientation to the desired orientation.
-			misorientation = ToDegrees( AngleBetween( desired_orientation, manipulandum_orientation ) ) ;
 			if ( DexTimerTimeout( timeout_timer ) ) {
 				
 				// Timeout has been reached. Signal the error to the user.
@@ -913,6 +911,11 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			// marker positions and computes the position and orientation of the maniplandum.
 			Update();
 
+			// Get the current position and orientation of the manipulandum.
+			manipulandum_visible = GetManipulandumPosition( manipulandum_position, manipulandum_orientation );
+			
+			// Compare the computed position and orientation to the desired position and orientation.
+			misorientation = ToDegrees( AngleBetween( desired_orientation, manipulandum_orientation ) ) ;
 			SubtractVectors( difference, targetPosition[target_id], manipulandum_position );
 			
 		} while ( 
@@ -941,6 +944,12 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 			}
 			// Continue to perform required updates during the wait period.
 			Update();
+
+			// Get the current position and orientation of the manipulandum.
+			manipulandum_visible = GetManipulandumPosition( manipulandum_position, manipulandum_orientation );
+
+			// Compare the computed position and orientation to the desired position and orientation.
+			misorientation = ToDegrees( AngleBetween( desired_orientation, manipulandum_orientation ) ) ;
 			SubtractVectors( difference, targetPosition[target_id], manipulandum_position );
 			
 		} while ( 
