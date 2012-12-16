@@ -115,7 +115,7 @@ bool DexCodaTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		if ( CODA_OK == CodaFrameGetMarker( &frame ) ) {
 			frame.time = 0.0;
 			for ( int mrk = 0; mrk < nMarkers; mrk++ ) {
-				frame.marker[mrk].visibility = bInView[mrk];
+				frame.marker[mrk].visibility = ( bInView[mrk] != 0 ? true : false );
 				CopyVector( frame.marker[mrk].position, &fPosition[mrk * 3] );
 			}
 		}
