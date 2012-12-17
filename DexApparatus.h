@@ -11,12 +11,15 @@
 #ifndef DexApparatusH
 #define DexApparatusH
 
+#include <ftconfig.h>
+
 #include <VectorsMixin.h>
 
 #include <DexTimers.h>
 #include <DexTargets.h>
 #include <DexSounds.h>
 #include <DexTracker.h>
+#include <DexADC.h>
 #include <DexMonitorServer.h>
 
 /********************************************************************************/
@@ -47,6 +50,13 @@ class DexApparatus : public VectorsMixin {
 		static const int	negativeBarMarker;
 		static const int	positiveBarMarker;
 
+		// Identify the analog channels associated with each force/torque sensor.
+		// Each element points to the index of the first channel for each sensor.
+		static const int	ftAnalogChannel[N_FORCE_TRANSDUCERS];
+
+		// Structures needed to use the ATI Force/Torque transducer library.
+		Calibration			*ftCalibration[N_FORCE_TRANSDUCERS];
+
 		// Keep track of what type we are.
 		DexApparatusType  type;
 
@@ -58,6 +68,8 @@ class DexApparatus : public VectorsMixin {
 		DexTracker				*tracker;
 		// An object that handles the sound generating hardware.
 		DexSounds				*sounds;
+		// An object that performs analog acquisition.
+		DexADC					*adc;
 
 		DexTimer	trialTimer;
 
@@ -219,6 +231,22 @@ class DexApparatus : public VectorsMixin {
 		virtual int SignalNormalCompletion( const char *message = "Task completed normally." );
 		virtual int fSignalNormalCompletion( const char *format = "Task completed normally.", ... );
 
+		// Methods to deal with the manipulandum force/torque measurements.
+		virtual void InitForceTransducers( void );
+		virtual void ReleaseForceTransducers( void );
+		virtual void ZeroForceTransducers( void );
+
+		void ComputeForceTorque( Vector3 &force, Vector3 &torque, int unit, AnalogSample analog );
+		void GetForceTorque( Vector3 &force, Vector3 &torque, int unit );
+		void ComputeCOP( Vector3 &cop, Vector3 &force, Vector3 &torque );
+		void GetCOP( Vector3 &cop, int unit );
+		float ComputeGripForce( Vector3 &force1, Vector3 &force2 );
+		float GetGripForce( void );
+
+		float ComputeLoadForce( Vector3 &load, Vector3 &force1, Vector3 &force2 );
+		float ComputePlanarLoadForce( Vector3 &load, Vector3 &force1, Vector3 &force2 );
+		float GetLoadForce( Vector3 &load );
+		float GetPlanarLoadForce( Vector3 &load );
 };
 
 /************************************************************************************/

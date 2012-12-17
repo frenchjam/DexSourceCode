@@ -16,18 +16,18 @@
 #include <memory.h>
 #include <process.h>
 
+// ATI Force/Torque Sensor Library
+#include <ftconfig.h>
+
 #include <fMessageBox.h>
-
-#include <useful.h>
-#include <screen.h>
 #include <VectorsMixin.h>
-
-
 #include <DexTimers.h>
+
 #include "DexMonitorServer.h"
 #include "Dexterous.h"
 #include "DexTargets.h"
 #include "DexTracker.h"
+#include "DexADC.H"
 #include "DexSounds.h"
 #include "DexApparatus.h"
 
@@ -49,6 +49,9 @@ DexApparatus::DexApparatus( int n_vertical_targets,
 	nTones = n_tones;
 	nMarkers = n_markers;
 
+	// Initialize force sensors as needed.
+	InitForceTransducers();
+	
 	// Open a file to store the positions and orientations that were computed from
 	// the individual marker positions. This allows us
 	// to compare with the position and orientation used by DexMouseTracker
@@ -68,10 +71,13 @@ DexApparatus::Quit( void ) {
 
 	fclose( fp );
 
+	ReleaseForceTransducers();
 	tracker->Quit();
 	monitor->Quit();
 	targets->Quit();
 	sounds->Quit();
+	adc->Quit();
+
 }
 
 /***************************************************************************/
@@ -1143,6 +1149,9 @@ DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets,
 
 	// Use the real Coda tracker.
 	tracker = new DexCodaTracker();
+
+	// Use the mouse to simulate analog inputs.
+	adc = new DexMouseADC();
 	
 	// Load the most recently defined target positions.
 	LoadTargetPositions();

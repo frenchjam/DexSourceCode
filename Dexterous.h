@@ -42,6 +42,10 @@
 #define N_CODAS 2
 #define N_CHANNELS	64
 
+#define N_FORCE_TRANSDUCERS	2
+#define N_GAUGES	6	// Number of strain gauges per force/torque transducer.
+#define N_SAMPLES_FOR_AVERAGE	20
+
 #define BEEP_TONE	4
 #define BEEP_VOLUME	8
 #define BEEP_DURATION 0.200
@@ -208,3 +212,4 @@ extern float SimulatedCodaRotation[2][3][3];
 #define BOTTOM_BAR_MARKER 18
 #define TOP_BAR_MARKER	  19
 
+extern char *ATICalFilename[N_FORCE_TRANSDUCERS];

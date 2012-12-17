@@ -30,21 +30,21 @@ class DexADC : public VectorsMixin {
 
 		DexADC() : nChannels( 32 ), samplePeriod( 0.001 ) {} ;
 
-		virtual void Initialize( void );
-		virtual int  Update( void );
-		virtual void Quit( void );
+		virtual void Initialize( void ) = 0;
+		virtual int  Update( void ) = 0;
+		virtual void Quit( void ) = 0;
 
-		virtual void	StartAcquisition( float max_duration );
-		virtual void	StopAcquisition( void );
-		virtual bool	CheckAcquisitionOverrun( void );
+		virtual void	StartAcquisition( float max_duration ) = 0;
+		virtual void	StopAcquisition( void ) = 0;
+		virtual bool	CheckAcquisitionOverrun( void ) = 0;
 
-		virtual int		RetrieveAnalogSamples( AnalogSample samples[], int max_samples );
-		virtual bool	GetCurrentAnalogSample( AnalogSample &sample );
+		virtual int		RetrieveAnalogSamples( AnalogSample samples[], int max_samples ) = 0;
+		virtual bool	GetCurrentAnalogSample( AnalogSample &sample ) = 0;
 
 		AnalogSample	recordedAnalogSamples[DEX_MAX_ANALOG_SAMPLES];
 
 		virtual double	GetSamplePeriod( void );
-		virtual bool	GetAcquisitionState( void );
+		virtual bool	GetAcquisitionState( void ) = 0;
 		void			CopyAnalogSample( AnalogSample &destination, AnalogSample &source );
 
 };
@@ -80,7 +80,7 @@ public:
 	void StartAcquisition( float max_duration );
 	void StopAcquisition( void );
 	bool GetAcquisitionState( void );
-	bool CheckOverrun( void );
+	bool CheckAcquisitionOverrun( void );
 
 	int		RetrieveAnalogSamples( AnalogSample samples[], int max_samples );
 	bool	GetCurrentAnalogSample( AnalogSample &sample );

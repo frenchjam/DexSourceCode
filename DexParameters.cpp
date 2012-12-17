@@ -137,3 +137,10 @@ float	SimulatedCodaRotation[2][3][3] = {
 /***************************************************************************/
 
 
+char *ATICalFilename[2] = {
+
+	"e:\\ATI Calibrations\\FT8884.cal",
+	"e:\\ATI Calibrations\\FT8885.cal"
+
+};
+

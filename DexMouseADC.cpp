@@ -71,7 +71,7 @@ bool DexMouseADC::GetAcquisitionState( void ) {
 	return( acquisitionOn );
 }
 
-bool DexMouseADC::CheckOverrun( void ) {
+bool DexMouseADC::CheckAcquisitionOverrun( void ) {
 	return( overrun );
 }
 
