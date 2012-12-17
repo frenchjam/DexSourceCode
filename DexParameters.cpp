@@ -45,9 +45,9 @@ float defaultOrientationTolerance = 60.0;					// Measured in degrees.
 // The tolerance on the orientation above is set very high for the simulator,
 // because the simulator intentionally makes the manipulandum rotate as you move toward the higher targets.
 
-float waitBlinkPeriod = 0.2;						// LED blink rate when out of zone.
-float waitHoldPeriod = 1.0;						// Required hold time in zone.
-float waitTimeLimit = 10.0;						// Signal time out if we wait this long.
+float waitBlinkPeriod = 0.2;		// LED blink rate when out of zone.
+float waitHoldPeriod = 1.0;			// Required hold time in zone.
+float waitTimeLimit = 10.0;			// Signal time out if we wait this long.
 
 char *TargetBarString[] = { "Indifferent", "Left", "Right", "Unknown" };
 char *PostureString[] = { "Indifferent", "Seated", "Supine", "Unknown" };
@@ -58,7 +58,7 @@ char *TappingSurfaceString[] = { "Indifferent", "Extended", "Folded", "Unknown" 
 const float uprightNullOrientation[4] = { 0.0, 0.0, 0.0, 1.0 };
 // Null orientation of the manipulandum when in the supine position.
 // TO DO: This is wrong. Need to compute the required quaternion.
-const float supineNullOrientation[4] = { ROOT2, 0.0, 0.0, ROOT2 }; 
+const float supineNullOrientation[4] = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) }; 
 
 
 // Position of the markers relative to the control point of the manipulandum.
@@ -105,10 +105,17 @@ int WristMarkerID[WRIST_MARKERS] = {8, 9, 10, 11, 12, 13, 14, 15};
 
 float		TargetFrameBody[TARGET_FRAME_MARKERS][3] =
 {
+	// This value must be the origin.
 	{  0.0,   0.0,   0.0}, 
+	// This marker defines the X axis, so it's X value should be the 
+	//  distance from the origin marker, and Y and Z should be zero.
 	{300.0,   0.0,   0.0},  
-	{  1.0,   1.0,   0.0},
-	{  0.0, 350.0,   1.0}
+	// The following two vectors say where we expect to find the marker
+	// at the top and bottom of the target bar when installed in the 
+	// right position.
+	// These values are set to work with the CodaMouseTracker simulator.
+	{  0.0,   0.0,   -118.0},
+	{  0.0, 230.0,   -118.0}
 
 };
 int nFrameMarkers = TARGET_FRAME_MARKERS;

@@ -480,10 +480,12 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case TARGETED_PROTOCOL:
+#if 0
 		do {
 			return_code = RunTargeted( apparatus, VERTICAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+#endif
 		do {
 			return_code = RunTargeted( apparatus, HORIZONTAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );

@@ -148,9 +148,6 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 			interval = recordedMarkerFrames[next].time - recordedMarkerFrames[previous].time;
 			// Compute the time between the current frame and the previous real_time frame.
 			offset = time - recordedMarkerFrames[previous].time;
-			if ( offset == 0.0 ) {
-				offset = offset;
-			}
 			// Use the relative time to interpolate.
 			relative = offset / interval;
 
@@ -192,19 +189,25 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	int mrk, id;
 
 	// Map mouse coordinates to world coordinates. This factors used here are empirical.
-	float y =  (double)  mouse_position.y / (double) ( rect.bottom - rect.top ) * 240.0;
-	float z =  (double) -100 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 240.0;
-	// Make the movement a little bit in X as well so that we test the routines in 3D.
-	float x = 60.0 + 5 * sin( y / 80.0);
-
-	// We will make the manipulandum rotate in a strange way as a function of the distance from 0.
-	// This is just so that we can test the routines that compute the manipulandum position and orientation.
-	double theta = y * 90.0 / 240.0;
-	double gamma = z * 60.0 / 240.0;
-
-	SetQuaterniond( Ry, theta, iVector );
-	SetQuaterniond( Rz, gamma, jVector );
-	MultiplyQuaternions( Q, Ry, Rz );
+	float y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top ) * 230.0;
+	float z =  (double) -100.0 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 305.0;
+	float x;
+	
+	if ( IsDlgButtonChecked( dlg, IDC_CODA_WOBBLY ) ) {
+		// We will make the manipulandum rotate in a strange way as a function of the distance from 0.
+		// This is just so that we can test the routines that compute the manipulandum position and orientation.
+		double theta = (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 45.0;
+		double gamma = (double) (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 45.0;
+		SetQuaterniond( Ry, theta, iVector );
+		SetQuaterniond( Rz, gamma, jVector );
+		MultiplyQuaternions( Q, Ry, Rz );
+		// Make the movement a little bit in X as well so that we test the routines in 3D.
+		x = 0.0 + 5.0 * sin( y / 80.0);
+	}
+	else {
+		CopyQuaternion( Q, nullQuaternion );
+		x = 0.0;
+	}
 
 	position[X] = x;
 	position[Y] = y;
@@ -247,7 +250,8 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	// Output the position and orientation used to compute the simulated
 	// marker positions. This is for testing only.
 	fprintf( fp, "%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
-		frame.time, position[X], position[Y], position[Z],
+		frame.time, 
+		position[X], position[Y], position[Z],
 		Q[X], Q[Y], Q[Z], Q[M] );
 
 	return( true );
@@ -321,6 +325,7 @@ int DexMouseTracker::Update( void ) {
 
 		CodaFrame	frame;
 		GetCurrentMarkerFrame( frame );
+#if 0
 		recordedMarkerFrames[ nPolled ].time = (float) DexTimerElapsedTime( acquisitionTimer );
 		for ( int j = 0; j < nMarkers; j++ ) {
 			recordedMarkerFrames[nPolled].marker[j].visibility = frame.marker[j].visibility;
@@ -328,6 +333,8 @@ int DexMouseTracker::Update( void ) {
 				recordedMarkerFrames[nPolled].marker[j].position[k] = frame.marker[j].position[k]; 
 			}
 		}
+#endif
+		CopyMarkerFrame( recordedMarkerFrames[nPolled], frame );
 		if ( nPolled < DEX_MAX_MARKER_FRAMES ) nPolled++;
 	}
 	return( 0 );
