@@ -29,6 +29,9 @@
 #define DEX_MAX_MARKER_FRAMES 20000
 #define DEX_MAX_EVENTS 20000
 
+#define DEX_MAX_CHANNELS		64
+#define DEX_MAX_ANALOG_SAMPLES	100000
+
 #define N_MARKERS 28
 #define N_VERTICAL_TARGETS 13
 #define N_HORIZONTAL_TARGETS 10
@@ -37,12 +40,13 @@
 #define N_VOLUMES 8
 #define N_DATA_FRAMES 3000
 #define N_CODAS 2
+#define N_CHANNELS	64
 
 #define BEEP_TONE	4
 #define BEEP_VOLUME	8
 #define BEEP_DURATION 0.200
 
-#define INVISIBLE -999.999
+#define INVISIBLE -999.999f
 #define TARGETS_OFF -1
 
 #define HORIZONTAL	0
@@ -133,7 +137,7 @@ typedef struct {
 
 typedef struct {
 
-	CodaMarker	marker[DEX_MAX_MARKERS];
+	CodaMarker	marker[N_MARKERS];
 	float		time;
 
 } CodaFrame;
@@ -146,6 +150,11 @@ typedef struct {
 	float	time;
 
 } ManipulandumState;
+
+typedef struct {
+	float time;
+	float channel[N_CHANNELS]; 
+} AnalogSample;
 
 // Event codes that are kept in a local buffer with a time stamp. 
 // Here we define some special ones used by DexApparatus
