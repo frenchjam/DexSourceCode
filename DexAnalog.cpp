@@ -73,6 +73,14 @@ void DexApparatus::ReleaseForceTransducers( void ) {
 
 /***************************************************************************/
 
+// Computes the average offset on each of the strain guages and then
+// inserts those values into the ATI calibration so that the offset can be 
+// compenstated.
+
+// This is the realtime version. It specifically acquires ADC samples for 
+// this purpose. See also the post hoc version that works on an acquired buffer
+// full of analog data.
+
 void DexApparatus::ZeroForceTransducers( void ) {
 
 	AnalogSample sample;

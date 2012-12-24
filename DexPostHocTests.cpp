@@ -644,3 +644,43 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 	return( NORMAL_EXIT );
 	
 }
+
+/********************************************************************************************/
+
+// Compute the strain guage offsets from the most recently acquired ADC data.
+// Store them with the ATI calibration data to allow the offsets to be nullified.
+// Because the acquired data is automatically sent to ground, we will be able
+// to repeat this process on the ground during post-flight data processing.
+
+void DexApparatus::ComputeAndNullifyStrainGaugeOffsets( void ) {
+
+	double sum[N_GAUGES];
+	float  gauge_offset[N_GAUGES];
+	int smpl, unit, gge;
+
+	// Take multiple samples and compute an average.
+	// First zero the sums.
+	for ( unit = 0; unit < nForceTransducers; unit++ ) {
+		for ( gge = 0; gge < nGauges; gge++ ) {
+			sum[gge] = 0.0;
+		}
+
+		// Accumulate the specified number of samples for the average.
+		for ( smpl = 0; smpl < nAcqSamples; smpl++ ) {
+			// Add the new samples to the sums.
+			for ( gge = 0; gge < N_GAUGES; gge++ ) {
+				sum[gge] += acquiredAnalog[smpl].channel[ ftAnalogChannel[unit] + gge ];
+			}
+		}
+		for ( gge = 0; gge < N_GAUGES; gge++ ) {
+			gauge_offset[gge] = sum[gge] / (double) nAcqSamples;
+		}
+
+		// Average values for the gauges get stored with the calibration.
+		Bias( ftCalibration[unit], gauge_offset );
+
+		// It could be useful to send the bias values to the ground in real time.
+		monitor->SendEvent( "Strain gauge offsets computed.\n Unit: %d < %f %f %f %f %f %f >", 
+			unit, gauge_offset[0], gauge_offset[1], gauge_offset[2], gauge_offset[3], gauge_offset[4], gauge_offset[5] );
+	} 
+}
