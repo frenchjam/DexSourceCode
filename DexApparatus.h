@@ -163,7 +163,9 @@ public:
 	
 	virtual int  WaitUntilAtVerticalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
 	virtual int  WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
-	
+
+	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
+
 	// Hardware configuration
 	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 	virtual DexSubjectPosture Posture( void );
@@ -236,6 +238,7 @@ public:
 	virtual void InitForceTransducers( void );
 	virtual void ReleaseForceTransducers( void );
 	virtual void ZeroForceTransducers( void );
+	virtual void ComputeAndNullifyStrainGaugeOffsets( void );
 	
 	void ComputeForceTorque( Vector3 &force, Vector3 &torque, int unit, AnalogSample analog );
 	void GetForceTorque( Vector3 &force, Vector3 &torque, int unit );

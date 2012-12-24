@@ -46,6 +46,9 @@ double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum
 int desired_posture = PostureSeated;
 double beepTime = BEEP_DURATION;
 
+double offsetMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
+double offsetAcquireTime = 2.0;			// How long to acquire when computing strain gauge offsets.
+
 // Targeted trial parameters;
 int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
 int targetSequenceN = 9;
@@ -141,6 +144,28 @@ int RunInstall( DexApparatus *apparatus ) {
 
 /*********************************************************************************/
 
+int RunTransducerOffsetCompensation( DexApparatus *apparatus ) {
+
+	int status;
+
+	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	// Acquire some data.
+	apparatus->StartAcquisition( targetedMaxTrialTime );
+	apparatus->Wait( offsetAcquireTime );
+	apparatus->StopAcquisition();
+	apparatus->SaveAcquisition( "OFFS" );
+
+	// Compute the offsets and insert them into force calculations.
+	apparatus->ComputeAndNullifyStrainGaugeOffsets();
+
+	return( NORMAL_EXIT );
+
+}
+
+/*********************************************************************************/
+
 int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], int n_targets ) {
 	
 	int status = 0;
@@ -180,14 +205,13 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-	apparatus->ZeroForceTransducers();
-
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 5.0 );
+	if ( status == ABORT_EXIT ) exit( status );
+
 
 #endif
 
@@ -490,6 +514,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case TARGETED_PROTOCOL:
+		do {
+			return_code = RunTransducerOffsetCompensation( apparatus );
+		} while ( return_code == RETRY_EXIT );
+		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
 		do {
 			return_code = RunTargeted( apparatus, VERTICAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
