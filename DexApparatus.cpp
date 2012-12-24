@@ -38,24 +38,26 @@ const int DexApparatus::positiveBoxMarker = 17;
 const int DexApparatus::negativeBarMarker = 18;
 const int DexApparatus::positiveBarMarker = 19;
 
-DexApparatus::DexApparatus( int n_vertical_targets, 
-							int n_horizontal_targets,
-							int n_tones, int n_markers ) {
+DexApparatus::DexApparatus( void ) {
 	
 	type = DEX_GENERIC_APPARATUS;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nVerticalTargets = n_vertical_targets;
-	nHorizontalTargets = n_horizontal_targets;
-	nTones = n_tones;
-	nMarkers = n_markers;
+	nVerticalTargets = N_VERTICAL_TARGETS;
+	nHorizontalTargets = N_HORIZONTAL_TARGETS;
+	nTargets = nVerticalTargets + nHorizontalTargets;
+	nTones = N_TONES;
+	nMarkers = N_MARKERS;
+	nChannels = N_CHANNELS;
+	nForceTransducers = N_FORCE_TRANSDUCERS;
+	nGauges = N_GAUGES;
+	nSamplesForAverage = N_SAMPLES_FOR_AVERAGE;
 
-	// Initialize force sensors as needed.
-	InitForceTransducers();
+	// Initialize the list of events.
+	nEvents = 0;
 	
 	// Open a file to store the positions and orientations that were computed from
 	// the individual marker positions. This allows us
 	// to compare with the position and orientation used by DexMouseTracker
-	// to compute the marker positions. 
+	// to compute the marker positions. It is for debugging purposes.
 	char *filename = "DexApparatusDebug.mrk";
 
 	fp = fopen( filename, "w" );
@@ -64,6 +66,23 @@ DexApparatus::DexApparatus( int n_vertical_targets,
 		exit( -1 );
 	}
 	fprintf( fp, "Time\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
+
+}
+
+void DexApparatus::Initialize( void ) {
+
+	// Load the most recently defined target positions.
+	LoadTargetPositions();
+  
+	// Initialize the hardware.
+	tracker->Initialize();
+	adc->Initialize();
+	InitForceTransducers();
+ 
+	// Start with all the targets off.
+	TargetsOff();
+	// Make sure that the sound is off.
+	SoundOff();
 
 }
 
@@ -460,6 +479,7 @@ void DexApparatus::Update( void ) {
 	if ( exit_status = targets->Update() ) exit( exit_status );
 	if ( exit_status = tracker->Update() ) exit( exit_status );
 	if ( exit_status = sounds->Update() ) exit( exit_status );
+	if ( exit_status = adc->Update() ) exit( exit_status );
 	
 	// Compute the current state of the manipulandum;
 	// Note that I no longer cache these information.
@@ -1068,6 +1088,10 @@ void DexApparatus::StartAcquisition( float max_duration ) {
 	nEvents = 0;
 	// Tell the tracker to start acquiring.
 	tracker->StartAcquisition( max_duration );
+	// And the ADC, too.
+	// The real system worries about syncronizing. Here I do not.
+	adc->StartAcquisition( max_duration );
+
 	// Keep track of how long we have been acquiring.
 	DexTimerSet( trialTimer, max_duration );
 	// Tell the ground what we just did.
@@ -1078,42 +1102,125 @@ void DexApparatus::StartAcquisition( float max_duration ) {
 void DexApparatus::StopAcquisition( void ) {
 	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
+	adc->StopAcquisition();
 	monitor->SendEvent( "Acquisition terminated." );
 	// Retrieve the marker data.
 	nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition, DEX_MAX_MARKER_FRAMES );
 	// Compute the manipulandum positions.
 	for ( int i = 0; i < nAcqFrames; i++ ) {
-		// Here I should compute the manipulandum position and orientation.
-		acquiredManipulandumState[i].visibility = acquiredPosition[i].marker[0].visibility;
+		Vector3		pos;
+		Quaternion	ori;
+		// Compute the manipulandum position and orientation at each time step.
+		acquiredManipulandumState[i].visibility = 
+			ComputeManipulandumPosition( pos, ori, acquiredPosition[i] );
 		acquiredManipulandumState[i].time = acquiredPosition[i].time;
-		CopyVector( acquiredManipulandumState[i].position, acquiredPosition[i].marker[0].position );
-		CopyVector( acquiredManipulandumState[i].orientation, nullQuaternion );
-
+		CopyVector( acquiredManipulandumState[i].position, pos );
+		CopyVector( acquiredManipulandumState[i].orientation, ori );
 	}
-	// Send the recording by telemetry to the ground for monitoring.
+	// Send the marker recording by telemetry to the ground for monitoring.
 	monitor->SendRecording( acquiredManipulandumState, nAcqFrames, INVISIBLE );
+
+	// Retrieve the recorded analog data.
+	nAcqSamples = adc->RetrieveAnalogSamples( acquiredAnalog, DEX_MAX_ANALOG_SAMPLES );
+	// Compute forces from analog data.
+	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
+		for ( int unit = 0; unit < N_FORCE_TRANSDUCERS; unit++ ) {
+			ComputeForceTorque( acquiredForce[unit][smpl], acquiredTorque[unit][smpl], unit, acquiredAnalog[smpl] );
+			ComputeCOP( acquiredCOP[unit][smpl], acquiredForce[unit][smpl], acquiredTorque[unit][smpl] );
+		}
+		acquiredGripForce[smpl] = ComputeGripForce( acquiredForce[0][smpl], acquiredForce[1][smpl] );
+		acquiredLoadForceMagnitude[smpl] = 
+			ComputePlanarLoadForce( acquiredLoadForce[smpl], acquiredForce[0][smpl], acquiredForce[1][smpl] );
+	}
 }
 void DexApparatus::SaveAcquisition( const char *tag ) {
 	
 	FILE *fp;
+	char fileroot[256], filename[512];
+
+	int frm, mrk, smpl, chan;
 	
 	// TO DO: Automatically generate a file name.
 	// Here we use the same name each time, but just add the tag.
-	char filename[1024];
-	sprintf( filename, "DexSimulatorOutput.%s.csv", tag );
+	sprintf( fileroot, "DexSimulatorOutput.%s", tag );
 	
-	// Write the data file.
+	// Write a file with raw marker data.
+	sprintf( filename, "%s.mrk", fileroot );
 	fp = fopen( filename, "w" );
-	fprintf( fp, "Sample,Time,X,Y,Z\n" );
-	for ( int i = 0; i < nAcqFrames; i++ ) {
-		fprintf( fp, "%d,%.3f,%.3f,%.3f,%.3f\n", i / 3, 
-			acquiredManipulandumState[i].time, 
-			acquiredManipulandumState[i].position[X], 
-			acquiredManipulandumState[i].position[Y], 
-			acquiredManipulandumState[i].position[Z] );
+	fprintf( fp, "Sample\tTime" );
+	for ( mrk = 0; mrk < nMarkers; mrk++ ) fprintf( fp, "\tM%2dV\tM%2dX\tM%2dY\tM%2dZ", mrk, mrk, mrk, mrk );
+	fprintf( fp, "\n" );
+	for ( frm = 0; frm < nAcqFrames; frm++ ) {
+		fprintf( fp, "%d\t%.3f", frm, acquiredManipulandumState[frm].time ); 
+		for ( mrk = 0; mrk < nMarkers; mrk++ ) {
+			fprintf( fp, "\t%d\t%f\t%f\t%f", 
+				acquiredPosition[frm].marker[mrk].visibility,
+				acquiredPosition[frm].marker[mrk].position[X],
+				acquiredPosition[frm].marker[mrk].position[Y],
+				acquiredPosition[frm].marker[mrk].position[Z] );
+		}
+		fprintf( fp, "\n" );
 	}
 	fclose( fp );
+	// Note that the file was written.
+	monitor->SendEvent( "Data file written: %s", filename );
 	
+	// Write a file with the computed manipulandum position and orientation.
+	sprintf( filename, "%s.mnp", fileroot );
+	fp = fopen( filename, "w" );
+	fprintf( fp, "Sample\tTime\tVisible\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
+	for ( frm = 0; frm < nAcqFrames; frm++ ) {
+		fprintf( fp, "%d\t%.3f\t%d\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\n", 
+			frm, 
+			acquiredManipulandumState[frm].time, 
+			acquiredManipulandumState[frm].visibility,
+			acquiredManipulandumState[frm].position[X], 
+			acquiredManipulandumState[frm].position[Y], 
+			acquiredManipulandumState[frm].position[Z],
+			acquiredManipulandumState[frm].orientation[X], 
+			acquiredManipulandumState[frm].orientation[Y], 
+			acquiredManipulandumState[frm].orientation[Z],
+			acquiredManipulandumState[frm].orientation[M] );
+	}
+	fclose( fp );
+	// Note that the file was written.
+	monitor->SendEvent( "Data file written: %s", filename );
+
+	// Write a file with raw adc data.
+	sprintf( filename, "%s.adc", fileroot );
+	fp = fopen( filename, "w" );
+	fprintf( fp, "Sample\tTime" );
+	for ( chan = 0; chan < nChannels; chan++ ) fprintf( fp, "\tCH%02d", chan );
+	fprintf( fp, "\n" );
+	for ( smpl = 0; smpl < nAcqSamples; smpl++ ) {
+		fprintf( fp, "%d\t%.3f", smpl, acquiredAnalog[smpl].time );
+		for ( chan = 0; chan < nChannels; chan++ ) fprintf( fp, "\t%f", acquiredAnalog[smpl].channel[chan] );
+		fprintf( fp, "\n" );
+	}
+	fclose( fp );
+	// Note that the file was written.
+	monitor->SendEvent( "Data file written: %s", filename );
+		
+	// Write a file with computed force data.
+	sprintf( filename, "%s.frc", fileroot );
+	fp = fopen( filename, "w" );
+	fprintf( fp, "Sample\tTime" );
+	fprintf( fp, "\tGF" );
+	fprintf( fp, "\tF1X\tF1Y\tF1Z" );
+	fprintf( fp, "\tF2X\tF2Y\tF2Z" );
+	fprintf( fp, "\tCOP1X\tCOP1Y\tCOP1Z" );
+	fprintf( fp, "\tCOP2X\tCOP2Y\tCOP2Z" );
+	fprintf( fp, "\n" );
+	for ( smpl = 0; smpl < nAcqSamples; smpl++ ) {
+		fprintf( fp, "%d\t%.3f", smpl, acquiredAnalog[smpl].time );
+		fprintf( fp, "\t%f", acquiredGripForce[smpl] );
+		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[0][smpl][X], acquiredForce[0][smpl][Y], acquiredForce[0][smpl][Z] );
+		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[1][smpl][X], acquiredForce[1][smpl][Y], acquiredForce[1][smpl][Z] );
+		fprintf( fp, "\t%f\t%f\t%f", acquiredCOP[0][smpl][X], acquiredCOP[0][smpl][Y], acquiredCOP[0][smpl][Z] );
+		fprintf( fp, "\t%f\t%f\t%f", acquiredCOP[1][smpl][X], acquiredCOP[1][smpl][Y], acquiredCOP[1][smpl][Z] );
+		fprintf( fp, "\n" );
+	}
+	fclose( fp );
 	// Note that the file was written.
 	monitor->SendEvent( "Data file written: %s", filename );
 	
@@ -1127,19 +1234,12 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 
 // A combination of simulated targets on the computer screen the real CODA tracker.
 
-DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets, 
-									 int n_horizontal_targets,
-									 int n_tones, int n_markers ) {
+DexCodaApparatus::DexCodaApparatus( void ) {
 	
 	type = DEX_CODA_APPARATUS;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nTones = n_tones;
-	nMarkers = n_markers;
-	nCodas = 2;
-	nEvents = 0;
 	
 	// Create a window to monitor the experiment.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
+	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
 	
 	// Initialize target system.
 	targets = new DexScreenTargets();
@@ -1153,14 +1253,8 @@ DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets,
 	// Use the mouse to simulate analog inputs.
 	adc = new DexMouseADC();
 	
-	// Load the most recently defined target positions.
-	LoadTargetPositions();
-
-	// Initialize the tracker hardware.
-	tracker->Initialize();
-
-	// Start with all the targets off.
-	TargetsOff();
+	// Do the common initializations.
+	Initialize();
 	
 }
 
@@ -1172,16 +1266,9 @@ DexCodaApparatus::DexCodaApparatus(  int n_vertical_targets,
 
 // A combination of simulated targets on the computer screen the real CODA tracker.
 
-DexRTnetApparatus::DexRTnetApparatus(  int n_vertical_targets, 
-									   int n_horizontal_targets,
-									   int n_tones, 
-                                       int n_markers ) {
+DexRTnetApparatus::DexRTnetApparatus( void ) {
 	
 	type = DEX_RTNET_APPARATUS;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nTones = n_tones;
-	nMarkers = n_markers;
-	nEvents = 0;
 
 	DexRTnetTracker *tracker_local;
 		
@@ -1199,17 +1286,14 @@ DexRTnetApparatus::DexRTnetApparatus(  int n_vertical_targets,
 	nCodas = tracker_local->nCodas;
 	
 	// Create a window to monitor the experiment.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
+	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
+ 
+	// Here we are using the real GLMbox analog interface.
+	adc = new DexNiDaqADC();
 
-	// Load the most recently defined target positions.
-	LoadTargetPositions();
-  
-	// Initialize the tracker hardware.
-	tracker->Initialize();
-  
-	// Start with all the targets off.
-	TargetsOff();
-  	
+	// Do the common initializations.
+	Initialize();
+
 }
 
 /***************************************************************************/
@@ -1261,17 +1345,9 @@ BOOL CALLBACK dexApparatusDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 
 /***************************************************************************/
 
-DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance, 
-									 int n_vertical_targets, 
-									 int n_horizontal_targets,
-									 int n_tones, int n_markers ) {
+DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance ) {
 	
 	type = DEX_MOUSE_APPARATUS;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nTones = n_tones;
-	nMarkers = n_markers;
-	nCodas = 2;
-	nEvents = 0;
 	
 	// Initialize dialog box.
 	dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexApparatusDlgCallback );
@@ -1284,26 +1360,23 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance,
 	ShowWindow( dlg, SW_SHOW );
 	
 	// Create a link to monitor the experiment.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, nCodas );
+	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
 	
 	// Initialize target system.
-	targets = new DexScreenTargets( n_vertical_targets, n_horizontal_targets );
+	targets = new DexScreenTargets( nVerticalTargets, nHorizontalTargets );
 
 	// Initialize sounds.
-	sounds = new DexScreenSounds( n_tones );
+	sounds = new DexScreenSounds( nTones );
 	
 	// Use a virtual mouse tracker in place of the coda.
 	tracker = new DexMouseTracker( dlg );
 	
-	// Load the most recently defined target positions.
-	LoadTargetPositions();
-  
-	// Initialize the tracker hardware.
-	tracker->Initialize();
-  
-	// Start with all the targets off.
-	TargetsOff();
-  
+	// Here we are using the real GLMbox analog interface.
+	adc = new DexNiDaqADC();
+
+	// Do the common initializations.
+	Initialize();
+ 
 }
 
 /***************************************************************************/
