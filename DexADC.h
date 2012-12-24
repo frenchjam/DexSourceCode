@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <NIDAQmx.h>
 #include "Dexterous.h"
 
 /********************************************************************************/
@@ -28,7 +29,7 @@ class DexADC : public VectorsMixin {
 
 		double samplePeriod;
 
-		DexADC() : nChannels( 32 ), samplePeriod( 0.001 ) {} ;
+		DexADC() : nChannels( N_CHANNELS ), samplePeriod( ANALOG_SAMPLE_PERIOD ) {} ;
 
 		virtual void Initialize( void ) = 0;
 		virtual int  Update( void ) = 0;
@@ -87,3 +88,38 @@ public:
 
 };
 
+/********************************************************************************/
+
+class DexNiDaqADC : public DexADC {
+
+private:
+
+	bool		acquisitionOn;
+	bool		overrun;
+	DexTimer	acquisitionTimer;
+	double		duration;
+	int			nPolled;
+
+	FILE		*fp;
+	
+protected:
+
+	TaskHandle  taskHandle;
+	void		ReportNiDaqError ( void );
+public:
+
+	DexNiDaqADC( void ) : acquisitionOn(false), overrun(false), taskHandle(0) {}
+
+	void Initialize( void );
+	void Quit( void );
+
+	int  Update( void );
+	void StartAcquisition( float max_duration );
+	void StopAcquisition( void );
+	bool GetAcquisitionState( void );
+	bool CheckAcquisitionOverrun( void );
+
+	int		RetrieveAnalogSamples( AnalogSample samples[], int max_samples );
+	bool	GetCurrentAnalogSample( AnalogSample &sample );
+
+};
