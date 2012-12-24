@@ -1006,6 +1006,70 @@ int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, const float desire
 	return( WaitUntilAtTarget( nVerticalTargets + target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg  ) );
 }
 
+/***************************************************************************/
+
+//
+// Wait until the grip is properly centered.
+//
+int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg  ) {
+	
+	// These are objects of my own making, based on the Windows clock.
+	DexTimer timeout_timer;
+
+	// Holds the current center of pressure.
+	Vector3		cop[N_FORCE_TRANSDUCERS];
+	double		cop_offset[N_FORCE_TRANSDUCERS];
+
+	bool		centered;
+	int			mb_reply;
+	
+	// Log that the method has started.
+	monitor->SendEvent( "WaitCenteredGrip - Start." );
+	DexTimerSet( timeout_timer, timeout );
+		
+	do {
+
+		if ( DexTimerTimeout( timeout_timer ) ) {
+			
+			// Timeout has been reached. Signal the error to the user.
+			if ( !msg ) msg = "Time to achieve centered grip exceeded.";
+			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
+				"%s\n\n Tolerance: %f\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
+				msg, cop_offset[0] * 1000.0, vstr( cop[0] ), cop_offset[1] * 1000.0, vstr( cop[1] )  );
+			// Exit, signalling that the subject wants to abort.
+			if ( mb_reply == IDABORT ) {
+				monitor->SendEvent( "Manual Abort from WaitCenteredGrip." );
+				return( ABORT_EXIT );
+			}
+			// Ignore the error and move on.
+			if ( mb_reply == IDIGNORE ) {
+				monitor->SendEvent( "Ignore Timeout from WaitCenteredGrip." );
+				return( IGNORE_EXIT );
+			}
+			
+			// Try again for another timeout period. Thus, retry restarts the step, 
+			// not the entire script.
+			monitor->SendEvent( "Retry after Timeout from WaitCenteredGrip." );
+			DexTimerSet( timeout_timer, waitTimeLimit );
+			
+		}
+		
+		
+		// Do whatever updates are needed during a wait cycle.
+		Update();
+
+		centered = true;
+		for ( int unit = 0; unit < nForceTransducers; unit++ ) {
+			cop_offset[unit] = GetCOP( cop[unit], unit, min_force );
+			if ( cop_offset[unit] < 0 || cop_offset[unit] > tolerance / 1000.0 ) centered = false;
+		}
+
+	} while ( !centered );
+
+	return( NORMAL_EXIT );
+	
+}
+	
 /*********************************************************************************/
 /*                                                                               */
 /*                                Stimulus Control                               */
