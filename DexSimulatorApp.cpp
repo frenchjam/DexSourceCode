@@ -179,6 +179,16 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+
+	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+	apparatus->ZeroForceTransducers();
+
+	// Instruct subject to pick up the manipulandum
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 #endif
 
 	// Start acquiring data.
@@ -480,12 +490,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case TARGETED_PROTOCOL:
-#if 0
 		do {
 			return_code = RunTargeted( apparatus, VERTICAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-#endif
 		do {
 			return_code = RunTargeted( apparatus, HORIZONTAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
