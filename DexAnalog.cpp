@@ -4,6 +4,8 @@
 /*                                                                               */
 /*********************************************************************************/
 
+// Methods to process the analog data, notably the ATI data.
+
 #include <windows.h>
 #include <mmsystem.h>
 
@@ -32,11 +34,13 @@
 
 /***************************************************************************/
 
-const int DexApparatus::ftAnalogChannel[N_FORCE_TRANSDUCERS] = {0, 6};
+const int DexApparatus::ftAnalogChannel[N_FORCE_TRANSDUCERS] = {LEFT_ATI_FIRST_CHANNEL, RIGHT_ATI_FIRST_CHANNEL};
 
 void DexApparatus::InitForceTransducers( void ) {
 
-	for ( int sensor = 0; sensor < N_FORCE_TRANSDUCERS; sensor++ ) {
+	Quaternion align, flip;
+
+	for ( int sensor = 0; sensor < nForceTransducers; sensor++ ) {
 		// Load the calibration data, for calibration index 1.
 		// Some transducers might have dual calibrations.
 		ftCalibration[sensor] = createCalibration( ATICalFilename[sensor], 1 );
@@ -48,11 +52,20 @@ void DexApparatus::InitForceTransducers( void ) {
 		SetForceUnits( ftCalibration[sensor], "N" );
 		SetTorqueUnits( ftCalibration[sensor], "N-m" );
 	}
+
+	// Compute the transformations to put ATI forces in a common reference frame.
+	// TO DO: Check what the others are using as a reference frame and make it 
+	// coherent. Ideally, the local manipulandum reference frame should align with
+	// the world reference frame when the manipulandum is held upright in the seated posture.
+	SetQuaterniond( ftAlignmentQuaternion[0], ATIRotationAngle[0], kVector );
+	SetQuaterniond( align, ATIRotationAngle[1], kVector );
+	SetQuaterniond( flip, 180.0, iVector );
+	MultiplyQuaternions( ftAlignmentQuaternion[1], flip, align );
 }
 
 void DexApparatus::ReleaseForceTransducers( void ) {
 
-	for ( int sensor = 0; sensor < N_FORCE_TRANSDUCERS; sensor++ ) {
+	for ( int sensor = 0; sensor < nForceTransducers; sensor++ ) {
 		if ( ftCalibration[sensor] ) destroyCalibration( ftCalibration[sensor] );
 	}
 
@@ -64,32 +77,39 @@ void DexApparatus::ZeroForceTransducers( void ) {
 
 	AnalogSample sample;
 	float gauges[N_FORCE_TRANSDUCERS][N_GAUGES];
-	int i, j;
+	int i, j, k;
+
+	float previous_timestamp = -1.0;
 
 	// Take multiple samples and compute an average.
-	for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
-		for ( j = 0; j < N_GAUGES; j++ ) {
+	// First zero the sums.
+	for ( i = 0; i < nForceTransducers; i++ ) {
+		for ( j = 0; j < nGauges; j++ ) {
 			gauges[i][j] = 0.0;
 		}
 	}
-	for ( i = 0; i < N_SAMPLES_FOR_AVERAGE; i++ ) {
-		adc->GetCurrentAnalogSample( sample );
-		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
-			for ( j = 0; j < N_GAUGES; j++ ) {
-				gauges[i][j] += sample.channel[ftAnalogChannel[i]+j];
+	// Accumulate the specified number of samples for the average.
+	for ( i = 0; i < nSamplesForAverage; i++ ) {
+		// Make sure that we take new samples.
+		do {
+			adc->GetCurrentAnalogSample( sample );
+		} while ( sample.time == previous_timestamp );
+		previous_timestamp = sample.time;
+		// Add the new samples to the sums.
+		for ( j = 0; j < nForceTransducers; j++ ) {
+			for ( k = 0; k < N_GAUGES; k++ ) {
+				gauges[j][k] += sample.channel[ftAnalogChannel[j]+k];
 			}
 		}
-		// Perhaps we should sleep here to allow new data to be acquired.
-		// Or check when a new sample is taken to see if the timestamp has changed.
 	}
-	for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
+	for ( i = 0; i < nForceTransducers; i++ ) {
 		for ( j = 0; j < N_GAUGES; j++ ) {
 			gauges[i][j] /= (float) N_SAMPLES_FOR_AVERAGE;
 		}
 	}
 
 	// Average values for the gauges get stored with the calibration.
-	for ( int sensor = 0; sensor < N_FORCE_TRANSDUCERS; sensor++ ) {
+	for ( int sensor = 0; sensor < nForceTransducers; sensor++ ) {
 		Bias( ftCalibration[sensor], gauges[sensor] );
 	} 
 
@@ -107,9 +127,13 @@ void DexApparatus::ComputeForceTorque(  Vector3 &force, Vector3 &torque, int uni
 	// Use the ATI provided routine to compute force and torque.
 	ConvertToFT( ftCalibration[unit], &analog.channel[ftAnalogChannel[unit]], ft );
 	// First three components are the force.
-	CopyVector( force, ft );
-	// Last three are the torque.
-	CopyVector( torque, ft + 3 );
+	// We pretend that FT is a vector.
+	RotateVector( force, ftAlignmentQuaternion[unit], ft );
+	// Last three are the torque. I acces the last 3 values like a vector.
+	// TO DO: Review the math. I believe that we apply the same
+	// rotation to the torque vector as to the force one. But
+	// I should think some more to be sure.
+	RotateVector( torque, ftAlignmentQuaternion[unit], ft + 3 );
 
 }
 
@@ -124,28 +148,39 @@ void DexApparatus::GetForceTorque( Vector3 &force, Vector3 &torque, int unit ) {
 
 /***************************************************************************/
 
-void DexApparatus::ComputeCOP( Vector3 &cop, Vector3 &force, Vector3 &torque ) {
-	cop[X] = torque[X] / force[X];
-	cop[Y] = torque[Y] / force[Y];
-	cop[Z] = 0.0;
+double DexApparatus::ComputeCOP( Vector3 &cop, Vector3 &force, Vector3 &torque, double threshold ) {
+	// If there is enough normal force, compute the center of pressure.
+	if ( fabs( force[Z] ) > threshold ) {
+		cop[X] = - torque[Y] / force[Z];
+		cop[Y] = - torque[X] / force[Z];
+		cop[Z] = 0.0;
+		// Return the distance from the center.
+		return( sqrt( cop[X] * cop[X] + cop[Y] * cop[Y] ) );
+	}
+	else {
+		// If there is not enough normal force, just call it a centered COP.
+		CopyVector( cop, zeroVector );
+		// But signal that it's not a valid COP by returning a negative distance.
+		return( -1 );
+	}
 }
 
-void DexApparatus::GetCOP( Vector3 &cop, int unit ) {
+double DexApparatus::GetCOP( Vector3 &cop, int unit, double threshold ) {
 
 	Vector3 force;
 	Vector3 torque;
 
 	GetForceTorque( force, torque, unit );
-	ComputeCOP( cop, force, torque );
+	return( ComputeCOP( cop, force, torque, threshold ) );
 
 }
 
 /***************************************************************************/
 
 float DexApparatus::ComputeGripForce( Vector3 &force1, Vector3 &force2 ) {
-	// This is the simple method. Z axes of the two transducers face in 
-	// opposite directions. Just take the average of the two, and change sign.
-	return(  ( force1[Z] + force2[Z] ) / -2.0 );
+	// Force readings have been transformed into a common reference frame.
+	// Take the average of two opposing forces.
+	return(  ( force1[Z] - force2[Z] ) / 2.0 );
 }
 
 float DexApparatus::GetGripForce( void ) {
@@ -158,22 +193,20 @@ float DexApparatus::GetGripForce( void ) {
 
 float DexApparatus::ComputeLoadForce( Vector3 &load, Vector3 &force1, Vector3 &force2 ) {
 	// Compute the net force on the object.
-	// This is the simple method. 
-	// Y and Z axes of the two transducers face in 
-	// opposite directions, X axes are aligned.
-	// TO DO: Check if I am right about how the transducers are aligned.
-	// Is it the X axes that are flipped and the Y axes aligned?
+	// If the reference frames have been properly aligned,
+	// the net force on the object is simply the sum of the forces 
+	// applied to either side.
 	load[X] = force1[X] + force2[X];
-	load[Y] = force1[Y] - force2[Y];
-	load[Z] = force1[Z] - force2[Z];
+	load[Y] = force1[Y] + force2[Y];
+	load[Z] = force1[Z] + force2[Z];
 	// Return the magnitude of the net force on the object.
 	return( VectorNorm( load ) );
 }
 
 float DexApparatus::ComputePlanarLoadForce( Vector3 &load, Vector3 &force1, Vector3 &force2 ) {
 	// Compute the net force perpendicular to the pinch axis.
-	load[X] = force1[X] + force2[X];
-	load[Y] = force1[Y] - force2[Y];
+	ComputeLoadForce( load, force1, force2 );
+	// Ignore the Z component.
 	load[Z] = 0.0;
 	// Return the magnitude of the net force on the object.
 	return( VectorNorm( load ) );

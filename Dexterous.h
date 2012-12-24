@@ -23,6 +23,7 @@
 #define N_ERROR_BLINKS 3
 #define N_NORMAL_BLINKS 3
 
+// These are maximum values, used to allocate arrays.
 #define DEX_MAX_CODAS 8
 #define DEX_MAX_MARKERS 28
 #define DEX_MAX_TARGETS 32
@@ -32,6 +33,11 @@
 #define DEX_MAX_CHANNELS		64
 #define DEX_MAX_ANALOG_SAMPLES	100000
 
+// The next are nominal values used as default values.
+
+#define ANALOG_SAMPLE_PERIOD	0.001
+#define MARKER_SAMPLE_PERIOD	0.005
+
 #define N_MARKERS 28
 #define N_VERTICAL_TARGETS 13
 #define N_HORIZONTAL_TARGETS 10
@@ -40,11 +46,18 @@
 #define N_VOLUMES 8
 #define N_DATA_FRAMES 3000
 #define N_CODAS 2
-#define N_CHANNELS	64
+#define N_CHANNELS	16
 
 #define N_FORCE_TRANSDUCERS	2
 #define N_GAUGES	6	// Number of strain gauges per force/torque transducer.
 #define N_SAMPLES_FOR_AVERAGE	20
+
+#define DEFAULT_COP_THRESHOLD	0.25	// Minimum normal force to compute a center of pressure.
+#define LEFT_ATI_TRANSDUCER		0
+#define RIGHT_ATI_TRANSDUCER	1
+
+#define LEFT_ATI_FIRST_CHANNEL	0
+#define RIGHT_ATI_FIRST_CHANNEL	6
 
 #define BEEP_TONE	4
 #define BEEP_VOLUME	8
@@ -212,4 +225,18 @@ extern float SimulatedCodaRotation[2][3][3];
 #define BOTTOM_BAR_MARKER 18
 #define TOP_BAR_MARKER	  19
 
+// Paths to the files containing the ATI Force/Torque transducer calibrations.
+#define LEFT_ATI_CALFILE	"e:\\ATI Calibrations\\FT7928.cal"
+#define RIGHT_ATI_CALFILE	"e:\\ATI Calibrations\\FT7927.cal"
+// How much, in degrees, to rotate each ATI around it's own Z axis to 
+// align the ATI reference frame with the manipulandum reference frame.
+// Note that the right ATI coordinate frame will also be flipped 180°
+//	to align with the left one. But that rotation is assumed to be exactly 180.
+// To Do: The ATI documentation appears to say that this angle is 22.5 degrees, but 
+// the GLMbox software appears to say 30. Better check.
+#define LEFT_ATI_ROTATION	 22.5
+#define RIGHT_ATI_ROTATION	 22.5
+	
 extern char *ATICalFilename[N_FORCE_TRANSDUCERS];
+extern double ATIRotationAngle[N_FORCE_TRANSDUCERS];
+

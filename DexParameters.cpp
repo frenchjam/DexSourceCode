@@ -136,11 +136,10 @@ float	SimulatedCodaRotation[2][3][3] = {
 
 /***************************************************************************/
 
+// These are the paths to the calibration files for each force/torque transducer.
+// Be careful not to mix the two. It would have a disastrous effect on the 
+// force and torque readings.
 
-char *ATICalFilename[2] = {
-
-	"e:\\ATI Calibrations\\FT8884.cal",
-	"e:\\ATI Calibrations\\FT8885.cal"
-
-};
+char *ATICalFilename[2] = {LEFT_ATI_CALFILE, RIGHT_ATI_CALFILE};
+double ATIRotationAngle[2] = {LEFT_ATI_ROTATION, RIGHT_ATI_ROTATION};
 
