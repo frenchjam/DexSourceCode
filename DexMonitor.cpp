@@ -20,6 +20,8 @@
 #include <memory.h>
 #include <process.h>
 
+#include <fOutputDebugString.h>
+
 #include <useful.h>
 #include <screen.h>
 #include <3dMatrix.h>
@@ -702,6 +704,9 @@ int DexMonitorServer::SendEvent( const char* format, ... ) {
 	// Send out the event on the data stream.
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
+
+	// Show it in the Debug window.
+	fOutputDebugString( "%s\n", packet );
 	
 	Sleep( DEX_UDP_WAIT );
 	messageCounter++;
