@@ -73,13 +73,31 @@ void DexApparatus::ReleaseForceTransducers( void ) {
 
 /***************************************************************************/
 
+// Set the strain gauge offsets in the ATI calibration, so that the offset is nulled when the force is computed.
+
+void DexApparatus::NullifyStrainGaugeOffsets( int unit, float gauge_offsets[N_GAUGES] ) {
+
+	Bias( ftCalibration[unit], gauge_offsets );
+
+	// It could be useful to send the bias values to the ground in real time.
+	monitor->SendEvent( "Strain gauge offsets nullified.\n Unit: %d < %f %f %f %f %f %f >", 
+		unit, gauge_offsets[0], gauge_offsets[1], gauge_offsets[2], gauge_offsets[3], gauge_offsets[4], gauge_offsets[5] );
+
+	// If someone has been computing filtered force values, they
+	// must have gone to zero after this operation.
+	filteredGrip = 0.0;
+	filteredLoad = 0.0;
+
+}
+
 // Computes the average offset on each of the strain guages and then
 // inserts those values into the ATI calibration so that the offset can be 
 // compenstated.
 
-// This is the realtime version. It specifically acquires ADC samples for 
+// This is the realtime version. It explicitly acquires ADC samples for 
 // this purpose. See also the post hoc version that works on an acquired buffer
 // full of analog data.
+
 
 void DexApparatus::ZeroForceTransducers( void ) {
 
@@ -114,16 +132,12 @@ void DexApparatus::ZeroForceTransducers( void ) {
 		for ( j = 0; j < N_GAUGES; j++ ) {
 			gauges[i][j] /= (float) N_SAMPLES_FOR_AVERAGE;
 		}
+		NullifyStrainGaugeOffsets( i, gauges[i] );
+		// It could be useful to send the bias values to the ground in real time.
+		monitor->SendEvent( "Strain gauge offsets computed.\n Unit: %d < %f %f %f %f %f %f >", 
+			i, gauges[i][0], gauges[i][1], gauges[i][2], gauges[i][3],gauges[i][4], gauges[i][5] );
+	
 	}
-
-	// Average values for the gauges get stored with the calibration.
-	for ( int sensor = 0; sensor < nForceTransducers; sensor++ ) {
-		Bias( ftCalibration[sensor], gauges[sensor] );
-	} 
-
-	// We should signal to ground that this operation has been performed.
-	// The average strain gauge values must be saved with the data.
-
 }
 
 /***************************************************************************/
@@ -233,4 +247,14 @@ float DexApparatus::GetPlanarLoadForce( Vector3 &load ) {
 	GetForceTorque( force0, torque0, 0 );
 	GetForceTorque( force1, torque1, 1 );
 	return( ComputePlanarLoadForce( load, force0, force1 ) );
+}
+
+float DexApparatus::FilteredLoad( float new_load, float filter_constant ) {
+	filteredLoad = (new_load + filter_constant * filteredLoad) / (1.0 + filter_constant);
+	return( filteredLoad );
+}
+
+float DexApparatus::FilteredGrip( float new_grip, float filter_constant ) {
+	filteredGrip = (new_grip + filter_constant * filteredGrip) / (1.0 + filter_constant);
+	return( filteredGrip );
 }

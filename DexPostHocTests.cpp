@@ -676,11 +676,11 @@ void DexApparatus::ComputeAndNullifyStrainGaugeOffsets( void ) {
 			gauge_offset[gge] = sum[gge] / (double) nAcqSamples;
 		}
 
-		// Average values for the gauges get stored with the calibration.
-		Bias( ftCalibration[unit], gauge_offset );
-
 		// It could be useful to send the bias values to the ground in real time.
 		monitor->SendEvent( "Strain gauge offsets computed.\n Unit: %d < %f %f %f %f %f %f >", 
 			unit, gauge_offset[0], gauge_offset[1], gauge_offset[2], gauge_offset[3], gauge_offset[4], gauge_offset[5] );
+
+		NullifyStrainGaugeOffsets( unit, gauge_offset );
+
 	} 
 }
