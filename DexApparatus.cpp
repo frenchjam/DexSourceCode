@@ -1077,6 +1077,294 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 	
 }
 	
+/***************************************************************************/
+
+// Use the target LEDs to give feedback about the applied grip and load force.
+// This sets up the mapping from the forces to the visible target LEDs.
+
+void DexApparatus::MapForceToLED( float min_grip, float max_grip, float min_load, float max_load ) {
+
+	// Map force ranges to visible LEDs.
+	// Desired grip forces are to be positive. 
+	// If they are negative, that means we don't care.
+	if ( max_grip < 0 && min_grip < 0 ) {
+		max_grip_led = -1;
+		min_grip_led = -1;
+		grip_to_led = 0.0;
+		grip_offset = 0.0;
+	}
+	if ( max_grip < 0 ) {
+		max_grip_led = -1;
+		min_grip_led = nHorizontalTargets - 5;
+		grip_to_led = (double) min_grip_led / min_grip;
+		grip_offset = 0.0;
+	}
+	else if ( min_grip < 0 ) {
+		min_grip_led = -1;
+		max_grip_led = nHorizontalTargets - 5;
+		grip_to_led = (double) max_grip_led / max_grip;
+		grip_offset = 0.0;
+	}
+	else {
+		// Map the allowable range to a set of LEDs.
+		min_grip_led = nHorizontalTargets - 6;
+		max_grip_led = nHorizontalTargets - 2;
+		// The distance between the min and max allowable force defines the gain
+		// factor between Newtons and LED steps.
+		grip_to_led = (double) (max_grip_led - min_grip_led) / (max_grip - min_grip);
+		// Compute how much force is represented by the LEDs below the lower one.
+		// You need at least this much force to get the LED to move.
+		grip_offset = min_grip - min_grip_led / grip_to_led;
+	}
+
+	// Map load force ranges to visible LEDs.
+	// Desired grip forces are to be positive. 
+	// If they are negative, that means we don't care.
+	zero_load_led = nVerticalTargets - 9;
+	if ( max_load < 0 && min_load < 0 ) {
+		max_load_led = -1;
+		min_load_led = -1;
+		load_to_led = 0.0;
+		load_offset = 0.0;
+	}
+	if ( max_load < 0 ) {
+		max_load_led = -1;
+		min_load_led = nVerticalTargets - 5;
+		load_to_led = (double) min_load_led / min_load;
+		load_offset = 0.0;
+	}
+	else if ( min_load < 0 ) {
+		min_load_led = -1;
+		max_load_led = nVerticalTargets - 5;
+		load_to_led = (double) max_load_led / max_load;
+		load_offset = 0.0;
+	}
+	else {
+		// Map the allowable range to a set of LEDs.
+		min_load_led = nVerticalTargets - 6;
+		max_load_led = nVerticalTargets - 2;
+		// The distance between the min and max allowable force defines the gain
+		// factor between Newtons and LED steps.
+		load_to_led = (double) (max_load_led - min_load_led) / (max_load - min_load);
+		// Compute how much force is represented by the LEDs below the lower one.
+		// You need at least this much force to get the LED to move.
+		load_offset = min_load - min_load_led / load_to_led;
+	}
+
+	DexTimerSet( blink_timer, waitBlinkPeriod );
+	blink = true;
+
+}
+
+// This routine runs the LEDs during the routines that feedback force info.
+
+void DexApparatus::UpdateForceToLED( float grip, float load ) {
+
+	int cursor;
+
+	if ( DexTimerTimeout( blink_timer ) ) {
+		blink = !blink;
+		DexTimerSet( blink_timer, waitBlinkPeriod );
+	}
+	TargetsOff();
+
+	// Show the desired range of grip forces.
+	if ( min_grip_led >= 0 ) HorizontalTargetOn( min_grip_led );
+	if ( max_grip_led >= 0 ) HorizontalTargetOn( max_grip_led );
+
+	// Make a blinking target follow the measured grip force.
+	cursor = floor( (grip - grip_offset) * grip_to_led );
+	if ( cursor < 0 ) cursor = 0;
+	if ( cursor >= nHorizontalTargets ) cursor = nHorizontalTargets - 1;
+	if ( blink ) HorizontalTargetOn( cursor );
+	else  HorizontalTargetOff( cursor );
+
+	// Show the desired range of load forces.
+	if ( min_load_led >= 0 ) VerticalTargetOn( min_load_led );
+	if ( max_load_led >= 0 ) VerticalTargetOn( max_load_led );
+
+	cursor = floor( (load - load_offset) * load_to_led );
+	if ( cursor < 0 ) cursor = 0;
+	if ( cursor >= nVerticalTargets ) cursor = nVerticalTargets - 1;
+	if ( blink ) VerticalTargetOn( cursor );
+	else  VerticalTargetOff( cursor );
+
+	Update();
+
+}
+
+// 
+// Wait until an appropriate combination of grip force and load force is achieved.
+//
+
+int DexApparatus::WaitDesiredForces( float min_grip, float max_grip, 
+									 float min_load, float max_load, 
+									 Vector3 direction,
+									 float filter_constant,
+									 float hold_time, float timeout, const char *msg ) {
+
+	Vector3		force[N_FORCE_TRANSDUCERS], torque[N_FORCE_TRANSDUCERS];
+
+	double		grip, load;
+	Vector3		load_force;
+
+	DexTimer	timeout_timer, hold_timer;
+
+	int			unit;
+
+	// Make sure that the direction vector is a unit vector.
+	NormalizeVector( direction );
+
+	// Set up the parameters of the visual feedback.
+	MapForceToLED( min_grip, max_grip, min_load, max_load );
+
+	DexTimerSet( timeout_timer, timeout );
+	DexTimerSet( hold_timer, hold_time );
+	while (1) {
+
+		if ( DexTimerTimeout( timeout_timer ) ) {
+
+			int mb_reply;
+			
+			// Timeout has been reached. Signal the error to the user.
+			if ( !msg ) msg = "Time to achieve desired forces exceeded.";
+			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s", msg );
+			// Exit, signalling that the subject wants to abort.
+			if ( mb_reply == IDABORT ) {
+				monitor->SendEvent( "Manual Abort from WaitDesiredForce()." );
+				return( ABORT_EXIT );
+			}
+			// Ignore the error and move on.
+			if ( mb_reply == IDIGNORE ) {
+				monitor->SendEvent( "Ignore Timeout from WaitDesiredForce()." );
+				return( IGNORE_EXIT );
+			}
+			
+			// Try again for another timeout period. Thus, retry restarts the step, 
+			// not the entire script.
+			monitor->SendEvent( "Retry after Timeout from WaitDesiredForces()." );
+			DexTimerSet( timeout_timer, timeout );
+			
+		}
+
+		for ( unit = 0; unit < N_FORCE_TRANSDUCERS; unit++ ) GetForceTorque( force[unit], torque[unit], unit ); 
+		grip = ComputeGripForce( force[0], force[1] );
+		ComputeLoadForce( load_force, force[0], force[1] );
+		load = DotProduct( load_force, direction );
+
+		// Filter the readings.
+		grip = FilteredGrip( grip, filter_constant );
+		load = FilteredLoad( load, filter_constant );
+
+		// If either force is out of range, restart the timer that measures
+		// how long we have been in range.
+		if ( min_grip >= 0 && grip < min_grip ) DexTimerSet( hold_timer, hold_time );
+		if ( max_grip >= 0 && grip > max_grip ) DexTimerSet( hold_timer, hold_time );
+		if ( min_load >= 0 && load < min_load ) DexTimerSet( hold_timer, hold_time );
+		if ( max_load >= 0 && load > max_load ) DexTimerSet( hold_timer, hold_time );
+
+		// If this timer runs out, it means that we were in the range for the required
+		// amount of time and can move on.
+		if ( DexTimerTimeout( hold_timer ) ) break;
+
+		UpdateForceToLED( grip, load );
+
+	} 
+
+	TargetsOff();
+	Update();
+
+	return( NORMAL_EXIT );
+}
+
+// 
+// Wait until the fingers slip.
+//
+
+int DexApparatus::WaitSlip( float min_grip, float max_grip, 
+							float min_load, float max_load, 
+							Vector3 direction,
+							float filter_constant,
+							float slip_threshold, float timeout, const char *msg ) {
+
+	Vector3		force[N_FORCE_TRANSDUCERS], torque[N_FORCE_TRANSDUCERS];
+	Vector3		cop[N_FORCE_TRANSDUCERS], initial_cop[N_FORCE_TRANSDUCERS], delta_cop[N_FORCE_TRANSDUCERS];
+
+	double		grip, load, delta[N_FORCE_TRANSDUCERS];
+	Vector3		load_force;
+
+	DexTimer	timeout_timer;
+
+	int			unit;
+
+	bool		slipped;
+
+	// Make sure that the direction vector is a unit vector.
+	NormalizeVector( direction );
+
+	// Set up the parameters of the visual feedback.
+	MapForceToLED( min_grip, max_grip, min_load, max_load );
+
+	// Measure where the fingers are to start.
+	for ( unit = 0; unit < N_FORCE_TRANSDUCERS; unit++ ) {
+		GetForceTorque( force[unit], torque[unit], unit ); 
+		ComputeCOP( initial_cop[unit], force[unit], torque[unit] );
+	}
+
+	DexTimerSet( timeout_timer, timeout );
+	do {
+
+		if ( DexTimerTimeout( timeout_timer ) ) {
+
+			int mb_reply;
+			
+			// Timeout has been reached. Signal the error to the user.
+			if ( !msg ) msg = "Time to achieve finger slip exceeded.";
+			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s", msg );
+			// Exit, signalling that the subject wants to abort.
+			if ( mb_reply == IDABORT ) {
+				monitor->SendEvent( "Manual Abort from WaitSlip()." );
+				return( ABORT_EXIT );
+			}
+			// Ignore the error and move on.
+			if ( mb_reply == IDIGNORE ) {
+				monitor->SendEvent( "Ignore Timeout from WaitSlip()." );
+				return( IGNORE_EXIT );
+			}
+			
+			// Try again for another timeout period. Thus, retry restarts the step, 
+			// not the entire script.
+			monitor->SendEvent( "Retry after Timeout from WaitDesiredForces()." );
+			DexTimerSet( timeout_timer, timeout );
+			
+		}
+
+		slipped = true;
+		for ( unit = 0; unit < N_FORCE_TRANSDUCERS; unit++ ) {
+			GetForceTorque( force[unit], torque[unit], unit ); 
+			if ( ComputeCOP( cop[unit], force[unit], torque[unit] ) > 0.0 ) {
+				SubtractVectors( delta_cop[unit], cop[unit], initial_cop[unit] );
+				delta[unit] = VectorNorm( delta_cop[unit] );
+				if ( delta[unit] < slip_threshold / 1000.0 ) slipped = false;
+			}
+		}
+		grip = ComputeGripForce( force[0], force[1] );
+		ComputeLoadForce( load_force, force[0], force[1] );
+		load = DotProduct( load_force, direction );
+
+		// Filter the readings.
+		grip = FilteredGrip( grip, filter_constant );
+		load = FilteredLoad( load, filter_constant );
+
+		UpdateForceToLED( grip, load );
+
+	} while ( !slipped );
+
+	TargetsOff();
+	Update();
+
+	return( NORMAL_EXIT );
+}
 /*********************************************************************************/
 /*                                                                               */
 /*                                Stimulus Control                               */
@@ -1101,12 +1389,24 @@ void DexApparatus::TargetOn( int id ) {
 	SetTargetState( currentTargetState | ( 0x00000001L << id ) );
 }
 
+void DexApparatus::TargetOff( int id ) {
+	SetTargetState( currentTargetState & ~( 0x00000001L << id ) );
+}
+
 void DexApparatus::VerticalTargetOn( int id ) {
 	TargetOn( id );
 }
 
 void DexApparatus::HorizontalTargetOn( int id ) {
 	TargetOn( nVerticalTargets + id );
+}
+
+void DexApparatus::VerticalTargetOff( int id ) {
+	TargetOff( id );
+}
+
+void DexApparatus::HorizontalTargetOff( int id ) {
+	TargetOff( nVerticalTargets + id );
 }
 
 int DexApparatus::DecodeTargetBits( unsigned long bits ) {

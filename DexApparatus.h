@@ -34,7 +34,29 @@ class DexApparatus : public VectorsMixin {
 private:
 	
 	FILE *fp;
-	
+
+	// These are parameters used to map measured forces to visible
+	// target LEDs to provide feedback of the desired and actual
+	// forces to be attained.
+	int			min_grip_led, max_grip_led;
+	int			min_load_led, max_load_led, zero_load_led;
+	double		grip_to_led, grip_offset;
+	double		load_to_led, load_offset;
+
+	// This is used in the UpdateForceToLED() method.
+	// It could also be used elsewhere to harmonize blinking, but 
+	// I'm not taking the time to do that.
+	DexTimer	blink_timer;
+	bool		blink;
+
+	// Saves force values between calls, so that recursive filtering 
+	// can be applied.
+	double		filteredLoad;
+	double		filteredGrip;
+
+	void MapForceToLED( float min_grip, float max_grip, float min_load, float max_load );
+	void UpdateForceToLED( float grip, float load );
+
 protected:
 	
 	unsigned long currentTargetState;
@@ -138,8 +160,11 @@ public:
 	
 	// Convenience routines for stimulus control. 
 	virtual void TargetOn( int n );
+	virtual void TargetOff( int n );
 	virtual void VerticalTargetOn( int n );
+	virtual void VerticalTargetOff( int n );
 	virtual void HorizontalTargetOn( int n );
+	virtual void HorizontalTargetOff( int n );
 	virtual void TargetsOff( void );
 	virtual int  DecodeTargetBits( unsigned long bits );
 	
@@ -165,6 +190,17 @@ public:
 	virtual int  WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
 
 	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
+
+	virtual int	 WaitDesiredForces( float min_grip, float max_grip, 
+									 float min_load, float max_load,
+									 Vector3 direction, float filter_constant,
+									 float hold_time, float timeout, const char *msg = NULL );
+	virtual int WaitSlip( float min_grip, float max_grip, 
+									 float min_load, float max_load, 
+									 Vector3 direction,
+									 float filter_constant,
+									 float slip_threshold, 
+									 float timeout, const char *msg = NULL );
 
 	// Hardware configuration
 	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
@@ -238,6 +274,7 @@ public:
 	virtual void InitForceTransducers( void );
 	virtual void ReleaseForceTransducers( void );
 	virtual void ZeroForceTransducers( void );
+	virtual void NullifyStrainGaugeOffsets( int unit, float gauge_offsets[N_GAUGES] );
 	virtual void ComputeAndNullifyStrainGaugeOffsets( void );
 	
 	void ComputeForceTorque( Vector3 &force, Vector3 &torque, int unit, AnalogSample analog );
@@ -251,6 +288,10 @@ public:
 	float ComputePlanarLoadForce( Vector3 &load, Vector3 &force1, Vector3 &force2 );
 	float GetLoadForce( Vector3 &load );
 	float GetPlanarLoadForce( Vector3 &load );
+
+	float FilteredLoad( float new_load, float filter_constant );
+	float FilteredGrip( float new_grip, float filter_constant );
+
 };
 
 /************************************************************************************/

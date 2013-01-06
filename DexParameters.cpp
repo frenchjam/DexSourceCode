@@ -45,7 +45,7 @@ float defaultOrientationTolerance = 60.0;					// Measured in degrees.
 // The tolerance on the orientation above is set very high for the simulator,
 // because the simulator intentionally makes the manipulandum rotate as you move toward the higher targets.
 
-float waitBlinkPeriod = 0.2;		// LED blink rate when out of zone.
+float waitBlinkPeriod = 0.02;		// LED blink rate when out of zone.
 float waitHoldPeriod = 1.0;			// Required hold time in zone.
 float waitTimeLimit = 10.0;			// Signal time out if we wait this long.
 

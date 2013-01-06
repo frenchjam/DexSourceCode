@@ -28,7 +28,9 @@
 
 /*********************************************************************************/
 
-// #define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+
+enum { FORCE_OK, SLIP_OK };
 
 /*********************************************************************************/
 
@@ -46,8 +48,22 @@ double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum
 int desired_posture = PostureSeated;
 double beepTime = BEEP_DURATION;
 
+// Force offset parameters.
 double offsetMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
 double offsetAcquireTime = 2.0;			// How long to acquire when computing strain gauge offsets.
+
+// Coefficient of friction test parameters.
+double frictionHoldTime = 5.0;
+double frictionTimeout = 15.0;
+double frictionMinGrip = 10.0;
+double frictionMaxGrip = 15.0;
+double frictionMinLoad = 5.0;
+double frictionMaxLoad = 10.0;
+double forceFilterConstant = 1.0;
+Vector3 frictionLoadDirection = { 0.0, -1.0, 0.0 };
+
+double slipThreshold = 10.0;
+double slipTimeout = 20.0;
 
 // Targeted trial parameters;
 int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
@@ -164,6 +180,46 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus ) {
 
 }
 
+/*********************************************************************************/
+
+int RunFrictionMeasurement( DexApparatus *apparatus ) {
+
+	int status;
+
+	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+
+	// Start acquiring Data.
+	apparatus->StartAcquisition( targetedMaxTrialTime );
+
+	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, relax the grip until slippage.\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
+		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+		forceFilterConstant, frictionHoldTime, frictionTimeout );
+	apparatus->MarkEvent( FORCE_OK );
+	apparatus->Beep();
+	apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
+		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+		forceFilterConstant, slipThreshold, slipTimeout );
+	apparatus->MarkEvent( SLIP_OK );
+
+	apparatus->Beep();
+	apparatus->Wait( 0.25 );
+	apparatus->Beep();
+	apparatus->Wait( 2.0 );
+
+	apparatus->StopAcquisition();
+	apparatus->SaveAcquisition( "FRIC" );
+
+	return( NORMAL_EXIT );
+
+}
 /*********************************************************************************/
 
 int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], int n_targets ) {
@@ -458,6 +514,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-rt"     ) ) apparatus_type = DEX_RTNET_APPARATUS;
 	if ( strstr( lpCmdLine, "-osc"    ) ) protocol = OSCILLATION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-coll"   ) ) protocol = COLLISION_PROTOCOL;
+	if ( strstr( lpCmdLine, "-friction"   ) ) protocol = FRICTION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-script" ) ) protocol = RUN_SCRIPT;
 	if ( strstr( lpCmdLine, "-calib"  ) ) protocol = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) protocol = INSTALL_PROCEDURE;
@@ -512,7 +569,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	case COLLISION_PROTOCOL:
 		while ( RETRY_EXIT == RunCollisions( apparatus ) );
 		break;
-		
+
+	case FRICTION_PROTOCOL:
+		do {
+			return_code = RunTransducerOffsetCompensation( apparatus );
+		} while ( return_code == RETRY_EXIT );
+		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+		do {
+			return_code = RunFrictionMeasurement( apparatus );
+		} while ( return_code == RETRY_EXIT );
+		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+		break;
+
 	case TARGETED_PROTOCOL:
 		do {
 			return_code = RunTransducerOffsetCompensation( apparatus );
