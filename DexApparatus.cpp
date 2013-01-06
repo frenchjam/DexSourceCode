@@ -1034,8 +1034,9 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 			// Timeout has been reached. Signal the error to the user.
 			if ( !msg ) msg = "Time to achieve centered grip exceeded.";
 			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
-				"%s\n\n Tolerance: %f\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
-				msg, cop_offset[0] * 1000.0, vstr( cop[0] ), cop_offset[1] * 1000.0, vstr( cop[1] )  );
+				"%s\n\n Tolerance: %.1f mm\n Min Force: %.2f N\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
+				msg, tolerance, min_force,
+				cop_offset[0] * 1000.0, vstr( cop[0] ), cop_offset[1] * 1000.0, vstr( cop[1] )  );
 			// Exit, signalling that the subject wants to abort.
 			if ( mb_reply == IDABORT ) {
 				monitor->SendEvent( "Manual Abort from WaitCenteredGrip." );
@@ -1059,8 +1060,14 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 		Update();
 
 		centered = true;
+		// Check if each sensor has its CoP near enough to the center.
+		// The test will also fail if there is not enough pressure, which
+		// we assume to mean that the subject is not holding the manipulandum
+		// properly in a pinch grip.
 		for ( int unit = 0; unit < nForceTransducers; unit++ ) {
 			cop_offset[unit] = GetCOP( cop[unit], unit, min_force );
+			// A negative offset means that the normal force is below threshold.
+			// The offset threshold is expressed in mm, but the COP is calculated in m.
 			if ( cop_offset[unit] < 0 || cop_offset[unit] > tolerance / 1000.0 ) centered = false;
 		}
 

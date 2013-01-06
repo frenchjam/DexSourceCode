@@ -209,7 +209,7 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
-	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 5.0 );
+	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
 	if ( status == ABORT_EXIT ) exit( status );
 
 
