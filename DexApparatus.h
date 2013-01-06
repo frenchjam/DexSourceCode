@@ -222,6 +222,7 @@ public:
 	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
 	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
 	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
+	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
 	
 	// Signalling events to the ground.
 	virtual void SignalConfiguration( void );
@@ -235,6 +236,7 @@ public:
 	virtual void MarkSoundEvent( int tone, int volume );
 	
 	virtual int TimeToFrame( float elapsed_time );
+	virtual int TimeToSample( float elapsed_time );
 	virtual void FindAnalysisEventRange( int &first, int &last );
 	virtual void FindAnalysisFrameRange( int &first, int &last );
 	

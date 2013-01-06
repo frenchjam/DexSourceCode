@@ -92,7 +92,7 @@ int collisionDownTarget = 1;
 
 #define UP		0
 #define DOWN	1
-int collisionSequenceN = 10;
+int collisionSequenceN = 3;
 int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, DOWN, UP, DOWN, UP, UP };
 double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
@@ -473,7 +473,11 @@ int RunCollisions( DexApparatus *apparatus ) {
 	// Check if trial was completed as instructed.
 	status = apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, collisionMovementThreshold );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
-	
+
+	// Check if collision forces were within range.
+	status = apparatus->CheckForcePeaks( 5.0, 20.0, 1 );
+	if ( status == IDABORT ) exit( ABORT_EXIT );
+
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );

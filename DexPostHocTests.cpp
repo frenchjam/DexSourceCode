@@ -644,6 +644,96 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 	return( NORMAL_EXIT );
 	
 }
+/********************************************************************************************/
+
+//
+// Checks that the subject taps hard enough, but not too hard, with the manipulandum.
+// Movement triggers must be marked by LogEvent( TRIGGER_MOVE_UP and TRIGGER_MOVE_DOWN );
+// 
+// TO DO: Not fully tested yet!
+
+int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg ) {
+	
+	const char *fmt;
+	bool  error = false;
+
+	int		bad_peaks = 0, lows = 0, highs = 0; 
+	int		movements = 0;
+	int		first, last;
+	int		start_sample, end_sample, smpl;
+	int		i, j, n;
+
+	double average, delta, peak;
+
+	// First we should look for the start and end of the actual movement based on 
+	// events such as when the subject reaches the first target. 
+	FindAnalysisFrameRange( first, last );
+
+	// Step through each marked movement trigger.
+	FindAnalysisEventRange( first, last );
+	for ( i = first; i < last - 1; i++ ) {
+		if ( eventList[i].event == TRIGGER_MOVE_UP || eventList[i].event == TRIGGER_MOVE_DOWN ) {
+			movements++;
+			// Find when the next movement started.
+			for ( j = i + 1; j < last - 1; j++ ) {
+				if ( eventList[i].event == TRIGGER_MOVE_UP || eventList[i].event == TRIGGER_MOVE_DOWN ) break;
+			}
+
+			// Compute the average force through the movement.
+			start_sample = TimeToSample( eventList[i].time );
+			end_sample = TimeToSample( eventList[j].time );
+			average = 0.0;
+			n = 0;
+			for ( smpl = start_sample; smpl < end_sample; smpl++ ) { 
+				average += acquiredLoadForceMagnitude[smpl];
+				n++;
+			}
+			average /= n;
+
+			// Find the peak force relative to the average during the period.
+			peak = 0.0;
+			for ( smpl = start_sample; smpl < end_sample; smpl++ ) { 
+				delta = acquiredLoadForceMagnitude[smpl] - average;
+				if ( delta > peak ) peak = delta;
+			}
+			if ( peak < min_amplitude || peak > max_amplitude ) bad_peaks++;
+			if ( peak < min_amplitude ) lows++;
+			if ( peak > max_amplitude ) highs++;
+
+		}
+	}
+
+	// Check if the computed number of incorrect starting positions is in the desired range.
+	error = ( bad_peaks > max_bad_peaks );
+
+	// This format string is used to add debugging information to the event notification.
+	// It is used whether there is an error or not.
+	fmt = "%s\n\n Min Force Peak: %.2f\n Max Force Peak: %.2f\n\nTotal Movements: %d\n  Errors Detected: %d\n   Highs: %d\n   Lows: %d\n  Maximum Allowed: %d";
+
+	// If not, signal the error to the subject.
+	// Here I take the approach of calling a method to signal the error.
+	// We agree instead that the routine should either return a null pointer
+	// if there is no error, or return the error message as a static string.
+	if ( error ) {
+		
+		// If the user provided a message to signal a visibilty error, use it.
+		// If not, generate a generic message.
+		if ( !msg ) msg = "To many collisions outside force range.";
+		int response = 
+			fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, min_amplitude, max_amplitude, 
+							movements, bad_peaks, highs, lows, max_bad_peaks );
+		
+		if ( response == IDABORT ) return( ABORT_EXIT );
+		if ( response == IDRETRY ) return( RETRY_EXIT );
+		if ( response == IDIGNORE ) return( IGNORE_EXIT );
+		
+	}
+	
+	// This is my means of signalling the event to ground.
+	monitor->SendEvent( fmt, "Start directions OK.", movements, bad_peaks, highs, lows, max_bad_peaks );
+	return( NORMAL_EXIT );
+	
+}
 
 /********************************************************************************************/
 

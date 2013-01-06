@@ -692,6 +692,16 @@ int DexApparatus::TimeToFrame( float elapsed_time ) {
 	return( frame );
 }
 
+// Calculate the approximate analog sample where the event occured.
+
+int DexApparatus::TimeToSample( float elapsed_time ) {
+	int sample = (int) floor( elapsed_time / adc->samplePeriod );
+	// Make sure that it is a valid frame.
+	if (sample < 0) sample = 0;
+	if (sample >= nAcqSamples ) sample = nAcqSamples - 1;
+	return( sample );
+}
+
 // Find the events that determine the interval of analysis,
 // based on the event markers BEGIN_ANALYSIS and END_ANAYLYSIS.
 
@@ -1577,6 +1587,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
 	fprintf( fp, "\tGF" );
+	fprintf( fp, "\tLF" );
 	fprintf( fp, "\tF1X\tF1Y\tF1Z" );
 	fprintf( fp, "\tF2X\tF2Y\tF2Z" );
 	fprintf( fp, "\tCOP1X\tCOP1Y\tCOP1Z" );
@@ -1585,6 +1596,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	for ( smpl = 0; smpl < nAcqSamples; smpl++ ) {
 		fprintf( fp, "%d\t%.3f", smpl, acquiredAnalog[smpl].time );
 		fprintf( fp, "\t%f", acquiredGripForce[smpl] );
+		fprintf( fp, "\t%f", acquiredLoadForceMagnitude[smpl] );
 		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[0][smpl][X], acquiredForce[0][smpl][Y], acquiredForce[0][smpl][Z] );
 		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[1][smpl][X], acquiredForce[1][smpl][Y], acquiredForce[1][smpl][Z] );
 		fprintf( fp, "\t%f\t%f\t%f", acquiredCOP[0][smpl][X], acquiredCOP[0][smpl][Y], acquiredCOP[0][smpl][Z] );
