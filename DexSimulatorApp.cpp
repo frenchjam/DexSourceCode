@@ -571,7 +571,14 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case COLLISION_PROTOCOL:
-		while ( RETRY_EXIT == RunCollisions( apparatus ) );
+		do {
+			return_code = RunTransducerOffsetCompensation( apparatus );
+		} while ( return_code == RETRY_EXIT );
+		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+		do {
+			return_code = RunCollisions( apparatus );
+		} while ( return_code == RETRY_EXIT );
+		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
 		break;
 
 	case FRICTION_PROTOCOL:

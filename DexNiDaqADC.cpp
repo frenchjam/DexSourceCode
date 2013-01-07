@@ -29,6 +29,10 @@
 #include "DexADC.h"
 #include "..\DexSimulatorApp\resource.h"
 
+// #define USE_POLLING
+
+float64	nidaq_buffer[DEX_MAX_CHANNELS * DEX_MAX_ANALOG_SAMPLES];
+
 /*********************************************************************************/
 
 void DexNiDaqADC::ReportNiDaqError ( void ) {
@@ -61,20 +65,26 @@ void DexNiDaqADC::Initialize( void ) {
 	for ( int chan = 0; chan < nChannels; chan++ ) fprintf( fp, "\tCh%02d", chan );
 	fprintf( fp, "\n" );
 
-	// Do the real work to initialize the ADC.
-	error_code = DAQmxCreateTask("",&taskHandle);
-	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Define the channels to be acquired.
 	// NI-DAQ uses this string based method to select channels. So first
 	// I construct the appropriate string based on the number of channels.
 	sprintf( channel_range, "Dev1/ai0:%d", nChannels - 1 );
+
+	// Do the real work to initialize the ADC for polling.
+	error_code = DAQmxCreateTask("",&taskHandle);
+	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Set to read single-ended voltages in the range +/- 5 volts.
 	error_code = DAQmxCreateAIVoltageChan(taskHandle, channel_range, "", DAQmx_Val_RSE, -5.0, 5.0, DAQmx_Val_Volts, NULL);
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
-	// Starting the task here should, I hope, reduce the time for the polled read.
-	// But I'm not sure that it is really the case.
-	error_code = DAQmxStartTask(taskHandle);
-	if( DAQmxFailed( error_code )) ReportNiDaqError();
+	// Here we don't set a clock. The read will read all the channels once as quickly as possible.
+
+	// Do the real work to initialize the ADC for polling.
+	error_code = DAQmxCreateTask("",&continuousTaskHandle);
+	// Set to read single-ended voltages in the range +/- 5 volts.
+	error_code = DAQmxCreateAIVoltageChan(continuousTaskHandle, channel_range, "", DAQmx_Val_RSE, -5.0, 5.0, DAQmx_Val_Volts, NULL);
+	// Set to acquire at a fixed rate.
+	error_code = DAQmxCfgSampClkTiming( continuousTaskHandle, NULL, 1.0 / samplePeriod, DAQmx_Val_Rising, DAQmx_Val_FiniteSamps, DEX_MAX_ANALOG_SAMPLES );
+	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 
 }
 
@@ -94,7 +104,18 @@ void DexNiDaqADC::Quit( void ) {
 		error_code = DAQmxClearTask(taskHandle);
 		if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	}
+	if( continuousTaskHandle!=0 )  {
+		// I think that the task stops itself after the read, but I'm not sure.
+		// In any case, it doesn't seem to hurt to do this.
+		error_code = DAQmxStopTask(continuousTaskHandle);
+		if( DAQmxFailed( error_code )) ReportNiDaqError();
+		// I don't know what happens if you don't clear a task before leaving,
+		// but the NI examples says to do it, so I do it.
+		error_code = DAQmxClearTask(continuousTaskHandle);
+		if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+	}
 }
+
 
 
 /*********************************************************************************/
@@ -103,15 +124,44 @@ void DexNiDaqADC::StartAcquisition( float max_duration ) {
 
 	acquisitionOn = true; 
 	overrun = false;
-	nPolled = 0;
 	DexTimerSet( acquisitionTimer, max_duration );
+
+#ifdef USE_POLLING
+	nPolled = 0;
 	Update();
+#else
+	int32		error_code;
+	// Start acquiring.
+	error_code = DAQmxStartTask( continuousTaskHandle );
+	if( DAQmxFailed( error_code )) ReportNiDaqError();
+
+
+#endif
+
 
 }
 
 void DexNiDaqADC::StopAcquisition( void ) {
+	
+	int32       samples_read;
+	int32		error_code;
+
 	acquisitionOn = false;
 	duration = DexTimerElapsedTime( acquisitionTimer );
+
+#ifndef USE_POLLING
+	error_code = DAQmxReadAnalogF64( continuousTaskHandle, DEX_MAX_ANALOG_SAMPLES, 
+					0, DAQmx_Val_GroupByScanNumber, 
+					nidaq_buffer, DEX_MAX_CHANNELS * DEX_MAX_ANALOG_SAMPLES, 
+					&samples_read, NULL );
+	// Ignore the timeout error. We don't expect to really get all the samples.
+	if( error_code != -200284 && DAQmxFailed( error_code ) ) ReportNiDaqError();
+	nAcqSamples = samples_read;
+
+	error_code = DAQmxStopTask(continuousTaskHandle);
+	if( DAQmxFailed( error_code )) ReportNiDaqError();
+#endif
+
 }
 
 bool DexNiDaqADC::GetAcquisitionState( void ) {
@@ -126,12 +176,18 @@ bool DexNiDaqADC::CheckAcquisitionOverrun( void ) {
 
 int DexNiDaqADC::RetrieveAnalogSamples( AnalogSample samples[], int max_samples ) {
 	
+#ifdef USE_POLLING
+
 	int previous;
 	int next;
 	int smpl;
 	
 	double	time, interval, offset, relative;
 	
+
+	// If we used the polling method to acquire samples, we now
+	// need to generate samples at a fixed rate using interpolation.
+
 	// Copy data into an array.
 	previous = 0;
 	next = 1;
@@ -176,6 +232,19 @@ int DexNiDaqADC::RetrieveAnalogSamples( AnalogSample samples[], int max_samples 
 	}
 
 	nAcqSamples = smpl;
+
+#else
+
+	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
+		for ( int chan = 0; chan < nChannels; chan++ ) {
+			samples[smpl].channel[chan] = nidaq_buffer[smpl * nChannels + chan];
+		}
+		samples[smpl].time = smpl * samplePeriod;
+	}
+
+#endif
+
+
 	return( nAcqSamples );
 
 }
@@ -219,6 +288,7 @@ bool DexNiDaqADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 
 int DexNiDaqADC::Update( void ) {
 
+#if USE_POLLING
 	// Store the time series of data.
 	if ( DexTimerTimeout( acquisitionTimer ) ) {
 		acquisitionOn = false;
@@ -230,6 +300,8 @@ int DexNiDaqADC::Update( void ) {
 		CopyAnalogSample( recordedAnalogSamples[ nPolled ], sample );
 		if ( nPolled < DEX_MAX_ANALOG_SAMPLES ) nPolled++;
 	}
+#endif
+
 	return( 0 );
 
 }

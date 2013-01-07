@@ -105,6 +105,7 @@ private:
 protected:
 
 	TaskHandle  taskHandle;
+	TaskHandle  continuousTaskHandle;
 	void		ReportNiDaqError ( void );
 public:
 

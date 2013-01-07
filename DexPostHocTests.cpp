@@ -730,7 +730,7 @@ int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int
 	}
 	
 	// This is my means of signalling the event to ground.
-	monitor->SendEvent( fmt, "Start directions OK.", movements, bad_peaks, highs, lows, max_bad_peaks );
+	monitor->SendEvent( fmt, "Peak Forces OK.", movements, bad_peaks, highs, lows, max_bad_peaks );
 	return( NORMAL_EXIT );
 	
 }
