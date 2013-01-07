@@ -475,7 +475,10 @@ int RunCollisions( DexApparatus *apparatus ) {
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
-	status = apparatus->CheckForcePeaks( 5.0, 20.0, 1 );
+	status = apparatus->CheckForcePeaks( 1.0, 5.0, 1 );
+	if ( status == IDABORT ) exit( ABORT_EXIT );
+	// Same idea for acclerations.
+	status = apparatus->CheckAccelerationPeaks( 1.0, 2.0, 1 );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Indicate to the subject that they are done.
