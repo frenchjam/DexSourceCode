@@ -75,6 +75,9 @@ public:
 	// Identify the analog channels associated with each force/torque sensor.
 	// Each element points to the index of the first channel for each sensor.
 	static const int	ftAnalogChannel[N_FORCE_TRANSDUCERS];
+
+	static const int	highAccAnalogChannel;
+	static const int	lowAccAnalogChannel;
 	
 	// Structures needed to use the ATI Force/Torque transducer library.
 	Calibration			*ftCalibration[N_FORCE_TRANSDUCERS];
@@ -112,7 +115,8 @@ public:
 	float				acquiredGripForce[DEX_MAX_ANALOG_SAMPLES];
 	float				acquiredLoadForceMagnitude[DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredLoadForce[DEX_MAX_ANALOG_SAMPLES];
-	
+	Vector3				acquiredAcceleration[DEX_MAX_ANALOG_SAMPLES];
+	double				acquiredHighAcceleration[DEX_MAX_ANALOG_SAMPLES];
 	DexEvent			eventList[DEX_MAX_EVENTS];
 	int					nEvents;
 	
@@ -223,6 +227,7 @@ public:
 	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
 	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
 	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
+	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
 	
 	// Signalling events to the ground.
 	virtual void SignalConfiguration( void );

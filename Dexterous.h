@@ -59,6 +59,10 @@
 #define LEFT_ATI_FIRST_CHANNEL	0
 #define RIGHT_ATI_FIRST_CHANNEL	6
 
+// Here we have only one accelerometer.
+#define HIGH_ACC_CHANNEL		12
+#define LOW_ACC_FIRST_CHANNEL	12
+
 #define BEEP_TONE	4
 #define BEEP_VOLUME	8
 #define BEEP_DURATION 0.200

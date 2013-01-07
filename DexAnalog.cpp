@@ -35,6 +35,8 @@
 /***************************************************************************/
 
 const int DexApparatus::ftAnalogChannel[N_FORCE_TRANSDUCERS] = {LEFT_ATI_FIRST_CHANNEL, RIGHT_ATI_FIRST_CHANNEL};
+const int DexApparatus::highAccAnalogChannel = HIGH_ACC_CHANNEL;
+const int DexApparatus::lowAccAnalogChannel = LOW_ACC_FIRST_CHANNEL;
 
 void DexApparatus::InitForceTransducers( void ) {
 
