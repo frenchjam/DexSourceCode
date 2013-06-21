@@ -121,25 +121,7 @@ float		TargetFrameBody[TARGET_FRAME_MARKERS][3] =
 int nFrameMarkers = TARGET_FRAME_MARKERS;
 int FrameMarkerID[TARGET_FRAME_MARKERS] = {16, 17, 18, 19};
 
-// DexMouseTracker will return these values when the current
-// Coda transformation is requested.
-
-float		SimulatedCodaOffset[2][3] = {
-	{  1000,    0.0, -2500.0 }, 
-	{   0.0, -900.0, -2500.0 }
-};
-
-float	SimulatedCodaRotation[2][3][3] = {
-	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
-	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
-};
 
 /***************************************************************************/
 
-// These are the paths to the calibration files for each force/torque transducer.
-// Be careful not to mix the two. It would have a disastrous effect on the 
-// force and torque readings.
-
-char *ATICalFilename[2] = {LEFT_ATI_CALFILE, RIGHT_ATI_CALFILE};
-double ATIRotationAngle[2] = {LEFT_ATI_ROTATION, RIGHT_ATI_ROTATION};
 

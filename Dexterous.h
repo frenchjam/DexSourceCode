@@ -12,6 +12,8 @@
 
 #include "DexUDPServices.h"
 
+// Some useful constants.
+
 #define NORMAL_EXIT 0
 #define ESCAPE_EXIT 1
 #define IGNORE_EXIT 2
@@ -19,11 +21,19 @@
 #define ABORT_EXIT 4
 #define RETRY_EXIT 5
 
-#define BLINK_PERIOD 0.166
-#define N_ERROR_BLINKS 3
-#define N_NORMAL_BLINKS 3
+#define INVISIBLE -999.999f
+#define TARGETS_OFF -1
+
+#define HORIZONTAL	0
+#define VERTICAL	1
+
+#define LEFT	0
+#define RIGHT	1
+
+#define DONT_CARE	0
 
 // These are maximum values, used to allocate arrays.
+
 #define DEX_MAX_CODAS 8
 #define DEX_MAX_MARKERS 28
 #define DEX_MAX_TARGETS 32
@@ -33,7 +43,8 @@
 #define DEX_MAX_CHANNELS		64
 #define DEX_MAX_ANALOG_SAMPLES	100000
 
-// The next are nominal values used as default values.
+// The next are nominal values describing the hardware.
+// They are often used as the default for an optional parameter.
 
 #define ANALOG_SAMPLE_PERIOD	0.001
 #define MARKER_SAMPLE_PERIOD	0.005
@@ -48,11 +59,10 @@
 #define N_CODAS 2
 #define N_CHANNELS	16
 
-#define N_FORCE_TRANSDUCERS	2
-#define N_GAUGES	6	// Number of strain gauges per force/torque transducer.
+#define N_FORCE_TRANSDUCERS		2
+#define N_GAUGES				6	// Number of strain gauges per force/torque transducer.
 #define N_SAMPLES_FOR_AVERAGE	20
 
-#define DEFAULT_COP_THRESHOLD	0.25	// Minimum normal force to compute a center of pressure.
 #define LEFT_ATI_TRANSDUCER		0
 #define RIGHT_ATI_TRANSDUCER	1
 
@@ -63,25 +73,23 @@
 #define HIGH_ACC_CHANNEL		12
 #define LOW_ACC_FIRST_CHANNEL	12
 
+
+// Behavior of some of the built-in routines.
+// Can also be used in the paradigms.
+
+#define BLINK_PERIOD 0.166
+#define N_ERROR_BLINKS 3
+#define N_NORMAL_BLINKS 3
+
 #define BEEP_TONE	4
 #define BEEP_VOLUME	8
 #define BEEP_DURATION 0.200
 
-#define INVISIBLE -999.999f
-#define TARGETS_OFF -1
-
-#define HORIZONTAL	0
-#define VERTICAL	1
-
-
 /* 
- * Allows one to select different configurations of the target LEDs.
+ * The follwing constants allow one to select different configurations of the target LEDs.
  * LeftHand and RightHand refer to the hand used by the subject, not necessarily
  *  to the side of the box where the target array will be.
  */
-
-#define DONT_CARE	0
-
 typedef enum { 
 	PostureIndifferent = 0,
 	PostureSeated,
@@ -107,16 +115,6 @@ typedef enum {
 } DexTappingSurfaceConfiguration;
 extern	char *TappingSurfaceString[];
 
-typedef struct {
-	
-	float position[3];
-	float orientation[4];
-	double targetPos[DEX_MAX_TARGETS][3];
-
-} TargetArrayConfiguration;
-extern char *TargetBarString[];
-
-extern TargetArrayConfiguration targetArrayConfiguration[MAX_TARGET_CONFIGURATIONS];
 
 // Parameters used when waiting for the hand to be at a target.
 
@@ -127,19 +125,7 @@ extern float waitBlinkPeriod;		// LED blink rate when out of zone.
 extern float waitHoldPeriod;		// Required hold time in zone.
 extern float waitTimeLimit;			// Signal time out if we wait this long.
 
-extern const float iVector[3], jVector[3], kVector[3];
 extern const float uprightNullOrientation[4], supineNullOrientation[4]; 
-
-// Possible protocols.
-
-enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, FRICTION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
-
-// Possible apparatii.
-
-typedef enum { DEX_GENERIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS, DEX_CODA_APPARATUS, DEX_RTNET_APPARATUS, DEX_COMPILER } DexApparatusType;
-
-#define DEFAULT_SCRIPT_FILENAME	"DexSampleScript.dex"
-
 
 /********************************************************************************/
 
@@ -203,35 +189,56 @@ typedef struct {
 
 } DexEvent;
 
-#define CODA_MANIPULANDUM_MARKER 0
-#define CODA_FRAME_MARKER 5
+// Rigid body models.
+// These are used both by DexApparatus to compute the position and orientation of the
+// manipulandum from acquired marker positions, and by DexMouseTracker to simulate
+// where each marker is according to the position of the mouse. Because they are shared,
+// I have made them global, rather than incorporating the model into Apparatus.
 
-#define		MANIPULANDUM_MARKERS 8
-extern float		ManipulandumBody[MANIPULANDUM_MARKERS][3];
-extern int nManipulandumMarkers;
-extern int ManipulandumMarkerID[MANIPULANDUM_MARKERS];
 
-#define		WRIST_MARKERS 8
-extern float		WristBody[WRIST_MARKERS][3];
-extern int nWristMarkers;
-extern int WristMarkerID[WRIST_MARKERS];
+#define			MANIPULANDUM_MARKERS 8
+extern float	ManipulandumBody[MANIPULANDUM_MARKERS][3];
+extern int		nManipulandumMarkers;
+extern int		ManipulandumMarkerID[MANIPULANDUM_MARKERS];
 
-#define TARGET_FRAME_MARKERS	4
-extern float		TargetFrameBody[TARGET_FRAME_MARKERS][3];
-extern int nFrameMarkers;
-extern int FrameMarkerID[TARGET_FRAME_MARKERS];
+#define			WRIST_MARKERS 8
+extern float	WristBody[WRIST_MARKERS][3];
+extern int		nWristMarkers;
+extern int		WristMarkerID[WRIST_MARKERS];
 
-extern float SimulatedCodaOffset[2][3];
-extern float SimulatedCodaRotation[2][3][3];
+#define			TARGET_FRAME_MARKERS	4
+extern float	TargetFrameBody[TARGET_FRAME_MARKERS][3];
+extern int		nFrameMarkers;
+extern int		FrameMarkerID[TARGET_FRAME_MARKERS];
 
-#define RIGHT_BOX_MARKER  16
-#define LEFT_BOX_MARKER	  17
-#define BOTTOM_BAR_MARKER 18
-#define TOP_BAR_MARKER	  19
+// Identify the 4 reference markers.
+// I am going to avoid the terms 'left', 'right', 'top' and 'bottom'
+//  because this leads to confusion between the subject left and right
+//  or left and right from the viewpoint of the CODAs.
+#define DEX_NEGATIVE_BOX_MARKER	16
+#define DEX_POSITIVE_BOX_MARKER	17
+#define DEX_NEGATIVE_BAR_MARKER	18
+#define DEX_POSITIVE_BAR_MARKER	19
+
+// A structure to hold the position and orientation of the target bar,
+//  and the position of each target at the configuration.
+typedef struct {
+	float position[3];
+	float orientation[4];
+	double targetPos[DEX_MAX_TARGETS][3];
+} TargetArrayConfiguration;
+extern TargetArrayConfiguration targetArrayConfiguration[MAX_TARGET_CONFIGURATIONS];
 
 // Paths to the files containing the ATI Force/Torque transducer calibrations.
-#define LEFT_ATI_CALFILE	"e:\\ATI Calibrations\\FT7928.cal"
-#define RIGHT_ATI_CALFILE	"e:\\ATI Calibrations\\FT7927.cal"
+// Each apparatus will have it's own calibration files and there will have to be a system
+// to select the correct files at startup through a parameterization file or somthing like that.
+// Be careful not to mix the two. It would have a disastrous effect on the 
+// force and torque readings.
+// These are the default values, using a random set of files that I happen to have on hand.
+
+#define DEFAULT_LEFT_ATI_CALFILE	"..\\DexSourceCode\\FT8884.cal"
+#define DEFAULT_RIGHT_ATI_CALFILE	"..\\DexSourceCode\\FT8885.cal"
+
 // How much, in degrees, to rotate each ATI around it's own Z axis to 
 // align the ATI reference frame with the manipulandum reference frame.
 // Note that the right ATI coordinate frame will also be flipped 180°
@@ -241,6 +248,22 @@ extern float SimulatedCodaRotation[2][3][3];
 #define LEFT_ATI_ROTATION	 22.5
 #define RIGHT_ATI_ROTATION	 22.5
 	
-extern char *ATICalFilename[N_FORCE_TRANSDUCERS];
-extern double ATIRotationAngle[N_FORCE_TRANSDUCERS];
+// The script interpreter will execute this file, if no other is specified.
+#define DEFAULT_SCRIPT_FILENAME	"DexSampleScript.dex"
+
+// These are some constants that are used inside the protocol routines.
+// I will probably move these to a separate file
+
+// Minimum normal force to compute a center of pressure.
+#define DEFAULT_COP_THRESHOLD	0.25	
+
+// These are the user-defined markers. 
+enum { FORCE_OK = 0, SLIP_OK };
+
+// Possible protocols.
+enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, FRICTION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+
+// Possible apparatii.
+typedef enum { DEX_GENERIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS, DEX_CODA_APPARATUS, DEX_RTNET_APPARATUS, DEX_COMPILER } DexApparatusType;
+
 

@@ -21,6 +21,18 @@
 #include "DexTracker.h"
 #include "..\DexSimulatorApp\resource.h"
 
+// DexMouseTracker will return these values when the current
+// Coda transformation is requested.
+
+float		SimulatedCodaOffset[2][3] = {
+	{  1000,    0.0, -2500.0 }, 
+	{   0.0, -900.0, -2500.0 }
+};
+
+float	SimulatedCodaRotation[2][3][3] = {
+	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
+	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+};
 
 /*********************************************************************************/
 
@@ -188,7 +200,7 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 
 	int mrk, id;
 
-	// Map mouse coordinates to world coordinates. This factors used here are empirical.
+	// Map mouse coordinates to world coordinates. The factors used here are empirical.
 	float y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top ) * 230.0;
 	float z =  (double) -100.0 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 305.0;
 	float x;

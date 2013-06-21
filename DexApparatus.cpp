@@ -33,10 +33,10 @@
 
 /***************************************************************************/
 
-const int DexApparatus::negativeBoxMarker = 16;
-const int DexApparatus::positiveBoxMarker = 17;
-const int DexApparatus::negativeBarMarker = 18;
-const int DexApparatus::positiveBarMarker = 19;
+const int DexApparatus::negativeBoxMarker = DEX_NEGATIVE_BOX_MARKER;
+const int DexApparatus::positiveBoxMarker = DEX_POSITIVE_BOX_MARKER;
+const int DexApparatus::negativeBarMarker = DEX_NEGATIVE_BAR_MARKER;
+const int DexApparatus::positiveBarMarker = DEX_POSITIVE_BAR_MARKER;
 
 DexApparatus::DexApparatus( void ) {
 	
@@ -90,7 +90,9 @@ DexApparatus::Quit( void ) {
 
 	fclose( fp );
 
+#ifndef NOATI
 	ReleaseForceTransducers();
+#endif
 	tracker->Quit();
 	monitor->Quit();
 	targets->Quit();
@@ -1503,6 +1505,8 @@ void DexApparatus::StopAcquisition( void ) {
 
 	// Retrieve the recorded analog data.
 	nAcqSamples = adc->RetrieveAnalogSamples( acquiredAnalog, DEX_MAX_ANALOG_SAMPLES );
+
+#ifndef NOATI
 	// Compute forces from analog data.
 	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
 		for ( int unit = 0; unit < N_FORCE_TRANSDUCERS; unit++ ) {
@@ -1517,6 +1521,8 @@ void DexApparatus::StopAcquisition( void ) {
 		acquiredAcceleration[smpl][Z] = acquiredAnalog[smpl].channel[lowAccAnalogChannel + Z];
 		acquiredHighAcceleration[smpl] = acquiredAnalog[smpl].channel[highAccAnalogChannel];
 	}
+#endif
+
 }
 void DexApparatus::SaveAcquisition( const char *tag ) {
 	
@@ -1614,6 +1620,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	fclose( fp );
 	// Note that the file was written.
 	monitor->SendEvent( "Data file written: %s", filename );
+
 	
 }
 
@@ -1762,8 +1769,10 @@ DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance ) {
 	// Use a virtual mouse tracker in place of the coda.
 	tracker = new DexMouseTracker( dlg );
 	
-	// Here we are using the real GLMbox analog interface.
-	adc = new DexNiDaqADC();
+	// Here we can use the real GLMbox analog interface.
+//	adc = new DexNiDaqADC();
+	// or the mouse simulator.
+	adc = new DexMouseADC();
 
 	// Do the common initializations.
 	Initialize();

@@ -30,7 +30,6 @@
 
 #define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 
-enum { FORCE_OK, SLIP_OK };
 
 /*********************************************************************************/
 

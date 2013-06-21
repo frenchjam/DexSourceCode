@@ -76,12 +76,19 @@ public:
 	// Each element points to the index of the first channel for each sensor.
 	static const int	ftAnalogChannel[N_FORCE_TRANSDUCERS];
 
+	// This is the single high-g acceleration channel.
 	static const int	highAccAnalogChannel;
+	// This is the first of 3 low-g accelerometer channels.
 	static const int	lowAccAnalogChannel;
 	
 	// Structures needed to use the ATI Force/Torque transducer library.
 	Calibration			*ftCalibration[N_FORCE_TRANSDUCERS];
 	Quaternion			ftAlignmentQuaternion[N_FORCE_TRANSDUCERS];
+
+	// Path to the files holding the ATI calibrations.
+	char	*ATICalFilename[N_FORCE_TRANSDUCERS];
+	// Defines the rotation of each ATI sensor around the local Z axis.
+	double	ATIRotationAngle[N_FORCE_TRANSDUCERS];
 	
 	// Keep track of what type we are.
 	DexApparatusType  type;
@@ -187,11 +194,22 @@ public:
 	virtual int  WaitSubjectReady( const char *message = "Ready to continue?" );
 	virtual int  fWaitSubjectReady( const char *format = "Ready to continue?", ... );
 	virtual int	 WaitUntilAtTarget( int target_id, const float desired_orientation[4], 
-		float position_tolerance[3], float orientation_tolerance, 
-		float hold_time, float timeout, char *msg  );
+									float position_tolerance[3], float orientation_tolerance, 
+									float hold_time, float timeout, char *msg  );
 	
-	virtual int  WaitUntilAtVerticalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
-	virtual int  WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4] = uprightNullOrientation, float position_tolerance[3] = defaultPositionTolerance, float orientation_tolerance = defaultOrientationTolerance, float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, char *msg = NULL );
+	virtual int  WaitUntilAtVerticalTarget( int target_id, 
+											const float desired_orientation[4] = uprightNullOrientation, 
+											float position_tolerance[3] = defaultPositionTolerance, 
+											float orientation_tolerance = defaultOrientationTolerance, 
+											float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, 
+											char *msg = NULL );
+	virtual int  WaitUntilAtHorizontalTarget( int target_id, 
+												const float desired_orientation[4] = uprightNullOrientation, 
+												float position_tolerance[3] = defaultPositionTolerance, 
+												float orientation_tolerance = defaultOrientationTolerance, 
+												float hold_time = waitHoldPeriod, 
+												float timeout = waitTimeLimit, 
+												char *msg = NULL );
 
 	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
 
@@ -218,11 +236,11 @@ public:
 	virtual int CheckMovementAmplitude(  float min, float max, const Vector3 direction, char *msg = NULL );
 	
 	int CheckMovementCycles(  int min_cycles, int max_cycles, 
-		float dirX, float dirY, float dirZ,
-		float hysteresis, const char *msg );
+								float dirX, float dirY, float dirZ,
+								float hysteresis, const char *msg );
 	int CheckMovementCycles(  int min_cycles, int max_cycles, 
-		const Vector3 direction,
-		float hysteresis, const char *msg );
+								const Vector3 direction,
+								float hysteresis, const char *msg );
 	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
 	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
 	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
@@ -247,23 +265,24 @@ public:
 	
 	// Tracker installation and alignment.
 	virtual int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
-		float min_x, float max_x,
-		float min_y, float max_y,
-		float min_z, float max_z, const char *msg = "Markers not centered in view." );		
+											float min_x, float max_x,
+											float min_y, float max_y,
+											float min_z, float max_z, 
+											const char *msg = "Markers not centered in view." );		
 	virtual int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment." );
-	virtual int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ="Codas out of alignment!" );
+	virtual int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, 
+										const char *msg ="Codas out of alignment!" );
 	virtual	int CheckTrackerPlacement( int unit, 
-		const Vector3 expected_pos, float p_tolerance,
-		const Quaternion expected_ori, float o_tolerance,
-		const char *msg = "Codas bars not placed as expected.");
+										const Vector3 expected_pos, float p_tolerance,
+										const Quaternion expected_ori, float o_tolerance,
+										const char *msg = "Codas bars not placed as expected.");
 	
 	// Measure the position and orientation of the manipulandum 
 	// based on a frame of Coda marker data.
 	virtual bool ComputeManipulandumPosition( float *pos, float *ori, 
-		CodaFrame &marker_frame, 
-		Quaternion default_orientation = NULL );
-	virtual bool ComputeTargetFramePosition( float *pos, float *ori, 
-		CodaFrame &marker_frame );
+												CodaFrame &marker_frame, 
+												Quaternion default_orientation = NULL );
+	virtual bool ComputeTargetFramePosition( float *pos, float *ori, CodaFrame &marker_frame );
 	
 	// Get the latest marker data and compute from it the manipulandum position and orientation.
 	virtual bool GetManipulandumPosition( Vector3 pos, Quaternion ori, Quaternion default_orientation = NULL );

@@ -128,7 +128,7 @@ DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 	// a border causes the mouse pointer to dissappear in the other 
 	// windows as well.
 	vertical_window->Border = true;
-	vertical_window->Create( NULL, "DEX", rect.right - width_in_pixels - 1 - 20, 0, width_in_pixels, height_in_pixels - 50 );
+	vertical_window->Create( NULL, "DEX", rect.right - width_in_pixels - 10, 0, width_in_pixels, height_in_pixels - 50 );
 	vertical_viewpoint = new OrthoViewpoint( - width / 2, width / 2, 0, height, -100, 100 );	
 	vertical_targets = new Assembly;
 	for ( trg = 0; trg < n_vertical; trg++ ) {
