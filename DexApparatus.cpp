@@ -39,21 +39,65 @@ const int DexApparatus::negativeBarMarker = DEX_NEGATIVE_BAR_MARKER;
 const int DexApparatus::positiveBarMarker = DEX_POSITIVE_BAR_MARKER;
 
 DexApparatus::DexApparatus( void ) {
-	
+
+	this->tracker = NULL;
+	this->targets = NULL;
+	this->sounds = NULL;
+	this->adc = NULL;
+
+	type = DEX_NULL_APPARATUS;
+
+}
+
+DexApparatus::DexApparatus( DexTracker  *tracker,
+						    DexTargets  *targets,
+							DexSounds	*sounds,
+							DexADC		*adc ) {
+
+	this->tracker = tracker;
+	this->targets = targets;
+	this->sounds = sounds;
+	this->adc = adc;
+
 	type = DEX_GENERIC_APPARATUS;
-	nVerticalTargets = N_VERTICAL_TARGETS;
-	nHorizontalTargets = N_HORIZONTAL_TARGETS;
+
+}
+
+/***************************************************************************/
+
+void DexApparatus::Initialize( void ) {
+  
+	// Initialize the hardware.
+	targets->Initialize();
+	sounds->Initialize();
+	tracker->Initialize();
+	adc->Initialize();
+
+	nVerticalTargets = targets->nVerticalTargets;
+	nHorizontalTargets = targets->nHorizontalTargets;
 	nTargets = nVerticalTargets + nHorizontalTargets;
-	nTones = N_TONES;
-	nMarkers = N_MARKERS;
-	nChannels = N_CHANNELS;
+
+	nTones = sounds->nTones;
+
+	nCodas = tracker->nCodas;
+	nMarkers = tracker->nMarkers;
+
+	nChannels = adc->nChannels;
+
 	nForceTransducers = N_FORCE_TRANSDUCERS;
 	nGauges = N_GAUGES;
 	nSamplesForAverage = N_SAMPLES_FOR_AVERAGE;
 
+	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
+
+	// Load the most recently defined target positions.
+	LoadTargetPositions();
+	// Load the calibration for each of the force transducers.
+	InitForceTransducers();
+ 
 	// Initialize the list of events.
 	nEvents = 0;
-	
+
 	// Open a file to store the positions and orientations that were computed from
 	// the individual marker positions. This allows us
 	// to compare with the position and orientation used by DexMouseTracker
@@ -67,32 +111,17 @@ DexApparatus::DexApparatus( void ) {
 	}
 	fprintf( fp, "Time\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
 
-}
-
-void DexApparatus::Initialize( void ) {
-
-	// Load the most recently defined target positions.
-	LoadTargetPositions();
-  
-	// Initialize the hardware.
-	tracker->Initialize();
-	adc->Initialize();
-	InitForceTransducers();
- 
 	// Start with all the targets off.
 	TargetsOff();
 	// Make sure that the sound is off.
 	SoundOff();
-
 }
 
 DexApparatus::Quit( void ) {
 
 	fclose( fp );
 
-#ifndef NOATI
 	ReleaseForceTransducers();
-#endif
 	tracker->Quit();
 	monitor->Quit();
 	targets->Quit();
@@ -1624,198 +1653,5 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*                             DexCodaApparatus                            */
-/*                                                                         */
-/***************************************************************************/
 
-// A combination of simulated targets on the computer screen the real CODA tracker.
 
-DexCodaApparatus::DexCodaApparatus( void ) {
-	
-	type = DEX_CODA_APPARATUS;
-	
-	// Create a window to monitor the experiment.
-	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
-	
-	// Initialize target system.
-	targets = new DexScreenTargets();
-	
-	// Initialize target system.
-	sounds = new DexScreenSounds();
-
-	// Use the real Coda tracker.
-	tracker = new DexCodaTracker();
-
-	// Use the mouse to simulate analog inputs.
-	adc = new DexMouseADC();
-	
-	// Do the common initializations.
-	Initialize();
-	
-}
-
-/***************************************************************************/
-/*                                                                         */
-/*                             DexRTnetApparatus                           */
-/*                                                                         */
-/***************************************************************************/
-
-// A combination of simulated targets on the computer screen the real CODA tracker.
-
-DexRTnetApparatus::DexRTnetApparatus( void ) {
-	
-	type = DEX_RTNET_APPARATUS;
-
-	DexRTnetTracker *tracker_local;
-		
-	// Initialize target system.
-	targets = new DexScreenTargets();
-	
-	// Initialize target system.
-	sounds = new DexScreenSounds();
-
-	// Use the real Coda tracker.
-	tracker_local = new DexRTnetTracker();
-	tracker = tracker_local;
-
-	// Ask the tracker how many Codas are being used.
-	nCodas = tracker_local->nCodas;
-	
-	// Create a window to monitor the experiment.
-	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
- 
-	// Here we are using the real GLMbox analog interface.
-	adc = new DexNiDaqADC();
-
-	// Do the common initializations.
-	Initialize();
-
-}
-
-/***************************************************************************/
-/*                                                                         */
-/*                             DexMouseApparatus                           */
-/*                                                                         */
-/***************************************************************************/
-
-//
-// A laptop version of the DEX apparatus.
-// Uses the mouse to simulate tracking of the manipulandum.
-// Uses a dialog box to simulate setting up the apparatus in different configurations.
-//
-
-// Mesage handler for dialog box.
-
-BOOL CALLBACK dexApparatusDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_INITDIALOG:
-        
-		//      SetTimer( hDlg, 1, period * 1000, NULL );
-		return TRUE;
-		break;
-		
-    case WM_TIMER:
-		return TRUE;
-		break;
-		
-    case WM_CLOSE:
-		EndDialog(hDlg, LOWORD(wParam));
-		exit( 0 );
-		return TRUE;
-		break;
-		
-    case WM_COMMAND:
-		switch ( LOWORD( wParam ) ) {
-		case IDCANCEL:
-			EndDialog(hDlg, LOWORD(wParam));
-			exit( 0 );
-			return TRUE;
-			break;
-		}
-		
-	}
-    return FALSE;
-}
-
-/***************************************************************************/
-
-DexMouseApparatus::DexMouseApparatus( HINSTANCE hInstance ) {
-	
-	type = DEX_MOUSE_APPARATUS;
-	
-	// Initialize dialog box.
-	dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexApparatusDlgCallback );
-	CheckRadioButton( dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
-	CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
-	CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
-	CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
-	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
-	CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
-	ShowWindow( dlg, SW_SHOW );
-	
-	// Create a link to monitor the experiment.
-	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
-	
-	// Initialize target system.
-	targets = new DexScreenTargets( nVerticalTargets, nHorizontalTargets );
-
-	// Initialize sounds.
-	sounds = new DexScreenSounds( nTones );
-	
-	// Use a virtual mouse tracker in place of the coda.
-	tracker = new DexMouseTracker( dlg );
-	
-	// Here we can use the real GLMbox analog interface.
-//	adc = new DexNiDaqADC();
-	// or the mouse simulator.
-	adc = new DexMouseADC();
-
-	// Do the common initializations.
-	Initialize();
- 
-}
-
-/***************************************************************************/
-
-#if 0 // Ingore virtual apparatus for now.
-
-/***************************************************************************/
-/*                                                                         */
-/*                          DexVirtualApparatus                            */
-/*                                                                         */
-/***************************************************************************/
-
-// A combination of simulated targets on the computer screen and a simulated
-// tracker that magically moves the manipulandum around.
-
-DexVirtualApparatus::DexVirtualApparatus( int n_vertical_targets, 
-									 int n_horizontal_targets,
-									 int n_tones, int n_codas ) {
-	
-	type = DEX_VIRTUAL_APPARATUS;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nCodas = n_codas;
-	nTones = n_tones;
-	
-	// Create a server to transmit monitored data to the client.
-	monitor = new DexMonitorServer( n_vertical_targets, n_horizontal_targets, n_codas );
-	
-	// Initialize target system.
-	targets = new DexScreenTargets( 5 );
-	
-	// Use a virtual tracker in place of the coda.
-	tracker = new DexVirtualTracker( targets );
-	tracker->Initialize();
-	manipulandumVisible = true;
-	
-	
-	StopAcquisition();
-	TargetsOff();
-	
-}
-
-#endif 

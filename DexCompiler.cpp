@@ -43,20 +43,28 @@
 
 DexCompiler::DexCompiler( int n_vertical_targets, 
 						  int n_horizontal_targets,
-						  int n_tones, int n_codas, int n_markers,
+						  int n_codas, int n_markers,
+						  int n_tones, int n_channels,	
 						  char *filename ) {
 	
 	type = DEX_COMPILER;
+	nVerticalTargets = n_vertical_targets;
+	nHorizontalTargets = n_horizontal_targets;
 	nTargets = n_vertical_targets + n_horizontal_targets;
-	nTones = n_tones;
 	nCodas = n_codas;
 	nMarkers = n_markers;
+	nTones = n_tones;
+	nChannels = n_channels;
 	script_filename = filename;
+
+}
+
+void DexCompiler::Initialize( void ) {
 	
-	fp = fopen( filename, "w" );
+	fp = fopen( script_filename, "w" );
 	if ( !fp ) {
 		char message[1024];
-		sprintf( message, "Error opening script file for write:\n  %s", filename );
+		sprintf( message, "Error opening script file for write:\n  %s", script_filename );
 	}
 	
 }

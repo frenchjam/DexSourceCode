@@ -18,8 +18,8 @@
 #include <fMessageBox.h>
 
 #include <VectorsMixin.h>
-#include "DexTracker.h"
 #include "..\DexSimulatorApp\resource.h"
+#include "DexTracker.h"
 
 // DexMouseTracker will return these values when the current
 // Coda transformation is requested.
@@ -37,6 +37,7 @@ float	SimulatedCodaRotation[2][3][3] = {
 /*********************************************************************************/
 
 void DexMouseTracker::Initialize( void ) {
+
 	acquisitionOn = false; 
 	overrun = false;
 	nAcqFrames = 0;

@@ -143,10 +143,15 @@ public:
 	int nAcqFrames;
 	int nAcqSamples;
 	
-	DexApparatus ( void );
+	DexApparatus::DexApparatus( void );
+	DexApparatus::DexApparatus(	DexTracker			*tracker,
+								DexTargets			*targets,
+								DexSounds			*sounds,
+								DexADC				*adc 
+							);
 	
 	// Called once all the components are defined.
-	void Initialize( void );
+	virtual void Initialize( void );
 	
 	// Called inside loops to update current state.
 	// This is strictly local to my simulator.
@@ -322,67 +327,6 @@ public:
 
 /************************************************************************************/
 
-class DexVirtualApparatus : public DexApparatus {
-
-private:
-
-protected:
-
-public:
-
-	DexApparatusType	type;
-	DexVirtualApparatus( int n_vertical_targets = N_VERTICAL_TARGETS, 
-						 int n_horizontal_targets = N_HORIZONTAL_TARGETS,
-						 int tones = N_TONES, int n_markers = N_MARKERS, int codas = N_CODAS );
-
-};
-
-/************************************************************************************/
-
-class DexCodaApparatus : public DexApparatus {
-
-private:
-
-protected:
-
-public:
-
-	DexCodaApparatus( void );
-
-};
-/************************************************************************************/
-
-class DexRTnetApparatus : public DexApparatus {
-
-private:
-
-protected:
-
-public:
-
-	DexRTnetApparatus( void );
-
-};
-
-/************************************************************************************/
-
-class DexMouseApparatus : public DexApparatus {
-
-private:
-
-	// A dialog that allows one to set the apparatus configuration.
-	HWND	dlg;
-
-protected:
-
-public:
-
-	DexMouseApparatus( HINSTANCE hInstance );
-
-};
-
-/************************************************************************************/
-
 class DexCompiler : public DexApparatus {
 
 private:
@@ -398,8 +342,11 @@ public:
 
 	DexCompiler( int n_vertical_targets = N_VERTICAL_TARGETS, 
 				 int n_horizontal_targets = N_HORIZONTAL_TARGETS,
-				 int n_tones = N_TONES, int n_markers = N_MARKERS, int n_codas = N_CODAS, 
+				 int n_markers = N_MARKERS, int n_codas = N_CODAS, 
+				 int n_tones = N_TONES, int n_channels = N_CHANNELS,
 				 char *filename = DEFAULT_SCRIPT_FILENAME );
+
+	void Initialize( void );
 
 	void SetTargetState( unsigned long target_state );
 	void SetSoundState( int tone, int volume );

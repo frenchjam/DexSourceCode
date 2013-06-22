@@ -27,9 +27,13 @@ protected:
 public:
 	
 	int				nTargets;
+	int				nVerticalTargets;
+	int				nHorizontalTargets;
+
 	int				lastTargetOn;
 	unsigned long	targetState;
 	
+	virtual void Initialize( void );
 	virtual void SetTargetStateInternal( unsigned long target_bit_pattern );
 	virtual int  Update( void );
 	virtual void Quit( void );
@@ -47,7 +51,7 @@ public:
 	// Retrieve a list of yes/no values indicating the state of each LED.
 	unsigned long GetTargetState( bool target_state_array[DEX_MAX_TARGETS] = NULL );
 	
-	DexTargets( int n_vertical = N_VERTICAL_TARGETS, int n_horizontal = N_HORIZONTAL_TARGETS );
+	DexTargets( void );
 	
 };
 
@@ -69,10 +73,9 @@ protected:
 public:
 	
 	DexScreenTargets( int n_vertical = N_VERTICAL_TARGETS, int n_horizontal = N_HORIZONTAL_TARGETS );
-	
-
 	void SetTargetStateInternal( unsigned long target_bit_pattern );
 	int  Update( void );
+	void  Initialize( void );
 	
 };
 

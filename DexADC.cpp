@@ -19,7 +19,6 @@
 #include <DexTimers.h>
 #include <Dexterous.h>
 #include "DexADC.h"
-#include "..\DexSimulatorApp\resource.h"
 
 double DexADC::GetSamplePeriod( void ) { 
 	return( samplePeriod ); 

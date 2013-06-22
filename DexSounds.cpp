@@ -36,12 +36,14 @@
 
 /***************************************************************************/
 
-DexSounds::DexSounds( int tones ) {
+DexSounds::DexSounds( void ) {
 
-	nTones = tones;
+	nTones = 0;
 	mute = false;
 
 }
+
+void DexSounds::Initialize( void ) {}
 
 void DexSounds::SoundOff( void ) {
 	SetSoundState( 0, 0 );
@@ -89,8 +91,11 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 	RECT rect;
 	int width_in_pixels, height_in_pixels;
 
+	// The creator of this device specifies how many tones it can produce.
+	nTones = tones;
+
 	// Do whatever the base class would do first.
-	DexSounds::DexSounds( tones );
+	DexSounds::DexSounds();
 
 	// Create a window to display the virtual speaker.
 	GetWindowRect( GetDesktopWindow(), &rect );

@@ -13,7 +13,7 @@
 /*********************************************************************************/
 
 //#include "stdafx.h"
-#include "resource.h"
+#include "..\DexSimulatorApp\resource.h"
 
 #include <Winsock2.h>
 
@@ -495,6 +495,42 @@ int RunTargetCalibration( DexApparatus *apparatus ) {
 	return( exit_status );
 }
 
+/*********************************************************************************/
+
+// Mesage handler for dialog box.
+
+BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_INITDIALOG:
+        
+		//      SetTimer( hDlg, 1, period * 1000, NULL );
+		return TRUE;
+		break;
+		
+    case WM_TIMER:
+		return TRUE;
+		break;
+		
+    case WM_CLOSE:
+		EndDialog(hDlg, LOWORD(wParam));
+		exit( 0 );
+		return TRUE;
+		break;
+		
+    case WM_COMMAND:
+		switch ( LOWORD( wParam ) ) {
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			exit( 0 );
+			return TRUE;
+			break;
+		}
+		
+	}
+    return FALSE;
+}
 
 
 /**************************************************************************************/
@@ -508,7 +544,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexApparatus *apparatus;
 	DexTimer session_timer;
 	
-	int apparatus_type = DEX_MOUSE_APPARATUS;
+	TrackerType	tracker_type;
+	TargetType	target_type;
+	SoundType	sound_type;
+	AdcType		adc_type;
+
+	DexTracker	*tracker;
+	DexTargets	*targets;
+	DexSounds	*sounds;
+	DexADC		*adc;	
+	
+	HWND	dlg;
+
 	int protocol = TARGETED_PROTOCOL;
 	char *script = "DexSampleScript.dex";
 
@@ -516,8 +563,27 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	
 	// Parse command line.
 	
-	if ( strstr( lpCmdLine, "-coda"   ) ) apparatus_type = DEX_CODA_APPARATUS;
-	if ( strstr( lpCmdLine, "-rt"     ) ) apparatus_type = DEX_RTNET_APPARATUS;
+	// First, define the devices.
+	if ( strstr( lpCmdLine, "-coda"   ) ) tracker_type = CODA_TRACKER;
+	else if ( strstr( lpCmdLine, "-rt"     ) ) tracker_type = RTNET_TRACKER;
+	else tracker_type = MOUSE_TRACKER;
+
+	if ( strstr( lpCmdLine, "-glm"   ) ) {
+		adc_type = GLM_ADC;
+		target_type = GLM_TARGETS;
+	}
+	else {
+		adc_type = MOUSE_ADC;
+		target_type = SCREEN_TARGETS;
+	}
+	// Can override the target type even if the glm is present for analog.
+	if ( strstr( lpCmdLine, "-screen"   ) ) target_type = SCREEN_TARGETS;
+
+	if ( strstr( lpCmdLine, "-blaster"   ) ) sound_type = SOUNDBLASTER_SOUNDS;
+	else sound_type = SCREEN_SOUNDS;
+
+	// Now specify what protocol to run.
+
 	if ( strstr( lpCmdLine, "-osc"    ) ) protocol = OSCILLATION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-coll"   ) ) protocol = COLLISION_PROTOCOL;
 	if ( strstr( lpCmdLine, "-friction"   ) ) protocol = FRICTION_PROTOCOL;
@@ -525,27 +591,84 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-calib"  ) ) protocol = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) protocol = INSTALL_PROCEDURE;
 	
-	switch ( apparatus_type ) {
-		
-	case DEX_MOUSE_APPARATUS:
-		apparatus = new DexMouseApparatus( hInstance );
-//		MessageBox( NULL, "Set desired startup state.", "DexSimulatorApp", MB_OK );
-		break;
-		
-	case DEX_CODA_APPARATUS:
-		apparatus = new DexCodaApparatus();
+	switch ( tracker_type ) {
+
+	case MOUSE_TRACKER:
+
+		dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexDlgCallback );
+		CheckRadioButton( dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
+		CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
+		CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
+		CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
+		CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+		CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
+		ShowWindow( dlg, SW_SHOW );
+
+		tracker = new DexMouseTracker( dlg );
 		break;
 
-  case DEX_RTNET_APPARATUS:
-		apparatus = new DexRTnetApparatus();
+	case CODA_TRACKER:
+		tracker = new DexCodaTracker();
 		break;
-		
-	case DEX_COMPILER:
-		apparatus = new DexCompiler();
+
+	case RTNET_TRACKER:
+		tracker = new DexRTnetTracker();
 		break;
+
+	default:
+		MessageBox( NULL, "Unkown tracker type.", "Error", MB_OK );
+
+	}
 		
+	switch ( target_type ) {
+
+	case GLM_TARGETS:
+		targets = new DexScreenTargets(); // GLM targets not yet implemented.
+		break;
+
+	case SCREEN_TARGETS:
+		targets = new DexScreenTargets( 5, 3 ); 
+		break;
+
+	default:
+		MessageBox( NULL, "Unknown target type.", "Error", MB_OK );
+
+	}
+
+	switch ( sound_type ) {
+
+	case SOUNDBLASTER_SOUNDS:
+		sounds = new DexScreenSounds(); // Soundblaster sounds not yet implemented.
+		break;
+
+	case SCREEN_SOUNDS:
+		sounds = new DexScreenSounds(); 
+		break;
+
+	default:
+		MessageBox( NULL, "Unknown sound type.", "Error", MB_OK );
+
 	}
 	
+	switch ( adc_type ) {
+
+	case GLM_ADC:
+		adc = new DexNiDaqADC(); // GLM targets not yet implemented.
+		break;
+
+	case MOUSE_ADC:
+		adc = new DexMouseADC( dlg, GLM_CHANNELS ); 
+		break;
+
+	default:
+		MessageBox( NULL, "Unknown adc type.", "Error", MB_OK );
+
+	}
+
+	// Create an apparatus by piecing together the components.
+	apparatus = new DexApparatus( tracker, targets, sounds, adc );
+	apparatus->Initialize();
+
 	// Send information about the actual configuration to the ground.
 	apparatus->SignalConfiguration();
 	

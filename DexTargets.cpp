@@ -36,19 +36,26 @@
 
 /***************************************************************************/
 
-DexTargets::DexTargets( int n_vertical, int n_horizontal ) {
+DexTargets::DexTargets( void ) {
 	
-	nTargets = n_vertical + n_horizontal;
+	nTargets = nVerticalTargets = nHorizontalTargets = 0;
+	
+}
+
+
+void DexTargets::Initialize( void ) {
+
+	nTargets = nVerticalTargets + nHorizontalTargets;
 	lastTargetOn = 0;
 
 	AllTargetsOff();
 	Update();
-	
+
 }
 
 /*********************************************************************************/
 
-// This default method does nothing and must be overlayed by a derived class.
+// These default methods do nothing and must be overlayed by a derived class.
 
 void DexTargets::SetTargetStateInternal( unsigned long state ) {}
 
@@ -163,10 +170,13 @@ DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 		
 	}
 
-	DexTargets::DexTargets( n_vertical, n_horizontal );
 	nTargets = n_vertical + n_horizontal;
+	nVerticalTargets = n_vertical;
+	nHorizontalTargets = n_horizontal;
 
 }
+
+void DexScreenTargets::Initialize( void ) {}
 
 /*********************************************************************************/
 

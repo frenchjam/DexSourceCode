@@ -45,6 +45,9 @@ void DexCodaTracker::Initialize( void ) {
 	coda_multi_acq_frame.pData = fPositionMulti;
 	coda_multi_acq_frame.pValid = bInViewMulti;
 
+	// How many CODA units are there?
+	// It would be nice if we could read this value.
+	nCodas = N_CODAS;
 
 }
 

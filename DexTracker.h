@@ -39,13 +39,14 @@ class DexTracker : public VectorsMixin {
 
 	public:
 
+		int nCodas;
 		// Number of markers to be acquired.
 		int nMarkers;
 		int nAcqFrames;
 
 		double samplePeriod;
 
-		DexTracker() : nMarkers( N_MARKERS ), samplePeriod( 0.005 ) {} ;
+		DexTracker() : nCodas( N_CODAS ), nMarkers( N_MARKERS ), samplePeriod( 0.005 ) {} ;
 
 		virtual void Initialize( void );
 		virtual int  Update( void );
@@ -73,42 +74,7 @@ class DexTracker : public VectorsMixin {
 
 };
 
-#if 0
-/********************************************************************************/
 
-class DexVirtualTracker : public DexTracker {
-
-private:
-
-	DexTimer	oscillate_timer;
-
-	int			next_sample;
-	bool		acquisition_on;
-	
-protected:
-
-public:
-
-	int simulated_movement;
-	int nCodas;
-
-	DexVirtualTracker( DexTargets *targets );
-
-	void Initialize( void );
-	void SetMovementType( int type );
-
-	int  Update( void );
-	bool GetManipulandumPosition( float *pos, float *ori );
-	bool GetFramePosition( float *pos );
-	void StartAcquisition( float max_duration );
-	void StopAcquisition( void );
-	int  RetrievePositions( float *destination );
-
-	bool GetAcquisitionState( void );
-
-};
-
-#endif
 
 /********************************************************************************/
 
@@ -139,10 +105,8 @@ protected:
 
 public:
 
-	int nCodas;
-
-	DexCodaTracker() : nCodas( N_CODAS ) {}
-
+	DexCodaTracker( void ){}
+	
 	void Initialize( void );
 	int  Update( void );
 	void StartAcquisition( float max_duration );
@@ -218,9 +182,7 @@ protected:
 
 public:
 
-	int nCodas;
-
-	DexRTnetTracker() : 
+	DexRTnetTracker( void ) : 
 		// Host address and UDP port for the Coda RTnet server.
 		serverAddress("192.168.1.10"), 
 		serverPort(10111), 

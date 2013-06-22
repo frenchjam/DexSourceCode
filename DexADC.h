@@ -29,7 +29,7 @@ class DexADC : public VectorsMixin {
 
 		double samplePeriod;
 
-		DexADC() : nChannels( N_CHANNELS ), samplePeriod( ANALOG_SAMPLE_PERIOD ) {} ;
+		DexADC() : nChannels( 0 ), samplePeriod( ANALOG_SAMPLE_PERIOD ) {} ;
 
 		virtual void Initialize( void ) = 0;
 		virtual int  Update( void ) = 0;
@@ -70,8 +70,9 @@ protected:
 
 public:
 
-	DexMouseADC( HWND dlg = NULL ) : acquisitionOn(false), overrun(false) {
+	DexMouseADC( HWND dlg = NULL, int channels = N_CHANNELS ) : acquisitionOn(false), overrun(false) {
 		this->dlg = dlg;
+		nChannels = channels;
 	}
 
 	void Initialize( void );
@@ -109,7 +110,9 @@ protected:
 	void		ReportNiDaqError ( void );
 public:
 
-	DexNiDaqADC( void ) : acquisitionOn(false), overrun(false), taskHandle(0) {}
+	DexNiDaqADC( void ) : acquisitionOn(false), overrun(false), taskHandle(0) { 
+		nChannels = GLM_CHANNELS; 
+	}
 
 	void Initialize( void );
 	void Quit( void );

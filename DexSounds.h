@@ -26,20 +26,24 @@ protected:
 	bool	mute;
 	int		hold_volume;
 	int		hold_tone;
-	int		nTones;
 
 	// The work horse. Must be provided by derived class.
 	// Will be invoked by the public method SetSoundState().
 	virtual void SetSoundStateInternal( int tone, int volume );
 
 public:
-	
-	// Constructor.
-	DexSounds( int tones = N_TONES );
 
-	// These functions are all defined by the base class. It is unlikely that
-	// they will be replaced by the derived classes, but they are defined
-	// as virtual just in case.
+	// The number of tones that this device can produce.
+	int		nTones;
+
+	// Constructor.
+	DexSounds( void );
+
+	// These functions are defaults defined by the base class. 
+	// They may be replaced by the derived classes.
+
+	// Any hardware initialization that might be needed.
+	void Initialize( void );
 
 	// Turns sounds on and off. Takes into account the mute flag
 	//  and then calls SetSoundStateInternal().
