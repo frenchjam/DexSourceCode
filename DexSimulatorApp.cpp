@@ -927,6 +927,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	case FRICTION_PROTOCOL:
+
+		apparatus->VerticalTargetOn( 16 );
+		apparatus->Wait( 2 );
+		apparatus->VerticalTargetOn( 17 );
+		apparatus->Wait( 2 );
+
+
 		do {
 			return_code = RunTransducerOffsetCompensation( apparatus );
 		} while ( return_code == RETRY_EXIT );
