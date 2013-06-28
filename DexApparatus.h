@@ -12,8 +12,7 @@
 #define DexApparatusH
 
 #include <ATIDAQ\ftconfig.h>
-// Try adding by Vincentsjlkjlkjd
-//twoic
+
 #include <VectorsMixin.h>
 
 #include <DexTimers.h>
