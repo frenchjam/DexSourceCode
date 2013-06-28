@@ -184,14 +184,14 @@ public:
 
 	DexRTnetTracker( void ) : 
 		// Host address and UDP port for the Coda RTnet server.
-		serverAddress("192.168.1.10"), 
+		serverAddress("192.168.1.1"), 
 		serverPort(10111), 
 		// Marker acquistion rate (200Hz), down sampling (none) and external sync (no).
 		mode( CODANET_CODA_MODE_200, 1, false ), 
 		// Request marker data from each Coda unit separately, and the combined data.
 		packet_mode( CODANET_CODAPACKETMODE_SEPARATE_AND_COMBINED_COORD ),	
 		// Use the first Coda configuration in the list.
-		codaConfig(0), 
+		codaConfig(1), 
 		// A Coda RTnet configuration can include cx1 devices, ADC, force platforms, etc.
 		// This is just a constant specifying the cx1 device.
 		cx1Device(1),

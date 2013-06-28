@@ -116,7 +116,8 @@ void DexRTnetTracker::Initialize( void ) {
 		// includes the number of Codas specified in the configuration that is in use.
 		DeviceInfoAlignment align_info;
 		cl.getDeviceInfo( align_info );
-		nCodas = align_info.dev.dwNumUnits;
+		// This isn't working. Maybe it only works if an alignment has been done.
+//		nCodas = align_info.dev.dwNumUnits;
 		
 	}
 	catch(NetworkException& exNet)
@@ -148,6 +149,9 @@ int DexRTnetTracker::Update( void ) {
 void DexRTnetTracker::StartAcquisition( float max_duration ) {
 	
 	overrun = false;
+	cl.setAcqMaxTicks(DEVICEID_CX1, floor( max_duration * 200.0 ));
+	OutputDebugString( "cl.startAcqContinuousBuffered()\n" );
+	cl.startAcqContinuousBuffered();
 	
 }
 
@@ -196,6 +200,8 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 
 	//* Loop through and get them all.
 	for ( frm = 0; frm < nFrames && frm < max_frames; frm++ ) {
+
+		fOutputDebugString( "%08u\tTrying.\n", frm );
 		//* Try to read the packets. Normally they should get here the first try.
 		//* But theoretically, they could get lost or the could get corrupted. 
 		//* So if we get a time out or checksum errors, we should try again.
@@ -231,6 +237,8 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 					// find number of marker positions available
 					DWORD nMarkers = decode3D.getNumMarkers();
 
+					fOutputDebugString( "%08u\tOK.", frm );
+
 					// TO DO: Fill the frames[] array.
 
 					// Count the number of packets received for this frame.
@@ -240,7 +248,7 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 		}
 		if ( retry >= maxRetries ) {
 			nFailedFrames++;
-			fOutputDebugString( "%08u\tfailed.", frm );
+//			fOutputDebugString( "%08u\tfailed.\n", frm );
 		}
 	}
 			

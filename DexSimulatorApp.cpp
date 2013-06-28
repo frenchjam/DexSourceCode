@@ -33,7 +33,7 @@
 
 /*********************************************************************************/
 
-#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+//#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 #define AUTOSCALE	// Autoscale the data traces.
 
 /*********************************************************************************/
