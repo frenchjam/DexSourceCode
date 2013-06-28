@@ -237,8 +237,8 @@ extern TargetArrayConfiguration targetArrayConfiguration[MAX_TARGET_CONFIGURATIO
 // force and torque readings.
 // These are the default values, using a random set of files that I happen to have on hand.
 
-#define DEFAULT_LEFT_ATI_CALFILE	"..\\DexSourceCode\\FT8884.cal"
-#define DEFAULT_RIGHT_ATI_CALFILE	"..\\DexSourceCode\\FT8885.cal"
+#define DEFAULT_LEFT_ATI_CALFILE	"..\\DexSourceCode\\FT7928.cal"
+#define DEFAULT_RIGHT_ATI_CALFILE	"..\\DexSourceCode\\FT7927.cal"
 
 // How much, in degrees, to rotate each ATI around it's own Z axis to 
 // align the ATI reference frame with the manipulandum reference frame.
