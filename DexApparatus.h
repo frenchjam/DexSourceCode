@@ -11,7 +11,7 @@
 #ifndef DexApparatusH
 #define DexApparatusH
 
-#include <ftconfig.h>
+#include <ATIDAQ\ftconfig.h>
 
 #include <VectorsMixin.h>
 

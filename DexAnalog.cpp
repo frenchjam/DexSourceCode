@@ -18,7 +18,7 @@
 #include <memory.h>
 #include <process.h>
 
-#include <ftconfig.h>
+#include <ATIDAQ\ftconfig.h>
 
 #include <fMessageBox.h>
 #include <VectorsMixin.h>

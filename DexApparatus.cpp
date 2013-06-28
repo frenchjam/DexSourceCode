@@ -17,7 +17,7 @@
 #include <process.h>
 
 // ATI Force/Torque Sensor Library
-#include <ftconfig.h>
+#include <ATIDAQ\ftconfig.h>
 
 #include <fMessageBox.h>
 #include <VectorsMixin.h>
