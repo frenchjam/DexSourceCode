@@ -21,6 +21,8 @@ class DexADC : public VectorsMixin {
 
 	protected:
 
+		bool allow_polling;
+
 	public:
 
 		// Number of ADC channels to be acquired.
@@ -29,11 +31,24 @@ class DexADC : public VectorsMixin {
 
 		double samplePeriod;
 
-		DexADC() : nChannels( 0 ), samplePeriod( ANALOG_SAMPLE_PERIOD ) {} ;
+		DexADC() : nChannels( 0 ), samplePeriod( ANALOG_SAMPLE_PERIOD ), allow_polling( false) {} ;
 
 		virtual void Initialize( void ) = 0;
 		virtual int  Update( void ) = 0;
 		virtual void Quit( void ) = 0;
+
+		// Not all the ADC interfaces, such as the NiDaq, allow continuous acquisition
+		//  and at the same time periodic polling of the most recent values.
+		// Calling this routine changes to a work-around solution.
+		// It performs time-series acquisitions by repeatedly polling the 
+		// device as quickly as it can and timestamps the samples. When the caller
+		// retrieves the samples, the polled data is interpolated to generate time
+		// series at a constant period.
+		// The DEX hardware will allow both polling and continuous acquisition, so 
+		//  no need to use it there. No script line will be generated for this command.
+		// NB : This must be called before each continuous acquisition that requires 
+		//  ADC polling, as StopAcquisition turns this mode off.
+		void AllowPollingDuringAcquisition( void );
 
 		virtual void	StartAcquisition( float max_duration ) = 0;
 		virtual void	StopAcquisition( void ) = 0;

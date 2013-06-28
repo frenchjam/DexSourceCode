@@ -6,11 +6,6 @@
 
 // This is the interface to a NiDaq analog input device.
 
-// It is a rudimentary interface that polls the device for single slices of 
-// data. It performs time-series acquisitions by repeatedly polling the 
-// device as quickly as it can and timestamps the samples. When the caller
-// retrieves the samples, the polled data is interpolated to generate time
-// series at a constant period.
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -29,7 +24,6 @@
 #include "DexADC.h"
 #include "..\DexSimulatorApp\resource.h"
 
-// #define USE_POLLING
 
 float64	nidaq_buffer[DEX_MAX_CHANNELS * DEX_MAX_ANALOG_SAMPLES];
 
@@ -53,12 +47,12 @@ void DexNiDaqADC::Initialize( void ) {
 	char *filename = "DexNiDaqAnalogDebug.adc";
 	int32 error_code;
 
-	// Open a file to store the analog values that were used by 
-	// GetCurrentAnalogSample() to simulate the analog inputs. 
+	// Open a file to store the polled analog values that were used by 
+	// GetCurrentAnalogSample() to simulate continous analog recording. 
 
 	fp = fopen( filename, "w" );
 	if ( !fp ) {
-		fMessageBox( MB_OK, "DexMouseAnalog", "Error openning file for write:\n %s", filename );
+		fMessageBox( MB_OK, "DexNiDaqAnalog", "Error openning file for write:\n %s", filename );
 		exit( -1 );
 	}
 	fprintf( fp, "Time" );
@@ -78,7 +72,7 @@ void DexNiDaqADC::Initialize( void ) {
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Here we don't set a clock. The read will read all the channels once as quickly as possible.
 
-	// Do the real work to initialize the ADC for polling.
+	// Do the real work to initialize the ADC for continuous acquisition.
 	error_code = DAQmxCreateTask("",&continuousTaskHandle);
 	// Set to read single-ended voltages in the range +/- 5 volts.
 	error_code = DAQmxCreateAIVoltageChan(continuousTaskHandle, channel_range, "", DAQmx_Val_RSE, -5.0, 5.0, DAQmx_Val_Volts, NULL);
@@ -126,41 +120,98 @@ void DexNiDaqADC::StartAcquisition( float max_duration ) {
 	overrun = false;
 	DexTimerSet( acquisitionTimer, max_duration );
 
-#ifdef USE_POLLING
-	nPolled = 0;
-	Update();
-#else
-	int32		error_code;
-	// Start acquiring.
-	error_code = DAQmxStartTask( continuousTaskHandle );
-	if( DAQmxFailed( error_code )) ReportNiDaqError();
-
-
-#endif
-
+	if ( allow_polling ) {
+		nPolled = 0;
+		Update();
+	}
+	else {
+		int32		error_code;
+		// Start acquiring.
+		error_code = DAQmxStartTask( continuousTaskHandle );
+		if( DAQmxFailed( error_code )) ReportNiDaqError();
+	}
 
 }
 
 void DexNiDaqADC::StopAcquisition( void ) {
 	
-	int32       samples_read;
-	int32		error_code;
-
 	acquisitionOn = false;
 	duration = DexTimerElapsedTime( acquisitionTimer );
 
-#ifndef USE_POLLING
-	error_code = DAQmxReadAnalogF64( continuousTaskHandle, DEX_MAX_ANALOG_SAMPLES, 
-					0, DAQmx_Val_GroupByScanNumber, 
-					nidaq_buffer, DEX_MAX_CHANNELS * DEX_MAX_ANALOG_SAMPLES, 
-					&samples_read, NULL );
-	// Ignore the timeout error. We don't expect to really get all the samples.
-	if( error_code != -200284 && DAQmxFailed( error_code ) ) ReportNiDaqError();
-	nAcqSamples = samples_read;
+	if ( allow_polling ) {
 
-	error_code = DAQmxStopTask(continuousTaskHandle);
-	if( DAQmxFailed( error_code )) ReportNiDaqError();
-#endif
+		// If we used the polling method to acquire samples, we now
+		// need to generate samples at a fixed rate using interpolation.
+
+		int previous;
+		int next;
+		int smpl;
+		int j;
+		
+		double	time, interval, offset, relative;
+		
+		// Copy data into an array.
+		previous = 0;
+		next = 1;
+		
+		// Fill an array of frames at a constant frequency by interpolating the
+		// frames that were taken at a variable frequency in real time.
+		for ( smpl = 0; smpl < DEX_MAX_ANALOG_SAMPLES && next <nPolled; smpl += 1 ) {
+			
+			// Compute the time of each slice at a constant sampling frequency.
+			time = (double) smpl * samplePeriod;
+			
+			// Fill the first frames with the same values as the first polled frame;
+			if ( time < recordedAnalogSamples[previous].time ) {
+				for ( j = 0; j < nChannels; j++ ) nidaq_buffer[nChannels * smpl + j] = recordedAnalogSamples[previous].channel[j];
+			}
+			
+			else {
+				// See if we have caught up with the real-time data.
+				if ( time > recordedAnalogSamples[next].time ) {
+					previous = next;
+					// Find the next real-time frame that has a time stamp later than this one.
+					while ( recordedAnalogSamples[next].time <= time && next < nPolled ) next++;
+					// If we reached the end of the real-time samples, then we are done.
+					if ( next >= nPolled ) {
+						break;
+					}
+				}
+				
+				// Compute the time difference between the two adjacent real-time frames.
+				interval = recordedAnalogSamples[next].time - recordedAnalogSamples[previous].time;
+				// Compute the time between the current frame and the previous real_time frame.
+				offset = time - recordedAnalogSamples[previous].time;
+				// Use the relative time to interpolate.
+				relative = offset / interval;
+				
+				for ( int j = 0; j < nChannels; j++ ) {
+					nidaq_buffer[nChannels * smpl + j] = recordedAnalogSamples[previous].channel[j] + 
+						relative * ( recordedAnalogSamples[next].channel[j] - recordedAnalogSamples[previous].channel[j] );
+				}
+			}
+		}
+		nAcqSamples = smpl;
+		allow_polling = false;
+	}
+	
+	else {
+
+		int32       samples_read;
+		int32		error_code;
+
+		// Stop the continous acquisition.
+		error_code = DAQmxReadAnalogF64( continuousTaskHandle, DEX_MAX_ANALOG_SAMPLES, 
+						0, DAQmx_Val_GroupByScanNumber, 
+						nidaq_buffer, DEX_MAX_CHANNELS * DEX_MAX_ANALOG_SAMPLES, 
+						&samples_read, NULL );
+		// Ignore the timeout error. We don't expect to really get all the samples.
+		if( error_code != -200284 && DAQmxFailed( error_code ) ) ReportNiDaqError();
+		nAcqSamples = samples_read;
+
+		error_code = DAQmxStopTask(continuousTaskHandle);
+		if( DAQmxFailed( error_code )) ReportNiDaqError();
+	}
 
 }
 
@@ -176,75 +227,12 @@ bool DexNiDaqADC::CheckAcquisitionOverrun( void ) {
 
 int DexNiDaqADC::RetrieveAnalogSamples( AnalogSample samples[], int max_samples ) {
 	
-#ifdef USE_POLLING
-
-	int previous;
-	int next;
-	int smpl;
-	
-	double	time, interval, offset, relative;
-	
-
-	// If we used the polling method to acquire samples, we now
-	// need to generate samples at a fixed rate using interpolation.
-
-	// Copy data into an array.
-	previous = 0;
-	next = 1;
-	
-	// Fill an array of frames at a constant frequency by interpolating the
-	// frames that were taken at a variable frequency in real time.
-	for ( smpl = 0; smpl < max_samples; smpl++ ) {
-		
-		// Compute the time of each slice at a constant sampling frequency.
-		time = (double) smpl * samplePeriod;
-		samples[smpl].time = (float) time;
-		
-		// Fill the first frames with the same position as the first polled frame;
-		if ( time < recordedAnalogSamples[previous].time ) {
-			CopyAnalogSample( samples[smpl], recordedAnalogSamples[previous] );
-		}
-		
-		else {
-			// See if we have caught up with the real-time data.
-			if ( time > recordedAnalogSamples[next].time ) {
-				previous = next;
-				// Find the next real-time frame that has a time stamp later than this one.
-				while ( recordedAnalogSamples[next].time <= time && next < nPolled ) next++;
-				// If we reached the end of the real-time samples, then we are done.
-				if ( next >= nPolled ) {
-					break;
-				}
-			}
-			
-			// Compute the time difference between the two adjacent real-time frames.
-			interval = recordedAnalogSamples[next].time - recordedAnalogSamples[previous].time;
-			// Compute the time between the current frame and the previous real_time frame.
-			offset = time - recordedAnalogSamples[previous].time;
-			// Use the relative time to interpolate.
-			relative = offset / interval;
-			
-			for ( int j = 0; j < nChannels; j++ ) {
-				samples[smpl].channel[j] = recordedAnalogSamples[previous].channel[j] + 
-					relative * ( recordedAnalogSamples[next].channel[j] - recordedAnalogSamples[previous].channel[j] );
-			}
-		}
-	}
-
-	nAcqSamples = smpl;
-
-#else
-
 	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
 		for ( int chan = 0; chan < nChannels; chan++ ) {
 			samples[smpl].channel[chan] = nidaq_buffer[smpl * nChannels + chan];
 		}
 		samples[smpl].time = smpl * samplePeriod;
 	}
-
-#endif
-
-
 	return( nAcqSamples );
 
 }
@@ -272,8 +260,7 @@ bool DexNiDaqADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 		sample.channel[chan] = nidaqDataSlice[chan];
 	}
 
-	// Output the position and orientation used to compute the simulated
-	// marker positions. This is for testing only.
+	// Output the sample to a file. This is for testing only.
 	fprintf( fp, "%f", sample.time );
 	for ( chan = 0; chan < nChannels; chan++ ) fprintf( fp, "\t%f", sample.channel[chan] );
 	fprintf( fp, "\n" );
@@ -288,20 +275,19 @@ bool DexNiDaqADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 
 int DexNiDaqADC::Update( void ) {
 
-#if USE_POLLING
-	// Store the time series of data.
-	if ( DexTimerTimeout( acquisitionTimer ) ) {
-		acquisitionOn = false;
-		overrun =true;
+	if ( allow_polling ) {
+		// Store the time series of data.
+		if ( DexTimerTimeout( acquisitionTimer ) ) {
+			acquisitionOn = false;
+			overrun =true;
+		}
+		if ( acquisitionOn && nPolled < DEX_MAX_ANALOG_SAMPLES ) {
+			AnalogSample	sample;
+			GetCurrentAnalogSample( sample );
+			CopyAnalogSample( recordedAnalogSamples[ nPolled ], sample );
+			if ( nPolled < DEX_MAX_ANALOG_SAMPLES ) nPolled++;
+		}
 	}
-	if ( acquisitionOn && nPolled < DEX_MAX_ANALOG_SAMPLES ) {
-		AnalogSample	sample;
-		GetCurrentAnalogSample( sample );
-		CopyAnalogSample( recordedAnalogSamples[ nPolled ], sample );
-		if ( nPolled < DEX_MAX_ANALOG_SAMPLES ) nPolled++;
-	}
-#endif
-
 	return( 0 );
 
 }
