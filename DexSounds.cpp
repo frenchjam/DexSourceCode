@@ -107,7 +107,7 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 	// a border causes the mouse pointer to dissappear in the other 
 	// windows as well.
 	window->Border = true;
-	window->Create( NULL, "DEX", rect.right - width_in_pixels - 200, rect.top + 120, width_in_pixels, height_in_pixels );
+	window->Create( NULL, "DEX", rect.right - width_in_pixels - 184, rect.top + 120, width_in_pixels, height_in_pixels );
 
 	viewpoint = new Viewpoint();
 	speaker = new Sphere();

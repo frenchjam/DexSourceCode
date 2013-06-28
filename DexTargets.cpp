@@ -153,7 +153,7 @@ DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 	height_in_pixels = ( rect.bottom - rect.top ) / 10;
 	horizontal_window = new OpenGLWindow();
 	horizontal_window->Border = true;
-	horizontal_window->Create( NULL, "DEX", 0, 0, width_in_pixels, height_in_pixels );
+	horizontal_window->Create( NULL, "DEX", 5, 0, width_in_pixels, height_in_pixels );
 
 	horizontal_viewpoint = new OrthoViewpoint( 0, height, - width / 2, width / 2, -100, 100 );	
 

@@ -26,10 +26,15 @@
 #include "DexApparatus.h"
 #include "Dexterous.h"
 
+#include <3dMatrix.h>
+#include <OglDisplayInterface.h>
+#include <Views.h>
+#include <Layouts.h>
+
 /*********************************************************************************/
 
 #define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
-
+#define AUTOSCALE	// Autoscale the data traces.
 
 /*********************************************************************************/
 
@@ -52,7 +57,7 @@ double offsetMaxTrialTime = 120.0;		// Max time to perform the whole list of mov
 double offsetAcquireTime = 2.0;			// How long to acquire when computing strain gauge offsets.
 
 // Coefficient of friction test parameters.
-double frictionHoldTime = 5.0;
+double frictionHoldTime = 2.0;
 double frictionTimeout = 15.0;
 double frictionMinGrip = 10.0;
 double frictionMaxGrip = 15.0;
@@ -61,12 +66,13 @@ double frictionMaxLoad = 10.0;
 double forceFilterConstant = 1.0;
 Vector3 frictionLoadDirection = { 0.0, -1.0, 0.0 };
 
+double copTolerance = 10.0;
 double slipThreshold = 10.0;
 double slipTimeout = 20.0;
 
 // Targeted trial parameters;
 int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
-int targetSequenceN = 9;
+int targetSequenceN = 2;
 double movementTime = 2.0;					// Time allowed for each movement.
 double targetedMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
 double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
@@ -103,7 +109,198 @@ Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
 Quaternion expected_orientation[2];
 unsigned int RefMarkerMask = 0x000f0000;
 
-float flashTime = 0.3;
+float flashTime = 0.1;
+
+// 2D Graphics
+Display display; 
+Layout  layout;
+View	view, yz_view, cop_view;
+
+int plot_screen_left = 225;
+int plot_screen_top = 120;
+int plot_screen_width = 772;
+int plot_screen_height = 600;
+float _plot_z_min = -500.0;
+float _plot_z_max =  500.0;
+float _plot_y_min = -200.0;
+float _plot_y_max =  800.0;
+int   _n_plots = 6;
+
+float cop_range = 0.03;
+float load_range = 100.0;
+float grip_range = 25.0;
+
+/*********************************************************************************/
+
+void BlinkAll ( DexApparatus *apparatus ) {
+
+	apparatus->SetTargetState( ~0 );
+	apparatus->Wait( flashTime );
+	apparatus->TargetsOff();
+	apparatus->Wait( flashTime );
+
+}
+
+/**************************************************************************************/
+
+void init_plots ( void ) {
+
+	display = DefaultDisplay();
+	DisplaySetSizePixels( display, plot_screen_width, plot_screen_height );
+	DisplaySetScreenPosition( display, plot_screen_left, plot_screen_top );
+	DisplaySetName( display, "DEX Monitor - Recorded Data" );
+	DisplayInit( display );
+	Erase( display );
+	
+	yz_view = CreateView( display );
+	ViewSetDisplayEdgesRelative( yz_view, 0.01, 0.51, 0.30, 0.99 );
+	ViewSetEdges( yz_view, _plot_z_min, _plot_y_min, _plot_z_max, _plot_y_max );
+	ViewMakeSquare( yz_view );
+	
+	cop_view = CreateView( display );
+	ViewSetDisplayEdgesRelative( cop_view, 0.01, 0.01, 0.30, 0.49 );
+	ViewSetEdges( cop_view, - cop_range, - cop_range, cop_range, cop_range );
+	ViewMakeSquare( cop_view );
+
+	layout = CreateLayout( display, _n_plots, 1 );
+	LayoutSetDisplayEdgesRelative( layout, 0.31, 0.01, 0.99, 0.99 );
+
+	ActivateDisplayWindow();
+	Erase( display );
+	DisplaySwap( display );
+	HideDisplayWindow();
+}
+
+void plot_data( DexApparatus *apparatus ) {
+
+	int i, j, cnt;
+
+	ShowDisplayWindow();
+	ActivateDisplayWindow();
+	Erase( display );
+		
+	ViewColor( yz_view, GREY4 );
+	ViewBox( yz_view );
+	ViewBox( cop_view );
+	ViewCircle( cop_view, 0.0, 0.0, copTolerance / 1000.0 );
+	
+	int frames = apparatus->nAcqFrames;
+	int samples = apparatus->nAcqSamples;
+	if ( frames > 0 ) {
+
+		ViewColor( yz_view, RED );
+		ViewPenSize( yz_view, 5 );
+		ViewXYPlotAvailableFloats( yz_view,
+			&apparatus->acquiredManipulandumState[0].position[Z], 
+			&apparatus->acquiredManipulandumState[0].position[Y], 
+			0, frames - 1, 
+			sizeof( *apparatus->acquiredManipulandumState ), 
+			sizeof( *apparatus->acquiredManipulandumState ), 
+			INVISIBLE );
+
+		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
+			ViewSelectColor( cop_view, i );
+			ViewPenSize( cop_view, 5 );
+			ViewXYPlotAvailableFloats( cop_view,
+				&apparatus->acquiredCOP[i][0][X], 
+				&apparatus->acquiredCOP[i][0][Y], 
+				0, samples - 1, 
+				sizeof( *apparatus->acquiredCOP[i] ), 
+				sizeof( *apparatus->acquiredCOP[i] ), 
+				INVISIBLE );
+		}
+
+		for ( i = 0, cnt = 0; i < 3; i++, cnt++ ) {
+		
+			view = LayoutViewN( layout, cnt );
+			ViewColor( view, GREY4 );	
+			ViewBox( view );
+		
+			ViewSetXLimits( view, 0.0, frames );
+			ViewAutoScaleInit( view );
+			ViewAutoScaleAvailableFloats( view,
+				&apparatus->acquiredManipulandumState[0].position[i], 
+				0, frames - 1, 
+				sizeof( *apparatus->acquiredManipulandumState ), 
+				INVISIBLE );
+			ViewAutoScaleSetInterval( view, 500.0 );			
+			
+			ViewSelectColor( view, i );
+			ViewPlotAvailableFloats( view,
+				&apparatus->acquiredManipulandumState[0].position[i], 
+				0, frames - 1, 
+				sizeof( *apparatus->acquiredManipulandumState ), 
+				INVISIBLE );
+			
+		}
+
+		view = LayoutViewN( layout, cnt++ );
+		ViewColor( view, GREY4 );	
+		ViewBox( view );
+	
+		ViewSetXLimits( view, 0.0, samples );
+		ViewAutoScaleInit( view );
+		ViewAutoScaleAvailableFloats( view,
+			&apparatus->acquiredGripForce[0], 
+			0, samples - 1, 
+			sizeof( *apparatus->acquiredGripForce ), 
+			INVISIBLE );
+		ViewAutoScaleSetInterval( view, grip_range );			
+		
+		ViewColor( view, RED );
+		ViewPlotAvailableFloats( view,
+			&apparatus->acquiredGripForce[0], 
+			0, samples - 1, 
+			sizeof( *apparatus->acquiredGripForce ), 
+			INVISIBLE );
+
+		view = LayoutViewN( layout, cnt++ );
+		ViewColor( view, GREY4 );	
+		ViewBox( view );
+	
+		ViewSetXLimits( view, 0.0, samples );
+		ViewAutoScaleInit( view );
+		ViewAutoScaleAvailableFloats( view,
+			&apparatus->acquiredLoadForceMagnitude[0], 
+			0, samples - 1, 
+			sizeof( *apparatus->acquiredLoadForceMagnitude ), 
+			INVISIBLE );
+		ViewAutoScaleSetInterval( view, load_range );			
+		
+		ViewColor( view, BLUE );
+		ViewPlotAvailableFloats( view,
+			&apparatus->acquiredLoadForceMagnitude[0], 
+			0, samples - 1, 
+			sizeof( *apparatus->acquiredLoadForceMagnitude ), 
+			INVISIBLE );
+
+		view = LayoutViewN( layout, cnt++ );
+		ViewColor( view, GREY4 );	
+		ViewBox( view );
+	
+		ViewSetXLimits( view, 0.0, samples );
+		ViewSetYLimits( view, - 2.0 * copTolerance / 1000.0, 2.0 * copTolerance / 1000.0 );
+		ViewLine( view, 0.0,   copTolerance / 1000.0, samples,   copTolerance / 1000.0 );
+		ViewLine( view, 0.0, - copTolerance / 1000.0, samples, - copTolerance / 1000.0 );
+		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
+			for ( j = 0; j < 2; j++ ) {
+				ViewSelectColor( view, i * N_FORCE_TRANSDUCERS + j );
+					ViewPlotAvailableFloats( view,
+					&apparatus->acquiredCOP[i][0][j], 
+					0, samples - 1, 
+					sizeof( *apparatus->acquiredCOP[i] ), 
+					INVISIBLE );
+			}
+		}
+	}
+	
+	DisplaySwap( display );
+
+	RunWindow();
+	HideDisplayWindow();
+
+
+}
 
 /*********************************************************************************/
 
@@ -185,22 +382,23 @@ int RunFrictionMeasurement( DexApparatus *apparatus ) {
 
 	int status;
 
-	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-
-
 	// Start acquiring Data.
+	// Note: DexNiDaqADC must be run in polling mode so that we can both record the 
+	// continuous data, but all monitor the COP in real time.
+	// The following routine does that, but it will have no effect on the real
+	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
+	apparatus->adc->AllowPollingDuringAcquisition();
 	apparatus->StartAcquisition( targetedMaxTrialTime );
 
-	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, relax the grip until slippage.\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
-	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
+	status = apparatus->WaitCenteredGrip( copTolerance, 1.0, 1.0, "Grip not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-		forceFilterConstant, frictionHoldTime, frictionTimeout );
+		forceFilterConstant, frictionHoldTime, 1000 * frictionTimeout );
 	apparatus->MarkEvent( FORCE_OK );
 	apparatus->Beep();
 	apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
@@ -260,15 +458,16 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+#endif
+
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+
+	// Check that the grip is properly centered.
 	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
 	if ( status == ABORT_EXIT ) exit( status );
-
-
-#endif
 
 	// Start acquiring data.
 	apparatus->StartAcquisition( targetedMaxTrialTime );
@@ -316,6 +515,9 @@ int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], 
 	// Collect one final second of data.
 	apparatus->Wait( baselineTime );
 	
+	// Let the subject know that they are done.
+	BlinkAll( apparatus );
+
 	// Stop collecting data.
 	apparatus->StopAcquisition();
 	
@@ -533,6 +735,7 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 }
 
 
+
 /**************************************************************************************/
 
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -627,7 +830,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	case SCREEN_TARGETS:
-		targets = new DexScreenTargets( 5, 3 ); 
+		targets = new DexScreenTargets(); 
 		break;
 
 	default:
@@ -676,6 +879,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	* Keep track of the elapsed time from the start of the first trial.
 	*/
 	DexTimerStart( session_timer );
+
+	init_plots();
 	
 	/*
 	* Run one of the protocols.
@@ -715,21 +920,31 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 			return_code = RunFrictionMeasurement( apparatus );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+
+		plot_data( apparatus );
+
 		break;
 
+
 	case TARGETED_PROTOCOL:
+
 		do {
 			return_code = RunTransducerOffsetCompensation( apparatus );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+
 		do {
 			return_code = RunTargeted( apparatus, VERTICAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+		plot_data( apparatus );
+
 		do {
 			return_code = RunTargeted( apparatus, HORIZONTAL, targetSequence, targetSequenceN );
 		} while ( return_code == RETRY_EXIT );
 		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+		plot_data( apparatus );
+
 		break;
 
 	case INSTALL_PROCEDURE:
