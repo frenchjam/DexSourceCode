@@ -85,8 +85,10 @@ class DexNiDaqTargets : public DexTargets {
 	
 private:
 	
+	DexScreenTargets	*screen_targets;
 	TaskHandle taskHandle;	
 	void DexNiDaqTargets::ReportNiDaqError ( void );
+
 	
 protected:
 	
@@ -95,7 +97,7 @@ public:
 	DexNiDaqTargets();
 	void  Initialize( void );
 	void SetTargetStateInternal( unsigned long target_bit_pattern );
-//	int  Update( void );
+	int  Update( void );
 	void Quit( void );
 	
 };

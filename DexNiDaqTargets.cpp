@@ -33,6 +33,15 @@ void DexNiDaqTargets::ReportNiDaqError ( void ) {
 	fMessageBox( MB_OK, "DexNiDaqADC", errBuff );
 }
 
+DexNiDaqTargets::DexNiDaqTargets( void ) {
+
+	nVerticalTargets = N_VERTICAL_TARGETS;
+	nHorizontalTargets = N_HORIZONTAL_TARGETS;
+	nTargets = nVerticalTargets + nHorizontalTargets;
+	screen_targets = new DexScreenTargets( nVerticalTargets, nHorizontalTargets );
+
+}
+
 void DexNiDaqTargets::Initialize( void ) {
 
 
@@ -52,22 +61,20 @@ void DexNiDaqTargets::Initialize( void ) {
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Here we don't set a clock. The read will read all the channels once as quickly as possible.
 
+	screen_targets->Initialize();
 
 }
 
-DexNiDaqTargets::DexNiDaqTargets( void ) {
-
-	nVerticalTargets = N_VERTICAL_TARGETS;
-	nHorizontalTargets = N_HORIZONTAL_TARGETS;
-	nTargets = nVerticalTargets + nHorizontalTargets;
-
-}
 
 void DexNiDaqTargets::SetTargetStateInternal( unsigned long state ) {
 	int32 channels_written;
 	DAQmxWriteDigitalU32( taskHandle, 1, true, 1.0, DAQmx_Val_GroupByScanNumber, &state, &channels_written, NULL );
+	screen_targets->SetTargetState( state );
 }
 
+int DexNiDaqTargets::Update( void ) {
+	return ( screen_targets->Update() );
+}
 
 void DexNiDaqTargets::Quit( void ) {
 
@@ -82,6 +89,7 @@ void DexNiDaqTargets::Quit( void ) {
 		error_code = DAQmxClearTask(taskHandle);
 		if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	}
+	screen_targets->Quit();
 
 }
 
