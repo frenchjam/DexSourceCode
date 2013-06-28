@@ -193,8 +193,8 @@ double DexApparatus::ComputeCOP( Vector3 &cop, Vector3 &force, Vector3 &torque, 
 		return( sqrt( cop[X] * cop[X] + cop[Y] * cop[Y] ) );
 	}
 	else {
-		// If there is not enough normal force, just call it a centered COP.
-		CopyVector( cop, zeroVector );
+		// If there is not enough normal force, call it 'invisible'.
+		cop[X] = cop[Y] = cop[Z] = INVISIBLE;
 		// But signal that it's not a valid COP by returning a negative distance.
 		return( -1 );
 	}

@@ -31,7 +31,7 @@ void DexMouseADC::Initialize( void ) {
 	nAcqSamples = 0;
 	nPolled = 0;
 
-	char *filename = "DexMouseAnalogDebug.mrk";
+	char *filename = "DexMouseAnalogDebug.adc";
 
 	// Open a file to store the analog values that were used by 
 	// GetCurrentAnalogSample() to simulate the analog inputs. 
@@ -142,22 +142,30 @@ bool DexMouseADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 	RECT rect;
 	GetWindowRect( GetDesktopWindow(), &rect );
 
+	// These row vectors effectively invert the gauge-to-force ATI transformations.
+	static double Vz[] = { -0.0037,  0.0000, -0.0037,  0.0000, -0.0037,  0.0000 };
+	static double Vy[] = {  0.0000,  0.0012,  0.0000, -0.0011,  0.0000, -0.0002 };
+	static double Tx[] = { -0.0033, -0.0025, -0.2533,  0.0019,  0.2515, -0.0007 };
+
+
 	int chan;
 
 	// Compute 2 voltages from the position of the mouse.
-	float y =  (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 10.0 - 5.0;
-	float x =  (double) (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 10.0 - 5.0;
+	float y =  (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 500.0;
+	float z =  (double) (mouse_position.x - rect.right) / (double) ( rect.left - rect.right ) * 100.0;
+	float t =  pow( ((double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top )), 3.0 );
 
 	sample.time = DexTimerElapsedTime( acquisitionTimer );
 
-	// For the moment, just alternate values between x and y.
-	for ( chan = 0; chan < nChannels; chan++ ) {
-		if ( chan % 2 ) sample.channel[chan] = x;
-		else sample.channel[chan] = y;
+	// By default, all values are zero.
+	for ( chan = 0; chan < nChannels; chan++ ) sample.channel[chan] = 0.0;
+	// Compute analog values to modulate Fz with X and Fy with Y.
+	for ( chan = 0; chan < N_GAUGES; chan++ ) {
+		sample.channel[ LEFT_ATI_FIRST_CHANNEL + chan] = - Vy[chan] * y + Vz[chan] * z - t * Tx[chan];
+		sample.channel[ RIGHT_ATI_FIRST_CHANNEL + chan] =  Vy[chan] * y + Vz[chan] * z + t * Tx[chan];
 	}
 
-	// Output the position and orientation used to compute the simulated
-	// marker positions. This is for testing only.
+	// Output the simulated values. This is for testing only.
 	fprintf( fp, "%f\t", sample.time );
 	for ( chan = 0; chan < nChannels; chan++ ) fprintf( fp, "\t%f", sample.channel[chan] );
 	fprintf( fp, "\n" );

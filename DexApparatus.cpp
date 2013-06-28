@@ -1638,7 +1638,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 		fprintf( fp, "%d\t%.3f", smpl, acquiredAnalog[smpl].time );
 		fprintf( fp, "\t%f", acquiredGripForce[smpl] );
 		fprintf( fp, "\t%f", acquiredLoadForceMagnitude[smpl] );
-		fprintf( fp, "\t%f", acquiredLoadForce[smpl][X], acquiredLoadForce[smpl][Y], acquiredLoadForce[smpl][Z] );
+		fprintf( fp, "\t%f\t%f\t%f", acquiredLoadForce[smpl][X], acquiredLoadForce[smpl][Y], acquiredLoadForce[smpl][Z] );
 		fprintf( fp, "\t%f", acquiredHighAcceleration[smpl] );
 		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[0][smpl][X], acquiredForce[0][smpl][Y], acquiredForce[0][smpl][Z] );
 		fprintf( fp, "\t%f\t%f\t%f", acquiredForce[1][smpl][X], acquiredForce[1][smpl][Y], acquiredForce[1][smpl][Z] );
