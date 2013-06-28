@@ -130,6 +130,9 @@ float cop_range = 0.03;
 float load_range = 100.0;
 float grip_range = 25.0;
 
+HWND	dlg;
+HWND	saving_dlg;
+
 /*********************************************************************************/
 
 void BlinkAll ( DexApparatus *apparatus ) {
@@ -169,6 +172,7 @@ void init_plots ( void ) {
 	Erase( display );
 	DisplaySwap( display );
 	HideDisplayWindow();
+
 }
 
 void plot_data( DexApparatus *apparatus ) {
@@ -304,6 +308,15 @@ void plot_data( DexApparatus *apparatus ) {
 
 /*********************************************************************************/
 
+void save_data ( DexApparatus *apparatus, const char *tag ) {
+	ShowWindow( saving_dlg, SW_SHOW );
+	SetDlgItemText( saving_dlg, IDC_SAVING_CAPTION, "Saving data ..." );
+	apparatus->SaveAcquisition( tag );
+	ShowWindow( saving_dlg, SW_HIDE );
+}
+
+/*********************************************************************************/
+
 int RunInstall( DexApparatus *apparatus ) {
 
 	int status;
@@ -367,7 +380,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus ) {
 	apparatus->StartAcquisition( targetedMaxTrialTime );
 	apparatus->Wait( offsetAcquireTime );
 	apparatus->StopAcquisition();
-	apparatus->SaveAcquisition( "OFFS" );
+	save_data( apparatus, "OFFS" );
 
 	// Compute the offsets and insert them into force calculations.
 	apparatus->ComputeAndNullifyStrainGaugeOffsets();
@@ -412,7 +425,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus ) {
 	apparatus->Wait( 2.0 );
 
 	apparatus->StopAcquisition();
-	apparatus->SaveAcquisition( "FRIC" );
+	save_data( apparatus, "FRIC" );
 
 	return( NORMAL_EXIT );
 
@@ -757,8 +770,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexSounds	*sounds;
 	DexADC		*adc;	
 	
-	HWND	dlg;
-
 	int protocol = TARGETED_PROTOCOL;
 	char *script = "DexSampleScript.dex";
 
@@ -881,6 +892,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexTimerStart( session_timer );
 
 	init_plots();
+
+	// Create a dialog box locally that we can display while the data is being saved.
+	saving_dlg = CreateDialog(hInstance, (LPCSTR)IDD_SAVING, HWND_DESKTOP, dexDlgCallback );
+	ShowWindow( saving_dlg, SW_HIDE );
 	
 	/*
 	* Run one of the protocols.
