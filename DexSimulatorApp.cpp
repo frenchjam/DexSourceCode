@@ -837,7 +837,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	switch ( target_type ) {
 
 	case GLM_TARGETS:
-		targets = new DexScreenTargets(); // GLM targets not yet implemented.
+		targets = new DexNiDaqTargets(); // GLM
 		break;
 
 	case SCREEN_TARGETS:

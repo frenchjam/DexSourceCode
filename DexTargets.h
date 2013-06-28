@@ -16,6 +16,8 @@
 #include <OpenGLColors.h>
 #include <OpenGLViewpoints.h>
 
+#include <NIDAQmx.h>
+
 #include "Dexterous.h"
 
 class DexTargets {
@@ -79,4 +81,22 @@ public:
 	
 };
 
+class DexNiDaqTargets : public DexTargets {
+	
+private:
+	
+	TaskHandle taskHandle;	
+	void DexNiDaqTargets::ReportNiDaqError ( void );
+	
+protected:
+	
+public:
+	
+	DexNiDaqTargets();
+	void  Initialize( void );
+	void SetTargetStateInternal( unsigned long target_bit_pattern );
+//	int  Update( void );
+	void Quit( void );
+	
+};
 #endif
