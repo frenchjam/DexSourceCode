@@ -89,10 +89,7 @@ public:
 	char	*ATICalFilename[N_FORCE_TRANSDUCERS];
 	// Defines the rotation of each ATI sensor around the local Z axis.
 	double	ATIRotationAngle[N_FORCE_TRANSDUCERS];
-	
-	// Keep track of what type we are.
-	DexApparatusType  type;
-	
+		
 	// An object that handles event logging and transmission to ground.
 	DexMonitorServer		*monitor;
 	// An object that handles the visible targets.

@@ -45,8 +45,6 @@ DexApparatus::DexApparatus( void ) {
 	this->sounds = NULL;
 	this->adc = NULL;
 
-	type = DEX_NULL_APPARATUS;
-
 }
 
 DexApparatus::DexApparatus( DexTracker  *tracker,
@@ -58,8 +56,6 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 	this->targets = targets;
 	this->sounds = sounds;
 	this->adc = adc;
-
-	type = DEX_GENERIC_APPARATUS;
 
 }
 

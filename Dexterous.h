@@ -249,26 +249,10 @@ extern TargetArrayConfiguration targetArrayConfiguration[MAX_TARGET_CONFIGURATIO
 #define LEFT_ATI_ROTATION	 22.5
 #define RIGHT_ATI_ROTATION	 22.5
 	
+
 // The script interpreter will execute this file, if no other is specified.
 #define DEFAULT_SCRIPT_FILENAME	"DexSampleScript.dex"
 
-// These are some constants that are used inside the protocol routines.
-// I will probably move these to a separate file
-
 // Minimum normal force to compute a center of pressure.
 #define DEFAULT_COP_THRESHOLD	0.25	
-
-// These are the user-defined markers. 
-enum { FORCE_OK = 0, SLIP_OK };
-
-// Possible protocols.
-enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, FRICTION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
-
-// Possible apparatii.
-typedef enum { DEX_NULL_APPARATUS, DEX_GENERIC_APPARATUS, DEX_DYNAMIC_APPARATUS, DEX_VIRTUAL_APPARATUS, DEX_MOUSE_APPARATUS, DEX_CODA_APPARATUS, DEX_RTNET_APPARATUS, DEX_COMPILER } DexApparatusType;
-
-typedef enum { MOUSE_TRACKER, CODA_TRACKER, RTNET_TRACKER } TrackerType;
-typedef enum { MOUSE_ADC, GLM_ADC } AdcType;
-typedef enum { SCREEN_TARGETS, GLM_TARGETS } TargetType;
-typedef enum { SCREEN_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 

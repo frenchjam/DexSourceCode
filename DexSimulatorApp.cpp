@@ -35,23 +35,21 @@
 /*********************************************************************************/
 
 //#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
-#define AUTOSCALE	// Autoscale the data traces.
 
 /*********************************************************************************/
 
-int RunTargeted( DexApparatus *apparatus, DexTargetBarConfiguration bar_position, int target_sequence[], int n_targets  );
-int RunOscillations( DexApparatus *apparatus );
-int RunCollisions( DexApparatus *apparatus );
-int RunScript( DexApparatus *apparatus, const char *filename );
-
-/*********************************************************************************/
-
-// Common paramters.
+// Common parameters.
 double baselineTime = 1.0;					// Duration of pause at first target before starting movement.
 double continuousDropoutTimeLimit = 0.050;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
-int desired_posture = PostureSeated;
 double beepTime = BEEP_DURATION;
+double flashTime = 0.1;
+double copTolerance = 10.0;
+
+// Installation parameters.
+Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
+Quaternion expected_orientation[2];
+unsigned int RefMarkerMask = 0x000f0000;
 
 // Force offset parameters.
 double offsetMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
@@ -66,14 +64,12 @@ double frictionMinLoad = 5.0;
 double frictionMaxLoad = 10.0;
 double forceFilterConstant = 1.0;
 Vector3 frictionLoadDirection = { 0.0, -1.0, 0.0 };
-
-double copTolerance = 10.0;
 double slipThreshold = 10.0;
 double slipTimeout = 20.0;
 
 // Targeted trial parameters;
 int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
-int targetSequenceN = 2;
+int targetSequenceN = 9;
 double movementTime = 2.0;					// Time allowed for each movement.
 double targetedMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
 double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
@@ -104,13 +100,7 @@ double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
 
-int exit_status = NORMAL_EXIT;
-
-Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
-Quaternion expected_orientation[2];
-unsigned int RefMarkerMask = 0x000f0000;
-
-float flashTime = 0.1;
+/*********************************************************************************/
 
 // 2D Graphics
 Display display; 
@@ -143,6 +133,17 @@ void BlinkAll ( DexApparatus *apparatus ) {
 	apparatus->TargetsOff();
 	apparatus->Wait( flashTime );
 
+}
+
+/*********************************************************************************/
+
+void ShowStatus ( const char *message ) {
+	ShowWindow( status_dlg, SW_SHOW );
+	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
+}
+
+void HideStatus ( void ) {
+	ShowWindow( status_dlg, SW_HIDE );
 }
 
 /**************************************************************************************/
@@ -307,16 +308,6 @@ void plot_data( DexApparatus *apparatus ) {
 
 }
 
-/*********************************************************************************/
-
-void ShowStatus ( const char *message ) {
-	ShowWindow( status_dlg, SW_SHOW );
-	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
-}
-
-void HideStatus ( void ) {
-	ShowWindow( status_dlg, SW_HIDE );
-}
 /*********************************************************************************/
 
 int RunInstall( DexApparatus *apparatus ) {
@@ -631,10 +622,8 @@ int RunOscillations( DexApparatus *apparatus ) {
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
-	
-	exit_status = NORMAL_EXIT;
-	
-	return( exit_status );
+		
+	return( NORMAL_EXIT );
 	
 }
 
@@ -706,7 +695,7 @@ int RunCollisions( DexApparatus *apparatus ) {
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
-	return( exit_status );
+	return( NORMAL_EXIT );
 	
 }
 /*********************************************************************************/

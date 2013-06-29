@@ -47,7 +47,6 @@ DexCompiler::DexCompiler( int n_vertical_targets,
 						  int n_tones, int n_channels,	
 						  char *filename ) {
 	
-	type = DEX_COMPILER;
 	nVerticalTargets = n_vertical_targets;
 	nHorizontalTargets = n_horizontal_targets;
 	nTargets = n_vertical_targets + n_horizontal_targets;
