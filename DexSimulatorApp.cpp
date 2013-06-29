@@ -25,6 +25,7 @@
 
 #include "DexApparatus.h"
 #include "Dexterous.h"
+#include "DexTasks.h"
 
 #include <3dMatrix.h>
 #include <OglDisplayInterface.h>
@@ -131,7 +132,7 @@ float load_range = 100.0;
 float grip_range = 25.0;
 
 HWND	dlg;
-HWND	saving_dlg;
+HWND	status_dlg;
 
 /*********************************************************************************/
 
@@ -308,13 +309,14 @@ void plot_data( DexApparatus *apparatus ) {
 
 /*********************************************************************************/
 
-void save_data ( DexApparatus *apparatus, const char *tag ) {
-	ShowWindow( saving_dlg, SW_SHOW );
-	SetDlgItemText( saving_dlg, IDC_SAVING_CAPTION, "Saving data ..." );
-	apparatus->SaveAcquisition( tag );
-	ShowWindow( saving_dlg, SW_HIDE );
+void ShowStatus ( const char *message ) {
+	ShowWindow( status_dlg, SW_SHOW );
+	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
 }
 
+void HideStatus ( void ) {
+	ShowWindow( status_dlg, SW_HIDE );
+}
 /*********************************************************************************/
 
 int RunInstall( DexApparatus *apparatus ) {
@@ -377,13 +379,16 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus ) {
 	if ( status == ABORT_EXIT ) return( status );
 
 	// Acquire some data.
+	ShowStatus( "Acquiring offsets ..." );
 	apparatus->StartAcquisition( targetedMaxTrialTime );
 	apparatus->Wait( offsetAcquireTime );
 	apparatus->StopAcquisition();
-	save_data( apparatus, "OFFS" );
-
+	ShowStatus( "Saving data ..." );
+	apparatus->SaveAcquisition( "OFFS" );
+	ShowStatus( "Processing data ..." );
 	// Compute the offsets and insert them into force calculations.
 	apparatus->ComputeAndNullifyStrainGaugeOffsets();
+	HideStatus();
 
 	return( NORMAL_EXIT );
 
@@ -425,7 +430,9 @@ int RunFrictionMeasurement( DexApparatus *apparatus ) {
 	apparatus->Wait( 2.0 );
 
 	apparatus->StopAcquisition();
-	save_data( apparatus, "FRIC" );
+	ShowStatus( "Saving data ..." );
+	apparatus->SaveAcquisition( "FRIC" );
+	HideStatus();
 
 	return( NORMAL_EXIT );
 
@@ -886,16 +893,14 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Send information about the actual configuration to the ground.
 	apparatus->SignalConfiguration();
 	
-	/*
-	* Keep track of the elapsed time from the start of the first trial.
-	*/
+	// Keep track of the elapsed time from the start of the first trial.
 	DexTimerStart( session_timer );
 
 	init_plots();
 
 	// Create a dialog box locally that we can display while the data is being saved.
-	saving_dlg = CreateDialog(hInstance, (LPCSTR)IDD_SAVING, HWND_DESKTOP, dexDlgCallback );
-	ShowWindow( saving_dlg, SW_HIDE );
+	status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
+	HideStatus();
 	
 	/*
 	* Run one of the protocols.
