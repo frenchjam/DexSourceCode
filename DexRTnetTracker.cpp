@@ -116,8 +116,7 @@ void DexRTnetTracker::Initialize( void ) {
 		// includes the number of Codas specified in the configuration that is in use.
 		DeviceInfoAlignment align_info;
 		cl.getDeviceInfo( align_info );
-		// This isn't working. Maybe it only works if an alignment has been done.
-//		nCodas = align_info.dev.dwNumUnits;
+		nCodas = align_info.dev.dwNumUnits;
 		
 	}
 	catch(NetworkException& exNet)
