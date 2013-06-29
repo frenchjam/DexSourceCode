@@ -20,27 +20,42 @@ typedef enum { SCREEN_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP_OK };
 
 // Possible protocols.
-enum { TARGETED_PROTOCOL, OSCILLATION_PROTOCOL, COLLISION_PROTOCOL, FRICTION_PROTOCOL, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
+extern double maxTrialDuration;				// The maximum time for a single recording.
+
 extern double baselineTime;					// Duration of pause at first target before starting movement.
+extern double initialMovementTime;			// Time allowed to reach the starting position.
+
 extern double continuousDropoutTimeLimit;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 extern double cumulativeDropoutTimeLimit;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
-extern double beepTime;						// How long to play a tone for a beep.
-extern double flashTime;					// How long to leave a target on for a flash.
+extern double beepDuration;					// How long to play a tone for a beep.
+extern double flashDuration;				// How long to leave a target on for a flash.
+
+extern unsigned int refMarkerMask;
+extern double copTolerance;					// Tolerance on how well the fingers are centered on the manipulandum.
+extern double copForceThreshold;			// Threshold of grip force to test if the manipulandum is in the hand.
+extern double copWaitTime;					// Gives time to achieve the centered grip. 
+											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
+
+extern unsigned long alignmentMarkerMask;	// A bit mask describing which markers are used to perform the alignment check.
+extern unsigned long fovMarkerMask;			// A bit mask describing which markers are used to check the fov of each CODA.
+
 
 // Some helper functions provided by DexSimulatorApp.
 void ShowStatus ( const char *message );
 void HideStatus ( void );
 void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
-int RunTargetCalibration( DexApparatus *apparatus );
+int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 
 // Here are the different tasks.
-int RunTargeted( DexApparatus *apparatus, DexTargetBarConfiguration bar_position, int target_sequence[], int n_targets  );
-int RunOscillations( DexApparatus *apparatus );
-int RunCollisions( DexApparatus *apparatus );
+int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
+int RunOscillations( DexApparatus *apparatus, const char *params = NULL );
+int RunCollisions( DexApparatus *apparatus, const char *params = NULL );
+int RunDiscrete( DexApparatus *apparatus, const char *params = NULL );
 
-int RunFrictionMeasurement( DexApparatus *apparatus );
-int RunTransducerOffsetCompensation( DexApparatus *apparatus );
-int RunInstall( DexApparatus *apparatus );
+int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL );
+int RunTransducerOffsetCompensation( DexApparatus *apparatus = NULL );
+int RunInstall( DexApparatus *apparatus, const char *params = NULL );

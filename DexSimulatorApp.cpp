@@ -12,10 +12,7 @@
 
 /*********************************************************************************/
 
-//#include "stdafx.h"
 #include "..\DexSimulatorApp\resource.h"
-
-#include <Winsock2.h>
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -39,66 +36,28 @@
 /*********************************************************************************/
 
 // Common parameters.
+double maxTrialDuration = 60.0;				// Trials can be up to this long, but may be shorter.
+
 double baselineTime = 1.0;					// Duration of pause at first target before starting movement.
+double initialMovementTime = 5.0;			// Time allowed to reach the starting position.
 double continuousDropoutTimeLimit = 0.050;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
-double beepTime = BEEP_DURATION;
-double flashTime = 0.1;
-double copTolerance = 10.0;
+double beepDuration = BEEP_DURATION;
+double flashDuration = 0.1;
+double copTolerance = 10.0;					// Tolerance on how well the fingers are centered on the manipulandum.
+double copForceThreshold = 0.25;			// Threshold of grip force to test if the manipulandum is in the hand.
+double copWaitTime = 1.0;					// Gives time to achieve the centered grip. 
+											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
 
-// Installation parameters.
-Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
-Quaternion expected_orientation[2];
-unsigned int RefMarkerMask = 0x000f0000;
+// A bit mask describing which markers are used to perform the alignment check.
+// This should be set to correspond to the 4 markers on the reference frame.
+unsigned long alignmentMarkerMask = 0x000f0000;
 
-// Force offset parameters.
-double offsetMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
-double offsetAcquireTime = 2.0;			// How long to acquire when computing strain gauge offsets.
-
-// Coefficient of friction test parameters.
-double frictionHoldTime = 2.0;
-double frictionTimeout = 15.0;
-double frictionMinGrip = 10.0;
-double frictionMaxGrip = 15.0;
-double frictionMinLoad = 5.0;
-double frictionMaxLoad = 10.0;
-double forceFilterConstant = 1.0;
-Vector3 frictionLoadDirection = { 0.0, -1.0, 0.0 };
-double slipThreshold = 10.0;
-double slipTimeout = 20.0;
-
-// Targeted trial parameters;
-int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
-int targetSequenceN = 9;
-double movementTime = 2.0;					// Time allowed for each movement.
-double targetedMaxTrialTime = 120.0;		// Max time to perform the whole list of movements. Set to 12 to simulate error.
-double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double targetedMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-
-// Oscillation trial parameters.
-int oscillationUpperTarget = 9;						// Targets showing desired amplitude of cyclic movement.
-int oscillationLowerTarget = 3;
-int oscillationCenterTarget = 6;
-double oscillationTime = 10.0;
-double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
-double oscillationMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double oscillationMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-int	oscillationMinCycles = 6;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
-int oscillationMaxCycles = 0;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
-float cycleHysteresis = 10.0;
-
-// Collision trial parameters;
-int collisionInitialTarget = 6;
-int collisionUpTarget = 11;
-int collisionDownTarget = 1;
-
-#define UP		0
-#define DOWN	1
-int collisionSequenceN = 3;
-int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, DOWN, UP, DOWN, UP, UP };
-double collisionTime = 2.0;
-double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
-double collisionMovementThreshold = 10.0;
+// A bit mask describing which markers are used to perform the field-of-view check.
+// This includes the manipulandum and the reference frame markers, with the 
+//  assumption that the manipulandum is placed on the back of the chair in a 
+//  visible position during the alignment procedure.
+unsigned long fovMarkerMask = 0x000f00ff;
 
 /*********************************************************************************/
 
@@ -126,16 +85,16 @@ HWND	status_dlg;
 
 /*********************************************************************************/
 
+// These are some helper functions that can be used in the task and procedures.
+
 void BlinkAll ( DexApparatus *apparatus ) {
 
 	apparatus->SetTargetState( ~0 );
-	apparatus->Wait( flashTime );
+	apparatus->Wait( flashDuration );
 	apparatus->TargetsOff();
-	apparatus->Wait( flashTime );
+	apparatus->Wait( flashDuration );
 
 }
-
-/*********************************************************************************/
 
 void ShowStatus ( const char *message ) {
 	ShowWindow( status_dlg, SW_SHOW );
@@ -310,404 +269,6 @@ void plot_data( DexApparatus *apparatus ) {
 
 /*********************************************************************************/
 
-int RunInstall( DexApparatus *apparatus ) {
-
-	int status;
-
-	// Express the expected orientation of each fo the CODA units as a quaternion.
-	apparatus->SetQuaterniond( expected_orientation[0], 90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( expected_orientation[1],  0.0, apparatus->iVector );
-
-	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
-	status = apparatus->CheckTrackerFieldOfView( 0, RefMarkerMask, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	status = apparatus->CheckTrackerFieldOfView( 1, RefMarkerMask, -1000.0, 1000.0, -1000.0, 1000.0, 2000.0, 4000.0 );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Perform the alignment based on those markers.
-	status = apparatus->PerformTrackerAlignment();
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Are the Coda bars where we think they should be?
-	status = apparatus->CheckTrackerPlacement( 0, 
-										expected_position[0], 45.0, 
-										expected_orientation[0], 45.0, 
-										"Placement error - Coda Unit 0." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	status = apparatus->CheckTrackerPlacement( 1, 
-										expected_position[1], 10.0, 
-										expected_orientation[1], 10.0, 
-										"Placement error - Coda Unit 1." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Check that the tracker is still aligned.
-	status = apparatus->CheckTrackerAlignment( RefMarkerMask, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Prompt the subject to place the manipulandum on the chair.
-	status = apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Perform a short acquisition to measure where the manipulandum is.
-	apparatus->StartAcquisition( 5.0 );
-	apparatus->Wait( 5.0 );
-	apparatus->StopAcquisition();
-	apparatus->SaveAcquisition( "ALGN" );
-
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	return( NORMAL_EXIT );
-}
-
-/*********************************************************************************/
-
-int RunTransducerOffsetCompensation( DexApparatus *apparatus ) {
-
-	int status;
-
-	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-
-	// Acquire some data.
-	ShowStatus( "Acquiring offsets ..." );
-	apparatus->StartAcquisition( targetedMaxTrialTime );
-	apparatus->Wait( offsetAcquireTime );
-	apparatus->StopAcquisition();
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "OFFS" );
-	ShowStatus( "Processing data ..." );
-	// Compute the offsets and insert them into force calculations.
-	apparatus->ComputeAndNullifyStrainGaugeOffsets();
-	HideStatus();
-
-	return( NORMAL_EXIT );
-
-}
-
-/*********************************************************************************/
-
-int RunFrictionMeasurement( DexApparatus *apparatus ) {
-
-	int status;
-
-	// Start acquiring Data.
-	// Note: DexNiDaqADC must be run in polling mode so that we can both record the 
-	// continuous data, but all monitor the COP in real time.
-	// The following routine does that, but it will have no effect on the real
-	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
-	apparatus->adc->AllowPollingDuringAcquisition();
-	apparatus->StartAcquisition( targetedMaxTrialTime );
-
-	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-
-	status = apparatus->WaitCenteredGrip( copTolerance, 1.0, 1.0, "Grip not centered." );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
-		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-		forceFilterConstant, frictionHoldTime, 1000 * frictionTimeout );
-	apparatus->MarkEvent( FORCE_OK );
-	apparatus->Beep();
-	apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
-		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-		forceFilterConstant, slipThreshold, slipTimeout );
-	apparatus->MarkEvent( SLIP_OK );
-
-	apparatus->Beep();
-	apparatus->Wait( 0.25 );
-	apparatus->Beep();
-	apparatus->Wait( 2.0 );
-
-	apparatus->StopAcquisition();
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "FRIC" );
-	HideStatus();
-
-	return( NORMAL_EXIT );
-
-}
-/*********************************************************************************/
-
-int RunTargeted( DexApparatus *apparatus, int direction, int target_sequence[], int n_targets ) {
-	
-	int status = 0;
-
-	int bar_position;
-
-	if ( direction == VERTICAL ) bar_position = TargetBarRight;
-	else bar_position = TargetBarLeft;
-
-#ifndef SKIP_PREP
-
-	// Check that the tracker is still aligned.
-	status = apparatus->CheckTrackerAlignment( RefMarkerMask, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
-		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Verify that it is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, DONT_CARE );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
-	apparatus->SetTargetPositions();
-	
-	// Send information about the actual configuration to the ground.
-	// This is redundant, because the SelectAndCheckConfiguration() command will do this as well.
-	// But I want to demonstrate that it can be used independent from the check as well.
-	apparatus->SignalConfiguration();
-	
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
-#endif
-
-	// Instruct subject to pick up the manipulandum
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Start acquiring data.
-	apparatus->StartAcquisition( targetedMaxTrialTime );
-
-	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( target_sequence[0], uprightNullOrientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( target_sequence[0], supineNullOrientation, defaultPositionTolerance, 1.0 ); 
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Make sure that the target is turned back on if a timeout occured.
-	// Normally this won't do anything.
-	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) apparatus->VerticalTargetOn( target_sequence[0] );
-	else apparatus->HorizontalTargetOn( target_sequence[0] );
-		
-	// Collect one second of data while holding at the starting position.
-	apparatus->Wait( baselineTime );
-	
-	// Mark the starting point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( BEGIN_ANALYSIS );
-
-	// Step through the list of targets.
-	for ( int target = 1; target < n_targets; target++ ) {
-		
-		// Light up the next target.
-		apparatus->TargetsOff();
-		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( target_sequence[ target ] );
-		else apparatus->HorizontalTargetOn( target_sequence[ target ] ); 
-
-
-		// Make a beep. Here we test the tones and volumes.
-		apparatus->SoundOn( target, target );
-		apparatus->Wait( beepTime );
-		apparatus->SoundOff();
-		
-		// Allow a fixed time to reach the target.
-		// Takes into account the duration of the beep.
-		apparatus->Wait( movementTime - beepTime );
-		
-	}
-	
-	// Mark the ending point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( END_ANALYSIS );
-
-	// Collect one final second of data.
-	apparatus->Wait( baselineTime );
-	
-	// Let the subject know that they are done.
-	BlinkAll( apparatus );
-
-	// Stop collecting data.
-	apparatus->StopAcquisition();
-	
-	// Save the data.
-	apparatus->SaveAcquisition( "TRGT" );
-	
-	// Check the quality of the data.
-	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->jVector, NULL );
-	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->kVector, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
-	if ( status == ABORT_EXIT ) exit( status );
-	
-	return( NORMAL_EXIT );
-	
-}
-
-
-/*********************************************************************************/
-
-int RunOscillations( DexApparatus *apparatus ) {
-	
-	int status = 0;
-	
-	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
-		PostureString[PostureSeated], TargetBarString[TargetBarRight], TappingSurfaceString[TappingFolded] );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Verify that it is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, TargetBarRight, TappingFolded );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( "Move to the flashing target.\nWhen 2 new targets appear, make oscillating\nmovements at approx. 1 Hz. " );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Light up the central target.
-	apparatus->TargetsOff();
-	apparatus->TargetOn( oscillationCenterTarget );
-	
-	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtVerticalTarget( oscillationCenterTarget );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-	
-	// Start acquiring data.
-	apparatus->StartAcquisition( oscillationMaxTrialTime );
-	
-	// Collect one second of data while holding at the starting position.
-	apparatus->Wait( baselineTime );
-	
-	// Show the limits of the oscillation movement by lighting 2 targets.
-	apparatus->TargetsOff();
-	apparatus->TargetOn( oscillationLowerTarget );
-	apparatus->TargetOn( oscillationUpperTarget );
-	
-	// Measure data during oscillations performed over a fixed duration.
-	apparatus->Wait( oscillationTime );
-	
-	// Stop acquiring.
-	apparatus->StopAcquisition();
-	
-	// Save the data and show it,
-	apparatus->SaveAcquisition( "OSCI" );
-	
-	// Check the quality of the data.
-	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Check that we got a reasonable amount of movement.
-	status = apparatus->CheckMovementAmplitude( oscillationMaxMovementExtent, oscillationMaxMovementExtent, apparatus->jVector, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Check that we got a reasonable amount of movement.
-	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, apparatus->jVector, cycleHysteresis, NULL );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
-	if ( status == ABORT_EXIT ) exit( status );
-		
-	return( NORMAL_EXIT );
-	
-}
-
-/*********************************************************************************/
-
-int RunCollisions( DexApparatus *apparatus ) {
-	
-	int status = 0;
-	
-	Sleep( 1000 );
-	apparatus->StartAcquisition( collisionMaxTrialTime );
-	
-	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-
-	// Mark the starting point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( BEGIN_ANALYSIS );
-	for ( int target = 0; target < collisionSequenceN; target++ ) {
-		
-		// Ready to start, so light up starting point target.
-		apparatus->TargetsOff();
-		apparatus->TargetOn( collisionInitialTarget );
-		
-		// Allow a fixed time to reach the starting point before we start blinking.
-		apparatus->Wait( movementTime );
-				
-		apparatus->TargetsOff();
-		if ( collisionSequence[target] ) {
-			apparatus->VerticalTargetOn( collisionUpTarget );
-			apparatus->MarkEvent( TRIGGER_MOVE_UP);
-		}
-		else {
-			apparatus->VerticalTargetOn( collisionDownTarget );
-			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
-		}
-
-		// Allow a fixed time to reach the target before we start blinking.
-		apparatus->Wait( flashTime );
-		apparatus->TargetsOff();
-		apparatus->TargetOn( collisionInitialTarget );
-		apparatus->Wait( movementTime - flashTime );
-
-		
-	}
-	
-	apparatus->TargetsOff();
-
-	// Mark the starting point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( END_ANALYSIS );
-	// Stop acquiring.
-	apparatus->StopAcquisition();
-	
-	// Save the data and show it,
-	apparatus->SaveAcquisition( "COLL" );
-
-	// Check if trial was completed as instructed.
-	status = apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, collisionMovementThreshold );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-
-	// Check if collision forces were within range.
-	status = apparatus->CheckForcePeaks( 1.0, 5.0, 1 );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-	// Same idea for acclerations.
-	status = apparatus->CheckAccelerationPeaks( 1.0, 2.0, 1 );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-
-	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
-	if ( status == ABORT_EXIT ) exit( status );
-	
-	return( NORMAL_EXIT );
-	
-}
-/*********************************************************************************/
-
-int RunTargetCalibration( DexApparatus *apparatus ) {
-	int exit_status;
-	exit_status = apparatus->CalibrateTargets();
-	return( exit_status );
-}
-
-/*********************************************************************************/
-
 // Mesage handler for dialog box.
 
 BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -766,8 +327,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexSounds	*sounds;
 	DexADC		*adc;	
 	
-	int protocol = TARGETED_PROTOCOL;
+	int task = TARGETED_TASK;
 	char *script = "DexSampleScript.dex";
+	int direction = VERTICAL;
+	bool eyes_closed = false;
 
 	int return_code;
 	
@@ -786,21 +349,32 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		adc_type = MOUSE_ADC;
 		target_type = SCREEN_TARGETS;
 	}
-	// Can override the target type even if the glm is present for analog.
-	if ( strstr( lpCmdLine, "-screen"   ) ) target_type = SCREEN_TARGETS;
 
 	if ( strstr( lpCmdLine, "-blaster"   ) ) sound_type = SOUNDBLASTER_SOUNDS;
 	else sound_type = SCREEN_SOUNDS;
 
-	// Now specify what protocol to run.
+	// Now specify what task or protocol to run.
 
-	if ( strstr( lpCmdLine, "-osc"    ) ) protocol = OSCILLATION_PROTOCOL;
-	if ( strstr( lpCmdLine, "-coll"   ) ) protocol = COLLISION_PROTOCOL;
-	if ( strstr( lpCmdLine, "-friction"   ) ) protocol = FRICTION_PROTOCOL;
-	if ( strstr( lpCmdLine, "-script" ) ) protocol = RUN_SCRIPT;
-	if ( strstr( lpCmdLine, "-calib"  ) ) protocol = CALIBRATE_TARGETS;
-	if ( strstr( lpCmdLine, "-install"  ) ) protocol = INSTALL_PROCEDURE;
-	
+	if ( strstr( lpCmdLine, "-osc"    ) ) task = OSCILLATION_TASK;
+	if ( strstr( lpCmdLine, "-oscillations"    ) ) task = OSCILLATION_TASK;
+	if ( strstr( lpCmdLine, "-targeted"    ) ) task = TARGETED_TASK;
+	if ( strstr( lpCmdLine, "-discrete"    ) ) task = DISCRETE_TASK;
+	if ( strstr( lpCmdLine, "-coll"   ) ) task = COLLISION_TASK;
+	if ( strstr( lpCmdLine, "-collisions"   ) ) task = COLLISION_TASK;
+	if ( strstr( lpCmdLine, "-friction"   ) ) task = FRICTION_TASK;
+
+	if ( strstr( lpCmdLine, "-script" ) ) task = RUN_SCRIPT;
+	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
+	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
+
+	// We can set some parameters for certain tasks.
+
+	if ( strstr( lpCmdLine, "-horiz"  ) ) direction = HORIZONTAL;
+	if ( strstr( lpCmdLine, "-vert"  ) ) direction = VERTICAL;
+
+	if ( strstr( lpCmdLine, "-open"  ) ) eyes_closed = false;
+	if ( strstr( lpCmdLine, "-closed"  ) ) eyes_closed = true;
+
 	switch ( tracker_type ) {
 
 	case MOUSE_TRACKER:
@@ -891,83 +465,48 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
 	HideStatus();
 	
-	/*
-	* Run one of the protocols.
-	*/
+	// Run one of the protocols.
 	
-	switch ( protocol ) {
+	switch ( task ) {
 
 	case CALIBRATE_TARGETS:
-		while ( RETRY_EXIT == RunTargetCalibration( apparatus ) );
+		while ( RETRY_EXIT == ( return_code = RunTargetCalibration( apparatus, lpCmdLine ) ) );
 		break;
 		
 	case RUN_SCRIPT:
-		while ( RETRY_EXIT == RunScript( apparatus, script ) );
+		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, script ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 		
-	case OSCILLATION_PROTOCOL:
-		while ( RETRY_EXIT == RunOscillations( apparatus ) );
+	case OSCILLATION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunOscillations( apparatus, lpCmdLine ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 		
-	case COLLISION_PROTOCOL:
-		do {
-			return_code = RunTransducerOffsetCompensation( apparatus );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-		do {
-			return_code = RunCollisions( apparatus );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
+	case COLLISION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunCollisions( apparatus, lpCmdLine ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 
-	case FRICTION_PROTOCOL:
-
-		apparatus->VerticalTargetOn( 16 );
-		apparatus->Wait( 2 );
-		apparatus->VerticalTargetOn( 17 );
-		apparatus->Wait( 2 );
-
-
-		do {
-			return_code = RunTransducerOffsetCompensation( apparatus );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-		do {
-			return_code = RunFrictionMeasurement( apparatus );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-
-		plot_data( apparatus );
-
+	case FRICTION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunFrictionMeasurement( apparatus, lpCmdLine ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 
+	case TARGETED_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTargeted( apparatus, lpCmdLine ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		break;
 
-	case TARGETED_PROTOCOL:
-
-		do {
-			return_code = RunTransducerOffsetCompensation( apparatus );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-
-		do {
-			return_code = RunTargeted( apparatus, VERTICAL, targetSequence, targetSequenceN );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-		plot_data( apparatus );
-
-		do {
-			return_code = RunTargeted( apparatus, HORIZONTAL, targetSequence, targetSequenceN );
-		} while ( return_code == RETRY_EXIT );
-		if ( return_code == ABORT_EXIT ) return( ABORT_EXIT );
-		plot_data( apparatus );
-
+	case DISCRETE_TASK:
+		while ( RETRY_EXIT == ( return_code = RunDiscrete( apparatus, lpCmdLine ) ) );
+		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 
 	case INSTALL_PROCEDURE:
-		while ( RETRY_EXIT == RunInstall( apparatus ) );
+		while ( RETRY_EXIT == RunInstall( apparatus, lpCmdLine ) );
 		break;
 
-		
 	}
 	
 	apparatus->Quit();

@@ -1,0 +1,81 @@
+/*********************************************************************************/
+/*                                                                               */
+/*                             DexFrictionTask.cpp                               */
+/*                                                                               */
+/*********************************************************************************/
+
+/*
+ * Performs the operations to measure the coeficient of friction.
+ */
+
+#include <windows.h>
+#include <mmsystem.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "DexApparatus.h"
+#include "Dexterous.h"
+#include "DexTasks.h"
+
+/*********************************************************************************/
+
+// Coefficient of friction test parameters.
+double frictionHoldTime = 2.0;
+double frictionTimeout = 15.0;
+double frictionMinGrip = 10.0;
+double frictionMaxGrip = 15.0;
+double frictionMinLoad = 5.0;
+double frictionMaxLoad = 10.0;
+double forceFilterConstant = 1.0;
+Vector3 frictionLoadDirection = { 0.0, -1.0, 0.0 };
+double slipThreshold = 10.0;
+double slipTimeout = 20.0;
+
+/*********************************************************************************/
+
+int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
+
+	int status;
+
+	// Start acquiring Data.
+	// Note: DexNiDaqADC must be run in polling mode so that we can both record the 
+	// continuous data, but all monitor the COP in real time.
+	// The following routine does that, but it will have no effect on the real
+	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
+	apparatus->adc->AllowPollingDuringAcquisition();
+	apparatus->StartAcquisition( maxTrialDuration );
+
+	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	status = apparatus->WaitCenteredGrip( copTolerance, 1.0, 1.0, "Grip not centered." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
+		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+		forceFilterConstant, frictionHoldTime, 1000 * frictionTimeout );
+	apparatus->MarkEvent( FORCE_OK );
+	apparatus->Beep();
+	apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
+		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+		forceFilterConstant, slipThreshold, slipTimeout );
+	apparatus->MarkEvent( SLIP_OK );
+
+	apparatus->Beep();
+	apparatus->Wait( 0.25 );
+	apparatus->Beep();
+	apparatus->Wait( 2.0 );
+
+	apparatus->StopAcquisition();
+	ShowStatus( "Saving data ..." );
+	apparatus->SaveAcquisition( "FRIC" );
+	HideStatus();
+
+	return( NORMAL_EXIT );
+
+}
+
+
+
+
