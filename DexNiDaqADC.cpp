@@ -229,9 +229,9 @@ int DexNiDaqADC::RetrieveAnalogSamples( AnalogSample samples[], int max_samples 
 	
 	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
 		for ( int chan = 0; chan < nChannels; chan++ ) {
-			samples[smpl].channel[chan] = nidaq_buffer[smpl * nChannels + chan];
+			samples[smpl].channel[chan] = (float) nidaq_buffer[smpl * nChannels + chan];
 		}
-		samples[smpl].time = smpl * samplePeriod;
+		samples[smpl].time = (float) (smpl * samplePeriod);
 	}
 	return( nAcqSamples );
 
@@ -253,11 +253,11 @@ bool DexNiDaqADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 		nidaqDataSlice, max_samples, &samples_read, NULL );
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Timestamp it.
-	sample.time = DexTimerElapsedTime( acquisitionTimer );
+	sample.time = (float) DexTimerElapsedTime( acquisitionTimer );
 
 	// Copy to buffer..
 	for ( int chan = 0; chan < nChannels; chan++ ) {
-		sample.channel[chan] = nidaqDataSlice[chan];
+		sample.channel[chan] = (float) nidaqDataSlice[chan];
 	}
 
 	// Output the sample to a file. This is for testing only.

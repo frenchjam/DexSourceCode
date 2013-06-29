@@ -122,8 +122,8 @@ int DexMouseADC::RetrieveAnalogSamples( AnalogSample samples[], int max_samples 
 			relative = offset / interval;
 			
 			for ( int j = 0; j < nChannels; j++ ) {
-				samples[smpl].channel[j] = recordedAnalogSamples[previous].channel[j] + 
-					relative * ( recordedAnalogSamples[next].channel[j] - recordedAnalogSamples[previous].channel[j] );
+				samples[smpl].channel[j] = (float) (recordedAnalogSamples[previous].channel[j] + 
+					relative * ( recordedAnalogSamples[next].channel[j] - recordedAnalogSamples[previous].channel[j] ));
 			}
 		}
 	}
@@ -151,18 +151,18 @@ bool DexMouseADC::GetCurrentAnalogSample( AnalogSample &sample ) {
 	int chan;
 
 	// Compute 2 voltages from the position of the mouse.
-	float y =  (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 500.0;
-	float z =  (double) (mouse_position.x - rect.right) / (double) ( rect.left - rect.right ) * 100.0;
-	float t =  pow( ((double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top )), 3.0 );
+	double y =  (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 500.0;
+	double z =  (double) (mouse_position.x - rect.right) / (double) ( rect.left - rect.right ) * 100.0;
+	double t =  pow( ((double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top )), 3.0 );
 
-	sample.time = DexTimerElapsedTime( acquisitionTimer );
+	sample.time = (float) DexTimerElapsedTime( acquisitionTimer );
 
 	// By default, all values are zero.
 	for ( chan = 0; chan < nChannels; chan++ ) sample.channel[chan] = 0.0;
 	// Compute analog values to modulate Fz with X and Fy with Y.
 	for ( chan = 0; chan < N_GAUGES; chan++ ) {
-		sample.channel[ LEFT_ATI_FIRST_CHANNEL + chan] = - Vy[chan] * y + Vz[chan] * z - t * Tx[chan];
-		sample.channel[ RIGHT_ATI_FIRST_CHANNEL + chan] =  Vy[chan] * y + Vz[chan] * z + t * Tx[chan];
+		sample.channel[ LEFT_ATI_FIRST_CHANNEL + chan] = (float)  (- Vy[chan] * y + Vz[chan] * z - t * Tx[chan]);
+		sample.channel[ RIGHT_ATI_FIRST_CHANNEL + chan] = (float) (  Vy[chan] * y + Vz[chan] * z + t * Tx[chan] );
 	}
 
 	// Output the simulated values. This is for testing only.
