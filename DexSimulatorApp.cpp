@@ -146,7 +146,8 @@ void plot_data( DexApparatus *apparatus ) {
 	// Compute velocity.
 	for ( i = 0; i < apparatus->nAcqFrames - 1; i++ ) {
 		apparatus->SubtractVectors( delta, apparatus->acquiredManipulandumState[i+1].position, apparatus->acquiredManipulandumState[i].position );
-		Vt[i] = apparatus->VectorNorm( delta ) / ( apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i+1].time );
+		apparatus->ScaleVector( delta, delta, 1.0 / apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i].time );
+		Vt[i] = apparatus->VectorNorm( delta );
 	}
 	Vt[apparatus->nAcqFrames - 1] = INVISIBLE;
 
@@ -212,16 +213,16 @@ void plot_data( DexApparatus *apparatus ) {
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
 		ViewBox( view );
-		ViewSetXLimits( view, 0.0, samples );
+		ViewSetXLimits( view, 0.0, frames );
 		ViewAutoScaleInit( view );
 		ViewAutoScaleAvailableDoubles( view, 
-			Vt, 0, samples - 1, 
-			sizeof( *apparatus->acquiredGripForce ), 
+			Vt, 0, frames - 1, 
+			sizeof( *Vt ), 
 			INVISIBLE );		
 		ViewColor( view, BLUE );
 		ViewPlotAvailableDoubles( view, 
-			Vt, 0, samples - 1, 
-			sizeof( *apparatus->acquiredGripForce ), 
+			Vt, 0, frames - 1, 
+			sizeof( *Vt ), 
 			INVISIBLE );
 
 		view = LayoutViewN( layout, cnt++ );
