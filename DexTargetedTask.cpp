@@ -119,8 +119,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Step through the list of targets.
 	for ( int target = 1; target < targetSequenceN; target++ ) {
 		
-		// Light up the next target.
+		// Light up the next target, and mark the event for post hoc analysis.
 		apparatus->TargetsOff();
+		apparatus->MarkEvent( TRIGGER_MOVEMENT );
 		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( targetSequence[ target ] );
 		else apparatus->HorizontalTargetOn( targetSequence[ target ] ); 
 

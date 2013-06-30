@@ -143,8 +143,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	for ( int delay = 1; delay < delaySequenceN; delay++ ) {
 		
 		// Make a beep.
-		apparatus->Beep();
 		apparatus->MarkEvent( TRIGGER_MOVEMENT );	
+		apparatus->Beep();
 		
 		// Allow a random time before triggering the next target.
 		// Takes into account the duration of the beep.
