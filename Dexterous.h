@@ -131,15 +131,11 @@ extern const Quaternion uprightNullOrientation, supineNullOrientation;
 
 /********************************************************************************/
 
-// One might ask why I don't use the VectorsMixin module and use the types
-// Vector3 and Quaternion. There is an incompatibilty between the 3dMatrix library
-// used for graphical objects and the new VectorsMixin module. I use arrays of floats
-// here so that Dexterous.h can be inserted into either system.
-
+// Structures that hold the collected data.
 
 typedef struct {
 
-	float	position[3];
+	Vector3	position;
 	bool	visibility;
 
 } CodaMarker;
@@ -147,7 +143,7 @@ typedef struct {
 typedef struct {
 
 	CodaMarker	marker[N_MARKERS];
-	float		time;
+	double		time;
 
 } CodaFrame;
 
@@ -156,12 +152,12 @@ typedef struct {
 	Vector3		position;
 	Quaternion	orientation;
 	bool		visibility;
-	float		time;
+	double		time;
 
 } ManipulandumState;
 
 typedef struct {
-	float time;
+	double time;
 	float channel[N_CHANNELS]; 
 } AnalogSample;
 
@@ -185,7 +181,7 @@ typedef struct {
 
 typedef struct {
 
-	float			time;
+	double			time;
 	int				event;
 	unsigned long	param;
 
