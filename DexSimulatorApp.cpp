@@ -74,7 +74,7 @@ float _plot_z_min = -500.0;
 float _plot_z_max =  500.0;
 float _plot_y_min = -200.0;
 float _plot_y_max =  800.0;
-int   _n_plots = 6;
+int   _n_plots = 7;
 
 float cop_range = 0.03;
 float load_range = 100.0;
@@ -82,6 +82,8 @@ float grip_range = 25.0;
 
 HWND	dlg;
 HWND	status_dlg;
+
+double Vt[DEX_MAX_MARKER_FRAMES];
 
 /*********************************************************************************/
 
@@ -139,6 +141,14 @@ void init_plots ( void ) {
 void plot_data( DexApparatus *apparatus ) {
 
 	int i, j, cnt;
+	Vector3 delta;
+
+	// Compute velocity.
+	for ( i = 0; i < apparatus->nAcqFrames - 1; i++ ) {
+		apparatus->SubtractVectors( delta, apparatus->acquiredManipulandumState[i+1].position, apparatus->acquiredManipulandumState[i].position );
+		Vt[i] = apparatus->VectorNorm( delta ) / ( apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i+1].time );
+	}
+	Vt[apparatus->nAcqFrames - 1] = INVISIBLE;
 
 	ShowDisplayWindow();
 	ActivateDisplayWindow();
@@ -155,7 +165,7 @@ void plot_data( DexApparatus *apparatus ) {
 
 		ViewColor( yz_view, RED );
 		ViewPenSize( yz_view, 5 );
-		ViewXYPlotAvailableFloats( yz_view,
+		ViewXYPlotAvailableDoubles( yz_view,
 			&apparatus->acquiredManipulandumState[0].position[Z], 
 			&apparatus->acquiredManipulandumState[0].position[Y], 
 			0, frames - 1, 
@@ -183,7 +193,7 @@ void plot_data( DexApparatus *apparatus ) {
 		
 			ViewSetXLimits( view, 0.0, frames );
 			ViewAutoScaleInit( view );
-			ViewAutoScaleAvailableFloats( view,
+			ViewAutoScaleAvailableDoubles( view,
 				&apparatus->acquiredManipulandumState[0].position[i], 
 				0, frames - 1, 
 				sizeof( *apparatus->acquiredManipulandumState ), 
@@ -191,7 +201,7 @@ void plot_data( DexApparatus *apparatus ) {
 			ViewAutoScaleSetInterval( view, 500.0 );			
 			
 			ViewSelectColor( view, i );
-			ViewPlotAvailableFloats( view,
+			ViewPlotAvailableDoubles( view,
 				&apparatus->acquiredManipulandumState[0].position[i], 
 				0, frames - 1, 
 				sizeof( *apparatus->acquiredManipulandumState ), 
@@ -202,10 +212,25 @@ void plot_data( DexApparatus *apparatus ) {
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
 		ViewBox( view );
+		ViewSetXLimits( view, 0.0, samples );
+		ViewAutoScaleInit( view );
+		ViewAutoScaleAvailableDoubles( view, 
+			Vt, 0, samples - 1, 
+			sizeof( *apparatus->acquiredGripForce ), 
+			INVISIBLE );		
+		ViewColor( view, BLUE );
+		ViewPlotAvailableDoubles( view, 
+			Vt, 0, samples - 1, 
+			sizeof( *apparatus->acquiredGripForce ), 
+			INVISIBLE );
+
+		view = LayoutViewN( layout, cnt++ );
+		ViewColor( view, GREY4 );	
+		ViewBox( view );
 	
 		ViewSetXLimits( view, 0.0, samples );
 		ViewAutoScaleInit( view );
-		ViewAutoScaleAvailableFloats( view,
+		ViewAutoScaleAvailableDoubles( view,
 			&apparatus->acquiredGripForce[0], 
 			0, samples - 1, 
 			sizeof( *apparatus->acquiredGripForce ), 
@@ -213,7 +238,7 @@ void plot_data( DexApparatus *apparatus ) {
 		ViewAutoScaleSetInterval( view, grip_range );			
 		
 		ViewColor( view, RED );
-		ViewPlotAvailableFloats( view,
+		ViewPlotAvailableDoubles( view,
 			&apparatus->acquiredGripForce[0], 
 			0, samples - 1, 
 			sizeof( *apparatus->acquiredGripForce ), 
@@ -225,7 +250,7 @@ void plot_data( DexApparatus *apparatus ) {
 	
 		ViewSetXLimits( view, 0.0, samples );
 		ViewAutoScaleInit( view );
-		ViewAutoScaleAvailableFloats( view,
+		ViewAutoScaleAvailableDoubles( view,
 			&apparatus->acquiredLoadForceMagnitude[0], 
 			0, samples - 1, 
 			sizeof( *apparatus->acquiredLoadForceMagnitude ), 
@@ -233,7 +258,7 @@ void plot_data( DexApparatus *apparatus ) {
 		ViewAutoScaleSetInterval( view, load_range );			
 		
 		ViewColor( view, BLUE );
-		ViewPlotAvailableFloats( view,
+		ViewPlotAvailableDoubles( view,
 			&apparatus->acquiredLoadForceMagnitude[0], 
 			0, samples - 1, 
 			sizeof( *apparatus->acquiredLoadForceMagnitude ), 

@@ -7,8 +7,6 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "..\DexSimulatorApp\resource.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -196,7 +194,7 @@ void DexApparatus::LoadTargetPositions( char *filename ) {
 	fp = fopen( filename, "r" );
 	if ( fp ) {
 		for ( int trg = 0; trg < nTargets; trg++ ) {
-			items = fscanf( fp, "%f, %f, %f\n", 
+			items = fscanf( fp, "%lf, %lf, %lf\n", 
 							&targetPosition[trg][X], 
 							&targetPosition[trg][Y], 
 							&targetPosition[trg][Z] );

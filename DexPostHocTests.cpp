@@ -141,7 +141,7 @@ int DexApparatus::CheckMovementAmplitude(  double min, double max,
 	
 	double N = 0.0, sd;
 	Matrix3x3 Sxy;
-	Vector3f  delta, mean;
+	Vector3  delta, mean;
 	Vector3   direction, vect;
 
 	// TODO: Should normalize the direction vector here.

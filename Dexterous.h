@@ -153,10 +153,10 @@ typedef struct {
 
 typedef struct {
 
-	float	position[3];
-	float	orientation[4];
-	bool	visibility;
-	float	time;
+	Vector3		position;
+	Quaternion	orientation;
+	bool		visibility;
+	float		time;
 
 } ManipulandumState;
 

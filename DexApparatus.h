@@ -116,8 +116,8 @@ public:
 	Vector3				acquiredForce[N_FORCE_TRANSDUCERS][DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredTorque[N_FORCE_TRANSDUCERS][DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredCOP[N_FORCE_TRANSDUCERS][DEX_MAX_ANALOG_SAMPLES];
-	float				acquiredGripForce[DEX_MAX_ANALOG_SAMPLES];
-	float				acquiredLoadForceMagnitude[DEX_MAX_ANALOG_SAMPLES];
+	double				acquiredGripForce[DEX_MAX_ANALOG_SAMPLES];
+	double				acquiredLoadForceMagnitude[DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredLoadForce[DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredAcceleration[DEX_MAX_ANALOG_SAMPLES];
 	double				acquiredHighAcceleration[DEX_MAX_ANALOG_SAMPLES];

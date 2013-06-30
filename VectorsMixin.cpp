@@ -128,6 +128,7 @@ void VectorsMixin::SubtractVectors( Vector3f result, const Vector3f a, const Vec
 }
 
 
+
 void VectorsMixin::ScaleVector( Vector3 result, const Vector3 a, const double scaling ) {
 	result[X] = (float) a[X] * scaling;
 	result[Y] = (float) a[Y] * scaling;
