@@ -29,7 +29,6 @@ class VectorsMixin {
 
 protected:	
 	
-
 public:
 
 	static const Vector3 zeroVector;
@@ -50,7 +49,6 @@ public:
 	void CopyVector( Vector3  destination, const Vector3f source );
 	void CopyVector( Vector3f  destination, const Vector3f  source );
 
-	
 	void CopyQuaternion( Quaternion destination, const Quaternion source );
 
 	void AddVectors( Vector3f result, const Vector3 a, const Vector3 b );
@@ -109,8 +107,6 @@ public:
 	char *vstr( const Vector3 v );
 	char *qstr( const Quaternion q );
 	char *mstr( const Matrix3x3 m );
-
-
 
 };
 

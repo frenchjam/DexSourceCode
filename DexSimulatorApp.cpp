@@ -85,6 +85,8 @@ HWND	status_dlg;
 
 double Vt[DEX_MAX_MARKER_FRAMES];
 
+char *axis_name[] = { "X", "Y", "Z", "M" };
+
 /*********************************************************************************/
 
 // These are some helper functions that can be used in the task and procedures.
@@ -114,7 +116,7 @@ void init_plots ( void ) {
 	display = DefaultDisplay();
 	DisplaySetSizePixels( display, plot_screen_width, plot_screen_height );
 	DisplaySetScreenPosition( display, plot_screen_left, plot_screen_top );
-	DisplaySetName( display, "DEX Monitor - Recorded Data" );
+	DisplaySetName( display, "DEX Simulator - Recorded Data" );
 	DisplayInit( display );
 	Erase( display );
 	
@@ -142,6 +144,8 @@ void plot_data( DexApparatus *apparatus ) {
 
 	int i, j, cnt;
 	Vector3 delta;
+	double max_time;
+	double filtered, filter_constant = 1.0;
 
 	// Compute velocity.
 	for ( i = 0; i < apparatus->nAcqFrames - 1; i++ ) {
@@ -149,7 +153,19 @@ void plot_data( DexApparatus *apparatus ) {
 		apparatus->ScaleVector( delta, delta, 1.0 / apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i].time );
 		Vt[i] = apparatus->VectorNorm( delta );
 	}
+	// Back and forth filter to avoid phase lag.
+	for ( i = 0, filtered = 0.0; i < apparatus->nAcqFrames - 1; i++ ) {
+		filtered = (filter_constant * filtered + Vt[i]) / (1.0 + filter_constant);
+		Vt[i] = filtered;
+	}
+	for ( i = apparatus->nAcqFrames - 2, filtered = 0.0; i >=0 ; i-- ) {
+		filtered = (filter_constant * filtered + Vt[i]) / (1.0 + filter_constant);
+		Vt[i] = filtered;
+	}
+	// There is one less sample, due to the need for the finite difference.
 	Vt[apparatus->nAcqFrames - 1] = INVISIBLE;
+
+	max_time = apparatus->acquiredManipulandumState[apparatus->nAcqFrames-1].time;
 
 	ShowDisplayWindow();
 	ActivateDisplayWindow();
@@ -157,8 +173,10 @@ void plot_data( DexApparatus *apparatus ) {
 		
 	ViewColor( yz_view, GREY4 );
 	ViewBox( yz_view );
+	ViewTitle( yz_view, "YZ", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	ViewBox( cop_view );
 	ViewCircle( cop_view, 0.0, 0.0, copTolerance / 1000.0 );
+	ViewTitle( cop_view, "CoP", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
 	int frames = apparatus->nAcqFrames;
 	int samples = apparatus->nAcqSamples;
@@ -191,8 +209,9 @@ void plot_data( DexApparatus *apparatus ) {
 			view = LayoutViewN( layout, cnt );
 			ViewColor( view, GREY4 );	
 			ViewBox( view );
+			ViewTitle( view, axis_name[cnt], INSIDE_LEFT, INSIDE_TOP, 0.0 );
 		
-			ViewSetXLimits( view, 0.0, frames );
+			ViewSetXLimits( view, 0.0, max_time );
 			ViewAutoScaleInit( view );
 			ViewAutoScaleAvailableDoubles( view,
 				&apparatus->acquiredManipulandumState[0].position[i], 
@@ -202,9 +221,11 @@ void plot_data( DexApparatus *apparatus ) {
 			ViewAutoScaleSetInterval( view, 500.0 );			
 			
 			ViewSelectColor( view, i );
-			ViewPlotAvailableDoubles( view,
+			ViewXYPlotAvailableDoubles( view,
+				&apparatus->acquiredManipulandumState[0].time, 
 				&apparatus->acquiredManipulandumState[0].position[i], 
 				0, frames - 1, 
+				sizeof( *apparatus->acquiredManipulandumState ), 
 				sizeof( *apparatus->acquiredManipulandumState ), 
 				INVISIBLE );
 			
@@ -212,7 +233,9 @@ void plot_data( DexApparatus *apparatus ) {
 
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
+		ViewTitle( view, "Vt", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 		ViewBox( view );
+		// Set the span to be covered by autoscale.
 		ViewSetXLimits( view, 0.0, frames );
 		ViewAutoScaleInit( view );
 		ViewAutoScaleAvailableDoubles( view, 
@@ -220,14 +243,20 @@ void plot_data( DexApparatus *apparatus ) {
 			sizeof( *Vt ), 
 			INVISIBLE );		
 		ViewColor( view, BLUE );
-		ViewPlotAvailableDoubles( view, 
-			Vt, 0, frames - 1, 
+		// Now set the span in terms of time.
+		ViewSetXLimits( view, 0.0, max_time );
+		ViewXYPlotAvailableDoubles( view, 
+			&apparatus->acquiredManipulandumState[0].time, 
+			Vt, 
+			0, frames - 1, 
+			sizeof( *apparatus->acquiredManipulandumState ), 
 			sizeof( *Vt ), 
 			INVISIBLE );
 
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
 		ViewBox( view );
+		ViewTitle( view, "GF", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
 		ViewSetXLimits( view, 0.0, samples );
 		ViewAutoScaleInit( view );
@@ -237,17 +266,21 @@ void plot_data( DexApparatus *apparatus ) {
 			sizeof( *apparatus->acquiredGripForce ), 
 			INVISIBLE );
 		ViewAutoScaleSetInterval( view, grip_range );			
+		ViewSetXLimits( view, 0.0, max_time );
 		
 		ViewColor( view, RED );
-		ViewPlotAvailableDoubles( view,
+		ViewXYPlotAvailableDoubles( view,
+			&apparatus->acquiredAnalog[0].time, 
 			&apparatus->acquiredGripForce[0], 
 			0, samples - 1, 
+			sizeof( *apparatus->acquiredAnalog ), 
 			sizeof( *apparatus->acquiredGripForce ), 
 			INVISIBLE );
 
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
 		ViewBox( view );
+		ViewTitle( view, "LF", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
 		ViewSetXLimits( view, 0.0, samples );
 		ViewAutoScaleInit( view );
@@ -257,40 +290,64 @@ void plot_data( DexApparatus *apparatus ) {
 			sizeof( *apparatus->acquiredLoadForceMagnitude ), 
 			INVISIBLE );
 		ViewAutoScaleSetInterval( view, load_range );			
+		ViewSetXLimits( view, 0.0, max_time );
 		
 		ViewColor( view, BLUE );
-		ViewPlotAvailableDoubles( view,
+		ViewXYPlotAvailableDoubles( view,
+			&apparatus->acquiredAnalog[0].time, 
 			&apparatus->acquiredLoadForceMagnitude[0], 
 			0, samples - 1, 
+			sizeof( *apparatus->acquiredAnalog ), 
 			sizeof( *apparatus->acquiredLoadForceMagnitude ), 
 			INVISIBLE );
 
 		view = LayoutViewN( layout, cnt++ );
 		ViewColor( view, GREY4 );	
 		ViewBox( view );
+		ViewTitle( view, "COP", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
-		ViewSetXLimits( view, 0.0, samples );
+		ViewSetXLimits( view, 0.0, max_time );
 		ViewSetYLimits( view, - 2.0 * copTolerance / 1000.0, 2.0 * copTolerance / 1000.0 );
 		ViewLine( view, 0.0,   copTolerance / 1000.0, samples,   copTolerance / 1000.0 );
 		ViewLine( view, 0.0, - copTolerance / 1000.0, samples, - copTolerance / 1000.0 );
 		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
 			for ( j = 0; j < 2; j++ ) {
 				ViewSelectColor( view, i * N_FORCE_TRANSDUCERS + j );
-					ViewPlotAvailableDoubles( view,
-					&apparatus->acquiredCOP[i][0][j], 
-					0, samples - 1, 
-					sizeof( *apparatus->acquiredCOP[i] ), 
-					INVISIBLE );
+					ViewXYPlotAvailableDoubles( view,
+						&apparatus->acquiredAnalog[0].time, 
+						&apparatus->acquiredCOP[i][0][j], 
+						0, samples - 1, 
+						sizeof( *apparatus->acquiredAnalog ), 
+						sizeof( *apparatus->acquiredCOP[i] ), 
+						INVISIBLE );
 			}
 		}
+
+		// Plot the events.
+		for ( i = 0; i < apparatus->nEvents; i++ ) {
+			double size;
+			// There are a lot of target and sound events, so we plot them as tick marks.
+			// Other events are plotted as full lines.
+			// If 2 events coincide, you will probably only see one of them.
+			if ( apparatus->eventList[i].event == TARGET_EVENT || apparatus->eventList[i].event == SOUND_EVENT ) size = 0.1;
+			else size = 1.0;
+			for ( j = 0; j < cnt; j++ ) {
+				view = LayoutViewN( layout, j );
+				double bottom = view->user_bottom;
+				double top = bottom + size * (view->user_top - view->user_bottom);
+				ViewSelectColor( view, apparatus->eventList[i].event );	
+				ViewLine( view, apparatus->eventList[i].time, bottom, apparatus->eventList[i].time, top );
+			}
+		}
+		
 	}
 	
 	DisplaySwap( display );
-
+	
 	RunWindow();
 	HideDisplayWindow();
-
-
+	
+	
 }
 
 /*********************************************************************************/
