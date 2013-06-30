@@ -37,17 +37,33 @@ double collisionTime = 2.0;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
 
+int collisionWrongDirectionTolerance = 5;
+double collisionMinForce = 1.0;
+double collisionMaxForce = 5.0;
+int collisionWrongForceTolerance = 5;
+
+
 /*********************************************************************************/
 
 int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 	
+	static int	direction = VERTICAL;
+	static int bar_position = TargetBarRight;
+	static int posture = PostureSeated;
+	static Vector3 direction_vector = {0.0, 1.0, 0.0};
+	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+
+	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+
+	// TODO: Add the appropriate hardware checks.
+
 	Sleep( 1000 );
 	apparatus->StartAcquisition( collisionMaxTrialTime );
 	
-	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget );
+	// Wait until the subject gets to the target before moving on.
+	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
@@ -91,14 +107,11 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->SaveAcquisition( "COLL" );
 
 	// Check if trial was completed as instructed.
-	status = apparatus->CheckMovementDirection( 1, 0.0, 1.0, 0.0, collisionMovementThreshold );
+	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
-	status = apparatus->CheckForcePeaks( 1.0, 5.0, 1 );
-	if ( status == IDABORT ) exit( ABORT_EXIT );
-	// Same idea for acclerations.
-	status = apparatus->CheckAccelerationPeaks( 1.0, 2.0, 1 );
+	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Indicate to the subject that they are done.

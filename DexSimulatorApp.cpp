@@ -109,6 +109,52 @@ void HideStatus ( void ) {
 	ShowWindow( status_dlg, SW_HIDE );
 }
 
+int ParseForPosture ( const char *cmd ) {
+	if ( cmd && strstr( cmd, "-sup" ) ) return( SUPINE );
+	else if ( strstr( cmd, "-up" ) ) return( UPRIGHT );
+	else return( DEFAULT );
+}
+
+
+int ParseForEyeState ( const char *cmd ) {
+	if ( cmd && strstr( cmd, "-open" ) ) return( OPEN );
+	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
+	else return( DEFAULT );
+}
+
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation ) {
+
+	int direction = VERTICAL;
+	int pos = ParseForPosture( cmd );	
+
+	if ( cmd && strstr( cmd, "-ver" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
+
+	if ( pos == UPRIGHT ) {
+		apparatus->CopyQuaternion( desired_orientation, uprightNullOrientation );
+		if ( direction == HORIZONTAL ) {
+			bar_position = TargetBarLeft;
+			apparatus->CopyVector( direction_vector, apparatus->kVector );
+		}
+		if ( direction == VERTICAL ) {
+			bar_position = TargetBarRight;
+			apparatus->CopyVector( direction_vector, apparatus->jVector );
+		}
+	}
+	else if ( pos == SUPINE ) {
+		apparatus->CopyQuaternion( desired_orientation, supineNullOrientation );
+		if ( direction == HORIZONTAL ) {
+			bar_position = TargetBarLeft;
+			apparatus->CopyVector( direction_vector, apparatus->jVector );
+		}
+		if ( direction == VERTICAL ) {
+			bar_position = TargetBarRight;
+			apparatus->CopyVector( direction_vector, apparatus->kVector );
+		}
+	}
+	return( direction );
+}
+
 /**************************************************************************************/
 
 void init_plots ( void ) {

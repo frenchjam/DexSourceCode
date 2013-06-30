@@ -248,6 +248,7 @@ public:
 	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
 	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
 	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
+	int CheckMovementDirection(  int n_false_directions, Vector3 direction, float threshold, const char *msg = NULL );
 	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
 	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
 	

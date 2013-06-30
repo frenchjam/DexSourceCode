@@ -25,11 +25,8 @@
 #define INVISIBLE -999.999f
 #define TARGETS_OFF -1
 
-#define HORIZONTAL	0
-#define VERTICAL	1
-
-#define LEFT	0
-#define RIGHT	1
+#define LEFT_ATI	0
+#define RIGHT_ATI	1
 
 #define DONT_CARE	0
 

@@ -642,6 +642,12 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 	return( NORMAL_EXIT );
 	
 }
+
+// Same as above, but with a array as an input to specify the direction.
+int DexApparatus::CheckMovementDirection(  int max_false_directions, Vector3 direction, float threshold, const char *msg ) {
+	return ( CheckMovementDirection( max_false_directions, direction[X], direction[Y], direction[Z], threshold, msg ) );
+}
+
 /********************************************************************************************/
 
 //

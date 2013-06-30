@@ -46,6 +46,14 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 	
+	static int	direction = VERTICAL;
+	static int bar_position = TargetBarRight;
+	static int posture = PostureSeated;
+	static Vector3 direction_vector = {0.0, 1.0, 0.0};
+	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+
+	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+
 	// Tell the subject which configuration should be used.
 	status = apparatus->fWaitSubjectReady( 
 		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
@@ -54,7 +62,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Verify that it is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, TargetBarRight, TappingFolded );
+	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, TappingFolded );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Tell the subject which configuration should be used.
@@ -66,7 +74,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetOn( oscillationCenterTarget );
 	
 	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtVerticalTarget( oscillationCenterTarget );
+	status = apparatus->WaitUntilAtVerticalTarget( oscillationCenterTarget, desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Start acquiring data.

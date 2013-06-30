@@ -16,6 +16,20 @@ typedef enum { MOUSE_ADC, GLM_ADC } AdcType;
 typedef enum { SCREEN_TARGETS, GLM_TARGETS } TargetType;
 typedef enum { SCREEN_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 
+#define HORIZONTAL	0
+#define VERTICAL	1
+
+#define LEFT	0
+#define RIGHT	1
+
+#define UPRIGHT	0
+#define SUPINE	1
+
+#define OPEN	0
+#define CLOSED	1
+
+#define DEFAULT -1
+
 // These are the user-defined markers. 
 enum { FORCE_OK = 0, SLIP_OK };
 
@@ -49,7 +63,9 @@ void HideStatus ( void );
 void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
-
+int ParseForPosture( const char *cmd );
+int ParseForEyeState( const char *cmd );
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
 int RunOscillations( DexApparatus *apparatus, const char *params = NULL );

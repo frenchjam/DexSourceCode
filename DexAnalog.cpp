@@ -44,14 +44,14 @@ void DexApparatus::InitForceTransducers( void ) {
 
 	// Set to use the default ATI calibration files.
 	// These should be read from a model-specific parameter file.
-	ATICalFilename[LEFT] = DEFAULT_LEFT_ATI_CALFILE;
-	ATICalFilename[RIGHT] = DEFAULT_RIGHT_ATI_CALFILE;
+	ATICalFilename[LEFT_ATI] = DEFAULT_LEFT_ATI_CALFILE;
+	ATICalFilename[RIGHT_ATI] = DEFAULT_RIGHT_ATI_CALFILE;
 
 	// Define the rotation of the ATI sensors with respect to the local 
 	// manipulandum reference frame. These are probably constants, 
 	// but perhaps they should be read from the model-specific parameter file as well.
-	ATIRotationAngle[LEFT] = LEFT_ATI_ROTATION;
-	ATIRotationAngle[RIGHT] = RIGHT_ATI_ROTATION;
+	ATIRotationAngle[LEFT_ATI] = LEFT_ATI_ROTATION;
+	ATIRotationAngle[RIGHT_ATI] = RIGHT_ATI_ROTATION;
 	
 	for ( int sensor = 0; sensor < nForceTransducers; sensor++ ) {
 		// Load the calibration data, for calibration index 1.

@@ -850,8 +850,8 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 		// I keep it here just for show. 
 		current_tapping = TappingDeployment();
 		
-		if (  ( posture == DONT_CARE || posture == current_posture ) &&
-			  ( bar_position == DONT_CARE || bar_position == current_bar_position ) && 
+		if (  ( posture == DONT_CARE || posture == PostureIndifferent || posture == current_posture ) &&
+			  ( bar_position == DONT_CARE || bar_position == TargetBarIndifferent || bar_position == current_bar_position ) && 
 			  ( tapping == DONT_CARE || tapping == current_tapping ) 
 		   ) {
 			monitor->SendEvent( "Successful configuration check." );

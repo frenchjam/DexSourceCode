@@ -41,35 +41,30 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 
-	int bar_position = TargetBarRight;
-	int direction = VERTICAL;
+	static int	direction = VERTICAL;
+	static int bar_position = TargetBarRight;
+	static int posture = PostureSeated;
+	static Vector3 direction_vector = {0.0, 1.0, 0.0};
+	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
-	if ( params && strstr( params, "-hori" ) ) {
-		bar_position = TargetBarLeft;
-		direction = HORIZONTAL;
-	}
-
-	if ( params && strstr( params, "-ver" ) ) {
-		bar_position = TargetBarRight;
-		direction = VERTICAL;
-	}
-
+	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
 #ifndef SKIP_PREP
-
-	// Check that the tracker is still aligned.
-	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
 	// Tell the subject which configuration should be used.
+	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
+	//   blocks of trials in the same configuration.
 	status = apparatus->fWaitSubjectReady( 
 		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
 		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Verify that it is in the correct configuration, and if not, 
+	// Check that the tracker is still aligned.
+	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	
+	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, DONT_CARE );
+	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
@@ -100,8 +95,8 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->StartAcquisition( maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], uprightNullOrientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], supineNullOrientation, defaultPositionTolerance, 1.0 ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation );
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], supineNullOrientation, desired_orientation ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Make sure that the target is turned back on if a timeout occured.
@@ -162,8 +157,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	if ( direction == VERTICAL ) status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->jVector, NULL );
-	else status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, apparatus->kVector, NULL );
+	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, direction_vector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	HideStatus();

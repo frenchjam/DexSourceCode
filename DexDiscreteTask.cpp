@@ -43,31 +43,17 @@ double discreteCycleHysteresis = 10.0;	// Parameter used to adjust the detection
 /*********************************************************************************/
 
 int RunDiscrete( DexApparatus *apparatus, const char *params ) {
-
-	Vector3 direction_vector;
 	
 	int status = 0;
 
-	int bar_position = TargetBarRight;
-	int direction = VERTICAL;
-	bool eyes_closed = false;
+	static int	direction = VERTICAL;
+	static int bar_position = TargetBarRight;
+	static int posture = PostureSeated;
+	static Vector3 direction_vector = {0.0, 1.0, 0.0};
+	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
-	if ( params && strstr( params, "-hor" ) ) {
-		bar_position = TargetBarLeft;
-		direction = HORIZONTAL;
-		apparatus->CopyVector( direction_vector, apparatus->kVector );
-	}
-
-	if ( params && strstr( params, "-ver" ) ) {
-		bar_position = TargetBarRight;
-		direction = VERTICAL;
-		apparatus->CopyVector( direction_vector, apparatus->jVector );
-	}
-
-	if ( params && strstr( params, "-open" ) ) eyes_closed = false;
-	if ( params && strstr( params, "-close" ) ) eyes_closed = true;
-
-
+	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+	static int eyes = ParseForEyeState( params );
 
 #ifndef SKIP_PREP
 
@@ -75,15 +61,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
-		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Verify that it is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	status = apparatus->SelectAndCheckConfiguration( PostureSeated, bar_position, DONT_CARE );
+	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
@@ -114,8 +94,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->StartAcquisition( maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0], uprightNullOrientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[0], uprightNullOrientation ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0], desired_orientation );
+	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[0], desired_orientation ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Light up the next target, alternating between the two.
@@ -129,7 +109,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[1] );
 	}
 		
-	if ( eyes_closed ) apparatus->WaitSubjectReady( "Close your eyes.\nPress OK when ready to continue." );
+	if ( eyes == CLOSED ) apparatus->WaitSubjectReady( "Close your eyes.\nPress OK when ready to continue." );
 	else apparatus->WaitSubjectReady( "Close your eyes.\nPress OK when ready to continue." );
 
 	if ( status == ABORT_EXIT ) exit( status );
