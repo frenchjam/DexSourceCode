@@ -24,12 +24,12 @@
 // DexMouseTracker will return these values when the current
 // Coda transformation is requested.
 
-float		SimulatedCodaOffset[2][3] = {
+Vector3		SimulatedCodaOffset[2] = {
 	{  1000,    0.0, -2500.0 }, 
 	{   0.0, -900.0, -2500.0 }
 };
 
-float	SimulatedCodaRotation[2][3][3] = {
+Matrix3x3	SimulatedCodaRotation[2] = {
 	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
 	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
 };
@@ -125,7 +125,7 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 	int next;
 	int frm;
 
-	Vector3	jump, delta;
+	Vector3f	jump, delta;
 	double	time, interval, offset, relative;
 
 	// Copy data into an array.
@@ -255,7 +255,7 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		frame.marker[FrameMarkerID[3]].position[X] += 300.0;
 	}
 
-	// TO DO: Transform all the marker positions if the dialog box
+	// TODO: Transform all the marker positions if the dialog box
 	// says that the apparatus is in the supine position.
 	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) {
 	}

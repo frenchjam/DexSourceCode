@@ -57,5 +57,5 @@ int RunCollisions( DexApparatus *apparatus, const char *params = NULL );
 int RunDiscrete( DexApparatus *apparatus, const char *params = NULL );
 
 int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL );
-int RunTransducerOffsetCompensation( DexApparatus *apparatus = NULL );
+int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params = NULL );
 int RunInstall( DexApparatus *apparatus, const char *params = NULL );

@@ -14,11 +14,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <codasys.h>
-#include <CodaUtilities.h>
 
 #include <VectorsMixin.h>
 #include "DexTracker.h"
+
+#include <codasys.h>
+#include <CodaUtilities.h>
 
 /***************************************************************************/
 

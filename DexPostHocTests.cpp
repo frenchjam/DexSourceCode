@@ -128,8 +128,8 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 //  threshold values for each of the protocols. For instance, what would be the expected SD for 
 //  a set of targeted movements?
 
-int DexApparatus::CheckMovementAmplitude(  float min, float max, 
-										   float dirX, float dirY, float dirZ,
+int DexApparatus::CheckMovementAmplitude(  double min, double max, 
+										   double dirX, double dirY, double dirZ,
 										   const char *msg ) {
 	
 	const char *fmt;
@@ -139,10 +139,12 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 
 	int first, last;
 	
-	double N = 0.0, Sxy[3][3], sd;
-	Vector3 delta, mean, direction, vect;
+	double N = 0.0, sd;
+	Matrix3x3 Sxy;
+	Vector3f  delta, mean;
+	Vector3   direction, vect;
 
-	// TO DO: Should normalize the direction vector here.
+	// TODO: Should normalize the direction vector here.
 	direction[X] = dirX;
 	direction[Y] = dirY;
 	direction[Z] = dirZ;
@@ -195,9 +197,6 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 		// This is just a scalar times a matrix.
 
 		// Sxy has to be a double or we risk underflow when computing the sums.
-		// The Vectors package is for float vectors, so we implement the operations
-		//  directly here.
-		// TO DO: Implement vector function for double matrices.
 		for ( k = 0; k < 3; k++ ) {
 			vect[k] = 0;
 			for ( m = 0; m < 3; m++ ) {
@@ -205,7 +204,6 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 			}
 		}
 		// This is a matrix multiply.
-		// TO DO: Implement vector function for double matrices.
 		for ( k = 0; k < 3; k++ ) {
 			for ( m = 0; m < 3; m++ ) {
 				vect[k] += Sxy[m][k] * direction[m];
@@ -249,7 +247,7 @@ int DexApparatus::CheckMovementAmplitude(  float min, float max,
 }
 
 // Same as above, but with a array as an input to specify the direction.
-int DexApparatus::CheckMovementAmplitude(  float min, float max, const float direction[3], char *msg ) {
+int DexApparatus::CheckMovementAmplitude(  double min, double max, const Vector3 direction, char *msg ) {
 	return ( CheckMovementAmplitude( min, max, direction[X], direction[Y], direction[Z], msg ) );
 }
 
@@ -283,7 +281,7 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles,
 	// Just make sure that the user gave a positive value for hysteresis.
 	hysteresis = fabs( hysteresis );
 
-	// TO DO: Should normalize the direction vector here.
+	// TODO: Should normalize the direction vector here.
 	direction[X] = dirX;
 	direction[Y] = dirY;
 	direction[Z] = dirZ;
@@ -377,7 +375,7 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, const Ve
 // Checks that the tangential velocity is zero when the cue to start a movement occurs.
 // Movement triggers must be marked by LogEvent( TRIGGER_MOVEMENT );
 // 
-// TO DO: Not yet tested!
+// TODO: Not yet tested!
 
 int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, float threshold, float filter_constant, const char *msg ) {
 	
@@ -477,7 +475,7 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 // Checks that the maniplandum is close to the specified target when the cue to start a movement occurs.
 // Movement triggers must be marked by LogEvent( TRIGGER_MOVEMENT );
 // 
-// TO DO: Not yet tested!
+// TODO: Not yet tested!
 
 int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float tolY, float tolZ, int max_bad_positions, const char *msg ) {
 	
@@ -541,7 +539,7 @@ int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float t
 // Checks that the subject starts off in the right direction.
 // Movement triggers must be marked by LogEvent( TRIGGER_MOVE_UP and TRIGGER_MOVE_DOWN );
 // 
-// TO DO: Not fully tested yet!
+// TODO: Not fully tested yet!
 
 int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg ) {
 	
@@ -650,7 +648,7 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 // Checks that the subject taps hard enough, but not too hard, with the manipulandum.
 // Movement triggers must be marked by LogEvent( TRIGGER_MOVE_UP and TRIGGER_MOVE_DOWN );
 // 
-// TO DO: Not fully tested yet!
+// TODO: Not fully tested yet!
 
 int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg ) {
 	
@@ -741,7 +739,7 @@ int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int
 // Checks that the subject taps hard enough, but not too hard, with the manipulandum.
 // Movement triggers must be marked by LogEvent( TRIGGER_MOVE_UP and TRIGGER_MOVE_DOWN );
 // Here we use the accelerometer data instead of force data.
-// TO DO: Not fully tested yet!
+// TODO: Not fully tested yet!
 
 int DexApparatus::CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg ) {
 	

@@ -12,11 +12,6 @@
 #include <math.h>
 #include <VectorsMixin.h>
 
-const int VectorsMixin::X = 0;
-const int VectorsMixin::Y = 1;
-const int VectorsMixin::Z = 2;
-const int VectorsMixin::M = 3;
-
 const double VectorsMixin::pi = 3.14159265358979;
 
 const Vector3 VectorsMixin::zeroVector = {0.0, 0.0, 0.0};
@@ -39,6 +34,24 @@ void VectorsMixin::CopyVector( Vector3 destination, const Vector3 source ){
 	destination[Z] = source[Z];
 }
 
+void VectorsMixin::CopyVector( Vector3f destination, const Vector3 source ){
+	destination[X] = (float) source[X];
+	destination[Y] = (float) source[Y];
+	destination[Z] = (float) source[Z];
+}
+
+void VectorsMixin::CopyVector( Vector3 destination, const Vector3f source ){
+	destination[X] = (double) source[X];
+	destination[Y] = (double) source[Y];
+	destination[Z] = (double) source[Z];
+}
+
+void VectorsMixin::CopyVector( Vector3f destination, const Vector3f source ){
+	destination[X] = source[X];
+	destination[Y] = source[Y];
+	destination[Z] = source[Z];
+}
+
 void VectorsMixin::CopyQuaternion( Quaternion destination, const Quaternion source ){
 	destination[X] = source[X];
 	destination[Y] = source[Y];
@@ -46,11 +59,43 @@ void VectorsMixin::CopyQuaternion( Quaternion destination, const Quaternion sour
 	destination[M] = source[M];
 }
 
+void VectorsMixin::AddVectors( Vector3 result, const Vector3f a, const Vector3f b ) {
+	result[X] = (double) ( a[X] + b[X] );
+	result[Y] = (double) ( a[Y] + b[Y] );
+	result[Z] = (double) ( a[Z] + b[Z] );
+} 
+
 void VectorsMixin::AddVectors( Vector3 result, const Vector3 a, const Vector3 b ) {
 	result[X] = a[X] + b[X];
 	result[Y] = a[Y] + b[Y];
 	result[Z] = a[Z] + b[Z];
 }
+
+void VectorsMixin::AddVectors( Vector3 result, const Vector3f a, const Vector3 b ) {
+	result[X] = (double) a[X] + b[X];
+	result[Y] = (double) a[Y] + b[Y];
+	result[Z] = (double) a[Z] + b[Z];
+}
+
+void VectorsMixin::AddVectors( Vector3 result, const Vector3 a, const Vector3f b ) {
+	result[X] = a[X] + (double) b[X];
+	result[Y] = a[Y] + (double) b[Y];
+	result[Z] = a[Z] + (double) b[Z];
+}
+
+void VectorsMixin::AddVectors( Vector3f result, const Vector3 a, const Vector3 b ) {
+	result[X] = (float) ( a[X] + b[X] );
+	result[Y] = (float) ( a[Y] + b[Y] );
+	result[Z] = (float) ( a[Z] + b[Z] );
+} 
+
+void VectorsMixin::AddVectors( Vector3f result, const Vector3f a, const Vector3f b ) {
+	result[X] = a[X] + b[X];
+	result[Y] = a[Y] + b[Y];
+	result[Z] = a[Z] + b[Z];
+}
+
+
 
 void VectorsMixin::SubtractVectors( Vector3 result, const Vector3 a, const Vector3 b ) {
 	result[X] = a[X] - b[X];
@@ -58,11 +103,49 @@ void VectorsMixin::SubtractVectors( Vector3 result, const Vector3 a, const Vecto
 	result[Z] = a[Z] - b[Z];
 }
 
+void VectorsMixin::SubtractVectors( Vector3 result, const Vector3f a, const Vector3f b ) {
+	result[X] = (double) ( a[X] - b[X] );
+	result[Y] = (double) ( a[Y] - b[Y] );
+	result[Z] = (double) ( a[Z] - b[Z] );
+}
+
+void VectorsMixin::SubtractVectors( Vector3 result, const Vector3f a, const Vector3 b ) {
+	result[X] = (double) a[X] - b[X];
+	result[Y] = (double) a[Y] - b[Y];
+	result[Z] = (double) a[Z] - b[Z];
+}
+
+void VectorsMixin::SubtractVectors( Vector3f result, const Vector3 a, const Vector3 b ) {
+	result[X] = (float) ( a[X] - b[X] );
+	result[Y] = (float) ( a[Y] - b[Y] );
+	result[Z] = (float) ( a[Z] - b[Z] );
+}
+
+void VectorsMixin::SubtractVectors( Vector3f result, const Vector3f a, const Vector3f b ) {
+	result[X] = a[X] - b[X];
+	result[Y] = a[Y] - b[Y];
+	result[Z] = a[Z] - b[Z];
+}
+
+
 void VectorsMixin::ScaleVector( Vector3 result, const Vector3 a, const double scaling ) {
 	result[X] = (float) a[X] * scaling;
 	result[Y] = (float) a[Y] * scaling;
 	result[Z] = (float) a[Z] * scaling;
 }
+
+void VectorsMixin::ScaleVector( Vector3f result, const Vector3 a, const double scaling ) {
+	result[X] = (float) ( a[X] * scaling );
+	result[Y] = (float) ( a[Y] * scaling );
+	result[Z] = (float) ( a[Z] * scaling );
+} 
+
+void VectorsMixin::ScaleVector( Vector3f result, const Vector3f a, const double scaling ) {
+	result[X] = (float) ( a[X] * scaling );
+	result[Y] = (float) ( a[Y] * scaling );
+	result[Z] = (float) ( a[Z] * scaling );
+} 
+
 
 double VectorsMixin::VectorNorm( const Vector3 vector ) {
 	return( sqrt( vector[X] * vector[X] + vector[Y] * vector[Y] + vector[Z] * vector[Z] ) );
@@ -90,10 +173,10 @@ void VectorsMixin::CopyMatrix( Matrix3x3 destination, const Matrix3x3 source ){
 		}
 	}
 }
-void VectorsMixin::CopyMatrix( double destination[3][3], const Matrix3x3 source ){
+void VectorsMixin::CopyMatrix( float destination[3][3], const Matrix3x3 source ){
 	for ( int i = 0; i < 3; i++ ) {
 		for ( int j = 0; j < 3; j++ ) {
-			destination[i][j] = source[i][j];
+			destination[i][j] = (float) source[i][j];
 		}
 	}
 }
@@ -149,6 +232,35 @@ void VectorsMixin::MultiplyVector( Vector3 result, Vector3 v, const Matrix3x3 m 
 	}
 }
 
+void VectorsMixin::MultiplyVector( Vector3 result, Vector3f v, const Matrix3x3 m ) {
+	// I represent vectors as row vectors so that a matrix is an array of rows.
+	// Therefore we normally do right multiplies.
+	for ( int i = 0; i < 3; i++ ) {
+		result[i] = 0.0;
+		for ( int j = 0; j < 3; j++ ) result[i] += (double) v[j] * m[j][i];
+	}
+}
+
+void VectorsMixin::MultiplyVector( Vector3f result, Vector3f v, const Matrix3x3 m ) {
+	// I represent vectors as row vectors so that a matrix is an array of rows.
+	// Therefore we normally do right multiplies.
+	for ( int i = 0; i < 3; i++ ) {
+		result[i] = 0.0;
+		for ( int j = 0; j < 3; j++ ) result[i] += (float) ((double) v[j] * m[j][i]);
+	}
+}
+
+void VectorsMixin::MultiplyVector( Vector3f result, Vector3 v, const Matrix3x3 m ) {
+	// I represent vectors as row vectors so that a matrix is an array of rows.
+	// Therefore we normally do right multiplies.
+	for ( int i = 0; i < 3; i++ ) {
+		result[i] = 0.0;
+		for ( int j = 0; j < 3; j++ ) result[i] += (float) (v[j] * m[j][i]);
+	}
+}
+
+
+
 // Let left and right be matrices of N 3-element row vectors.
 // Compute transpose(left) * right, which is necessarily a 3x3 matrix
 void VectorsMixin::CrossVectors( Matrix3x3 result, const Vector3 left[], const Vector3 right[], int rows ) {
@@ -194,7 +306,7 @@ double VectorsMixin::Determinant( const Matrix3x3 m ) {
 
 double VectorsMixin::InvertMatrix( Matrix3x3 result, const Matrix3x3 m ){
 
-	float r[3][3];
+	Matrix3x3 r;
 	double det = Determinant( m );
 
 	r[0][0] = m[2][2] * m[1][1] - m[2][1] * m[1][2];

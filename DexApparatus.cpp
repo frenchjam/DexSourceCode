@@ -211,7 +211,8 @@ void DexApparatus::LoadTargetPositions( char *filename ) {
 int DexApparatus::CalibrateTargets( void ) {
 
 	int status;
-	float position[3], orientation[4];
+	Vector3		position;
+	Quaternion	orientation;
 	FILE *fp;
 
 	for ( int trg = 0; trg < nTargets; trg++ ) {
@@ -390,7 +391,7 @@ int DexApparatus::PerformTrackerAlignment( const char *msg ) {
 // Compute the 3D position vector and 4D orientation quaternion of the manipulandum.
 // Takes as input a pointer to a buffer full of one slice of marker data (marker_frame);
 // Fills in the position vector pos and the orientation quaternion ori.
-bool DexApparatus::ComputeManipulandumPosition( float *pos, float *ori, CodaFrame &marker_frame, Quaternion default_orientation ) {
+bool DexApparatus::ComputeManipulandumPosition( Vector3 pos, Quaternion ori, CodaFrame &marker_frame, Quaternion default_orientation ) {
 
 	Vector3		selected_model[DEX_MAX_MARKERS];
 	Vector3		selected_actual[DEX_MAX_MARKERS];
@@ -496,7 +497,8 @@ bool DexApparatus::GetTargetFramePosition( Vector3 pos, Quaternion ori ) {
 void DexApparatus::Update( void ) {
 	
 	bool			manipulandum_visible;
-	float			pos[3], ori[4];
+	Vector3			pos;
+	Quaternion		ori;
 	bool			acquisition_state;
 	unsigned long	target_state;
 	
@@ -900,9 +902,13 @@ void DexApparatus::Wait( double duration ) {
 //
 // Wait until the manipulandum is placed at a target position.
 //
-int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientation[4],
-									float position_tolerance[3], float orientation_tolerance,
-									float hold_time, float timeout, char *msg  ) {
+int DexApparatus::WaitUntilAtTarget( int target_id, 
+									const Quaternion desired_orientation,
+									Vector3 position_tolerance, 
+									double orientation_tolerance,
+									double hold_time, 
+									double timeout, 
+									char *msg  ) {
 	
 	// These are objects of my own making, based on the Windows clock.
 	DexTimer blink_timer;
@@ -1035,11 +1041,23 @@ int DexApparatus::WaitUntilAtTarget( int target_id, const float desired_orientat
 
 // Convenience methods for my own use.
 
-int DexApparatus::WaitUntilAtVerticalTarget( int target_id, const float desired_orientation[4], float position_tolerance[3], float orientation_tolerance, float hold_time, float timeout, char *msg ) {
+int DexApparatus::WaitUntilAtVerticalTarget( int target_id, 
+									const Quaternion desired_orientation,
+									Vector3 position_tolerance, 
+									double orientation_tolerance,
+									double hold_time, 
+									double timeout, 
+									char *msg  ) {
 	return( WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg ) );
 }
 
-int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, const float desired_orientation[4], float position_tolerance[3], float orientation_tolerance, float hold_time, float timeout, char *msg ) {
+int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, 
+									const Quaternion desired_orientation,
+									Vector3 position_tolerance, 
+									double orientation_tolerance,
+									double hold_time, 
+									double timeout, 
+									char *msg  ) {
 	return( WaitUntilAtTarget( nVerticalTargets + target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg  ) );
 }
 
@@ -1489,7 +1507,7 @@ void DexApparatus::Beep( int tone, int volume, float duration ) {
 /*********************************************************************************/
 
 // These are the acqusition routines according to my design. 
-// TO DO: Should be updated to the new specification where SaveAcqusition 
+// TODO: Should be updated to the new specification where SaveAcqusition 
 // does not exist.
 void DexApparatus::StartAcquisition( float max_duration ) {
 	// Reset the list of target and sound events.
@@ -1556,7 +1574,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 
 	int frm, mrk, smpl, chan;
 	
-	// TO DO: Automatically generate a file name.
+	// TODO: Automatically generate a file name.
 	// Here we use the same name each time, but just add the tag.
 	sprintf( fileroot, "DexSimulatorOutput.%s", tag );
 	

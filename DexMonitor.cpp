@@ -22,6 +22,7 @@
 
 #include <fOutputDebugString.h>
 
+
 #include <useful.h>
 #include <screen.h>
 #include <3dMatrix.h>
@@ -630,7 +631,9 @@ int DexMonitorServer::SendConfiguration( int nCodas, int nTargets,
 }
 
 int DexMonitorServer::SendState( bool acquisitionState, unsigned long targetState, 
-								bool manipulandum_visibility, float manipulandum_position[3], float manipulandum_orientation[4] ) {
+								 bool manipulandum_visibility, 
+								 Vector3 manipulandum_position, 
+								 Quaternion manipulandum_orientation ) {
 	
 	int i = 0;
 	int exit_status = NORMAL_EXIT;

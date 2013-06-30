@@ -104,7 +104,7 @@ public:
 	DexTimer	trialTimer;
 	
 	// The position of each of the visible targets in tracker coordinates.
-	float	targetPosition[DEX_MAX_TARGETS][3];
+	Vector3	targetPosition[DEX_MAX_TARGETS];
 	char	*targetPositionFilename;
 	
 	// After an acquisition, the full data set is retrieved from
@@ -195,23 +195,25 @@ public:
 	virtual void Wait( double seconds );
 	virtual int  WaitSubjectReady( const char *message = "Ready to continue?" );
 	virtual int  fWaitSubjectReady( const char *format = "Ready to continue?", ... );
-	virtual int	 WaitUntilAtTarget( int target_id, const float desired_orientation[4], 
-									float position_tolerance[3], float orientation_tolerance, 
-									float hold_time, float timeout, char *msg  );
+	virtual int	 WaitUntilAtTarget( int target_id,  
+									const Quaternion desired_orientation = uprightNullOrientation, 
+									Vector3 position_tolerance = defaultPositionTolerance, 
+									double orientation_tolerance = defaultOrientationTolerance, 
+									double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
+									char *msg = NULL );
 	
 	virtual int  WaitUntilAtVerticalTarget( int target_id, 
-											const float desired_orientation[4] = uprightNullOrientation, 
-											float position_tolerance[3] = defaultPositionTolerance, 
-											float orientation_tolerance = defaultOrientationTolerance, 
-											float hold_time = waitHoldPeriod, float timeout = waitTimeLimit, 
+											const Quaternion desired_orientation = uprightNullOrientation, 
+											Vector3 position_tolerance = defaultPositionTolerance, 
+											double orientation_tolerance = defaultOrientationTolerance, 
+											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
 											char *msg = NULL );
 	virtual int  WaitUntilAtHorizontalTarget( int target_id, 
-												const float desired_orientation[4] = uprightNullOrientation, 
-												float position_tolerance[3] = defaultPositionTolerance, 
-												float orientation_tolerance = defaultOrientationTolerance, 
-												float hold_time = waitHoldPeriod, 
-												float timeout = waitTimeLimit, 
-												char *msg = NULL );
+											const Quaternion desired_orientation = uprightNullOrientation, 
+											Vector3 position_tolerance = defaultPositionTolerance, 
+											double orientation_tolerance = defaultOrientationTolerance, 
+											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
+											char *msg = NULL );
 
 	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
 
@@ -234,8 +236,8 @@ public:
 	
 	// Post hoc tests of data validity.
 	virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
-	virtual int CheckMovementAmplitude(  float min, float max, float dirX, float dirY, float dirZ, const char *msg = NULL );
-	virtual int CheckMovementAmplitude(  float min, float max, const Vector3 direction, char *msg = NULL );
+	virtual int CheckMovementAmplitude(  double min, double max, double dirX, double dirY, double dirZ, const char *msg = NULL );
+	virtual int CheckMovementAmplitude(  double min, double max, const Vector3 direction, char *msg = NULL );
 	
 	int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								float dirX, float dirY, float dirZ,
@@ -281,10 +283,10 @@ public:
 	
 	// Measure the position and orientation of the manipulandum 
 	// based on a frame of Coda marker data.
-	virtual bool ComputeManipulandumPosition( float *pos, float *ori, 
+	virtual bool ComputeManipulandumPosition( Vector3 pos, Quaternion ori, 
 												CodaFrame &marker_frame, 
 												Quaternion default_orientation = NULL );
-	virtual bool ComputeTargetFramePosition( float *pos, float *ori, CodaFrame &marker_frame );
+	virtual bool ComputeTargetFramePosition( Vector3 pos, Quaternion ori, CodaFrame &marker_frame );
 	
 	// Get the latest marker data and compute from it the manipulandum position and orientation.
 	virtual bool GetManipulandumPosition( Vector3 pos, Quaternion ori, Quaternion default_orientation = NULL );

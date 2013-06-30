@@ -106,7 +106,7 @@ void DexRTnetTracker::Initialize( void ) {
 		// To run different applications simultaneously, I just define a different port
 		// number for each one. But what if I want to run the same application on different
 		// machines?
-		// TO DO: Figure out how the port number is supposed to be used.
+		// TODO: Figure out how the port number is supposed to be used.
 		cl.createDataStream(stream, 7001);
 		// ensure socket is up before starting acquisition
 		codanet_sleep(50);
@@ -238,7 +238,7 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 
 					fOutputDebugString( "%08u\tOK.", frm );
 
-					// TO DO: Fill the frames[] array.
+					// TODO: Fill the frames[] array.
 
 					// Count the number of packets received for this frame.
 					unit++;
@@ -337,7 +337,7 @@ bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 						BYTE    *intensity = decode3D.getIntensity(imarker);
 						DWORD   tick = decode3D.getTick();
 						
-						// TO DO: Do something with the data.
+						// TODO: Do something with the data.
 						
 					}
 					//* Signal that we got the CX1 packet.
@@ -347,7 +347,7 @@ bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 			else
 			{
 				// Signal a checksum  or packet type error.
-				// TO DO: Decide what to do if it happens.
+				// TODO: Decide what to do if it happens.
 				// Here we just ignore and continue.
 				fOutputDebugString( "Checksum failed!!!" );
 			}

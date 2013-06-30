@@ -166,7 +166,7 @@ void plot_data( DexApparatus *apparatus ) {
 		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
 			ViewSelectColor( cop_view, i );
 			ViewPenSize( cop_view, 5 );
-			ViewXYPlotAvailableFloats( cop_view,
+			ViewXYPlotAvailableDoubles( cop_view,
 				&apparatus->acquiredCOP[i][0][X], 
 				&apparatus->acquiredCOP[i][0][Y], 
 				0, samples - 1, 
@@ -250,7 +250,7 @@ void plot_data( DexApparatus *apparatus ) {
 		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
 			for ( j = 0; j < 2; j++ ) {
 				ViewSelectColor( view, i * N_FORCE_TRANSDUCERS + j );
-					ViewPlotAvailableFloats( view,
+					ViewPlotAvailableDoubles( view,
 					&apparatus->acquiredCOP[i][0][j], 
 					0, samples - 1, 
 					sizeof( *apparatus->acquiredCOP[i] ), 
@@ -489,6 +489,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	case FRICTION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunFrictionMeasurement( apparatus, lpCmdLine ) ) );
 		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;

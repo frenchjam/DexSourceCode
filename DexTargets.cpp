@@ -10,6 +10,8 @@
 #include <memory.h>
 #include <process.h>
 
+#include "VectorsMixin.h"  // This has to be before 3dMatrix.h.
+
 #include <useful.h>
 #include <screen.h>
 #include <3dMatrix.h>

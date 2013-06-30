@@ -250,8 +250,6 @@ int main( int argc, char *argv[] ) {
 		// orientation if there are just 2 or 1, but we could calculate a
 		// position assuming a zero orientation. Here I just show the results
 		// of the best fit solution.
-
-		// TO DO: Implement a solution for 3, 2 or 1 markers.
 		vm.BestFitTransformation( best, delta_input, delta_output, (int) count );
 
 		// Now compute the displacement.

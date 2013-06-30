@@ -67,7 +67,7 @@ void DexApparatus::InitForceTransducers( void ) {
 	}
 
 	// Compute the transformations to put ATI forces in a common reference frame.
-	// TO DO: Check what the others are using as a reference frame and make it 
+	// TODO: Check what the others are using as a reference frame and make it 
 	// coherent. Ideally, the local manipulandum reference frame should align with
 	// the world reference frame when the manipulandum is held upright in the seated posture.
 	SetQuaterniond( ftAlignmentQuaternion[0], ATIRotationAngle[0], kVector );
@@ -157,18 +157,28 @@ void DexApparatus::ZeroForceTransducers( void ) {
 
 void DexApparatus::ComputeForceTorque(  Vector3 &force, Vector3 &torque, int unit, AnalogSample analog ) {
 	
-	float ft[6];
+	float ft[6] = {0, 0, 0, 0, 0, 0};
+
+	Vector3 ft_force, ft_torque;
 
 	// Use the ATI provided routine to compute force and torque.
 	ConvertToFT( ftCalibration[unit], &analog.channel[ftAnalogChannel[unit]], ft );
+
 	// First three components are the force.
-	// We pretend that FT is a vector.
-	RotateVector( force, ftAlignmentQuaternion[unit], ft );
-	// Last three are the torque. I acces the last 3 values like a vector.
-	// TO DO: Review the math. I believe that we apply the same
+	ft_force[X] = ft[0];
+	ft_force[Y] = ft[1];
+	ft_force[Z] = ft[2];
+
+	// Last three are the torque.
+	ft_torque[X] = ft[3];
+	ft_torque[Y] = ft[4];
+	ft_torque[Z] = ft[5];
+
+	RotateVector( force, ftAlignmentQuaternion[unit], ft_force );
+	// TODO: Review the math. I believe that we apply the same
 	// rotation to the torque vector as to the force one. But
 	// I should think some more to be sure.
-	RotateVector( torque, ftAlignmentQuaternion[unit], ft + 3 );
+	RotateVector( torque, ftAlignmentQuaternion[unit], ft_torque );
 
 }
 

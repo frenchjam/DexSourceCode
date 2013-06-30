@@ -40,14 +40,14 @@
 #include "DexApparatus.h"
 
 // Parameters used when waiting for the hand to be at a target.
-float defaultPositionTolerance[3] = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
-float defaultOrientationTolerance = 60.0;					// Measured in degrees.
+Vector3 defaultPositionTolerance = { 100.0, 25.0, 25.0 };	// Zone considered to be at the target.
+double  defaultOrientationTolerance = 60.0;					// Measured in degrees.
 // The tolerance on the orientation above is set very high for the simulator,
 // because the simulator intentionally makes the manipulandum rotate as you move toward the higher targets.
 
-float waitBlinkPeriod = 0.02;		// LED blink rate when out of zone.
-float waitHoldPeriod = 1.0;			// Required hold time in zone.
-float waitTimeLimit = 10.0;			// Signal time out if we wait this long.
+double waitBlinkPeriod = 0.02;		// LED blink rate when out of zone.
+double waitHoldPeriod = 1.0;			// Required hold time in zone.
+double waitTimeLimit = 10.0;			// Signal time out if we wait this long.
 
 char *TargetBarString[] = { "Indifferent", "Left", "Right", "Unknown" };
 char *PostureString[] = { "Indifferent", "Seated", "Supine", "Unknown" };
@@ -55,10 +55,10 @@ char *TappingSurfaceString[] = { "Indifferent", "Extended", "Folded", "Unknown" 
 
 // Null orientation of the manipulandum when in the upright (seated) posture.
 // Orientations are expressed as quaternions.
-const float uprightNullOrientation[4] = { 0.0, 0.0, 0.0, 1.0 };
+const Quaternion uprightNullOrientation = { 0.0, 0.0, 0.0, 1.0 };
 // Null orientation of the manipulandum when in the supine position.
-// TO DO: This is wrong. Need to compute the required quaternion.
-const float supineNullOrientation[4] = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) }; 
+// TODO: This is wrong. Need to compute the required quaternion.
+const Quaternion supineNullOrientation = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) }; 
 
 
 // Position of the markers relative to the control point of the manipulandum.
@@ -66,7 +66,7 @@ const float supineNullOrientation[4] = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) };
 // manipulandum from acquired marker positions, and by DexMouseTracker to simulate
 // where each marker is according to the position of the mouse.
 
-float		ManipulandumBody[MANIPULANDUM_MARKERS][3] = 
+Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] = 
 {
 	{1.0, 0.0, 0.0}, 
 	{0.0, 1.0, 0.0},  
@@ -85,7 +85,7 @@ int ManipulandumMarkerID[MANIPULANDUM_MARKERS] = {0, 1, 2, 3, 4, 5, 6, 7};
 // way as for the manipulandum, but this functionality is not at present
 // needed in the real-time DEX system.
 
-float		WristBody[WRIST_MARKERS][3] = 
+Vector3		WristBody[WRIST_MARKERS] = 
 {
 	{1.0, 0.0, 0.0}, 
 	{0.0, 1.0, 0.0},  
@@ -103,7 +103,7 @@ int WristMarkerID[WRIST_MARKERS] = {8, 9, 10, 11, 12, 13, 14, 15};
 // can move with respect to the horizontal box. But it is convenient to 
 // define the marker positions in the same format for DexMouseTracker.
 
-float		TargetFrameBody[TARGET_FRAME_MARKERS][3] =
+Vector3		TargetFrameBody[TARGET_FRAME_MARKERS] =
 {
 	// This value must be the origin.
 	{  0.0,   0.0,   0.0}, 

@@ -11,6 +11,7 @@
 #pragma once
 
 #include "DexUDPServices.h"
+#include "VectorsMixin.h"
 
 // Some useful constants.
 
@@ -119,14 +120,14 @@ extern	char *TappingSurfaceString[];
 
 // Parameters used when waiting for the hand to be at a target.
 
-extern float defaultPositionTolerance[3];	// Zone considered to be at the target.
-extern float defaultOrientationTolerance;
+extern Vector3 defaultPositionTolerance;	// Zone considered to be at the target.
+extern double defaultOrientationTolerance;
 
-extern float waitBlinkPeriod;		// LED blink rate when out of zone.
-extern float waitHoldPeriod;		// Required hold time in zone.
-extern float waitTimeLimit;			// Signal time out if we wait this long.
+extern double waitBlinkPeriod;		// LED blink rate when out of zone.
+extern double waitHoldPeriod;		// Required hold time in zone.
+extern double waitTimeLimit;			// Signal time out if we wait this long.
 
-extern const float uprightNullOrientation[4], supineNullOrientation[4]; 
+extern const Quaternion uprightNullOrientation, supineNullOrientation; 
 
 /********************************************************************************/
 
@@ -198,17 +199,17 @@ typedef struct {
 
 
 #define			MANIPULANDUM_MARKERS 8
-extern float	ManipulandumBody[MANIPULANDUM_MARKERS][3];
+extern Vector3	ManipulandumBody[MANIPULANDUM_MARKERS];
 extern int		nManipulandumMarkers;
 extern int		ManipulandumMarkerID[MANIPULANDUM_MARKERS];
 
 #define			WRIST_MARKERS 8
-extern float	WristBody[WRIST_MARKERS][3];
+extern Vector3	WristBody[WRIST_MARKERS];
 extern int		nWristMarkers;
 extern int		WristMarkerID[WRIST_MARKERS];
 
 #define			TARGET_FRAME_MARKERS	4
-extern float	TargetFrameBody[TARGET_FRAME_MARKERS][3];
+extern Vector3	TargetFrameBody[TARGET_FRAME_MARKERS];
 extern int		nFrameMarkers;
 extern int		FrameMarkerID[TARGET_FRAME_MARKERS];
 

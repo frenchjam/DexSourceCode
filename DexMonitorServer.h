@@ -31,8 +31,9 @@ public:
 	void Quit( void );
 
 	int DexMonitorServer::SendState( bool acquisitionState, unsigned long targetState, 
-									 bool manipulandum_visibility, float manipulandum_position[3], 
-									 float manipulandum_orientation[4] );
+									 bool manipulandum_visibility, 
+									 Vector3 manipulandum_position, 
+									 Quaternion manipulandum_orientation );
 
 	int SendConfiguration( int nCodas, int nTargets, 
 							DexSubjectPosture subjectPosture,
