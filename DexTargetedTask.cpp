@@ -96,7 +96,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Wait until the subject gets to the target before moving on.
 	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], supineNullOrientation, desired_orientation ); 
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], desired_orientation ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Make sure that the target is turned back on if a timeout occured.
