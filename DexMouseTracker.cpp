@@ -119,7 +119,7 @@ bool DexMouseTracker::CheckOverrun( void ) {
 
 /*********************************************************************************/
 
-int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) {
+int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit ) {
 
 	int previous;
 	int next;
@@ -141,16 +141,16 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 		frames[frm].time = (float) time;
 
 		// Fill the first frames with the same position as the first polled frame;
-		if ( time < recordedMarkerFrames[previous].time ) {
-			CopyMarkerFrame( frames[frm], recordedMarkerFrames[previous] );
+		if ( time < polledMarkerFrames[previous].time ) {
+			CopyMarkerFrame( frames[frm], polledMarkerFrames[previous] );
 		}
 
 		else {
 			// See if we have caught up with the real-time data.
-			if ( time > recordedMarkerFrames[next].time ) {
+			if ( time > polledMarkerFrames[next].time ) {
 				previous = next;
 				// Find the next real-time frame that has a time stamp later than this one.
-				while ( recordedMarkerFrames[next].time <= time && next < nPolled ) next++;
+				while ( polledMarkerFrames[next].time <= time && next < nPolled ) next++;
 				// If we reached the end of the real-time samples, then we are done.
 				if ( next >= nPolled ) {
 					break;
@@ -158,9 +158,9 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 			}
 
 			// Compute the time difference between the two adjacent real-time frames.
-			interval = recordedMarkerFrames[next].time - recordedMarkerFrames[previous].time;
+			interval = polledMarkerFrames[next].time - polledMarkerFrames[previous].time;
 			// Compute the time between the current frame and the previous real_time frame.
-			offset = time - recordedMarkerFrames[previous].time;
+			offset = time - polledMarkerFrames[previous].time;
 			// Use the relative time to interpolate.
 			relative = offset / interval;
 
@@ -168,15 +168,15 @@ int DexMouseTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 				// Both the previous and next polled frame must be visible for the 
 				// interpolated sample to be visible.
 				frames[frm].marker[j].visibility = 
-					 ( recordedMarkerFrames[previous].marker[j].visibility
-					   && recordedMarkerFrames[next].marker[j].visibility );
+					 ( polledMarkerFrames[previous].marker[j].visibility
+					   && polledMarkerFrames[next].marker[j].visibility );
 
 				if ( frames[frm].marker[j].visibility ) {
 					SubtractVectors( jump, 
-										recordedMarkerFrames[next].marker[j].position,
-										recordedMarkerFrames[previous].marker[j].position );
+										polledMarkerFrames[next].marker[j].position,
+										polledMarkerFrames[previous].marker[j].position );
 					ScaleVector( delta, jump, (float) relative );
-					AddVectors( frames[frm].marker[j].position, recordedMarkerFrames[previous].marker[j].position, delta );
+					AddVectors( frames[frm].marker[j].position, polledMarkerFrames[previous].marker[j].position, delta );
 				}
 			}
 		}
@@ -335,19 +335,9 @@ int DexMouseTracker::Update( void ) {
 		overrun =true;
 	}
 	if ( acquisitionOn && nPolled < DEX_MAX_MARKER_FRAMES ) {
-
 		CodaFrame	frame;
 		GetCurrentMarkerFrame( frame );
-#if 0
-		recordedMarkerFrames[ nPolled ].time = (float) DexTimerElapsedTime( acquisitionTimer );
-		for ( int j = 0; j < nMarkers; j++ ) {
-			recordedMarkerFrames[nPolled].marker[j].visibility = frame.marker[j].visibility;
-			for ( int k = 0; k < 3; k++ ) {
-				recordedMarkerFrames[nPolled].marker[j].position[k] = frame.marker[j].position[k]; 
-			}
-		}
-#endif
-		CopyMarkerFrame( recordedMarkerFrames[nPolled], frame );
+		CopyMarkerFrame( polledMarkerFrames[nPolled], frame );
 		if ( nPolled < DEX_MAX_MARKER_FRAMES ) nPolled++;
 	}
 	return( 0 );

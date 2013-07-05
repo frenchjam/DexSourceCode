@@ -109,8 +109,11 @@ public:
 	
 	// After an acquisition, the full data set is retrieved from
 	// the tracker and analog system and stored here.
-	CodaFrame			acquiredPosition[DEX_MAX_MARKER_FRAMES];			// Markers
-	ManipulandumState	acquiredManipulandumState[DEX_MAX_MARKER_FRAMES];	// Manipulandum Position
+
+	// Marker frames are one from each CODA unit, plus the combined.
+	CodaFrame			acquiredPosition[DEX_MAX_CODAS+1][DEX_MAX_MARKER_FRAMES];			
+	// The manipulandum position and orientation are computed from the marker data.
+	ManipulandumState	acquiredManipulandumState[DEX_MAX_MARKER_FRAMES];
 	
 	AnalogSample		acquiredAnalog[DEX_MAX_ANALOG_SAMPLES];
 	Vector3				acquiredForce[N_FORCE_TRANSDUCERS][DEX_MAX_ANALOG_SAMPLES];

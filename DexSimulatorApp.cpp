@@ -608,11 +608,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case OSCILLATION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunOscillations( apparatus, lpCmdLine ) ) );
 		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 		
 	case COLLISION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunCollisions( apparatus, lpCmdLine ) ) );
 		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
@@ -625,11 +629,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	case TARGETED_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunTargeted( apparatus, lpCmdLine ) ) );
 		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;
 
 	case DISCRETE_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunDiscrete( apparatus, lpCmdLine ) ) );
 		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
 		break;

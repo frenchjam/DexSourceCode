@@ -974,8 +974,8 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 				DexTimerSet( blink_timer, waitBlinkPeriod );
 			}
 			
-			// The apparatus class has an Update() method that acquires the most recent 
-			// marker positions and computes the position and orientation of the maniplandum.
+			// The apparatus class has an Update() method that must be called during any 
+			// wait loop, in case any of the hardware devices need periodic updating.
 			Update();
 
 			// Get the current position and orientation of the manipulandum.
@@ -1524,22 +1524,27 @@ void DexApparatus::StartAcquisition( float max_duration ) {
 	MarkEvent( ACQUISITION_START );
 }
 void DexApparatus::StopAcquisition( void ) {
+
+	int unit;
+
 	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	adc->StopAcquisition();
 	monitor->SendEvent( "Acquisition terminated." );
 	// Retrieve the marker data.
-	nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition, DEX_MAX_MARKER_FRAMES );
+	for ( unit = 0; unit <= nCodas; unit++ ) {
+		nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition[unit], DEX_MAX_MARKER_FRAMES, unit );
+	}
 	// Compute the manipulandum positions.
 	for ( int i = 0; i < nAcqFrames; i++ ) {
 		Vector3		pos;
 		Quaternion	ori;
 		// Compute the manipulandum position and orientation at each time step.
 		acquiredManipulandumState[i].visibility = 
-			ComputeManipulandumPosition( pos, ori, acquiredPosition[i] );
-		acquiredManipulandumState[i].time = acquiredPosition[i].time;
+			ComputeManipulandumPosition( pos, ori, acquiredPosition[0][i] );
+		acquiredManipulandumState[i].time = acquiredPosition[0][i].time;
 		CopyVector( acquiredManipulandumState[i].position, pos );
-		CopyVector( acquiredManipulandumState[i].orientation, ori );
+		CopyQuaternion( acquiredManipulandumState[i].orientation, ori );
 	}
 	// Send the marker recording by telemetry to the ground for monitoring.
 	monitor->SendRecording( acquiredManipulandumState, nAcqFrames, INVISIBLE );
@@ -1570,7 +1575,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	FILE *fp;
 	char fileroot[256], filename[512];
 
-	int frm, mrk, smpl, chan;
+	int unit, frm, mrk, smpl, chan;
 	
 	// TODO: Automatically generate a file name.
 	// Here we use the same name each time, but just add the tag.
@@ -1580,16 +1585,23 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	sprintf( filename, "%s.mrk", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
-	for ( mrk = 0; mrk < nMarkers; mrk++ ) fprintf( fp, "\tM%2dV\tM%2dX\tM%2dY\tM%2dZ", mrk, mrk, mrk, mrk );
+	for ( mrk = 0; mrk < nMarkers; mrk++ ) fprintf( fp, "\tM%02dV\tM%02dX\tM%02dY\tM%02dZ", mrk, mrk, mrk, mrk );
+	for ( unit = 0; unit <= nCodas; unit++ ) {
+		for ( mrk = 0; mrk < nMarkers; mrk++ ) {
+			fprintf( fp, "\tU%1dM%02dV\tU%1dM%02dX\tU%1dM%02dY\tU%1dM%02dZ", unit, mrk, unit, mrk, unit, mrk, unit, mrk );
+		}
+	}
 	fprintf( fp, "\n" );
 	for ( frm = 0; frm < nAcqFrames; frm++ ) {
 		fprintf( fp, "%d\t%.3f", frm, acquiredManipulandumState[frm].time ); 
+		for ( unit = 0; unit <= nCodas; unit++ ) {
 		for ( mrk = 0; mrk < nMarkers; mrk++ ) {
-			fprintf( fp, "\t%d\t%f\t%f\t%f", 
-				acquiredPosition[frm].marker[mrk].visibility,
-				acquiredPosition[frm].marker[mrk].position[X],
-				acquiredPosition[frm].marker[mrk].position[Y],
-				acquiredPosition[frm].marker[mrk].position[Z] );
+				fprintf( fp, "\t%d\t%f\t%f\t%f", 
+					acquiredPosition[unit][frm].marker[mrk].visibility,
+					acquiredPosition[unit][frm].marker[mrk].position[X],
+					acquiredPosition[unit][frm].marker[mrk].position[Y],
+					acquiredPosition[unit][frm].marker[mrk].position[Z] );
+		}
 		}
 		fprintf( fp, "\n" );
 	}

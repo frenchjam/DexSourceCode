@@ -17,6 +17,11 @@
 #include <fOutputDebugString.h>
 #include "DexTracker.h"
 
+// Starting up the CODA takes time. It would be nice if we could leave it
+// in a running state after the first startup, to go faster on subsequent trials.
+// Set this flag to force a shutdown before each start up for testing purposes.
+#define ALWAYS_SHUTDOWN
+
 // RTNet C++ includes
 #define NO64BIT
 #include "codaRTNetProtocolCPP/RTNetClient.h"
@@ -51,9 +56,11 @@ void DexRTnetTracker::Initialize( void ) {
 		//  fOutputDebugString() uses old-fashioned strings.
 		// But this stuff should never happen anyway.
 		fOutputDebugString( "Found %u hardware configurations:\n", configs.dwNumConfig);
+		char dest[1024];
 		for(DWORD iconfig = 0; iconfig < configs.dwNumConfig; iconfig++) {
+			wcstombs( dest, configs.config[iconfig].strName, sizeof( dest ) );
 			fOutputDebugString( "  [%u] address: %08X  name: %s\n", 
-				iconfig, configs.config[iconfig].dwAddressHandle, configs.config[iconfig].strName);
+				iconfig, configs.config[iconfig].dwAddressHandle, dest );
 		}
 		if (configs.dwNumConfig < codaConfig)
 		{
@@ -61,7 +68,8 @@ void DexRTnetTracker::Initialize( void ) {
 			exit( -1 );
 		}
 		// Show which configuration we are trying to use.
-		fOutputDebugString( "RTnet Configuration: %s\n", configs.config[codaConfig].strName );
+		wcstombs( dest, configs.config[codaConfig].strName, sizeof( dest ) );
+		fOutputDebugString( "RTnet Configuration: %s\n", dest );
 		
 
 		// It used to be that we could just run the startup commands even
@@ -70,16 +78,23 @@ void DexRTnetTracker::Initialize( void ) {
 		// So if we are running already and it is not the same configuration
 		// then shut down and start again.
 		DWORD	running_config = cl.getRunningHWConfig();
+#ifdef ALWAYS_SHUTDOWN
+		OutputDebugString( "Shutting down ... " );
+		cl.stopSystem();
+		running_config = NULL;
+		OutputDebugString( "OK.\n" );
+#else
 		if ( running_config != configs.config[codaConfig].dwAddressHandle ) {
 			OutputDebugString( "*** Not running the right configuration! ***" );
 			cl.stopSystem();
 			running_config = NULL;
 		}
+#endif
 
 
 		if ( !running_config ) {
 
-			OutputDebugString( "*** Starting up Coda system! ***" );
+			OutputDebugString( "Starting up Coda system ... " );
 
 			// If system is already started, this does nothing.
 			// Otherwise it will load the specified configuration.
@@ -93,12 +108,24 @@ void DexRTnetTracker::Initialize( void ) {
 			// This says that we want both combined and individual data from each coda.
 			cl.setDeviceOptions( packet_mode );
 
-
 			// prepare for acquisition
-			OutputDebugString( "cl.prepareForAcq()\n" );
+			OutputDebugString( "OK.\ncl.prepareForAcq() ... " );
 			cl.prepareForAcq();
+			OutputDebugString( "OK.\n" );
 
 		}
+
+		// Find out how many Coda units are actually in use.
+		// I don't really need the alignment information, but that structure
+		// includes the number of Codas specified in the configuration that is in use.
+		// So we do a bogus alignment.
+		DeviceOptionsAlignment align(1, 1, 1, 1, 1);
+		cl.setDeviceOptions( align );
+		// Then this is what tells us how many units are there.
+		DeviceInfoAlignment align_info;
+		cl.getDeviceInfo( align_info );
+
+		fOutputDebugString( "Number of connected CODA units: %d\n", nCodas = align_info.dev.dwNumUnits );
 
 		// Create a data stream.
 		// I know from experience that the port number (here 7000) has to be different
@@ -110,13 +137,6 @@ void DexRTnetTracker::Initialize( void ) {
 		cl.createDataStream(stream, 7001);
 		// ensure socket is up before starting acquisition
 		codanet_sleep(50);
-
-		// Find out how many Coda units are actually in use.
-		// I don't really need the alignment information, but that structure
-		// includes the number of Codas specified in the configuration that is in use.
-		DeviceInfoAlignment align_info;
-		cl.getDeviceInfo( align_info );
-		nCodas = align_info.dev.dwNumUnits;
 		
 	}
 	catch(NetworkException& exNet)
@@ -169,19 +189,10 @@ void DexRTnetTracker::StopAcquisition( void ) {
 	//* that this is a misnomer, since it sends 3 packets per slice of data
 	//* (one for each coda unit and one for the combined data).
 	nAcqFrames = cl.getAcqBufferNumPackets( cx1Device );
-}
+	if ( nAcqFrames > DEX_MAX_MARKER_FRAMES ) nAcqFrames = DEX_MAX_MARKER_FRAMES;
 
-//*
-//* Retrieve the stored CX1 data.
-//*
-
-int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) {
-	
-	OutputDebugString( "Start Retrieval\n" );
-
-	int nFrames; 
 	int frm;
-	int unit;
+	int unit_count;
 	
 	int nChecksumErrors = 0;
 	int nTimeouts = 0;
@@ -189,18 +200,11 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 	int nFailedFrames = 0;
 	int nSuccessfullPackets = 0;
 	
-	//* Find out how many frames worth of data are stored for this device.
-	//* Note that StopAcqusition() should have done this already, but lets be sure.
-	//* Note also that the routine says it gets the number of packets, but I believe
-	//* that this is a misnomer, since it sends 3 packets per slice of data
-	//* (one for each coda unit and one for the combined data).
-	nFrames = cl.getAcqBufferNumPackets( cx1Device );
-	fOutputDebugString( "\nStart retrieval of Marker data (%d frames) .", nFrames );
+	fOutputDebugString( "\nStart retrieval of Marker data (%d frames).\n", nAcqFrames );
 
 	//* Loop through and get them all.
-	for ( frm = 0; frm < nFrames && frm < max_frames; frm++ ) {
+	for ( frm = 0; frm < nAcqFrames; frm++ ) {
 
-		fOutputDebugString( "%08u\tTrying.\n", frm );
 		//* Try to read the packets. Normally they should get here the first try.
 		//* But theoretically, they could get lost or the could get corrupted. 
 		//* So if we get a time out or checksum errors, we should try again.
@@ -212,12 +216,11 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 			}
 			catch(DeviceStatusArray&)
 			{
-			/*... ignore status information - errors will just cause codanet_packet_receive to time out... */
 				OutputDebugString( "Caught error from cl.requestAcqBufferPacket()\n" );
 			}
-			//* We are supposed to get nCoda + 1 per time slice.
-			unit = 0;
-			while ( unit <= nCodas ) {
+			//* We are supposed to get nCoda + 1 packets per request.
+			unit_count = 0;
+			while ( unit_count <= nCodas ) {
 				// Time out means we did not get as many packets as expected.
 				// So request them again for this time slice.
 				if ( stream.receivePacket(packet, 50000) == CODANET_STREAMTIMEOUT ) {
@@ -226,24 +229,42 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 				}
 				if ( !packet.verifyCheckSum() ) {
 					nChecksumErrors++;
+					break;
 				}
-				else if ( decode3D.decode( packet ) ) {
+				else if ( !decode3D.decode( packet ) ) {
 					nUnexpectedPackets++;
+					break;
 				}
 				else {
 					// Process packet.
 					nSuccessfullPackets++;
 					// find number of marker positions available
 					DWORD nMarkers = decode3D.getNumMarkers();
+					if ( nMarkers > DEX_MAX_MARKERS ) {
+						MessageBox( NULL, "How many markers?!?!", "Dexterous", MB_OK );
+						exit( -1 );
+					}
 
-					fOutputDebugString( "%08u\tOK.", frm );
+					int   unit = decode3D.getPage();
+					if ( unit > nCodas ) {
+						MessageBox( NULL, "Which unit?!?!", "Dexterous", MB_OK );
+						exit( -1 );
+					}
 
-					// TODO: Fill the frames[] array.
-
+					recordedMarkerFrames[unit][frm].time = decode3D.getTick() * cl.getDeviceTickSeconds( DEVICEID_CX1 );
+					for ( int mrk = 0; mrk < nMarkers; mrk++ ) {
+						float *pos = decode3D.getPosition( mrk );
+						for ( int i = 0; i < 3; i++ ) recordedMarkerFrames[unit][frm].marker[mrk].position[i] = pos[i];
+						recordedMarkerFrames[unit][frm].marker[mrk].visibility = ( decode3D.getValid( mrk ) != 0 );
+					}
 					// Count the number of packets received for this frame.
-					unit++;
+					// There should be one per unit, plus one for the combined.
+					unit_count++;
 				}
 			}
+			// If we finished the loop normally that means we got all the packets for this frame.
+			// If we got here via one of the break statements, then we should try again.
+			if ( unit_count > nCodas ) break;
 		}
 		if ( retry >= maxRetries ) {
 			nFailedFrames++;
@@ -254,17 +275,45 @@ int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) 
 	if ( nFailedFrames || nTimeouts || nChecksumErrors || nUnexpectedPackets ) {
 		char message[2048];
 		sprintf( message, "Packet Errors:\n\nFrames: %d\nFailed Frames: %d\nTimeouts: %d\nChecksum Errors: %d\nUnexpected Packets: %d",
-			nFrames, nFailedFrames, nTimeouts, nChecksumErrors, nUnexpectedPackets );
+			nAcqFrames, nFailedFrames, nTimeouts, nChecksumErrors, nUnexpectedPackets );
 		MessageBox( NULL, message, "RTnetAcquisition", MB_OK | MB_ICONEXCLAMATION );
 	}
 	else OutputDebugString( "Stop Retrieval\n" );
-	return( nSuccessfullPackets );
-	
+
+	// It appears that the system has to be prepared again for new acquisitions.
+	// That's not documented anywhere, but it seems to be true.
+	// TODO: Verify with Charnwood.
+	OutputDebugString( "OK.\ncl.prepareForAcq() ... " );
+	cl.prepareForAcq();
+	OutputDebugString( "OK.\n" );
+
+}
+
+//*
+//* Retrieve the stored CX1 data.
+//*
+
+int DexRTnetTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit ) {
+	//* Loop through and get them all.
+	for ( int frm = 0; frm < nAcqFrames; frm++ ) {
+		CopyMarkerFrame( frames[frm], recordedMarkerFrames[unit][frm] );
+	}
+	return( nAcqFrames );
 }
 
 
 bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	
+	int unit_count;
+	
+	int nChecksumErrors = 0;
+	int nTimeouts = 0;
+	int nUnexpectedPackets = 0;
+	int nFailedFrames = 0;
+	int nSuccessfullPackets = 0;
+
+	bool status = false;
+
 	// If the CODA is already acquiring, just read the latest data.
 	// We assume that it is in buffered mode, so we have to ask for the latest frame.
 	if ( cl.isAcqInProgress() ) {
@@ -280,9 +329,7 @@ bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 			OutputDebugString( "Caught (DeviceStatusArray& array)\n" );
 			exit( -1 );
 		}
-		
 	}
-	
 	// If not already acquiring, then request acquisition of a single frame.
 	else {
 		// request a frame from all devices
@@ -298,66 +345,85 @@ bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		}
 	}
 	
-	//* Process packets.
-	//* Charnwood version makes no assumptions about how many devices, and therefore how many packets
-	//*  will arrive and need to be processed. So they try for packets until they get a timeout.
-	//* In my version we assume that there will be 1 packets from each CX1, and one combined.
-	//* When all have been received, we can move on without waiting any longer.
-	//* This should allow rapid responses to movements of the markers.
-	//* Be careful, though, because if the loop runs fast enough you will probably get multiple 
-	//*  packets from the same clock tick.
-	
-	if ( 1 ) {
-		
-		int received_cx1 = 0;
-		do {
-			// receive data - wait for max 50ms
-			if ( stream.receivePacket(packet, 50000) == CODANET_STREAMTIMEOUT )
-			{
-				//* A timeout means that we didn't get one of the packets that we expected.
-				return( false );
-				break;
+	// Set a counter to count the number of packets that we get from the request.
+	// We are supposed to get nCoda + 1 packets per request.
+	unit_count = 0;
+	while ( unit_count <= nCodas ) {
+
+		// Time out means we did not get as many packets as expected.
+		// So request them again for this time slice.
+		if ( stream.receivePacket(packet, 50000) == CODANET_STREAMTIMEOUT ) {
+			nTimeouts++;
+			break;
+		}
+
+		// Check if the packet is corrupted.
+		if ( !packet.verifyCheckSum() ) {
+			nChecksumErrors++;
+			break;
+		}
+
+		// Check if it is a 3D marker packet. It could conceivably  be a packet
+		// from the ADC device, although we don't plan to use the CODA ADC at the moment.
+		else if ( !decode3D.decode( packet ) ) {
+			nUnexpectedPackets++;
+			break;
+		}
+
+		// If we get this far, it is a valid marker packet.
+		else {
+			// Count the total number of valid packets..
+			nSuccessfullPackets++;
+			// find number of markers included in the packet.
+			DWORD n_markers = decode3D.getNumMarkers();
+
+			// Single shots can return 56 marker positions, even if we are using
+			// 200 Hz / 28 markers for continuous acquisition. Stay within bounds.
+			if ( n_markers > DEX_MAX_MARKERS ) {
+				n_markers = DEX_MAX_MARKERS;
 			}
 			
-			// check result
-			if ( packet.verifyCheckSum() )
-			{
-				
-				// decode & print results
-				if ( decode3D.decode(packet) )
-				{
-					// find number of marker positions available
-					DWORD nMarkers = decode3D.getNumMarkers();
-					
-					// loop through one or more markers (set maxDisplayMarkers to do more than one)
-					for (DWORD imarker = 0; imarker < nMarkers; imarker++)
-					{
-						float   *pos = decode3D.getPosition(imarker);
-						BYTE    valid = decode3D.getValid(imarker);
-						BYTE    *intensity = decode3D.getIntensity(imarker);
-						DWORD   tick = decode3D.getTick();
-						
-						// TODO: Do something with the data.
-						
-					}
-					//* Signal that we got the CX1 packet.
-					received_cx1++;
+			// The 'page' number is used to say which CODA unit the packet belongs to.
+			// TODO: Double check that page 0 is the combined data.
+			int   unit = decode3D.getPage();
+			if ( unit > nCodas ) {
+				// I don't believe that we should ever get here, but who knows?
+				MessageBox( NULL, "Which unit?!?!", "Dexterous", MB_OK );
+				exit( -1 );
+			}
+			
+			// For realtime monitoring we take only the combined data.
+			if ( unit == 0 ) {
+
+				// Compute the time from the tick counter in the packet and the tick duration.
+				// Actually, I am not sure if the tick is defined on a single shot acquistion.
+				frame.time = decode3D.getTick() * cl.getDeviceTickSeconds( DEVICEID_CX1 );
+
+				// Get the marker data from the CODA packet.
+				for ( int mrk = 0; mrk < n_markers; mrk++ ) {
+					float *pos = decode3D.getPosition( mrk );
+					for ( int i = 0; i < 3; i++ ) frame.marker[mrk].position[i] = pos[i];
+					frame.marker[mrk].visibility = ( decode3D.getValid( mrk ) != 0 );
 				}
+
+				// If the packet contains fewer markers than the nominal number for
+				//  the apparatus, set the other markers to be out of sight..
+				for ( int mrk = mrk; mrk < nMarkers; mrk++ ) {
+					float *pos = decode3D.getPosition( mrk );
+					for ( int i = 0; i < 3; i++ ) frame.marker[mrk].position[i] =INVISIBLE;
+					frame.marker[mrk].visibility = false;
+				}
+
+				// Signal that we got the data that we were seeking.
+				status = true;
 			}
-			else
-			{
-				// Signal a checksum  or packet type error.
-				// TODO: Decide what to do if it happens.
-				// Here we just ignore and continue.
-				fOutputDebugString( "Checksum failed!!!" );
-			}
-			//* If expected packets received, move on.
-		} while ( received_cx1 < 1); 
-		// Flush any other packets that might come in.
-		while ( stream.receivePacket(packet, 50000) != CODANET_STREAMTIMEOUT ); 
+			// Count the number of packets received for this frame.
+			// There should be one per unit, plus one for the combined.
+			unit_count++;
+		}
 	}
-	
-	return( true );
+
+	return( status );
 	
 }
 

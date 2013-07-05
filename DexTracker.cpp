@@ -27,7 +27,7 @@ void DexTracker::Quit() {}
 
 void DexTracker::StartAcquisition( float max_duration ) {}
 void DexTracker::StopAcquisition( void ) {}
-int  DexTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames ) { 
+int  DexTracker::RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit ) { 
 	return( 0 );
 }
 bool  DexTracker::GetCurrentMarkerFrame( CodaFrame &frame ) { 

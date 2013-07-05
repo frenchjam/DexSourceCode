@@ -56,12 +56,10 @@ class DexTracker : public VectorsMixin {
 		virtual void	StopAcquisition( void );
 		virtual bool	CheckAcquisitionOverrun( void );
 
-		virtual int		RetrieveMarkerFrames( CodaFrame frames[], int max_frames );
+		virtual int		RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit = 0 );
 		virtual bool	GetCurrentMarkerFrame( CodaFrame &frame );
 		virtual bool	GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit );
 		virtual bool	GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit );
-
-		CodaFrame		recordedMarkerFrames[DEX_MAX_MARKER_FRAMES];
 
 		virtual double	GetSamplePeriod( void );
 		virtual int		GetNumberOfCodas( void );
@@ -135,7 +133,7 @@ private:
 	unsigned int serverPort;
 
 	// Marker tracker device.
-	int cx1Device;	// Should be the CX1
+	const int cx1Device;	// Should be the CX1
 
 	// How many tries to get a data packet before giving up.
 	int maxRetries;
@@ -178,6 +176,8 @@ private:
 	DataStream		stream;
 	CODANET_HWCONFIG_DEVICEENABLE devices;
 
+	CodaFrame		recordedMarkerFrames[DEX_MAX_CODAS][DEX_MAX_MARKER_FRAMES];
+
 protected:
 
 public:
@@ -191,7 +191,8 @@ public:
 		// Request marker data from each Coda unit separately, and the combined data.
 		packet_mode( CODANET_CODAPACKETMODE_SEPARATE_AND_COMBINED_COORD ),	
 		// Use the first Coda configuration in the list.
-		codaConfig(1), 
+		// This has to be set up as a cx1 only configuration on the server.
+		codaConfig(0), 
 		// A Coda RTnet configuration can include cx1 devices, ADC, force platforms, etc.
 		// This is just a constant specifying the cx1 device.
 		cx1Device(1),
@@ -208,7 +209,7 @@ public:
 	bool GetAcquisitionState( void );
 	int  GetNumberOfCodas( void );
 
-	int		RetrieveMarkerFrames( CodaFrame frames[], int max_frames );
+	int		RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit );
 	bool	GetCurrentMarkerFrame( CodaFrame &frame );
 
 	// Need to add the following.
@@ -232,6 +233,9 @@ private:
 	HWND		dlg;
 
 	FILE		*fp;
+
+	CodaFrame	polledMarkerFrames[DEX_MAX_MARKER_FRAMES];
+
 	
 protected:
 
@@ -250,7 +254,7 @@ public:
 	bool GetAcquisitionState( void );
 	bool CheckOverrun( void );
 
-	int	 RetrieveMarkerFrames( CodaFrame frames[], int max_frames );
+	int	 RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit );
 	bool GetCurrentMarkerFrame( CodaFrame &frame );
 	bool GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit );
 	bool GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit );
