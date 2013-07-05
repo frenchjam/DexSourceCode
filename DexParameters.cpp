@@ -66,6 +66,17 @@ const Quaternion supineNullOrientation = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) };
 // manipulandum from acquired marker positions, and by DexMouseTracker to simulate
 // where each marker is according to the position of the mouse.
 
+#ifdef GLM_MANIPULANDUM
+Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] = 
+{
+	{-10.0,  35.0, 15.0}, 
+	{ 10.0,  35.0, 15.0},  
+	{ 10.0, -35.0, 15.0}, 
+	{-10.0, -35.0, 15.0}
+};
+int nManipulandumMarkers = MANIPULANDUM_MARKERS;
+int ManipulandumMarkerID[MANIPULANDUM_MARKERS] = {0, 1, 2, 3};
+#else
 Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] = 
 {
 	{1.0, 0.0, 0.0}, 
@@ -79,6 +90,7 @@ Vector3		ManipulandumBody[MANIPULANDUM_MARKERS] =
 };
 int nManipulandumMarkers = MANIPULANDUM_MARKERS;
 int ManipulandumMarkerID[MANIPULANDUM_MARKERS] = {0, 1, 2, 3, 4, 5, 6, 7};
+#endif
 
 // The wrist markers also constitute a rigid body. 
 // We can reconstruct the position and orientation of the wrist in the same
@@ -119,7 +131,7 @@ Vector3		TargetFrameBody[TARGET_FRAME_MARKERS] =
 
 };
 int nFrameMarkers = TARGET_FRAME_MARKERS;
-int FrameMarkerID[TARGET_FRAME_MARKERS] = {16, 17, 18, 19};
+int FrameMarkerID[TARGET_FRAME_MARKERS] = {4, 5, 6, 7};
 
 
 /***************************************************************************/

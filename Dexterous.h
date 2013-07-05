@@ -190,8 +190,14 @@ typedef struct {
 // where each marker is according to the position of the mouse. Because they are shared,
 // I have made them global, rather than incorporating the model into Apparatus.
 
+#define GLM_MANIPULANDUM
 
+#ifdef GLM_MANIPULANDUM
+#define			MANIPULANDUM_MARKERS 4
+#else
 #define			MANIPULANDUM_MARKERS 8
+#endif
+
 extern Vector3	ManipulandumBody[MANIPULANDUM_MARKERS];
 extern int		nManipulandumMarkers;
 extern int		ManipulandumMarkerID[MANIPULANDUM_MARKERS];
@@ -210,10 +216,10 @@ extern int		FrameMarkerID[TARGET_FRAME_MARKERS];
 // I am going to avoid the terms 'left', 'right', 'top' and 'bottom'
 //  because this leads to confusion between the subject left and right
 //  or left and right from the viewpoint of the CODAs.
-#define DEX_NEGATIVE_BOX_MARKER	16
-#define DEX_POSITIVE_BOX_MARKER	17
-#define DEX_NEGATIVE_BAR_MARKER	18
-#define DEX_POSITIVE_BAR_MARKER	19
+#define DEX_NEGATIVE_BOX_MARKER	4
+#define DEX_POSITIVE_BOX_MARKER	5
+#define DEX_NEGATIVE_BAR_MARKER	6
+#define DEX_POSITIVE_BAR_MARKER	7	
 
 // A structure to hold the position and orientation of the target bar,
 //  and the position of each target at the configuration.

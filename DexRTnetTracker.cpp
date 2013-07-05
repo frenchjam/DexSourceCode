@@ -31,6 +31,7 @@
 #include "codaRTNetProtocolCPP/PacketDecode3DResult.h"
 #include "codaRTNetProtocolCPP/PacketDecode3DResultExt.h"
 #include "codaRTNetProtocolCPP/PacketDecodeADC16.h"
+#include "codaRTNetProtocolCPP/DeviceInfoUnitCoordSystem.h"
 
 #define DEVICEID_ADC DEVICEID_GS16AIO
 
@@ -408,7 +409,7 @@ bool DexRTnetTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 
 				// If the packet contains fewer markers than the nominal number for
 				//  the apparatus, set the other markers to be out of sight..
-				for ( int mrk = mrk; mrk < nMarkers; mrk++ ) {
+				for ( mrk = mrk; mrk < nMarkers; mrk++ ) {
 					float *pos = decode3D.getPosition( mrk );
 					for ( int i = 0; i < 3; i++ ) frame.marker[mrk].position[i] =INVISIBLE;
 					frame.marker[mrk].visibility = false;
@@ -437,6 +438,20 @@ bool DexRTnetTracker::GetAcquisitionState( void ) {
 int DexRTnetTracker::GetNumberOfCodas( void ) {
 	return( nCodas );
 }
+
+int  DexRTnetTracker::PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive ) {
+	DeviceOptionsAlignment align( origin + 1, x_negative + 1, x_positive + 1, xy_negative + 1, xy_positive + 1);
+	cl.setDeviceOptions( align );
+
+	// Show what are the alignment transformations before doing the alignment.
+	DeviceInfoUnitCoordSystem pre_xforms;
+	cl.getDeviceInfo( pre_xforms );
+
+
+	return( NORMAL_EXIT );
+}
+
+
 
 /****************************************************************************************/
 

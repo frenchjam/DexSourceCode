@@ -192,7 +192,7 @@ public:
 		packet_mode( CODANET_CODAPACKETMODE_SEPARATE_AND_COMBINED_COORD ),	
 		// Use the first Coda configuration in the list.
 		// This has to be set up as a cx1 only configuration on the server.
-		codaConfig(0), 
+		codaConfig(1), 
 		// A Coda RTnet configuration can include cx1 devices, ADC, force platforms, etc.
 		// This is just a constant specifying the cx1 device.
 		cx1Device(1),
@@ -214,7 +214,7 @@ public:
 
 	// Need to add the following.
 	// void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
-	// int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
+	int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
 
 };
 

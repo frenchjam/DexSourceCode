@@ -51,13 +51,13 @@ double copWaitTime = 1.0;					// Gives time to achieve the centered grip.
 
 // A bit mask describing which markers are used to perform the alignment check.
 // This should be set to correspond to the 4 markers on the reference frame.
-unsigned long alignmentMarkerMask = 0x000f0000;
+unsigned long alignmentMarkerMask = 0x000000f0;
 
 // A bit mask describing which markers are used to perform the field-of-view check.
 // This includes the manipulandum and the reference frame markers, with the 
 //  assumption that the manipulandum is placed on the back of the chair in a 
 //  visible position during the alignment procedure.
-unsigned long fovMarkerMask = 0x000f00ff;
+unsigned long fovMarkerMask = 0x000000f0;
 
 /*********************************************************************************/
 
@@ -581,6 +581,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Create an apparatus by piecing together the components.
 	apparatus = new DexApparatus( tracker, targets, sounds, adc );
 	apparatus->Initialize();
+//	apparatus->PerformTrackerAlignment( NULL );
 
 	// Send information about the actual configuration to the ground.
 	apparatus->SignalConfiguration();
