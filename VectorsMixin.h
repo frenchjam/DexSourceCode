@@ -22,8 +22,15 @@ typedef double Matrix3x3[3][3];
 
 // I am also putting here support for calculations on 3D rigid bodies.
 // It should probably be a separate class, but I will deal with that later.
-
 #define MAX_RIGID_BODY_MARKERS	256
+
+// The algorithm that is used to compute the best-fit transformation is sensitive
+// to the fact that the visible markers may be co-planar. There is a conditioning 
+// number, which happens to be the determinant of the rigid body's model matrix,
+// that can be used to detect when there is this problem so that it can be recomputed 
+// another way. This constant determines the threshold for what is considered to be 
+// ill-conditioned. 
+#define ILL_CONDITIONED_THRESHOLD 0.001
 
 class VectorsMixin {
 
@@ -90,7 +97,7 @@ public:
 	void MultiplyVector( Vector3f result, Vector3 v, const Matrix3x3 m );
 
 	void CrossVectors( Matrix3x3 result, const Vector3 left[], const Vector3 right[], int rows );
-	void BestFitTransformation( Matrix3x3 result, const Vector3 input[], const Vector3 output[], int rows );
+	double BestFitTransformation( Matrix3x3 result, const Vector3 input[], const Vector3 output[], int rows );
 		
 	void SetQuaternion( Quaternion result, double radians, const Vector3 axis );
 	void SetQuaterniond( Quaternion result, double degrees, const Vector3 axis );
