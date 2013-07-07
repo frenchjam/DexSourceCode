@@ -281,7 +281,7 @@ void VectorsMixin::CrossVectors( Matrix3x3 result, const Vector3 left[], const V
 	}
 }
 
-double VectorsMixin::BestFitTransformation( Matrix3x3 result, const Vector3 input[], const Vector3 output[], int rows ) {
+void VectorsMixin::BestFitTransformation( Matrix3x3 result, const Vector3 input[], const Vector3 output[], int rows ) {
 
 	Matrix3x3	left;
 	Matrix3x3	right;
@@ -292,7 +292,6 @@ double VectorsMixin::BestFitTransformation( Matrix3x3 result, const Vector3 inpu
 	CrossVectors( left, input, input, rows );
 	InvertMatrix( left_inverse, left );
 	MultiplyMatrices( result, left_inverse, right );
-	return( Determinant( left ) );
 
 }
 
@@ -438,8 +437,6 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 	Matrix3x3	model_local, actual_local;
 	Matrix3x3	best, exact;
 
-	double determinant;
-
 	int i;
 
 	if (N > MAX_RIGID_BODY_MARKERS) N = MAX_RIGID_BODY_MARKERS;
@@ -476,17 +473,14 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 		}
 
 		// Compute the best fit transformation between the two.
-		determinant = BestFitTransformation( best, model_delta, actual_delta, N );
+		BestFitTransformation( best, model_delta, actual_delta, N );
 		MatrixToQuaternion( orientation, best );
 
 	}
 
 	// If we have only 3 markers, then the system is exactly constrained for 
 	// a rotation. We compute the matrix that maps model to actual.
-	// If the determinant from the BestFitTransformation is too small, it means that the
-	//  model markers are co-planar and the results is ill-conditioned. In this case
-	//  we recompute using only 3 markers as well.
-	if ( N == 3 || determinant < ILL_CONDITIONED_THRESHOLD ) {
+	else if ( N == 3 ) {
 
 		Vector3 temp;
 		Matrix3x3 inverse;
@@ -531,6 +525,9 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 
 	}
 
+	if ( N == 8 ) {
+		i = i;
+	}
 	// To compute the position (displacement) we first calculate the model 
 	// marker positions at the actual orientation, then we compute the 
 	// average difference between rotated model and actual to get the displacement.
