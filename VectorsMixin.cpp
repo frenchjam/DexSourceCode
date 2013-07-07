@@ -434,6 +434,7 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 
 	Vector3		model_centroid, actual_centroid;
 	Vector3		model_delta[MAX_RIGID_BODY_MARKERS], actual_delta[MAX_RIGID_BODY_MARKERS];
+	Vector3		model_center_of_rotation, actual_center_of_rotation;
 	Matrix3x3	model_local, actual_local;
 	Matrix3x3	best, exact;
 
@@ -470,6 +471,23 @@ bool VectorsMixin::ComputeRigidBodyPose( Vector3 position, Quaternion orientatio
 		for ( i = 0; i < N; i++ ) {
 			SubtractVectors( model_delta[i], model[i], model_centroid );
 			SubtractVectors( actual_delta[i], actual[i], actual_centroid );
+		}
+
+		// If the vectors are co-planar, we can get a degenerate solution.
+		// The following makes sure that the center-of-rotation is out of
+		// that plane, avoiding the problem.
+
+		// Move perpendicular to the plane defined by the first two deltas.
+		ComputeCrossProduct( model_center_of_rotation, model_delta[0], model_delta[1] );
+		// Make the displacement off the plane about the same magnitude as the other deltas from the centroid.
+		ScaleVector( model_center_of_rotation, model_center_of_rotation, VectorNorm( model_delta[0] ) / VectorNorm( model_delta[0] ) / VectorNorm( model_delta[01] ) );
+		// Do the same for the actual, measured marker positions.
+		ComputeCrossProduct( actual_center_of_rotation, actual_delta[0], actual_delta[1] );
+		// The 'model_delta[0] in the next line is not a mistake. I want the center of rotation to have precisely the same length in both cases.
+		ScaleVector( actual_center_of_rotation, actual_center_of_rotation, VectorNorm( model_delta[0] ) / VectorNorm( actual_delta[0] ) / VectorNorm( actual_delta[01] ) );
+		for ( i = 0; i < N; i++ ) {
+			SubtractVectors( model_delta[i], model_delta[i], model_center_of_rotation );
+			SubtractVectors( actual_delta[i], actual_delta[i], actual_center_of_rotation );
 		}
 
 		// Compute the best fit transformation between the two.
