@@ -34,10 +34,8 @@ bool  DexTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	return( false );
 }
 bool  DexTracker::GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit ) { 
-	return( false );
-}
-bool  DexTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit ) { 
-	return( false );
+	// If the tracker has no concept of separate units, just get the data from the default unit.
+	return( GetCurrentMarkerFrame( frame ) );
 }
 double DexTracker::GetSamplePeriod( void ) {
 	return( samplePeriod );
@@ -68,7 +66,8 @@ void DexTracker::GetUnitPlacement( int unit, Vector3 &pos, Quaternion &ori ) {
 
 	// I have to check: Is the position equal to its offset, 
 	//  or the negative of the offset?
-	ScaleVector( pos, offset, -1.0 );
+	// ScaleVector( pos, offset, -1.0 );
+	CopyVector( pos, offset );
 	// I want to be sure that the rotation matrix is really a rotation matrix.
 	// This means that it must be orthonormal.
 	// In fact, I am not convinced that CODA guarantees an orthonormal matrix.
@@ -96,3 +95,39 @@ void DexTracker::CopyMarkerFrame( CodaFrame &destination, CodaFrame &source ) {
 	}
 }
 
+/**************************************************************************************/
+
+// Get the latest frame of marker data from the specified unit.
+// Marker positions are expressed in the intrinsic reference frame of the unit.
+
+bool DexTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &iframe, int unit ) {
+
+	CodaFrame	frame;
+	int			status;
+
+	Vector3		offset;
+	Matrix3x3	rotation;
+	Matrix3x3	inverse;
+	Vector3		delta;
+
+	// Retrieve the offset and rotation matrix from the Coda for this unit.
+	GetUnitTransform( unit, offset, rotation );
+	// Inverse of a rotation matrix is just its transpose.
+	TransposeMatrix( inverse, rotation );
+
+	// Get the current frame in aligned coordinates.
+	status = GetCurrentMarkerFrameUnit( frame, unit );
+	status = GetCurrentMarkerFrameUnit( frame, unit );
+	// I'm not sure what could go wrong, but signal if it does.
+	if ( !status ) return( false );
+	// Compute the position of each maker in intrinsic coordinates.
+	for ( int mrk = 0; mrk < nMarkers; mrk++ ) {
+		iframe.marker[mrk].visibility = frame.marker[mrk].visibility;
+		if ( frame.marker[mrk].visibility ) {
+			SubtractVectors( delta, frame.marker[mrk].position, offset );
+			MultiplyVector( iframe.marker[mrk].position, delta, inverse );
+		}
+	}
+
+	return( true );
+}

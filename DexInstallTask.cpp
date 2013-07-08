@@ -31,9 +31,11 @@
 // To be sure to see the markers throughout the trial the CODAs must be at a
 //  certain distance and orientation. These parameters determine the volume within
 //  which we expect to see the referencce markers.
+// Remember, these are in the intrinsic reference frame of the CODA unit, where
+//  X is along the length of the bar, Y is the distance from the bar and Z is 'above' the bar.
 double fov_min_x = -1000.0, fov_max_x = 1000.0;
-double fov_min_y = -1000.0, fov_max_y = 1000.0;
-double fov_min_z =  2000.0, fov_max_z = 4000.0;
+double fov_min_y =  2000.0, fov_max_y = 4000.0;
+double fov_min_z = -1000.0, fov_max_z = 1000.0;
 
 double codaUnitOrientationTolerance = 30.0;		// Allowable rotation wrt expected orientation, in degrees.
 double codaUnitPositionTolerance = 500.0;		// Allowable displacement wrt expected position, in mm.
@@ -62,8 +64,10 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	if ( apparatus->nCodas > 1 ) {
+		status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	}
 
 	// Perform the alignment based on those markers.
 	status = apparatus->PerformTrackerAlignment();
@@ -75,11 +79,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 										expected_orientation[0], codaUnitOrientationTolerance, 
 										"Placement error - Coda Unit 0." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	status = apparatus->CheckTrackerPlacement( 1, 
-										expected_position[1], codaUnitPositionTolerance, 
-										expected_orientation[1], codaUnitOrientationTolerance, 
-										"Placement error - Coda Unit 1." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	if ( apparatus->nCodas > 1 ) {
+		status = apparatus->CheckTrackerPlacement( 1, 
+											expected_position[1], codaUnitPositionTolerance, 
+											expected_orientation[1], codaUnitOrientationTolerance, 
+											"Placement error - Coda Unit 1." );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	}
 
 	// Check that the tracker is still aligned.
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );

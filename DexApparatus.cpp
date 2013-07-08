@@ -255,7 +255,8 @@ int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 	while ( 1) {
 
 		bool out = false;
-		tracker->GetCurrentMarkerFrameIntrinsic( frame, unit );
+		// May need to wake up MDB, so sample twice. Second one should be good.
+		for ( int i = 1; i < 2; i++ ) tracker->GetCurrentMarkerFrameIntrinsic( frame, unit );
 		sprintf( info, "\n\nUnit: %d\n", unit );
 		for ( mrk = 0, bit = 0x01; mrk < nMarkers; mrk++, bit = bit << 1 ) {
 			if ( marker_mask & bit ) {
@@ -373,15 +374,10 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 int DexApparatus::PerformTrackerAlignment( const char *msg ) {
 	int error_code;
 	// Ask the tracker to perform the alignment.
-	if ( error_code = tracker->PerformAlignment( negativeBoxMarker, 
+	error_code = tracker->PerformAlignment( negativeBoxMarker, 
 													negativeBoxMarker, positiveBoxMarker, 
-													negativeBarMarker, positiveBarMarker ) ) {
-		// If there is an error, report it to the user.
-		// We may need to add information to the message, depending
-		// on what the error was.
-		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, msg ) );
-	}
-	else return( NORMAL_EXIT );
+													negativeBarMarker, positiveBarMarker );
+	return( error_code );
 }
 
 /***************************************************************************/

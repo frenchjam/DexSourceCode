@@ -440,15 +440,48 @@ int DexRTnetTracker::GetNumberOfCodas( void ) {
 }
 
 int  DexRTnetTracker::PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive ) {
-	DeviceOptionsAlignment align( origin + 1, x_negative + 1, x_positive + 1, xy_negative + 1, xy_positive + 1);
-	cl.setDeviceOptions( align );
 
-	// Show what are the alignment transformations before doing the alignment.
+	// Get what are the alignment transformations before doing the alignment.
+	// This is just for debugging. Set a breakpoint to see the results.
 	DeviceInfoUnitCoordSystem pre_xforms;
 	cl.getDeviceInfo( pre_xforms );
 
+	DeviceOptionsAlignment align( origin + 1, x_negative + 1, x_positive + 1, xy_negative + 1, xy_positive + 1);
+	cl.setDeviceOptions( align );
 
-	return( NORMAL_EXIT );
+	// Show what are the alignment transformations after doing the alignment.
+	// This is just for debugging. Set a breakpoint to see the results.
+	DeviceInfoUnitCoordSystem post_xforms;
+	cl.getDeviceInfo( post_xforms );
+
+	// retrieve information
+	DeviceInfoAlignment info;
+	cl.getDeviceInfo(info);
+
+	// print alignment diagnostics
+	DWORD marker_id_array[5] = { origin + 1, x_negative + 1, x_positive + 1, xy_negative + 1, xy_positive + 1 };
+	int response = print_alignment_status(marker_id_array, info);
+
+	if ( info.dev.dwStatus == 0 ) return( NORMAL_EXIT );
+	else return( ERROR_EXIT );
+}
+
+/*********************************************************************************/
+
+void DexRTnetTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation ) {
+
+	DeviceInfoUnitCoordSystem coord;
+	cl.getDeviceInfo( coord );
+
+	CopyVector( offset, coord.dev.Rt[0].t );
+	for ( int i = 0; i < 3; i++ ) {
+		for ( int j = 0; j < 3; j++ ) {
+			// If this seems backwards to you, it's because RTnet uses column vectors
+			// and I use row vectors. So when RTnet does M * v, I need to do v * M'.
+			rotation[i][j] = coord.dev.Rt[0].R[j*3+i];
+		}
+	}
+
 }
 
 
@@ -537,38 +570,42 @@ void DexRTnetTracker::print_network_error(const NetworkException& exNet)
 // Helper function to show alignment status
 // @param marker_id_array 5-element array containing one-based marker identities for alignment markers
 // @param info Alignment info retrieved from server
-void DexRTnetTracker::print_alignment_status(const DWORD* marker_id_array,  const DeviceInfoAlignment& info)
+int DexRTnetTracker::print_alignment_status(const DWORD* marker_id_array,  const DeviceInfoAlignment& info)
 {
+
+	char message[10240] = "";
+	char line[1024];
 	// print alignment status value
-	fprintf(stderr, "Alignment result: ");
+	strcpy( message, "Alignment result: ");
 	switch (info.dev.dwStatus)
 	{
 	case 0:
-		fOutputDebugString( "success");
+		strcat( message, "success");
 		break;
 	case CODANET_ALIGNMENTERROR_SYSTEM:
-		fOutputDebugString( "system error");
+		strcat( message,  "system error");
 		break;
 	case CODANET_ALIGNMENTERROR_ALREADY_ACQUIRING:
-		fOutputDebugString( "already acquiring (is another program running?");
+		strcat( message,  "already acquiring (is another program running?");
 		break;
 	case CODANET_ALIGNMENTERROR_OCCLUSIONS:
-		fOutputDebugString( "occlusions");
+		strcat( message,  "occlusions");
 		break;
 	case CODANET_ALIGNMENTERROR_XTOOCLOSE:
-		fOutputDebugString( "x-axis markers too close");
+		strcat( message,  "x-axis markers too close");
 		break;
 	case CODANET_ALIGNMENTERROR_XYTOOCLOSE:
-		fOutputDebugString( "xy-plane markers too close");
+		strcat( message,  "xy-plane markers too close");
 		break;
 	case CODANET_ALIGNMENTERROR_NOTPERP:
-		fOutputDebugString( "marked axes not sufficiently perpendicular");
+		strcat( message,  "marked axes not sufficiently perpendicular");
 		break;
 	default:
-		fOutputDebugString( "unknown alignment status error code %d", info.dev.dwStatus);
+		sprintf( line, "unknown alignment status error code %d", info.dev.dwStatus);
+		strcat( message, line );
 		break;
 	}
-	fOutputDebugString( "\n");
+	strcat( message, "\n");
 	
 	// number of CX1 units
 	DWORD nunits = info.dev.dwNumUnits;
@@ -580,7 +617,8 @@ void DexRTnetTracker::print_alignment_status(const DWORD* marker_id_array,  cons
 	for (DWORD icoda = 0; icoda < nunits; icoda++)
 	{
 		// index of Codamotion CX1 unit
-		fOutputDebugString( "Coda %d\n", icoda+1);
+		sprintf( line, "Coda %d\n", icoda+1);
+		strcat( message, line );
 		
 		// data from each marker
 		for (DWORD imarker = 0; imarker < 5; imarker++)
@@ -594,41 +632,42 @@ void DexRTnetTracker::print_alignment_status(const DWORD* marker_id_array,  cons
 				switch (imarker)
 				{
 				case 0:
-					fOutputDebugString( "Org");
+					strcat( message, "Org");
 					break;
 				case 1:
-					fOutputDebugString(  "X0 ");
+					strcat( message,  "X0  ");
 					break;
 				case 2:
-					fOutputDebugString( "X1 ");
+					strcat( message, "X1  ");
 					break;
 				case 3:
-					fOutputDebugString( "XY0");
+					strcat( message, "XY0");
 					break;
 				case 4:
-					fOutputDebugString( "XY1");
+					strcat( message, "XY1");
 					break;
 				}
 				
 				// print marker identity
-				fOutputDebugString( " (Marker %02d) ", marker_identity);
+				sprintf( line, " (Marker %02d) ", marker_identity);
+				strcat( message, line );
 				
 				// camera letter for each coda camera
 				switch (icam)
 				{
 				case 0:
-					fOutputDebugString( "A");
+					strcat( message, "A");
 					break;
 				case 1:
-					fOutputDebugString( "B");
+					strcat( message, "B");
 					break;
 				case 2:
-					fOutputDebugString( "C");
+					strcat( message, "C");
 					break;
 				}
 				
 				// space
-				fOutputDebugString( ": ");
+				strcat( message, ": ");
 				
 				// print visibility graph for frames of data
 				// show a 1 for visible and _ for occluded
@@ -637,16 +676,22 @@ void DexRTnetTracker::print_alignment_status(const DWORD* marker_id_array,  cons
 				{
 					BYTE flag = info.dev.camera_flag[3*nframes*5*icoda + 3*nframes*imarker + 3*iframe + icam];
 					if (flag <= 10)
-						fOutputDebugString( "_");
+						strcat( message, "-");
 					else
-						fOutputDebugString( "1");
+						strcat( message, "1");
 				}
 				
 				// new line
-				fOutputDebugString( "\n");
+				strcat( message, "\n");
 			}
 		}
 	}
+	if ( info.dev.dwStatus ) {
+		int response = MessageBox( NULL, message, "Coda RTnet Alignment", MB_ABORTRETRYIGNORE );
+		return( response );
+	}
+	else return( NORMAL_EXIT );
+
 }
 
 
