@@ -218,8 +218,8 @@ extern int		FrameMarkerID[TARGET_FRAME_MARKERS];
 //  or left and right from the viewpoint of the CODAs.
 #define DEX_NEGATIVE_BOX_MARKER	4
 #define DEX_POSITIVE_BOX_MARKER	5
-#define DEX_NEGATIVE_BAR_MARKER	6
-#define DEX_POSITIVE_BAR_MARKER	7	
+#define DEX_NEGATIVE_BAR_MARKER	5
+#define DEX_POSITIVE_BAR_MARKER	6	
 
 // A structure to hold the position and orientation of the target bar,
 //  and the position of each target at the configuration.
