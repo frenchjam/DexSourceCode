@@ -148,7 +148,7 @@ private:
 	void print_devicestatusarray_errors(const DeviceStatusArray& status);
 
 	// Helper function to print system alignment status
-	void print_alignment_status(const DWORD* marker_id_array, const DeviceInfoAlignment& info);
+	int print_alignment_status(const DWORD* marker_id_array, const DeviceInfoAlignment& info);
 
 	//* Generic data packet
 	RTNetworkPacket packet;
@@ -192,7 +192,7 @@ public:
 		packet_mode( CODANET_CODAPACKETMODE_SEPARATE_AND_COMBINED_COORD ),	
 		// Use the first Coda configuration in the list.
 		// This has to be set up as a cx1 only configuration on the server.
-		codaConfig(1), 
+		codaConfig(0), 
 		// A Coda RTnet configuration can include cx1 devices, ADC, force platforms, etc.
 		// This is just a constant specifying the cx1 device.
 		cx1Device(1),
@@ -213,7 +213,7 @@ public:
 	bool	GetCurrentMarkerFrame( CodaFrame &frame );
 
 	// Need to add the following.
-	// void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
+	void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
 	int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
 
 };
@@ -257,7 +257,6 @@ public:
 	int	 RetrieveMarkerFrames( CodaFrame frames[], int max_frames, int unit );
 	bool GetCurrentMarkerFrame( CodaFrame &frame );
 	bool GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit );
-	bool GetCurrentMarkerFrameIntrinsic( CodaFrame &frame, int unit );
 
 	void GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation );
 	int  PerformAlignment( int origin, int x_negative, int x_positive, int xy_negative, int xy_positive );
