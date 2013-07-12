@@ -28,9 +28,9 @@
 /*********************************************************************************/
 
 // Oscillation trial parameters.
-int oscillationUpperTarget = 9;						// Targets showing desired amplitude of cyclic movement.
-int oscillationLowerTarget = 3;
-int oscillationCenterTarget = 6;
+int oscillationUpperTarget = 3;						// Targets showing desired amplitude of cyclic movement.
+int oscillationLowerTarget = 7;
+int oscillationCenterTarget = 5;
 double oscillationTime = 10.0;
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double oscillationMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
@@ -63,6 +63,15 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Verify that it is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, TappingUnknown );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Instruct subject to pick up the manipulandum
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Check that the grip is properly centered.
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Grip not centered or not in hand." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Tell the subject which configuration should be used.

@@ -27,9 +27,9 @@
 
 
 // Targeted trial parameters;
-int delaySequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
+int delaySequence[] = { 1, 1, 2, 3, 1, 1, 2, 3, 1 };	// Delays between the discrete movements.
 int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
-int discreteTargets[2] = { 1, 9};
+int discreteTargets[2] = { 3, 7};
 
 int discreteFalseStartTolerance = 5;
 double discreteFalseStartThreshold = 1.0;
