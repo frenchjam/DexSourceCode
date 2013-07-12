@@ -943,7 +943,6 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 					timeout, ( manipulandum_visible ? "yes" : "no" ), 
 					manipulandum_orientation[X], manipulandum_orientation[Y],
 					manipulandum_orientation[Z], manipulandum_orientation[M],
-					
 					misorientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
