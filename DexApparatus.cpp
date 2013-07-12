@@ -938,11 +938,12 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 				// Timeout has been reached. Signal the error to the user.
 				if ( !msg ) msg = "Time to reach target exceeded.\n Is the manipulandum visible?\n Is the manipulandum upright?\n";
 				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
-					"%s\n  Target ID: %d\n  Max time: %.2f\n  Manipulandum Visible: %s\n  Desired orientation: <%.3f %.3f %.3f %.3f>\n  Orientation Error: %.0f degrees",
+					"%s\n  Target ID: %d\n  Max time: %.2f\n  Manipulandum Visible: %s\n  Manipuladum orientation: <%.3f %.3f %.3f %.3f>\n  Orientation Error: %.0f degrees",
 					msg, target_id,
 					timeout, ( manipulandum_visible ? "yes" : "no" ), 
-					desired_orientation[X], desired_orientation[Y],
-					desired_orientation[Z], desired_orientation[M],
+					manipulandum_orientation[X], manipulandum_orientation[Y],
+					manipulandum_orientation[Z], manipulandum_orientation[M],
+					
 					misorientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
