@@ -131,7 +131,7 @@ Vector3		TargetFrameBody[TARGET_FRAME_MARKERS] =
 
 };
 int nFrameMarkers = TARGET_FRAME_MARKERS;
-int FrameMarkerID[TARGET_FRAME_MARKERS] = {4, 5, 6, 7};
+int FrameMarkerID[TARGET_FRAME_MARKERS] = {DEX_NEGATIVE_BOX_MARKER, DEX_POSITIVE_BOX_MARKER, DEX_NEGATIVE_BAR_MARKER, DEX_POSITIVE_BAR_MARKER};
 
 
 /***************************************************************************/

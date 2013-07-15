@@ -11,8 +11,6 @@
 
 /***************************************************************************/
 
-DexTracker::DexTracker() {}
-
 void DexTracker::Initialize( void ) {}
 int DexTracker::Update( void ) {
 	return( 0 );

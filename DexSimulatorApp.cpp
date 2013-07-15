@@ -49,15 +49,6 @@ double copForceThreshold = 0.25;			// Threshold of grip force to test if the man
 double copWaitTime = 1.0;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
 
-// A bit mask describing which markers are used to perform the alignment check.
-// This should be set to correspond to the 4 markers on the reference frame.
-unsigned long alignmentMarkerMask = 0x000000f0;
-
-// A bit mask describing which markers are used to perform the field-of-view check.
-// This includes the manipulandum and the reference frame markers, with the 
-//  assumption that the manipulandum is placed on the back of the chair in a 
-//  visible position during the alignment procedure.
-unsigned long fovMarkerMask = 0x000000f0;
 
 /*********************************************************************************/
 

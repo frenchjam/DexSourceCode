@@ -49,6 +49,18 @@ double alignmentAcquisitionDuration = 5.0;		// Acquire some data to verify where
 
 /*********************************************************************************/
 
+// A bit mask describing which markers are used to perform the alignment check.
+// This should be set to correspond to the 4 markers on the reference frame.
+unsigned long alignmentMarkerMask = 0x03C00000;
+
+// A bit mask describing which markers are used to perform the field-of-view check.
+// This includes the manipulandum and the reference frame markers, with the 
+//  assumption that the manipulandum is placed on the back of the chair in a 
+//  visible position during the alignment procedure.
+unsigned long fovMarkerMask = 0x03C00000;
+
+/*********************************************************************************/
+
 int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	int status;
@@ -61,7 +73,9 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->SetQuaterniond( expected_orientation[0], 90.0, apparatus->kVector );
 	apparatus->SetQuaterniond( expected_orientation[1],  0.0, apparatus->iVector );
 
+
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
+	ShowStatus( "Checking field of view ..." );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	if ( apparatus->nCodas > 1 ) {
@@ -70,10 +84,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Perform the alignment based on those markers.
+	ShowStatus( "Performing alignment ..." );
 	status = apparatus->PerformTrackerAlignment();
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
+	ShowStatus( "Check tracker placement ..." );
 	status = apparatus->CheckTrackerPlacement( 0, 
 										expected_position[0], codaUnitPositionTolerance, 
 										expected_orientation[0], codaUnitOrientationTolerance, 
@@ -88,6 +104,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Check that the tracker is still aligned.
+	ShowStatus( "Check tracker alignment ..." );
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -96,11 +113,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform a short acquisition to measure where the manipulandum is.
+	ShowStatus( "Acquire data ..." );
 	apparatus->StartAcquisition( maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
 	apparatus->SaveAcquisition( "ALGN" );
 
+	ShowStatus( "Check visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
