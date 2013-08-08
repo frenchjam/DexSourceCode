@@ -34,7 +34,7 @@
 // Remember, these are in the intrinsic reference frame of the CODA unit, where
 //  X is along the length of the bar, Y is the distance from the bar and Z is 'above' the bar.
 double fov_min_x = -1000.0, fov_max_x = 1000.0;
-double fov_min_y =  2000.0, fov_max_y = 4000.0;
+double fov_min_y =  1500.0, fov_max_y = 4000.0;
 double fov_min_z = -1000.0, fov_max_z = 1000.0;
 
 double codaUnitOrientationTolerance = 30.0;		// Allowable rotation wrt expected orientation, in degrees.
@@ -68,10 +68,11 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	Quaternion expected_orientation[2];
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
-	Vector3 expected_position[2] = {{-1000.0, 0.0, 2500.0}, {0.0, 900.0, 2500.0}};
+	Vector3 expected_position[2] = {{900.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
+
 	// Express the expected orientation of each fo the CODA units as a quaternion.
-	apparatus->SetQuaterniond( expected_orientation[0], 90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( expected_orientation[1],  0.0, apparatus->iVector );
+	apparatus->SetQuaterniond( expected_orientation[0],     90.0, apparatus->kVector );
+	apparatus->SetQuaterniond( expected_orientation[1],      0.0, apparatus->iVector );
 
 
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.

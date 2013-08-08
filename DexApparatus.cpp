@@ -363,8 +363,22 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 	SubtractVectors( delta_pos, pos, expected_pos );
 	distance = VectorNorm( delta_pos );
 	angle = ToDegrees( AngleBetween( ori, expected_ori ) );
+	
 	if ( distance > p_tolerance || abs( angle ) > o_tolerance ) {
-		return( fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle ) );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle );
+	
+		if ( response == IDABORT ) {
+			monitor->SendEvent( "Manual Abort from CheckTrackerPlacement()." );
+			return( ABORT_EXIT );
+		}
+		else if ( response == IDIGNORE ) {
+			monitor->SendEvent( "Ignore Error from CheckTrackerPlacement." );
+			return( IGNORE_EXIT );
+		}
+		else {
+			monitor->SendEvent( "Retry exit from CheckTrackerPlacement." );
+			return( RETRY_EXIT );
+		}
 	}
 	else return( NORMAL_EXIT );
 }
