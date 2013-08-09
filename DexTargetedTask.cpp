@@ -28,11 +28,17 @@
 
 
 // Targeted trial parameters;
-int targetSequence[] = { 0, 1, 0, 4, 0, 2, 0, 3, 0 };	// List of targets for point-to-point movements.
-int targetSequenceN = 9;
+int targetSequence[] = { 0, 3, 5, 2, 6, 2, 4, 8, 11, 9,
+						 5, 2, 4, 6, 2, 4, 8, 11, 9, 12,
+						 8, 5, 9, 7, 3, 0, 4, 8,  4,  1,
+						 4, 6, 2, 5, 9, 11, 7, 3, 0, 2,
+						 0, 3, 5, 2, 6, 2, 4, 8, 11, 9,
+					//	 5, 2, 4, 6, 2, 4, 8, 11, 9, 12
+						};	// List of targets for point-to-point movements.
+int targetSequenceN = 50;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
-double targetedMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double targetedMinMovementExtent = 10.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 double targetedMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 
 /*********************************************************************************/
