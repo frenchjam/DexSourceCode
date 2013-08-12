@@ -68,11 +68,11 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	Quaternion expected_orientation[2];
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
-	Vector3 expected_position[2] = {{900.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
+	Vector3 expected_position[2] = {{750.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
 
 	// Express the expected orientation of each fo the CODA units as a quaternion.
-	apparatus->SetQuaterniond( expected_orientation[0],     90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( expected_orientation[1],      0.0, apparatus->iVector );
+	apparatus->SetQuaterniond( expected_orientation[0],    -90.0, apparatus->iVector );
+	apparatus->SetQuaterniond( expected_orientation[1],    -90.0, apparatus->iVector );
 
 
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
@@ -96,6 +96,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 										expected_orientation[0], codaUnitOrientationTolerance, 
 										"Placement error - Coda Unit 0." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	
 	if ( apparatus->nCodas > 1 ) {
 		status = apparatus->CheckTrackerPlacement( 1, 
 											expected_position[1], codaUnitPositionTolerance, 
