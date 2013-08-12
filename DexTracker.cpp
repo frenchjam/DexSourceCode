@@ -117,7 +117,7 @@ bool DexTracker::GetCurrentMarkerFrameIntrinsic( CodaFrame &iframe, int unit ) {
 
 	// Get the current frame in aligned coordinates.
 	status = GetCurrentMarkerFrameUnit( frame, unit );
-	status = GetCurrentMarkerFrameUnit( frame, unit );
+//	status = GetCurrentMarkerFrameUnit( frame, unit );
 	// I'm not sure what could go wrong, but signal if it does.
 	if ( !status ) return( false );
 	// Compute the position of each maker in intrinsic coordinates.

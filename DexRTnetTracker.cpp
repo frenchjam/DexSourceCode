@@ -473,12 +473,12 @@ void DexRTnetTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &ro
 	DeviceInfoUnitCoordSystem coord;
 	cl.getDeviceInfo( coord );
 
-	CopyVector( offset, coord.dev.Rt[0].t );
+	CopyVector( offset, coord.dev.Rt[unit].t );
 	for ( int i = 0; i < 3; i++ ) {
 		for ( int j = 0; j < 3; j++ ) {
 			// If this seems backwards to you, it's because RTnet uses column vectors
 			// and I use row vectors. So when RTnet does M * v, I need to do v * M'.
-			rotation[i][j] = coord.dev.Rt[0].R[j*3+i];
+			rotation[i][j] = coord.dev.Rt[unit].R[j*3+i];
 		}
 	}
 
