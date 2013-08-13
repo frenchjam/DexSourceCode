@@ -40,8 +40,9 @@
 #include "DexApparatus.h"
 
 // Parameters used when waiting for the hand to be at a target.
-Vector3 defaultPositionTolerance = { 100.0, 100.0, 100.0 };	// Zone considered to be at the target.
-double  defaultOrientationTolerance = 60.0;					// Measured in degrees.
+Vector3 defaultPositionTolerance = { 150.0, 50.0, 50.0 };	// Zone considered to be at the target. 
+//X tolerance is higher because it exist a permanent offset between the manipulandum and the target position. (The manipulandum is on the right of the vertical bar)
+double  defaultOrientationTolerance = 45.0;					// Measured in degrees.
 // The tolerance on the orientation above is set very high for the simulator,
 // because the simulator intentionally makes the manipulandum rotate as you move toward the higher targets.
 

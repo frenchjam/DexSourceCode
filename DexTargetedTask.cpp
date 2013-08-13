@@ -83,7 +83,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Take the seat, attach the belts and the wrist box.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 #endif
