@@ -66,14 +66,17 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	int status;
 
 	Quaternion expected_orientation[2];
+    Quaternion transition_orientation[2];
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
 	Vector3 expected_position[2] = {{750.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
 
 	// Express the expected orientation of each fo the CODA units as a quaternion.
 	apparatus->SetQuaterniond( expected_orientation[0],    -90.0, apparatus->iVector );
-	apparatus->SetQuaterniond( expected_orientation[1],    -90.0, apparatus->iVector );
-
+	apparatus->SetQuaterniond( transition_orientation[0],     90.0, apparatus->kVector );
+	apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
+	// need to make 2 quaternion rotations for the 2nd Coda bar.
+    apparatus->MultiplyQuaternions(expected_orientation[1],transition_orientation[0],transition_orientation[1]);
 
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
 	ShowStatus( "Checking field of view ..." );
