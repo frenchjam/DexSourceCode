@@ -28,15 +28,15 @@
 /*********************************************************************************/
 
 // Oscillation trial parameters.
-int oscillationUpperTarget = 3;						// Targets showing desired amplitude of cyclic movement.
-int oscillationLowerTarget = 7;
-int oscillationCenterTarget = 5;
-double oscillationTime = 10.0;
+int oscillationUpperTarget = 2;						// Targets showing desired amplitude of cyclic movement.
+int oscillationLowerTarget = 10;
+int oscillationCenterTarget = 6;
+double oscillationTime = 30.0;
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
-double oscillationMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double oscillationMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-int	oscillationMinCycles = 6;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
-int oscillationMaxCycles = 20;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationMinMovementExtent = 30.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationMaxMovementExtent = 50; //HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+int	oscillationMinCycles = 20;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+int oscillationMaxCycles = 40;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
 double oscillationCycleHysteresis = 10.0;	// Parameter used to adjust the detection of cycles. 
 Vector3	oscillationDirection = {0.0, 1.0, 0.0};	// Oscillations are nominally in the vertical direction. Could change at some point, I suppose.
 
@@ -99,7 +99,10 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	
 	// Measure data during oscillations performed over a fixed duration.
 	apparatus->Wait( oscillationTime );
-	
+    
+	// Turn off the target
+	BlinkAll(apparatus);
+
 	// Stop acquiring.
 	ShowStatus( "Retrieving data ..." );
 	apparatus->StopAcquisition();
