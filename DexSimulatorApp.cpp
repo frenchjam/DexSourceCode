@@ -187,7 +187,7 @@ void plot_data( DexApparatus *apparatus ) {
 	// Compute velocity.
 	for ( i = 0; i < apparatus->nAcqFrames - 1; i++ ) {
 		apparatus->SubtractVectors( delta, apparatus->acquiredManipulandumState[i+1].position, apparatus->acquiredManipulandumState[i].position );
-		apparatus->ScaleVector( delta, delta, 1.0 / apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i].time );
+		apparatus->ScaleVector( delta, delta, 1.0 / ( apparatus->acquiredManipulandumState[i+1].time - apparatus->acquiredManipulandumState[i].time ) );
 		Vt[i] = apparatus->VectorNorm( delta );
 	}
 	// Back and forth filter to avoid phase lag.
