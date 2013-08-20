@@ -34,8 +34,16 @@ double slipTimeout = 20.0;
 
 /*********************************************************************************/
 
-int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
+
+int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
+// 3 first targets output are used to drive a sound. When the 3 targets are turned on no sound appears otherwise
+	// a sound is played.
+	//initialize sound off
+    apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
+	
 	int status;
 
 	// Start acquiring Data.
@@ -44,29 +52,61 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// The following routine does that, but it will have no effect on the real
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
 	apparatus->adc->AllowPollingDuringAcquisition();
-	apparatus->StartAcquisition( maxTrialDuration );
+	
 
-	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index.\nPull upward.\nAdjust pinch and pull forces according to LEDs.\nWhen you hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Squeeze the manipulandum between thumb and index with the right hand.\nBe sure that the thumb and the forefinger are centered.\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	status = apparatus->WaitCenteredGrip( copTolerance, 1.0, 1.0, "Grip not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	status = apparatus->WaitSubjectReady( "Pull downward.\nAdjust pinch and pull forces according to LEDs.\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+    status = apparatus->WaitSubjectReady( "When you will hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+    apparatus->StartAcquisition( maxTrialDuration );
+  
+
+	
+	
+	
+	//Sound off
+	apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
+
 	apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, 1000 * frictionTimeout );
 	apparatus->MarkEvent( FORCE_OK );
+    apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
+	//Sound On
 	apparatus->Beep();
+	apparatus->TargetOff(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
+	//Sound off
+	apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
+
+    
 	apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, slipThreshold, slipTimeout );
+    apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
 	apparatus->MarkEvent( SLIP_OK );
+	HideStatus();
 
-	apparatus->Beep();
-	apparatus->Wait( 0.25 );
-	apparatus->Beep();
-	apparatus->Wait( 2.0 );
-
+   apparatus->TargetOn(0);
+	apparatus->TargetOn(1);
+	apparatus->TargetOn(2);
 	apparatus->StopAcquisition();
 	ShowStatus( "Saving data ..." );
 	apparatus->SaveAcquisition( "FRIC" );
