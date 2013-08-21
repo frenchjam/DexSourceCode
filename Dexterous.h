@@ -176,6 +176,8 @@ typedef struct {
 #define TRIGGER_MOVE_UP		-8	// Used to test for tapping movements in the wrong direction.
 #define TRIGGER_MOVE_DOWN	-9
 
+#define ACQUISITION_SAVE	-666
+
 typedef struct {
 
 	double			time;

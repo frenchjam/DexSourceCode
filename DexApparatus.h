@@ -126,9 +126,7 @@ public:
 	double				acquiredHighAcceleration[DEX_MAX_ANALOG_SAMPLES];
 	DexEvent			eventList[DEX_MAX_EVENTS];
 	int					nEvents;
-	
-	Quit();
-	
+		
 	int nCodas;
 	int nMarkers;
 	int nTones;
@@ -156,6 +154,10 @@ public:
 	// Called inside loops to update current state.
 	// This is strictly local to my simulator.
 	virtual void Update( void );
+
+	// Undo whatever needs to be done once the apparatus has been initialized.
+	virtual void Quit();
+
 	
 	// Core routine to establish the position of each of the targets in 3D space.
 	// This routine is to be called at the beginning of a trial to determine where the 
@@ -338,33 +340,55 @@ private:
 	FILE *fp;
 
 	void CloseScript( void );
+	void UnhandledCommand( const char *cmd );
 
 protected:
 
 public:
 
-	DexCompiler( int n_vertical_targets = N_VERTICAL_TARGETS, 
-				 int n_horizontal_targets = N_HORIZONTAL_TARGETS,
-				 int n_markers = N_MARKERS, int n_codas = N_CODAS, 
-				 int n_tones = N_TONES, int n_channels = N_CHANNELS,
+	DexCompiler( DexTracker			*tracker,
+				 DexTargets			*targets,
+				 DexSounds			*sounds,
+				 DexADC				*adc,
 				 char *filename = DEFAULT_SCRIPT_FILENAME );
 
 	void Initialize( void );
+	void Quit( void );
 
 	void SetTargetState( unsigned long target_state );
 	void SetSoundState( int tone, int volume );
 
-	void StartAcquisition( void );
+	void StartAcquisition( float max_duration  );
 	void StopAcquisition( void );
-	void SaveAcquisition( void );
+	void SaveAcquisition( const char *tag ); // To be removed.
 
 	void Wait( double seconds );
 	int  WaitSubjectReady( const char *message = "Ready to continue?" );
-	int	 WaitUntilAtTarget( int target_id, float tolerance[3], float hold_time, float timeout, char *msg  );
+	int	 WaitUntilAtTarget( int target_id, 
+									const Quaternion desired_orientation,
+									Vector3 position_tolerance, 
+									double orientation_tolerance,
+									double hold_time, 
+									double timeout, 
+									char *msg  );
+	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 
-	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time );
+	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
+	int CheckOverrun(  const char *msg );
+	int CheckMovementAmplitude(  double min, double max, 
+								 double dirX, double dirY, double dirZ,
+								 const char *msg );
+
+	void MarkEvent( int event, unsigned long param = 0x00L );
+
+	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg );
+
+
+	void SetTargetPositions( void );
+	void SignalConfiguration( void );
+	void SignalEvent( const char *event );
 
 };
 

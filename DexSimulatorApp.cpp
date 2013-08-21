@@ -451,6 +451,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	char *script = "DexSampleScript.dex";
 	int direction = VERTICAL;
 	bool eyes_closed = false;
+	bool use_compiler = false;
 
 	int return_code;
 	
@@ -494,6 +495,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( strstr( lpCmdLine, "-open"  ) ) eyes_closed = false;
 	if ( strstr( lpCmdLine, "-closed"  ) ) eyes_closed = true;
+
+	if ( strstr( lpCmdLine, "-compile"  ) ) use_compiler = true;
+
 
 	switch ( tracker_type ) {
 
@@ -570,13 +574,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	// Create an apparatus by piecing together the components.
-	apparatus = new DexApparatus( tracker, targets, sounds, adc );
-	apparatus->Initialize();
-//	apparatus->PerformTrackerAlignment( NULL );
+	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, "TestScript.dex" );
+	else apparatus = new DexApparatus( tracker, targets, sounds, adc );
 
-	// Send information about the actual configuration to the ground.
-	apparatus->SignalConfiguration();
-	
+	apparatus->Initialize();
+
 	// Keep track of the elapsed time from the start of the first trial.
 	DexTimerStart( session_timer );
 
@@ -624,7 +626,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunTargeted( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case DISCRETE_TASK:

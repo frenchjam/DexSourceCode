@@ -40,31 +40,51 @@
 
 //  !!!!!!!!!!!!!!!!!!!! THIS IS NOT UP TO DATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //   It may not cover all the required commands.
-
-DexCompiler::DexCompiler( int n_vertical_targets, 
-						  int n_horizontal_targets,
-						  int n_codas, int n_markers,
-						  int n_tones, int n_channels,	
-						  char *filename ) {
 	
-	nVerticalTargets = n_vertical_targets;
-	nHorizontalTargets = n_horizontal_targets;
-	nTargets = n_vertical_targets + n_horizontal_targets;
-	nCodas = n_codas;
-	nMarkers = n_markers;
-	nTones = n_tones;
-	nChannels = n_channels;
+DexCompiler::DexCompiler(   DexTracker  *tracker,
+						    DexTargets  *targets,
+							DexSounds	*sounds,
+							DexADC		*adc,
+							char *filename ) {
+
+	// Even though we will not use the actual hardware devices, we create instances of each 
+	// hardware component when we create the compiler. This is just so that the hardware
+	// parameters such as the number of vertical and horizontal targets are set according to the
+	// choice of hardware components.
+
+	this->tracker = tracker;
+	this->targets = targets;
+	this->sounds = sounds;
+	this->adc = adc;
+
 	script_filename = filename;
 
 }
 
 void DexCompiler::Initialize( void ) {
 	
+	nVerticalTargets = targets->nVerticalTargets;
+	nHorizontalTargets = targets->nHorizontalTargets;
+	nTargets = nVerticalTargets + nHorizontalTargets;
+
+	nTones = sounds->nTones;
+
+	nCodas = tracker->nCodas;
+	nMarkers = tracker->nMarkers;
+
+	nChannels = adc->nChannels;
+
+	// Open a file into which we will write the script.
 	fp = fopen( script_filename, "w" );
 	if ( !fp ) {
 		char message[1024];
 		sprintf( message, "Error opening script file for write:\n  %s", script_filename );
 	}
+
+	// Start with all the targets off.
+	TargetsOff();
+	// Make sure that the sound is off.
+	SoundOff();
 	
 }
 
@@ -72,25 +92,48 @@ void DexCompiler::CloseScript( void ) {
 	fclose( fp );
 }
 
+void DexCompiler::Quit( void ) {
+
+	CloseScript();
+
+}
+
+
 /***************************************************************************/
 
 int DexCompiler::WaitSubjectReady( const char *message ) {
 	fprintf( fp, "WaitSubjectReady\t%s\n", message );
-	return( 0 );
+	return( NORMAL_EXIT );
 }
 
 void DexCompiler::Wait( double duration ) {
 	fprintf( fp, "Wait\t%.6f\n", duration );
 }
 
-int	 DexCompiler::WaitUntilAtTarget( int target_id, float tolerance[3], float hold_time, float timeout, char *msg  ) {
-	fprintf( fp, "WaitUntilAtTarget\t%d\t%.6f\t%.6f\t%.6f\n", target_id, tolerance[X],  tolerance[Y],  tolerance[Z] );
-	return( 0 );
+int DexCompiler::WaitUntilAtTarget( int target_id, 
+									const Quaternion desired_orientation,
+									Vector3 position_tolerance, 
+									double orientation_tolerance,
+									double hold_time, 
+									double timeout, 
+									char *msg  ) {
+	fprintf( fp, "WaitUntilAtTarget, %d, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, \"%s\"\n",
+		target_id, 
+		desired_orientation[X], desired_orientation[Y], desired_orientation[Z], desired_orientation[M], 
+		position_tolerance[X], position_tolerance[Y], position_tolerance[Z], orientation_tolerance,
+		hold_time, timeout, msg );
+	return( NORMAL_EXIT );
 }
+
+int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg ) {
+	fprintf( fp, "WaitCenteredGrip, %f, %f, %f, \"%s\"\n", tolerance, min_force, timeout, msg );
+	return( NORMAL_EXIT );
+}
+
 
 int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
 	fprintf( fp, "SelectAndCheckConfiguration\t%d\t%d\t%d\n", posture, bar_position, tapping );
-	return( 0 );
+	return( NORMAL_EXIT );
 }
 
 void DexCompiler::SetTargetState( unsigned long target_state ) {
@@ -101,23 +144,74 @@ void DexCompiler::SetSoundState( int tone, int volume ) {
 	fprintf( fp, "SetSoundState\t%d\t%d\n", tone, volume );
 }
 
-int DexCompiler::CheckVisibility(  double max_cumulative_dropout_time, double max_continuous_dropout_time ) {
-	fprintf( fp, "CheckVisibility\t%f\t%f\n", max_cumulative_dropout_time, max_continuous_dropout_time );
-	return( 0 );
+int DexCompiler::CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg ) {
+	fprintf( fp, "CheckVisibility, %f, %f, \"%s\"\n", max_cumulative_dropout_time, max_continuous_dropout_time, msg );
+	return( NORMAL_EXIT );
 }
 
-void DexCompiler::StartAcquisition( void ) {
+int DexCompiler::CheckOverrun(  const char *msg ) {
+	fprintf( fp, "CheckOverrun, \"%s\"\n", msg );
+	return( NORMAL_EXIT );
+}
+
+int DexCompiler::CheckMovementAmplitude(  double min, double max, 
+										   double dirX, double dirY, double dirZ,
+										   const char *msg ) {
+	fprintf( fp, "CheckMovementAmplitude, %f, %f, %f, %f, %f, \"%s\"\n", 
+		min, max, dirX, dirY, dirZ, msg );
+	return( NORMAL_EXIT );
+}
+
+void DexCompiler::StartAcquisition( float max_duration ) {
 	fprintf( fp, "StartAcquisition\n" );
+	// Note the time of the acqisition start.
+	MarkEvent( ACQUISITION_START );
 }
 
 void DexCompiler::StopAcquisition( void ) {
+	MarkEvent( ACQUISITION_STOP );
 	fprintf( fp, "StopAcquisition\n" );
 }
 
-void DexCompiler::SaveAcquisition( void ) {
-	fprintf( fp, "StopAcquisition\n" );
+void DexCompiler::SaveAcquisition( const char *tag ) {
+	MarkEvent( ACQUISITION_SAVE );
+	fprintf( fp, "SaveAcquisition\n" );
 }
 
+void DexCompiler::MarkEvent( int event, unsigned long param ) {
+	fprintf( fp, "CMD_LOG_EVENT,%d\n", event );
+}
+
+int DexCompiler::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
+	fprintf( fp, "CheckTrackerAlignment,%ul,%f,%d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
+	return( NORMAL_EXIT );
+}
+
+// The following routines do not output anything to the scripts. 
+// They represent stuff that cannot be executed by DEX.
+
+void DexCompiler::UnhandledCommand( const char *cmd ) {
+	char msg[2048];
+	sprintf( msg, "Warning - Command is not handled by DEX script processor: %s", cmd );
+	MessageBox( NULL, msg, "DEX Compiler Warning", MB_OK );
+}
+void DexCompiler::SetTargetPositions( void ) { 
+	static bool first = true;
+	if ( first ) UnhandledCommand( "SetTargetPositions()" );
+	first = false;
+}
+void DexCompiler::SignalConfiguration( void ) {
+	static bool first = true;
+	if ( first ) UnhandledCommand( "SignalConfiguration()" );
+	first = false;
+}
+
+// It is normal to encounter this command in the task programs.
+// But it should not generate a command in the script.
+// I have it generate a comment for the moment.
+void DexCompiler::SignalEvent( const char *event ) {
+	fprintf( fp, "#SignalEvent, %s\n", event );
+}
 
 /*********************************************************************************/
 

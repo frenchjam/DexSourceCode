@@ -109,9 +109,15 @@ void DexApparatus::Initialize( void ) {
 	TargetsOff();
 	// Make sure that the sound is off.
 	SoundOff();
+
+	// Send information about the actual configuration to the ground.
+	SignalConfiguration();
+	
+
+
 }
 
-DexApparatus::Quit( void ) {
+void DexApparatus::Quit( void ) {
 
 	fclose( fp );
 
