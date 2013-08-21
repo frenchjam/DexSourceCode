@@ -102,7 +102,15 @@ void DexCompiler::Quit( void ) {
 /***************************************************************************/
 
 int DexCompiler::WaitSubjectReady( const char *message ) {
-	fprintf( fp, "WaitSubjectReady\t%s\n", message );
+	char msg[2048];
+	// Transform linebreaks into back slashes.
+	// It remains to be seen if the DEX GUI can handle multi-line messages.
+	// If so, how should newines be indicated in the message string?
+	strncpy( msg, message, sizeof( msg ) );
+	for ( int i = 0; i < strlen( msg ); i++ ) {
+		if ( msg[i] == '\n' ) msg[i] = '\\';
+	}
+	fprintf( fp, "WaitSubjectReady, \"%s\"\n", msg );
 	return( NORMAL_EXIT );
 }
 
@@ -137,7 +145,7 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 }
 
 void DexCompiler::SetTargetState( unsigned long target_state ) {
-	fprintf( fp, "SetTargetState\t%ul\n", target_state );
+	fprintf( fp, "SetTargetState, 0x%08lx\n", target_state );
 }
 
 void DexCompiler::SetSoundState( int tone, int volume ) {
@@ -179,11 +187,11 @@ void DexCompiler::SaveAcquisition( const char *tag ) {
 }
 
 void DexCompiler::MarkEvent( int event, unsigned long param ) {
-	fprintf( fp, "CMD_LOG_EVENT,%d\n", event );
+	fprintf( fp, "CMD_LOG_EVENT, %d\n", event );
 }
 
 int DexCompiler::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
-	fprintf( fp, "CheckTrackerAlignment,%ul,%f,%d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
+	fprintf( fp, "CheckTrackerAlignment, 0x%08lx, %f, %d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
 	return( NORMAL_EXIT );
 }
 
