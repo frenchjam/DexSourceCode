@@ -57,9 +57,12 @@ private:
 	void MapForceToLED( float min_grip, float max_grip, float min_load, float max_load );
 	void UpdateForceToLED( float grip, float load );
 
+
 protected:
 	
 	unsigned long currentTargetState;
+	unsigned long horizontalTargetMask;
+	unsigned long verticalTargetMask;
 	
 public:
 	
@@ -173,10 +176,12 @@ public:
 	virtual void LoadTargetPositions( char *filename = "DexTargetPositions.csv" );
 	
 	// Core routines for stimulus control.
-	virtual void SetTargetState( unsigned long target_state );
-	virtual void SetSoundState( int tone, int volume );
+	virtual void SetTargetStateInternal( unsigned long target_state );
+	virtual void SetSoundStateInternal( int tone, int volume );
 	
 	// Convenience routines for stimulus control. 
+	virtual void SetTargetState( unsigned long target_state );
+	virtual void SetSoundState( int tone, int volume );
 	virtual void TargetOn( int n );
 	virtual void TargetOff( int n );
 	virtual void VerticalTargetOn( int n );
@@ -342,6 +347,14 @@ private:
 	void CloseScript( void );
 	void UnhandledCommand( const char *cmd );
 
+	// My simulator assumes that all targets are controlled with a 32-bit word.
+	// DEX uses two separate 16-bit words, one for vertical and one for horizontal.
+	// These routines will translate between the two.
+	unsigned short verticalTargetBits( unsigned long targetBits );
+	unsigned short horizontalTargetBits( unsigned long targetBits );
+	unsigned short verticalTargetBit( int target_id );
+	unsigned short horizontalTargetBit( int target_id);
+
 protected:
 
 public:
@@ -355,8 +368,8 @@ public:
 	void Initialize( void );
 	void Quit( void );
 
-	void SetTargetState( unsigned long target_state );
-	void SetSoundState( int tone, int volume );
+	void SetTargetStateInternal( unsigned long target_state );
+	void SetSoundStateInternal( int tone, int volume );
 
 	void StartAcquisition( float max_duration  );
 	void StopAcquisition( void );

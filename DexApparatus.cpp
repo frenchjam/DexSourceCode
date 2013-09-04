@@ -71,6 +71,13 @@ void DexApparatus::Initialize( void ) {
 	nHorizontalTargets = targets->nHorizontalTargets;
 	nTargets = nVerticalTargets + nHorizontalTargets;
 
+	// Create bit masks for the horizontal and vertical targets.
+	verticalTargetMask = 0;
+	for ( int i = 0; i < nVerticalTargets; i++ ) verticalTargetMask = ( verticalTargetMask << 1 ) + 1;
+	horizontalTargetMask = 0;
+	for ( i = 0; i < nHorizontalTargets; i++ ) horizontalTargetMask = ( horizontalTargetMask << 1 ) + 1;
+	horizontalTargetMask = horizontalTargetMask << nVerticalTargets;
+
 	nTones = sounds->nTones;
 
 	nCodas = tracker->nCodas;
@@ -1445,8 +1452,12 @@ int DexApparatus::WaitSlip( float min_grip, float max_grip,
 
 // Set the state of the target LEDs.
 
-void DexApparatus::SetTargetState( unsigned long target_state ) {
+void DexApparatus::SetTargetStateInternal( unsigned long target_state ) {
 	targets->SetTargetState( target_state );
+}
+
+void DexApparatus::SetTargetState( unsigned long target_state ) {
+	SetTargetStateInternal( target_state );
 	currentTargetState = target_state;
 	MarkTargetEvent( target_state );
 }
@@ -1492,8 +1503,14 @@ int DexApparatus::DecodeTargetBits( unsigned long bits ) {
 
 // Initiate a constant tone. Will continue until stopped.
 // This is the lowest level routine to be implemented in the DEX scripting language.
-void DexApparatus::SetSoundState( int tone, int volume ) {
+// This routine will get overlayed by the compiler.
+void DexApparatus::SetSoundStateInternal( int tone, int volume ) {
 	sounds->SetSoundState( tone, volume );
+}
+
+// This one notes the event as well, then calls the underlying routine.
+void DexApparatus::SetSoundState( int tone, int volume ) {
+	SetSoundStateInternal( tone, volume );
 	MarkSoundEvent( tone, volume );
 }
 

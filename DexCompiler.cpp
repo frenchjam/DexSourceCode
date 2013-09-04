@@ -63,9 +63,16 @@ DexCompiler::DexCompiler(   DexTracker  *tracker,
 
 void DexCompiler::Initialize( void ) {
 	
+	
 	nVerticalTargets = targets->nVerticalTargets;
 	nHorizontalTargets = targets->nHorizontalTargets;
 	nTargets = nVerticalTargets + nHorizontalTargets;
+	// Create bit masks for the horizontal and vertical targets.
+	verticalTargetMask = 0;
+	for ( int i = 0; i < nVerticalTargets; i++ ) verticalTargetMask = ( verticalTargetMask << 1 ) + 1;
+	horizontalTargetMask = 0;
+	for ( i = 0; i < nHorizontalTargets; i++ ) horizontalTargetMask = ( horizontalTargetMask << 1 ) + 1;
+	horizontalTargetMask = horizontalTargetMask << nVerticalTargets;
 
 	nTones = sounds->nTones;
 
@@ -73,6 +80,7 @@ void DexCompiler::Initialize( void ) {
 	nMarkers = tracker->nMarkers;
 
 	nChannels = adc->nChannels;
+
 
 	// Open a file into which we will write the script.
 	fp = fopen( script_filename, "w" );
@@ -98,6 +106,25 @@ void DexCompiler::Quit( void ) {
 
 }
 
+/***************************************************************************/
+
+unsigned short DexCompiler::verticalTargetBits( unsigned long targetBits ) {
+	return( targetBits & verticalTargetMask );
+}
+unsigned short DexCompiler::horizontalTargetBits( unsigned long targetBits ) {
+	return( targetBits >> nVerticalTargets );
+}
+
+unsigned short DexCompiler::verticalTargetBit( int target_id ) {
+	if ( target_id < nVerticalTargets ) return( 0x01 << target_id );
+	else return( 0 );
+}
+unsigned short DexCompiler::horizontalTargetBit( int target_id) {
+	if ( target_id >= nVerticalTargets ) return( 0x01 << ( target_id - nVerticalTargets ) );
+	else return( 0 );
+}
+
+
 
 /***************************************************************************/
 
@@ -110,12 +137,15 @@ int DexCompiler::WaitSubjectReady( const char *message ) {
 	for ( int i = 0; i < strlen( msg ); i++ ) {
 		if ( msg[i] == '\n' ) msg[i] = '\\';
 	}
-	fprintf( fp, "WaitSubjectReady, \"%s\"\n", msg );
+	// There is no provision yet for an image file, so just put an empty field.
+	// I did not foresee a timeout for this command. I am setting the timeout 
+	// to zero, hoping that it means an indefinite timeout.
+	fprintf( fp, "CMD_WAIT_SUBJ_READY, \"%s\", \"%s\", %.0f\n", msg, "", 0 );
 	return( NORMAL_EXIT );
 }
 
 void DexCompiler::Wait( double duration ) {
-	fprintf( fp, "Wait\t%.6f\n", duration );
+	fprintf( fp, "CMD°WAIT, %.0f\n", duration * 10.0 );
 }
 
 int DexCompiler::WaitUntilAtTarget( int target_id, 
@@ -125,8 +155,9 @@ int DexCompiler::WaitUntilAtTarget( int target_id,
 									double hold_time, 
 									double timeout, 
 									char *msg  ) {
-	fprintf( fp, "WaitUntilAtTarget, %d, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, \"%s\"\n",
-		target_id, 
+
+	fprintf( fp, "CMD_WAIT_MANIP_ATTARGET, 0x%04x, 0x%04x, %f, %f, %f, %f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, \"%s\"\n",
+		horizontalTargetBit( target_id ), verticalTargetBit( target_id ), 
 		desired_orientation[X], desired_orientation[Y], desired_orientation[Z], desired_orientation[M], 
 		position_tolerance[X], position_tolerance[Y], position_tolerance[Z], orientation_tolerance,
 		hold_time, timeout, msg );
@@ -134,7 +165,16 @@ int DexCompiler::WaitUntilAtTarget( int target_id,
 }
 
 int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg ) {
-	fprintf( fp, "WaitCenteredGrip, %f, %f, %f, \"%s\"\n", tolerance, min_force, timeout, msg );
+	static bool once = false;
+	if ( timeout > DEX_MAX_TIMEOUT && !once ) {
+		once = true;
+		MessageBox( NULL, "Warning - Timeout exceeds limit.", "DexCompiler", MB_OK );
+	}
+	if ( timeout < 0 && !once ) {
+		once = true;
+		MessageBox( NULL, "Warning - Timeout cannot be negative.", "DexCompiler", MB_OK );
+	}
+	fprintf( fp, "CMD_WAIT_MANIP_GRIP, %f, %.0f, %f, \"%s\"\n", min_force, tolerance, timeout, msg );
 	return( NORMAL_EXIT );
 }
 
@@ -144,28 +184,43 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 	return( NORMAL_EXIT );
 }
 
-void DexCompiler::SetTargetState( unsigned long target_state ) {
-	fprintf( fp, "SetTargetState, 0x%08lx\n", target_state );
+void DexCompiler::SetTargetStateInternal( unsigned long target_state ) {
+	// I assumed that targets will be set with a single 32-bit word.
+	// Instead, DEX treats horizontal and vertical with separate 16-bit words.
+	unsigned short vstate, hstate;
+	vstate = verticalTargetBits( target_state );
+	hstate = horizontalTargetBits( target_state );
+	fprintf( fp, "CMD_CTRL_TARGETS, 0x%04x, 0x%04x\n", hstate, vstate );
 }
 
-void DexCompiler::SetSoundState( int tone, int volume ) {
-	fprintf( fp, "SetSoundState\t%d\t%d\n", tone, volume );
+void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
+	static bool once = false;
+	if ( volume != 0 && volume != 1 && !once ) {
+		MessageBox( NULL, "Warning - Sound volume on DEX is 0 or 1", "DexCompiler", MB_OK );
+		once = true;
+	}
+	if ( ( tone < 0 || tone >= nTones ) && !once ) {
+		MessageBox( NULL, "Warning - Tone is out of range.", "DexCompiler", MB_OK );
+		once = true;
+	}
+	fprintf( fp, "CMD_CTRL_TONE, %d, %d\n", ( volume ? 1 : 0 ), tone );
 }
 
 int DexCompiler::CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg ) {
-	fprintf( fp, "CheckVisibility, %f, %f, \"%s\"\n", max_cumulative_dropout_time, max_continuous_dropout_time, msg );
+	fprintf( fp, "CMD_CHK_MANIP_VISIBILITY, %f, %f, \"%s\"\n", 
+		max_cumulative_dropout_time, max_continuous_dropout_time, msg );
 	return( NORMAL_EXIT );
 }
 
+// DEX does not implement overrun checks.
 int DexCompiler::CheckOverrun(  const char *msg ) {
-	fprintf( fp, "CheckOverrun, \"%s\"\n", msg );
 	return( NORMAL_EXIT );
 }
 
 int DexCompiler::CheckMovementAmplitude(  double min, double max, 
 										   double dirX, double dirY, double dirZ,
 										   const char *msg ) {
-	fprintf( fp, "CheckMovementAmplitude, %f, %f, %f, %f, %f, \"%s\"\n", 
+	fprintf( fp, "CMD_CHK_MOVEMENTS_AMPL, %.0f, %.0f, %f, %f, %f, \"%s\"\n", 
 		min, max, dirX, dirY, dirZ, msg );
 	return( NORMAL_EXIT );
 }
@@ -191,7 +246,7 @@ void DexCompiler::MarkEvent( int event, unsigned long param ) {
 }
 
 int DexCompiler::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
-	fprintf( fp, "CheckTrackerAlignment, 0x%08lx, %f, %d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
+	fprintf( fp, "CMD_CHK_CODA_ALIGNMENT, 0x%08lx, %.0f, %d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
 	return( NORMAL_EXIT );
 }
 

@@ -22,7 +22,7 @@
 
 /*********************************************************************************/
 
-//#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 
 /*********************************************************************************/
 
@@ -110,7 +110,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) apparatus->VerticalTargetOn( targetSequence[0] );
 	else apparatus->HorizontalTargetOn( targetSequence[0] );
-		
+
 	// Collect basline data while holding at the starting position.
 	apparatus->Wait( baselineTime );
 	
@@ -128,7 +128,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 
 		// Make a beep. Here we test the tones and volumes.
-		apparatus->SoundOn( target, target );
+		apparatus->SoundOn( target % apparatus->nTones, 1 );
 		apparatus->Wait( beepDuration );
 		apparatus->SoundOff();
 		
