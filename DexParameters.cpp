@@ -110,7 +110,7 @@ Vector3		WristBody[WRIST_MARKERS] =
 	{2.0, 2.0, 2.0}
 };
 int nWristMarkers = WRIST_MARKERS;
-int WristMarkerID[WRIST_MARKERS] = {8, 9, 10, 11, 12, 13, 14, 15};
+int WristMarkerID[WRIST_MARKERS] = { 12, 13, 14, 15, 16, 17, 18, 19 };
 
 // The target frame is not quite a rigig body, because the vertical bar 
 // can move with respect to the horizontal box. But it is convenient to 

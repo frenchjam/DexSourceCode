@@ -51,13 +51,11 @@ double alignmentAcquisitionDuration = 5.0;		// Acquire some data to verify where
 
 // A bit mask describing which markers are used to perform the alignment check.
 // This should be set to correspond to the 4 markers on the reference frame.
-unsigned long alignmentMarkerMask = 0x03C00000;
+unsigned long alignmentMarkerMask = 0x00000f00;
 
 // A bit mask describing which markers are used to perform the field-of-view check.
-// This includes the manipulandum and the reference frame markers, with the 
-//  assumption that the manipulandum is placed on the back of the chair in a 
-//  visible position during the alignment procedure.
-unsigned long fovMarkerMask = 0x03C00000;
+// This should be set to correspond to the 4 markers on the reference frame.
+unsigned long fovMarkerMask = 0x00000f00;
 
 /*********************************************************************************/
 
@@ -68,17 +66,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	Quaternion expected_orientation[2];
     Quaternion transition_orientation[2];
 
-	// Where do we expect the CODAs to be with respect to the reference frame?.
-	Vector3 expected_position[2] = {{750.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
 
-	// Express the expected orientation of each fo the CODA units as a quaternion.
-	apparatus->SetQuaterniond( expected_orientation[0],    -90.0, apparatus->iVector );
-	apparatus->SetQuaterniond( transition_orientation[0],     90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
-	// need to make 2 quaternion rotations for the 2nd Coda bar.
-    apparatus->MultiplyQuaternions(expected_orientation[1],transition_orientation[0],transition_orientation[1]);
-
-	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
+	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
 	ShowStatus( apparatus, "Checking field of view ..." );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -94,16 +83,26 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Are the Coda bars where we think they should be?
 	ShowStatus( apparatus, "Check tracker placement ..." );
-	status = apparatus->CheckTrackerPlacement( 0, 
-										expected_position[0], codaUnitPositionTolerance, 
-										expected_orientation[0], codaUnitOrientationTolerance, 
-										"Placement error - Coda Unit 0." );
+
+	// Where do we expect the CODAs to be with respect to the reference frame?.
+	Vector3 expected_position[2] = {{750.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
+
+	// This is for the 'horizontal' coda, tilted downward. I don't know why it's -90 and not -45.0.
+	apparatus->SetQuaterniond( expected_orientation[1], -135.0, apparatus->iVector );
+	status = apparatus->CheckTrackerPlacement( 1, 
+										expected_position[1], codaUnitPositionTolerance, 
+										expected_orientation[1], codaUnitOrientationTolerance, 
+										"Placement error - Coda Unit 2." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	if ( apparatus->nCodas > 1 ) {
-		status = apparatus->CheckTrackerPlacement( 1, 
-											expected_position[1], codaUnitPositionTolerance, 
-											expected_orientation[1], codaUnitOrientationTolerance, 
+		// Need to make 2 quaternion rotations for the 2nd Coda bar.
+		apparatus->SetQuaterniond( transition_orientation[0],  90.0, apparatus->kVector );
+		apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
+		apparatus->MultiplyQuaternions(expected_orientation[0],transition_orientation[0],transition_orientation[1]);
+		status = apparatus->CheckTrackerPlacement( 0, 
+											expected_position[0], codaUnitPositionTolerance, 
+											expected_orientation[0], codaUnitOrientationTolerance, 
 											"Placement error - Coda Unit 1." );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
@@ -124,8 +123,10 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition();
 
 	ShowStatus( apparatus, "Check visibility ..." );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum obscured from view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	HideStatus();
 
 	return( NORMAL_EXIT );
 }

@@ -250,18 +250,18 @@ public:
 	virtual int CheckMovementAmplitude(  double min, double max, double dirX, double dirY, double dirZ, const char *msg = NULL );
 	virtual int CheckMovementAmplitude(  double min, double max, const Vector3 direction, char *msg = NULL );
 	
-	int CheckMovementCycles(  int min_cycles, int max_cycles, 
+	virtual int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								float dirX, float dirY, float dirZ,
 								float hysteresis, const char *msg );
-	int CheckMovementCycles(  int min_cycles, int max_cycles, 
+	virtual int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								const Vector3 direction,
 								float hysteresis, const char *msg );
-	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
-	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
-	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
-	int CheckMovementDirection(  int n_false_directions, Vector3 direction, float threshold, const char *msg = NULL );
-	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
-	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
+	virtual int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
+	virtual int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
+	virtual int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
+	virtual int CheckMovementDirection(  int n_false_directions, Vector3 direction, float threshold, const char *msg = NULL );
+	virtual int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
+	virtual int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
 	
 	// Signalling events to the ground.
 	virtual void SignalConfiguration( void );
@@ -345,6 +345,7 @@ private:
 
 	char *script_filename;
 	FILE *fp;
+	unsigned long nextStep;
 
 	void CloseScript( void );
 	void UnhandledCommand( const char *cmd );
@@ -394,16 +395,36 @@ public:
 	int CheckMovementAmplitude(  double min, double max, 
 								 double dirX, double dirY, double dirZ,
 								 const char *msg = "Movement amplitude outside range." );
+	int CheckMovementCycles(  int min_cycles, int max_cycles, 
+								float dirX, float dirY, float dirZ,
+								float hysteresis, const char *msg );
+	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
+	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
+	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
+	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
+	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
 
 	void MarkEvent( int event, unsigned long param = 0x00L );
 
-	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg = "Tracker not aligned." );
+	int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
+											float min_x, float max_x,
+											float min_y, float max_y,
+											float min_z, float max_z, 
+											const char *msg = "Markers not centered in view." );		
+	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, 
+										const char *msg ="Codas out of alignment!" );
+	int CheckTrackerPlacement( int unit, 
+										const Vector3 expected_pos, float p_tolerance,
+										const Quaternion expected_ori, float o_tolerance,
+										const char *msg = "Codas bars not placed as expected.");
 
 
 	void SetTargetPositions( void );
 	void SignalConfiguration( void );
 	void SignalEvent( const char *event );
 	void Comment( const char *txt );
+
+	void AddStepNumber( void );
 
 };
 

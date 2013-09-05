@@ -20,10 +20,6 @@
 
 /*********************************************************************************/
 
-//#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
-
-/*********************************************************************************/
-
 // Collision trial parameters;
 int collisionInitialTarget = 6;
 int collisionUpTarget = 11;

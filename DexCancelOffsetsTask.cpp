@@ -31,7 +31,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	int status;
 
-	status = apparatus->WaitSubjectReady( "Place manipulandum in holder.\n\n  !!! REMOVE HAND !!!\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Place manipulandum in holder. !!! REMOVE HAND !!! Press OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	// Acquire some data.

@@ -165,18 +165,19 @@ typedef struct {
 // to compute the post hoc tests on acquired data.
 // Users may also signal other events in the script
 // that may be useful for analizing the data on the ground.
-// By convention, the system events will be negative and 
-// users can define positive events in the scripts.
 
-#define TARGET_EVENT		-1	// Will be raised whenever the targets change state.
-#define SOUND_EVENT			-2	// Signals any change of the sound state.
-#define BEGIN_ANALYSIS		-3	// These two signal where in a record analyses such as counting 
-#define END_ANALYSIS		-4	//  the number of cycles in a movement should start and end.
-#define ACQUISITION_START	-5	// Automatically raised when acquisition starts and ends.
-#define ACQUISITION_STOP	-6
-#define TRIGGER_MOVEMENT	-7	// Used to test for false starts.
-#define TRIGGER_MOVE_UP		-8	// Used to test for tapping movements in the wrong direction.
-#define TRIGGER_MOVE_DOWN	-9
+// By convention, the system events will be above 100. 
+// Users can define events 1 - 100 in the scripts. 
+
+#define TARGET_EVENT		101	// Will be raised whenever the targets change state.
+#define SOUND_EVENT			102	// Signals any change of the sound state.
+#define BEGIN_ANALYSIS		103	// These two signal where in a record analyses such as counting 
+#define END_ANALYSIS		104	//  the number of cycles in a movement should start and end.
+#define ACQUISITION_START	105	// Automatically raised when acquisition starts and ends.
+#define ACQUISITION_STOP	106
+#define TRIGGER_MOVEMENT	107	// Used to test for false starts.
+#define TRIGGER_MOVE_UP		108	// Used to test for tapping movements in the wrong direction.
+#define TRIGGER_MOVE_DOWN	109
 
 #define ACQUISITION_SAVE	-666
 

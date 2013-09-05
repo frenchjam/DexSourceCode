@@ -63,7 +63,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
 	//   blocks of trials in the same configuration.
 	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
+		"Install the DEX Target Frame in the %s Position. Place the Target Bar in the %s position. Place the tapping surfaces in the %s position. Press <OK> when ready.",
 		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -79,7 +79,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Take the seat, attach the belts and the wrist box.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Take the seat and attach the belts and the wrist box. Press OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	ShowStatus( apparatus, "Hardware configuration complete ..." );
@@ -89,7 +89,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->Comment( "Starting set of targeted trials." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand. Be sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
@@ -100,8 +100,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->StartAcquisition( "TRGT", maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], desired_orientation ); 
+	char *wait_at_target_message = "Too long to reach desired target.";
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Make sure that the target is turned back on if a timeout occured.
@@ -153,10 +154,10 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Check the quality of the data.
 	ShowStatus( apparatus, "Checking data ..." );
 	
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, direction_vector, NULL );
+	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, direction_vector, "Movement amplitude out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	HideStatus();
