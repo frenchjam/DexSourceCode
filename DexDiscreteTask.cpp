@@ -91,7 +91,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.
-	apparatus->StartAcquisition( maxTrialDuration );
+	apparatus->StartAcquisition( "DISC", maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
 	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0], desired_orientation );
@@ -145,9 +145,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	ShowStatus( "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
-	// Save the data.
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "TRGT" );
 	
 	// Check the quality of the data.
 	ShowStatus( "Checking data ..." );

@@ -22,7 +22,7 @@
 
 /*********************************************************************************/
 
-#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
+// #define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 
 /*********************************************************************************/
 
@@ -98,7 +98,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.
-	apparatus->StartAcquisition( maxTrialDuration );
+	apparatus->StartAcquisition( "TRGT", maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
 	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation );
@@ -151,14 +151,8 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	ShowStatus( "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
-	// Save the data.
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "TRGT" );
-	
 	// Check the quality of the data.
 	ShowStatus( "Checking data ..." );
-	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );

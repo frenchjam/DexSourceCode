@@ -66,7 +66,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
     status = apparatus->WaitSubjectReady( "When you will hear the beep, pull harder until slippage.\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
-    apparatus->StartAcquisition( maxTrialDuration );
+    apparatus->StartAcquisition( "FRIC", maxTrialDuration );
   
 
 	
@@ -104,12 +104,11 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( SLIP_OK );
 	HideStatus();
 
-   apparatus->TargetOn(0);
+    apparatus->TargetOn(0);
 	apparatus->TargetOn(1);
 	apparatus->TargetOn(2);
 	apparatus->StopAcquisition();
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "FRIC" );
+
 	HideStatus();
 
 	return( NORMAL_EXIT );

@@ -112,7 +112,7 @@ unsigned short DexCompiler::verticalTargetBits( unsigned long targetBits ) {
 	return( targetBits & verticalTargetMask );
 }
 unsigned short DexCompiler::horizontalTargetBits( unsigned long targetBits ) {
-	return( targetBits >> nVerticalTargets );
+	return( (targetBits & horizontalTargetMask) >> nVerticalTargets );
 }
 
 unsigned short DexCompiler::verticalTargetBit( int target_id ) {
@@ -145,7 +145,7 @@ int DexCompiler::WaitSubjectReady( const char *message ) {
 }
 
 void DexCompiler::Wait( double duration ) {
-	fprintf( fp, "CMD°WAIT, %.0f\n", duration * 10.0 );
+	fprintf( fp, "CMD_WAIT, %.0f\n", duration * 10.0 );
 }
 
 int DexCompiler::WaitUntilAtTarget( int target_id, 
@@ -180,7 +180,12 @@ int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float time
 
 
 int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
-	fprintf( fp, "SelectAndCheckConfiguration\t%d\t%d\t%d\n", posture, bar_position, tapping );
+	char message[256];
+	sprintf( message, "Posture: %s   Target Bar: %s",
+		( posture ? "supine" : "seated" ),
+		( bar_position ? "Right" : "Left" ));
+	// I am putting 0 for the timeout, because I don't believe that this one should timeout.
+	fprintf( fp, "CMD_CHK_HW_CONFIG, \"%s\", \"%s\", %d, %d, %d \n", message, "", posture, bar_position, 0 );
 	return( NORMAL_EXIT );
 }
 
@@ -225,20 +230,17 @@ int DexCompiler::CheckMovementAmplitude(  double min, double max,
 	return( NORMAL_EXIT );
 }
 
-void DexCompiler::StartAcquisition( float max_duration ) {
-	fprintf( fp, "StartAcquisition\n" );
+void DexCompiler::StartAcquisition( const char *tag, float max_duration ) {
+	// DEX ignores the max duration parameter.
+	fprintf( fp, "CMD_ACQ_START, \"%s\"\n", tag ); 
 	// Note the time of the acqisition start.
 	MarkEvent( ACQUISITION_START );
 }
 
-void DexCompiler::StopAcquisition( void ) {
+int DexCompiler::StopAcquisition( const char *msg ) {
 	MarkEvent( ACQUISITION_STOP );
-	fprintf( fp, "StopAcquisition\n" );
-}
-
-void DexCompiler::SaveAcquisition( const char *tag ) {
-	MarkEvent( ACQUISITION_SAVE );
-	fprintf( fp, "SaveAcquisition\n" );
+	fprintf( fp, "CMD_ACQ_STOP, \"%s\"\n", msg );
+	return( NORMAL_EXIT );
 }
 
 void DexCompiler::MarkEvent( int event, unsigned long param ) {
@@ -347,9 +349,11 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		
 		if ( !strcmp( token, "StartAcquisition" ) ) {
 			float max_duration = 120.0;
-			sscanf( line, "%s %f", token, &max_duration );
+			char tag[256];
+
+			sscanf( line, "%s %s %f", token, tag, &max_duration );
 			// Start acquiring data.
-			apparatus->StartAcquisition( max_duration );
+			apparatus->StartAcquisition( tag, max_duration );
 		}
 		
 		if ( !strcmp( token, "Wait" ) ) {

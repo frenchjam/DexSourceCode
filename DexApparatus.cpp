@@ -1543,7 +1543,11 @@ void DexApparatus::Beep( int tone, int volume, float duration ) {
 // These are the acqusition routines according to my design. 
 // TODO: Should be updated to the new specification where SaveAcqusition 
 // does not exist.
-void DexApparatus::StartAcquisition( float max_duration ) {
+void DexApparatus::StartAcquisition( const char *tag, float max_duration ) {
+
+	// Store the tag that will be used in the filename.
+	strncpy( filename_tag, tag, sizeof( filename_tag ) );
+
 	// Reset the list of target and sound events.
 	nEvents = 0;
 	// Tell the tracker to start acquiring.
@@ -1559,7 +1563,8 @@ void DexApparatus::StartAcquisition( float max_duration ) {
 	// Note the time of the acqisition start.
 	MarkEvent( ACQUISITION_START );
 }
-void DexApparatus::StopAcquisition( void ) {
+
+int DexApparatus::StopAcquisition( const char *msg ) {
 
 	int unit;
 
@@ -1588,6 +1593,14 @@ void DexApparatus::StopAcquisition( void ) {
 	// Retrieve the recorded analog data.
 	nAcqSamples = adc->RetrieveAnalogSamples( acquiredAnalog, DEX_MAX_ANALOG_SAMPLES );
 
+	// Save the data.
+	SaveAcquisition( filename_tag );
+		
+	int status = CheckOverrun( msg );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+
+
 #ifndef NOATI
 	// Compute forces from analog data.
 	for ( int smpl = 0; smpl < nAcqSamples; smpl++ ) {
@@ -1604,6 +1617,8 @@ void DexApparatus::StopAcquisition( void ) {
 		acquiredHighAcceleration[smpl] = acquiredAnalog[smpl].channel[highAccAnalogChannel];
 	}
 #endif
+
+	return( NORMAL_EXIT );
 
 }
 void DexApparatus::SaveAcquisition( const char *tag ) {

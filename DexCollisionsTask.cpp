@@ -60,7 +60,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// TODO: Add the appropriate hardware checks.
 
 	Sleep( 1000 );
-	apparatus->StartAcquisition( collisionMaxTrialTime );
+	apparatus->StartAcquisition( "COLL", collisionMaxTrialTime );
 	
 	// Wait until the subject gets to the target before moving on.
 	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
@@ -103,9 +103,6 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Stop acquiring.
 	apparatus->StopAcquisition();
 	
-	// Save the data and show it,
-	apparatus->SaveAcquisition( "COLL" );
-
 	// Check if trial was completed as instructed.
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );
 	if ( status == IDABORT ) exit( ABORT_EXIT );

@@ -33,6 +33,7 @@ class DexApparatus : public VectorsMixin {
 	
 private:
 	
+	char filename_tag[256];
 	FILE *fp;
 
 	// These are parameters used to map measured forces to visible
@@ -196,10 +197,10 @@ public:
 	virtual void Beep( int tone = BEEP_TONE, int volume = BEEP_VOLUME, float duration = BEEP_DURATION );
 	
 	// Acquisition
-	virtual void StartAcquisition( float max_duration ); // TAKE OUT DURATION, add file tag and message
-	virtual void StopAcquisition( void );
+	virtual void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION ); 
+	virtual int  StopAcquisition( const char *msg = "Error - Maybe file overrun." );
 	virtual int  CheckOverrun(  const char *msg );	 // To be integrated with stop acquisition.
-	virtual void SaveAcquisition( const char *tag ); // To be removed.
+	virtual void SaveAcquisition( const char *tag ); // To be integrated with stop acquisition.
 	
 	// Flow control
 	virtual void Wait( double seconds );
@@ -371,9 +372,8 @@ public:
 	void SetTargetStateInternal( unsigned long target_state );
 	void SetSoundStateInternal( int tone, int volume );
 
-	void StartAcquisition( float max_duration  );
-	void StopAcquisition( void );
-	void SaveAcquisition( const char *tag ); // To be removed.
+	void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION );
+	int  StopAcquisition( const char *msg );
 
 	void Wait( double seconds );
 	int  WaitSubjectReady( const char *message = "Ready to continue?" );

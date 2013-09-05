@@ -87,7 +87,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Start acquiring data.
-	apparatus->StartAcquisition( oscillationMaxTrialTime );
+	apparatus->StartAcquisition( "OSCI", oscillationMaxTrialTime );
 	
 	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineTime );
@@ -107,14 +107,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	ShowStatus( "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
-	// Save the data and show it,
-	ShowStatus( "Saving data ..." );
-	apparatus->SaveAcquisition( "OSCI" );
-	
 	// Check the quality of the data.
 	ShowStatus( "Checking data ..." );
-	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );

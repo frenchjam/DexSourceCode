@@ -119,10 +119,9 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Perform a short acquisition to measure where the manipulandum is.
 	ShowStatus( "Acquire data ..." );
-	apparatus->StartAcquisition( maxTrialDuration );
+	apparatus->StartAcquisition( "ALGN", maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
-	apparatus->SaveAcquisition( "ALGN" );
 
 	ShowStatus( "Check visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
