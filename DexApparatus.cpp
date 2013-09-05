@@ -168,13 +168,14 @@ void DexApparatus::SetTargetPositions( void ) {
 	}
 
 	// The vertical bar might be in either position (left or right).
-	// That's OK for the calculation of the orientation,
+	// That was OK for the calculation of the orientation,
 	// but now we need to make sure that the targets on the vertical 
 	// are where the vertical bar is.
 
 	CodaFrame	frame;
 	Vector3	bar_position;
 	Vector3 target_position;
+	Vector3 shift;
 
 	// Get the current marker positions.
 	tracker->GetCurrentMarkerFrame( frame );
@@ -182,11 +183,19 @@ void DexApparatus::SetTargetPositions( void ) {
 	// Compute the midpoint between the two reference markers on the bar.
 	AddVectors( bar_position, frame.marker[negativeBarMarker].position, frame.marker[positiveBarMarker].position );
 	ScaleVector( bar_position, bar_position, 0.5 );
+
 	// Compute the midpoint between the top and bottom target, in the new reference frame.
 	AddVectors( target_position, targetPosition[0], targetPosition[nVerticalTargets - 1] );
 	ScaleVector( target_position, target_position, 0.5 );
+
 	// Compute the offset that will bring the two midpoints together.
 	SubtractVectors( offset, bar_position, target_position );
+
+	// Now compute an additional offset that corrects the offset of the bar markers 
+	// in front of the targets LEDs and that places the target position to the right of the bar,
+	// all of this the current reference frame of the target frame.
+	RotateVector( shift, rotation, BarMarkersToTargets );
+	AddVectors( offset, offset, shift );
 
 	// Shift the target positions to match the position of the target bar.
 	// Only the vertical targets move.

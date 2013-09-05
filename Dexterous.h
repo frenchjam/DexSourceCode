@@ -217,6 +217,9 @@ extern Vector3	TargetFrameBody[TARGET_FRAME_MARKERS];
 extern int		nFrameMarkers;
 extern int		FrameMarkerID[TARGET_FRAME_MARKERS];
 
+extern Vector3 BarMarkersToTargets;
+
+
 // Identify the 4 reference markers.
 // I am going to avoid the terms 'left', 'right', 'top' and 'bottom'
 //  because this leads to confusion between the subject left and right
