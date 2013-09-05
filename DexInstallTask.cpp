@@ -79,7 +79,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
     apparatus->MultiplyQuaternions(expected_orientation[1],transition_orientation[0],transition_orientation[1]);
 
 	// Check that the 4 reference markers are in the ideal field-of-view of each Coda unit.
-	ShowStatus( "Checking field of view ..." );
+	ShowStatus( apparatus, "Checking field of view ..." );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	if ( apparatus->nCodas > 1 ) {
@@ -88,12 +88,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Perform the alignment based on those markers.
-	ShowStatus( "Performing alignment ..." );
+	ShowStatus( apparatus, "Performing alignment ..." );
 	status = apparatus->PerformTrackerAlignment();
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
-	ShowStatus( "Check tracker placement ..." );
+	ShowStatus( apparatus, "Check tracker placement ..." );
 	status = apparatus->CheckTrackerPlacement( 0, 
 										expected_position[0], codaUnitPositionTolerance, 
 										expected_orientation[0], codaUnitOrientationTolerance, 
@@ -109,7 +109,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Check that the tracker is still aligned.
-	ShowStatus( "Check tracker alignment ..." );
+	ShowStatus( apparatus, "Check tracker alignment ..." );
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -118,12 +118,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform a short acquisition to measure where the manipulandum is.
-	ShowStatus( "Acquire data ..." );
+	ShowStatus( apparatus, "Acquire data ..." );
 	apparatus->StartAcquisition( "ALGN", maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
 
-	ShowStatus( "Check visibility ..." );
+	ShowStatus( apparatus, "Check visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 

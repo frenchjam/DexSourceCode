@@ -270,6 +270,7 @@ public:
 	// Mark events locally for post hoc analyses
 	virtual void ClearEventLog( void );
 	virtual void MarkEvent( int event, unsigned long param = 0x00L );
+	virtual void Comment( const char *txt );
 	
 	virtual void MarkTargetEvent( unsigned int bits );
 	virtual void MarkSoundEvent( int tone, int volume );
@@ -373,7 +374,7 @@ public:
 	void SetSoundStateInternal( int tone, int volume );
 
 	void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION );
-	int  StopAcquisition( const char *msg );
+	int  StopAcquisition( const char *msg = "Buffer overrun or error writing data file." );
 
 	void Wait( double seconds );
 	int  WaitSubjectReady( const char *message = "Ready to continue?" );
@@ -383,25 +384,26 @@ public:
 									double orientation_tolerance,
 									double hold_time, 
 									double timeout, 
-									char *msg  );
-	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
+									char *msg = "Timeout waiting to reach target." );
+	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = "Grip not centered"  );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 
-	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
+	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = "Manipulandum occluded too often." );
 	int CheckOverrun(  const char *msg );
 	int CheckMovementAmplitude(  double min, double max, 
 								 double dirX, double dirY, double dirZ,
-								 const char *msg );
+								 const char *msg = "Movement amplitude outside range." );
 
 	void MarkEvent( int event, unsigned long param = 0x00L );
 
-	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg );
+	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg = "Tracker not aligned." );
 
 
 	void SetTargetPositions( void );
 	void SignalConfiguration( void );
 	void SignalEvent( const char *event );
+	void Comment( const char *txt );
 
 };
 

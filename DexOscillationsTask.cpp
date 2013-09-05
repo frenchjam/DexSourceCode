@@ -104,11 +104,11 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	BlinkAll(apparatus);
 
 	// Stop acquiring.
-	ShowStatus( "Retrieving data ..." );
+	ShowStatus( apparatus, "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
 	// Check the quality of the data.
-	ShowStatus( "Checking data ..." );
+	ShowStatus( apparatus, "Checking data ..." );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );

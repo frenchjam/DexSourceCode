@@ -91,9 +91,11 @@ void BlinkAll ( DexApparatus *apparatus ) {
 
 }
 
-void ShowStatus ( const char *message ) {
+void ShowStatus ( DexApparatus *apparatus, const char *message ) {
 	ShowWindow( status_dlg, SW_SHOW );
 	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
+	apparatus->Comment( message );
+	apparatus->SignalEvent( message );
 }
 
 void HideStatus ( void ) {

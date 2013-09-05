@@ -605,6 +605,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 		
 	int status;
 
+	Comment( "Signal Normal Completion." );
 	for ( int blinks = 0; blinks < N_NORMAL_BLINKS; blinks++ ) {
 		
 		TargetsOff();
@@ -705,10 +706,12 @@ void DexApparatus::SignalConfiguration( void ) {
 // Log and signal an event to the ground.
 
 void DexApparatus::SignalEvent( const char *msg ) {
-	
 	monitor->SendEvent( msg );
-	
 }
+
+// Does nothing in execution mode.
+// Will be replaced by the compiler to add comments in the script files.
+void DexApparatus::Comment( const char *txt ) {}
 
 // Log events locally, for use by post hoc tests.
 
@@ -862,6 +865,9 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 		
 		// Signal to the ground what is the current configuration.
 		SignalConfiguration();
+
+		// Compute the target positions in that configuration.
+		SetTargetPositions();
 		
 		// Check what is the current configuration to be compared with the desired.
 		// Super classes implement tests to detect the target frame orientation and
@@ -877,7 +883,7 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 			  ( bar_position == DONT_CARE || bar_position == TargetBarIndifferent || bar_position == current_bar_position ) && 
 			  ( tapping == DONT_CARE || tapping == current_tapping ) 
 		   ) {
-			monitor->SendEvent( "Successful configuration check." );
+			SignalEvent( "Successful configuration check." );
 			return( NORMAL_EXIT );
 		}
 		
@@ -887,11 +893,11 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 			"Configuration incorrect.\n\nDesired configuration:\n\n  Subject Restraint:     %s\n  Target Bar:               %s\n  Tapping Surfaces:     %s", 
 			PostureString[posture], TargetBarString[bar_position], TappingSurfaceString[tapping] );
 		if ( response == IDABORT ) {
-			monitor->SendEvent( "Manual Abort from SelectAndCheckConfiguration." );
+			SignalEvent(  "Manual Abort from SelectAndCheckConfiguration." );
 			return( ABORT_EXIT );
 		}
 		if ( response == IDIGNORE ) {
-			monitor->SendEvent( "Ignore Error from SelectAndCheckConfiguration." );
+			SignalEvent(  "Ignore Error from SelectAndCheckConfiguration." );
 			return( IGNORE_EXIT );
 		}
 		// If we get here, it's a retry. Loop again to check if the change was successful.
@@ -950,7 +956,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 	int  mb_reply;
 	
 	// Log that the method has started.
-	monitor->SendEvent( "WaitUntilAtTarget - Start." );
+	SignalEvent(  "WaitUntilAtTarget - Start." );
 	DexTimerSet( timeout_timer, timeout );
 	while ( 1 ) {
 		
@@ -976,18 +982,18 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 					misorientation );
 				// Exit, signalling that the subject wants to abort.
 				if ( mb_reply == IDABORT ) {
-					monitor->SendEvent( "Manual Abort from WaitUntilAtTarget." );
+					SignalEvent(  "Manual Abort from WaitUntilAtTarget." );
 					return( ABORT_EXIT );
 				}
 				// Ignore the error and move on.
 				if ( mb_reply == IDIGNORE ) {
-					monitor->SendEvent( "Ignore Timeout from WaitUntilAtTarget." );
+					SignalEvent(  "Ignore Timeout from WaitUntilAtTarget." );
 					return( IGNORE_EXIT );
 				}
 				
 				// Try again for another timeout period. Thus, retry restarts the step, 
 				// not the entire script.
-				monitor->SendEvent( "Retry after Timeout from WaitUntilAtTarget." );
+				SignalEvent(  "Retry after Timeout from WaitUntilAtTarget." );
 				DexTimerSet( timeout_timer, waitTimeLimit );
 				
 			}
@@ -1032,7 +1038,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 		do {
 			// If the manipulandum has been in the zone long enough, return with SUCCESS.
 			if ( DexTimerTimeout( hold_timer ) ) {
-				monitor->SendEvent( "WaitUntilAtTarget - Success." );
+				SignalEvent(  "WaitUntilAtTarget - Success." );
 				return( NORMAL_EXIT );
 			}
 			// Continue to perform required updates during the wait period.

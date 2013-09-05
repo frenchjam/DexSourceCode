@@ -189,9 +189,20 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 	return( NORMAL_EXIT );
 }
 
+/**************************************************************************************************************/
+
+// These commands are used to set the target and sound states.
+// Here I have replaced the lowest level command which does that and only that.
+// The higher level commands SetTargetStateInternal() and SetSoundState() call
+//  these routines, and they automatically make calls to log the events.
+// If CMD_CTRL_TARGETS and CMD_CTRL_TONE also automatically log events, then
+//  one should change these funtions to overlay SetTargetStateInternal() and SetSoundState() instead.
+
 void DexCompiler::SetTargetStateInternal( unsigned long target_state ) {
+
 	// I assumed that targets will be set with a single 32-bit word.
 	// Instead, DEX treats horizontal and vertical with separate 16-bit words.
+	// Here I reconstuct the two DEX bits patterns from the simulator bit pattern.
 	unsigned short vstate, hstate;
 	vstate = verticalTargetBits( target_state );
 	hstate = horizontalTargetBits( target_state );
@@ -210,6 +221,8 @@ void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
 	}
 	fprintf( fp, "CMD_CTRL_TONE, %d, %d\n", ( volume ? 1 : 0 ), tone );
 }
+
+/**************************************************************************************************************/
 
 int DexCompiler::CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg ) {
 	fprintf( fp, "CMD_CHK_MANIP_VISIBILITY, %f, %f, \"%s\"\n", 
@@ -243,10 +256,6 @@ int DexCompiler::StopAcquisition( const char *msg ) {
 	return( NORMAL_EXIT );
 }
 
-void DexCompiler::MarkEvent( int event, unsigned long param ) {
-	fprintf( fp, "CMD_LOG_EVENT, %d\n", event );
-}
-
 int DexCompiler::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
 	fprintf( fp, "CMD_CHK_CODA_ALIGNMENT, 0x%08lx, %.0f, %d,\"%s\"\n", marker_mask, tolerance, n_good, msg );
 	return( NORMAL_EXIT );
@@ -271,11 +280,16 @@ void DexCompiler::SignalConfiguration( void ) {
 	first = false;
 }
 
-// It is normal to encounter this command in the task programs.
-// But it should not generate a command in the script.
-// I have it generate a comment for the moment.
+void DexCompiler::MarkEvent( int event, unsigned long param ) {
+	fprintf( fp, "CMD_LOG_EVENT, %d\n", event );
+}
+
 void DexCompiler::SignalEvent( const char *event ) {
-	fprintf( fp, "#SignalEvent, %s\n", event );
+	fprintf( fp, "CMD_LOG_MESSAGE, \"%s\"\n", event );
+}
+
+void DexCompiler::Comment( const char *txt ) {
+	fprintf( fp, "\n# %s\n", txt );
 }
 
 /*********************************************************************************/

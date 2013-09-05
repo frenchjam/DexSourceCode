@@ -56,6 +56,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
 #ifndef SKIP_PREP
+
+	ShowStatus( apparatus, "Initiating hardware configuration phase ..." );
+
 	// Tell the subject which configuration should be used.
 	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
 	//   blocks of trials in the same configuration.
@@ -65,6 +68,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the tracker is still aligned.
+	ShowStatus( apparatus, "Tracker alignment check ..." );
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
@@ -73,21 +77,16 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
-	apparatus->SetTargetPositions();
-	
-	// Send information about the actual configuration to the ground.
-	// This is redundant, because the SelectAndCheckConfiguration() command will do this as well.
-	// But I want to demonstrate that it can be used independent from the check as well.
-	apparatus->SignalConfiguration();
-	
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Take the seat, attach the belts and the wrist box.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	ShowStatus( apparatus, "Hardware configuration complete ..." );
+
 #endif
 
+	apparatus->Comment( "Starting set of targeted trials." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
@@ -148,11 +147,11 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	BlinkAll( apparatus );
 
 	// Stop collecting data.
-	ShowStatus( "Retrieving data ..." );
+	ShowStatus( apparatus, "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
 	// Check the quality of the data.
-	ShowStatus( "Checking data ..." );
+	ShowStatus( apparatus, "Checking data ..." );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );

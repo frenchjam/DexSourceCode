@@ -142,12 +142,12 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	BlinkAll( apparatus );
 
 	// Stop collecting data.
-	ShowStatus( "Retrieving data ..." );
+	ShowStatus( apparatus, "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
 	
 	// Check the quality of the data.
-	ShowStatus( "Checking data ..." );
+	ShowStatus( apparatus, "Checking data ..." );
 
 
 	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
