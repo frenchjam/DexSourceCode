@@ -600,28 +600,28 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case RUN_SCRIPT:
 		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, script ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 		
 	case OSCILLATION_TASK:
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunOscillations( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 		
 	case COLLISION_TASK:
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunCollisions( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case FRICTION_TASK:
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunFrictionMeasurement( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case TARGETED_TASK:
@@ -635,7 +635,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunDiscrete( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT ) plot_data( apparatus );
+		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case INSTALL_PROCEDURE:

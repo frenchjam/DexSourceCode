@@ -146,6 +146,11 @@ char *DexCompiler::quoteMessage( const char *message ) {
 
 	static char result[ 2 * DEX_MAX_MESSAGE_LENGTH ];
 
+	if ( !message ) {
+		strcpy( result, "\"\"" );
+		return( result );
+	}
+
 	int j = 0;
 	result[j++] = '\"';
 
@@ -313,19 +318,23 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 
 int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg ) {
 	AddStepNumber();
+	MessageBox( NULL, "CheckEarlyStarts()\nWhat about the filter constant?!?!", "DexCompiler", MB_OK | MB_ICONQUESTION );
 	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %f, %f, %s\n", n_false_starts, hold_time * 10, threshold, filter_constant, quoteMessage( msg ) );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg ) {
 	AddStepNumber();
+	UnhandledCommand( "CheckCorrectStartPosition()" );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg ) {
 	AddStepNumber();
+	UnhandledCommand( "CheckMovementDirection()" );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg ) {
 	AddStepNumber();
+	UnhandledCommand( "CheckForcePeaks()" );
 	return( NORMAL_EXIT );
 };
 
@@ -408,7 +417,7 @@ void DexCompiler::AddStepNumber( void ) {
 void DexCompiler::UnhandledCommand( const char *cmd ) {
 	char msg[2048];
 	sprintf( msg, "Warning - Command is not handled by DEX script processor: %s", cmd );
-	MessageBox( NULL, msg, "DEX Compiler Warning", MB_OK | MB_ICONEXCLAMATION );
+	MessageBox( NULL, msg, "DEX Compiler Warning", MB_OK | MB_ICONHAND );
 }
 void DexCompiler::SetTargetPositions( void ) { 
 	static bool first = true;
