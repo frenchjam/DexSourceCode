@@ -93,10 +93,9 @@ void DexCompiler::Initialize( void ) {
 	// Keep track of step number.
 	nextStep = 0;
 
-	// Start with all the targets off.
-	TargetsOff();
-	// Make sure that the sound is off.
-	SoundOff();
+	Comment( "Start with all the targets and sounds off, but don't signal the event." );
+	SetTargetStateInternal( 0x00000000 );
+	SetSoundStateInternal( 0, 0 );
 	
 }
 
@@ -111,6 +110,10 @@ void DexCompiler::Quit( void ) {
 }
 
 /***************************************************************************/
+
+// Translate the full-width target bit pattern used by the simulator into
+// separate bit patterns for the horizontal and vertical targets used by
+// the DEX hardware.
 
 unsigned short DexCompiler::verticalTargetBits( unsigned long targetBits ) {
 	return( targetBits & verticalTargetMask );
@@ -127,6 +130,17 @@ unsigned short DexCompiler::horizontalTargetBit( int target_id) {
 	if ( target_id >= nVerticalTargets ) return( 0x01 << ( target_id - nVerticalTargets ) );
 	else return( 0 );
 }
+
+/***************************************************************************/
+
+// Message strings have to be quoted by the DEX interpreter.
+// This puts quotes into the string itself.
+// Also, they have a limited length and for the moment commas have to be replaced.
+
+// The return value is a pointer to a static string that gets overwritten every time
+//  this routine is called. Since in general the result is used just once in a printf
+//  statement, this should not be a problem. But if you want to save the result, 
+//  you need to copy the resulting string.
 
 char *DexCompiler::quoteMessage( const char *message ) {
 
@@ -263,7 +277,8 @@ void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
 		once = true;
 	}
 	AddStepNumber();
-	fprintf( fp, "CMD_CTRL_TONE, %d, %d\n", ( volume ? 1 : 0 ), tone );
+	// On DEX, the bit is actually 'mute' or 'not mute'. This volume (on or off) to mute (on or off).
+	fprintf( fp, "CMD_CTRL_TONE, %d, %d\n", ( volume ? 0 : 1 ), tone );
 }
 
 /**************************************************************************************************************/

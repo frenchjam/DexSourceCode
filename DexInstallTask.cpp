@@ -85,32 +85,41 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	ShowStatus( apparatus, "Check tracker placement ..." );
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
-	Vector3 expected_position[2] = {{750.0, 700, 2000.0}, {-300.0, 700.0, 2000.0}};
+	Vector3 expected_position[2] = { {-300.0, 700.0, 2000.0}, {750.0, 700, 2000.0} };
 
-	// This is for the 'horizontal' coda, tilted downward. I don't know why it's -90 and not -45.0.
-	apparatus->SetQuaterniond( expected_orientation[1], -135.0, apparatus->iVector );
-	status = apparatus->CheckTrackerPlacement( 1, 
-										expected_position[1], codaUnitPositionTolerance, 
-										expected_orientation[1], codaUnitOrientationTolerance, 
-										"Placement error - Coda Unit 2." );
+	// At what orientation? Need to make 2 quaternion rotations for the vertical Coda bar.
+	apparatus->SetQuaterniond( transition_orientation[0],  90.0, apparatus->kVector );
+	apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
+	apparatus->MultiplyQuaternions(expected_orientation[0],transition_orientation[0],transition_orientation[1]);
+	status = apparatus->CheckTrackerPlacement( 0, 
+										expected_position[0], codaUnitPositionTolerance, 
+										expected_orientation[0], codaUnitOrientationTolerance, 
+										"Placement error - Coda Unit 1." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
+
 	if ( apparatus->nCodas > 1 ) {
-		// Need to make 2 quaternion rotations for the 2nd Coda bar.
-		apparatus->SetQuaterniond( transition_orientation[0],  90.0, apparatus->kVector );
-		apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
-		apparatus->MultiplyQuaternions(expected_orientation[0],transition_orientation[0],transition_orientation[1]);
-		status = apparatus->CheckTrackerPlacement( 0, 
-											expected_position[0], codaUnitPositionTolerance, 
-											expected_orientation[0], codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1." );
-		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	}
 
-	// Check that the tracker is still aligned.
-	ShowStatus( apparatus, "Check tracker alignment ..." );
-	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// This is for the 'horizontal' coda. I don't know if this is right.
+
+		// Flip it end over end.
+		apparatus->SetQuaterniond( transition_orientation[0],  180.0, apparatus->kVector );
+		// Tilt it down somewhat.
+		apparatus->SetQuaterniond( transition_orientation[1],   45.0, apparatus->iVector);
+		apparatus->MultiplyQuaternions(expected_orientation[1],transition_orientation[0],transition_orientation[1]);
+	
+		status = apparatus->CheckTrackerPlacement( 1, 
+											expected_position[1], codaUnitPositionTolerance, 
+											expected_orientation[1], codaUnitOrientationTolerance, 
+											"Placement error - Coda Unit 2." );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+		// Check that the trackers are still aligned with each other.
+		ShowStatus( apparatus, "Check tracker alignment ..." );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	}
+	
 
 	// Prompt the subject to place the manipulandum on the chair.
 	status = apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
