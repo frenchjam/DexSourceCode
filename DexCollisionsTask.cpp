@@ -55,12 +55,25 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// TODO: Add the appropriate hardware checks.
 
+	apparatus->SignalEvent( "Initiating set of collisions." );
 	Sleep( 1000 );
 	apparatus->StartAcquisition( "COLL", collisionMaxTrialTime );
 	
+	status = apparatus->WaitSubjectReady( "`Perform collisions task.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	status = apparatus->WaitSubjectReady( "`Pick up manipulandum between thumb and forefinger.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	// Check that the grip is properly centered.
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Grip not centered or not in hand." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Wait until the subject gets to the target before moving on.
 	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
+
+	apparatus->SignalEvent( "Ready to start." );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
@@ -70,7 +83,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 		apparatus->TargetsOff();
 		apparatus->TargetOn( collisionInitialTarget );
 		
-		// Allow a fixed time to reach the starting point before we start blinking.
+		// Allow a fixed time to reach the starting point before triggering the first movement.
 		apparatus->Wait( initialMovementTime );
 				
 		apparatus->TargetsOff();
@@ -83,11 +96,13 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
 		}
 
-		// Allow a fixed time to reach the target before we start blinking.
+		// Turn off the LED (sound) after a brief instant and turn the
 		apparatus->Wait( flashDuration );
 		apparatus->TargetsOff();
-		apparatus->TargetOn( collisionInitialTarget );
+		// Wait a fixed time to finish the movement.
 		apparatus->Wait( initialMovementTime - flashDuration );
+		// Light the center target to bring the hand back to the starting point.
+		apparatus->TargetOn( collisionInitialTarget );
 
 		
 	}
@@ -99,11 +114,15 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Stop acquiring.
 	apparatus->StopAcquisition();
 	
+	apparatus->SignalEvent( "Acquisition terminated." );
+	
 	// Check if trial was completed as instructed.
+	ShowStatus( apparatus, "Checking movement directions ..." );
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
+	ShowStatus( apparatus, "Checking collision forces ..." );
 	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 

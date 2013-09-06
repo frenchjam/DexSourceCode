@@ -44,6 +44,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	ShowStatus( apparatus, "Processing data ..." );
 	// Compute the offsets and insert them into force calculations.
 	apparatus->ComputeAndNullifyStrainGaugeOffsets();
+	ShowStatus( apparatus, "Force offsets nullified." );
 	HideStatus();
 
 	return( NORMAL_EXIT );
