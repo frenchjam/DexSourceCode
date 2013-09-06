@@ -27,6 +27,7 @@
 #include "DexTracker.h"
 #include "DexApparatus.h"
 
+
 /***************************************************************************/
 /*                                                                         */
 /*                                DexCompiler                              */
@@ -132,15 +133,25 @@ unsigned short DexCompiler::horizontalTargetBit( int target_id) {
 /***************************************************************************/
 
 int DexCompiler::WaitSubjectReady( const char *message ) {
-	char msg[64]; // Set to match limit on DEX.
-	// Transform linebreaks into back slashes.
-	// It remains to be seen if the DEX GUI can handle multi-line messages.
-	// If so, how should newines be indicated in the message string?
-	strncpy( msg, message, sizeof( msg ) );
-	msg[63] = 0;
-//	for ( int i = 0; i < strlen( msg ); i++ ) {
-//		if ( msg[i] == '\n' ) msg[i] = '\\';
-//	}
+
+	char msg[256]; // Set to match limit on DEX.
+
+	// Limit the message to the size handled by DEX and replace some special characters.
+	for ( int i = 0; i < DEX_MAX_MESSAGE_LENGTH - 1 && i < sizeof( msg ) - 2 && message[i] != 0; i++ ) {
+		// Transform linebreaks into \n.
+		if ( message[i] == '\n' ) {
+			msg[i++] = '\\';
+			msg[i] = 'n';
+		}
+		// The DEX parser is messing up on commas, even if they are in quotes.
+		else if ( message[i] == ',' ) {
+			msg[i] = ';';
+		}
+		// Otherwise, just copy.
+		else msg[i] = message[i];
+
+	}
+	msg[i] = 0;
 
 	// There is no provision yet for an image file, so just put an empty field.
 	// I did not foresee a timeout for this command. I am setting the timeout 
