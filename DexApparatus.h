@@ -358,6 +358,8 @@ private:
 	unsigned short verticalTargetBit( int target_id );
 	unsigned short horizontalTargetBit( int target_id);
 
+	char *quoteMessage( const char *message );
+
 protected:
 
 public:
