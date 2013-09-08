@@ -389,6 +389,16 @@ public:
 									double timeout, 
 									char *msg = "Timeout waiting to reach target." );
 	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = "Grip not centered"  );
+	int	 WaitDesiredForces( float min_grip, float max_grip, 
+									 float min_load, float max_load,
+									 Vector3 direction, float filter_constant,
+									 float hold_time, float timeout, const char *msg = "Desired force not achieved." );
+	int WaitSlip( float min_grip, float max_grip, 
+									 float min_load, float max_load, 
+									 Vector3 direction,
+									 float filter_constant,
+									 float slip_threshold, 
+									 float timeout, const char *msg = "Slip not achieved." );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 
@@ -405,9 +415,11 @@ public:
 	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
 	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
 	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
+	void ComputeAndNullifyStrainGaugeOffsets( void );
 
 	void MarkEvent( int event, unsigned long param = 0x00L );
 
+	int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment." );
 	int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 											float min_x, float max_x,
 											float min_y, float max_y,
