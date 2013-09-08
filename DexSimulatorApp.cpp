@@ -450,7 +450,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexADC		*adc;	
 	
 	int task = TARGETED_TASK;
-	char *script = "DexSampleScript.dex";
+	char script[256] = "DexSampleScript.dex";
 	int direction = VERTICAL;
 	bool eyes_closed = false;
 	bool use_compiler = false;
@@ -481,12 +481,24 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-osc"    ) ) task = OSCILLATION_TASK;
 	if ( strstr( lpCmdLine, "-oscillations"    ) ) task = OSCILLATION_TASK;
 	if ( strstr( lpCmdLine, "-targeted"    ) ) task = TARGETED_TASK;
-	if ( strstr( lpCmdLine, "-discrete"    ) ) task = DISCRETE_TASK;
+	if ( strstr( lpCmdLine, "-discrete"    ) ) {
+		task = DISCRETE_TASK;
+		strcpy( script, "DiscreteTask.dex" );
+	}
+
 	if ( strstr( lpCmdLine, "-coll"   ) ) task = COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-collisions"   ) ) task = COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-friction"   ) ) task = FRICTION_TASK;
 
-	if ( strstr( lpCmdLine, "-script" ) ) task = RUN_SCRIPT;
+
+	if ( strstr( lpCmdLine, "-script" ) ) {
+		char *ptr;
+		task = RUN_SCRIPT;
+		if ( ( ptr = strstr( lpCmdLine, "-script=" ) ) ) {
+			sscanf( ptr + strlen( "-script=" ), "%s", script );
+		}
+	}
+
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 
@@ -576,7 +588,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	// Create an apparatus by piecing together the components.
-	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, "TestScript.dex" );
+	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, script );
 	else apparatus = new DexApparatus( tracker, targets, sounds, adc );
 
 	apparatus->Initialize();
