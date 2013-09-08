@@ -59,6 +59,7 @@ private:
 	void UpdateForceToLED( float grip, float load );
 
 	HWND	status_dlg;
+	HWND	mass_dlg;
 
 
 protected:
@@ -152,7 +153,8 @@ public:
 								DexTargets			*targets,
 								DexSounds			*sounds,
 								DexADC				*adc,
-								HWND				dlg
+								HWND				status_dlg,
+								HWND				mass_dlg
 							);
 	
 	// Called once all the components are defined.

@@ -102,7 +102,7 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 	// Create a window to display the virtual speaker.
 	GetWindowRect( GetDesktopWindow(), &rect );
 	width_in_pixels = ( rect.bottom - rect.top ) / 10;
-	height_in_pixels = width_in_pixels + 40;
+	height_in_pixels = width_in_pixels + 48;
 
 	window = new OpenGLWindow();
 	// I would rather not have a border on this window, but not having

@@ -52,13 +52,16 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 						    DexTargets  *targets,
 							DexSounds	*sounds,
 							DexADC		*adc,
-							HWND		dlg ) {
+							HWND		status_dlg,
+							HWND		mass_dlg
+						) {
 
 	this->tracker = tracker;
 	this->targets = targets;
 	this->sounds = sounds;
 	this->adc = adc;
-	status_dlg = dlg;
+	this->status_dlg = status_dlg;
+	this->mass_dlg = mass_dlg;
 
 }
 

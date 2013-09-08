@@ -35,7 +35,7 @@ int targetSequence[] = { 2, 5, 2, 11, 8, 5, 2, 11, 2, 8,
 						 8, 2, 11, 2, 8, 5, 11, 2, 11, 2,
 						 11, 8, 11, 5, 8, 2, 11, 11, 9, 12
 						};	// List of targets for point-to-point movements.
-int targetSequenceN = 40;
+int targetSequenceN = 4;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
 double targetedMinMovementExtent = 10.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.

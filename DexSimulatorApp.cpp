@@ -76,6 +76,7 @@ float grip_range = 25.0;
 
 HWND	mouse_tracker_dlg;
 HWND	status_dlg;
+HWND	mass_dlg;
 
 double Vt[DEX_MAX_MARKER_FRAMES];
 
@@ -595,7 +596,12 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		// Create a dialog box to emulate the DEX status window.
 		status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
-		apparatus = new DexApparatus( tracker, targets, sounds, adc, status_dlg );
+
+		// Create a dialog box to emulate selection of the extra masses.
+		mass_dlg = CreateDialog(hInstance, (LPCSTR)IDD_MASS, HWND_DESKTOP, dexDlgCallback );
+		CheckRadioButton( mass_dlg, IDC_MASS1A, IDC_RADIO12, IDC_MASS1A ); 
+
+		apparatus = new DexApparatus( tracker, targets, sounds, adc, status_dlg, mass_dlg );
 		init_plots();
 
 	}
@@ -603,10 +609,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	else apparatus = new DexCompiler( outputScript );
 
 	apparatus->Initialize();
-
-	apparatus->HideStatus();
 	
-
 	// If the command line flag was set to do the transducer offset cancellation, then do it.
 	if ( raz ) {
 
