@@ -49,6 +49,9 @@ double copForceThreshold = 0.25;			// Threshold of grip force to test if the man
 double copWaitTime = 1.0;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
 
+char inputScript[256] = "DexSampleScript.dex";
+char outputScript[256] = "DexSampleScript.dex";
+
 
 /*********************************************************************************/
 
@@ -450,7 +453,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexADC		*adc;	
 	
 	int task = TARGETED_TASK;
-	char script[256] = "DexSampleScript.dex";
 	int direction = VERTICAL;
 	bool eyes_closed = false;
 	bool use_compiler = false;
@@ -481,37 +483,41 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-osc"    ) ) task = OSCILLATION_TASK;
 	if ( strstr( lpCmdLine, "-oscillations"    ) ) task = OSCILLATION_TASK;
 	if ( strstr( lpCmdLine, "-targeted"    ) ) task = TARGETED_TASK;
-	if ( strstr( lpCmdLine, "-discrete"    ) ) {
-		task = DISCRETE_TASK;
-		strcpy( script, "DiscreteTask.dex" );
-	}
-
+	if ( strstr( lpCmdLine, "-discrete"    ) ) task = DISCRETE_TASK;
 	if ( strstr( lpCmdLine, "-coll"   ) ) task = COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-collisions"   ) ) task = COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-friction"   ) ) task = FRICTION_TASK;
-
-
-	if ( strstr( lpCmdLine, "-script" ) ) {
-		char *ptr;
-		task = RUN_SCRIPT;
-		if ( ( ptr = strstr( lpCmdLine, "-script=" ) ) ) {
-			sscanf( ptr + strlen( "-script=" ), "%s", script );
-		}
-	}
-
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 
-	// We can set some parameters for certain tasks.
+
+	// This should invoke the command interpreter on the specified script.
+	// For the moment, the interpreter is not working.
+	if ( strstr( lpCmdLine, "-script" ) ) {
+		char *ptr;
+		if ( ( ptr = strstr( lpCmdLine, "-script=" ) ) ) {
+			sscanf( ptr + strlen( "-script=" ), "%s", inputScript );
+		}
+		task = RUN_SCRIPT;	
+	}
+
+	// This says to compile the C++ code into a DEX script, instead of executing it.
+	// You can specify the name of the output script.
+	if ( strstr( lpCmdLine, "-compile" ) ) {
+		char *ptr;
+		if ( ( ptr = strstr( lpCmdLine, "-compile=" ) ) ) {
+			sscanf( ptr + strlen( "-compile=" ), "%s", outputScript );
+		}
+		use_compiler = true;
+	}
+
+	// We can set some parameters for certain tasks from the command line.
 
 	if ( strstr( lpCmdLine, "-horiz"  ) ) direction = HORIZONTAL;
 	if ( strstr( lpCmdLine, "-vert"  ) ) direction = VERTICAL;
 
 	if ( strstr( lpCmdLine, "-open"  ) ) eyes_closed = false;
 	if ( strstr( lpCmdLine, "-closed"  ) ) eyes_closed = true;
-
-	if ( strstr( lpCmdLine, "-compile"  ) ) use_compiler = true;
-
 
 	switch ( tracker_type ) {
 
@@ -588,7 +594,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	// Create an apparatus by piecing together the components.
-	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, script );
+	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, outputScript );
 	else apparatus = new DexApparatus( tracker, targets, sounds, adc );
 
 	apparatus->Initialize();
@@ -596,7 +602,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Keep track of the elapsed time from the start of the first trial.
 	DexTimerStart( session_timer );
 
-	init_plots();
+	if ( !use_compiler ) init_plots();
 
 	// Create a dialog box locally that we can display while the data is being saved.
 	status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
@@ -611,7 +617,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 		
 	case RUN_SCRIPT:
-		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, script ) ) );
+		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, inputScript ) ) );
 		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 		
