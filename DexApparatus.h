@@ -364,11 +364,7 @@ protected:
 
 public:
 
-	DexCompiler( DexTracker			*tracker,
-				 DexTargets			*targets,
-				 DexSounds			*sounds,
-				 DexADC				*adc,
-				 char *filename = DEFAULT_SCRIPT_FILENAME );
+	DexCompiler( char *filename = DEFAULT_SCRIPT_FILENAME );
 
 	void Initialize( void );
 	void Quit( void );

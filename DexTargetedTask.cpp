@@ -57,6 +57,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 #ifndef SKIP_PREP
 
+	// Clearly demark this operation in the script file. 
+	apparatus->Comment( "################################################################################" );
+
 	ShowStatus( apparatus, "Initiating hardware configuration phase ..." );
 
 	// Tell the subject which configuration should be used.
@@ -83,6 +86,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	ShowStatus( apparatus, "Hardware configuration complete ..." );
+
+	// Clearly demark this operation in the script file. 
+	apparatus->Comment( "################################################################################" );
 
 #endif
 

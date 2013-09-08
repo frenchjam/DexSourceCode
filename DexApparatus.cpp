@@ -72,6 +72,7 @@ void DexApparatus::Initialize( void ) {
 	nTargets = nVerticalTargets + nHorizontalTargets;
 
 	// Create bit masks for the horizontal and vertical targets.
+	// If you change something here, don't forget to change it in the derived classes as well.
 	verticalTargetMask = 0;
 	for ( int i = 0; i < nVerticalTargets; i++ ) verticalTargetMask = ( verticalTargetMask << 1 ) + 1;
 	horizontalTargetMask = 0;
