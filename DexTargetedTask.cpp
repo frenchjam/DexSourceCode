@@ -60,39 +60,41 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Clearly demark this operation in the script file. 
 	apparatus->Comment( "################################################################################" );
 
-	ShowStatus( apparatus, "Initiating hardware configuration phase ..." );
+	apparatus->ShowStatus( "Initiating hardware configuration phase ..." );
 
 	// Tell the subject which configuration should be used.
 	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
 	//   blocks of trials in the same configuration.
 	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position. Place the Target Bar in the %s position. Place the tapping surfaces in the %s position. Press <OK> when ready.",
+		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\nPress <OK> when ready.",
 		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the tracker is still aligned.
-	ShowStatus( apparatus, "Tracker alignment check ..." );
+	apparatus->ShowStatus( "Tracker alignment check ..." );
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
+	apparatus->ShowStatus( "Hardware configuration check ..." );
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
+
+	apparatus->ShowStatus( "Ready to start test ..." );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Take the seat and attach the belts and the wrist box. Press OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	ShowStatus( apparatus, "Hardware configuration complete ..." );
 
 	// Clearly demark this operation in the script file. 
 	apparatus->Comment( "################################################################################" );
 
 #endif
 
-	apparatus->Comment( "Starting set of targeted trials." );
+	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand. Be sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
@@ -154,11 +156,11 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	BlinkAll( apparatus );
 
 	// Stop collecting data.
-	ShowStatus( apparatus, "Retrieving data ..." );
+	apparatus->ShowStatus( "Retrieving data ..." );
 	apparatus->StopAcquisition();
 	
 	// Check the quality of the data.
-	ShowStatus( apparatus, "Checking data ..." );
+	apparatus->ShowStatus( "Checking data ..." );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -166,7 +168,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, direction_vector, "Movement amplitude out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	HideStatus();
+	apparatus->HideStatus();
 	
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( "Block terminated normally." );

@@ -21,6 +21,9 @@
 #include <VectorsMixin.h>
 #include <DexTimers.h>
 
+// The dialog boxes are defined at the executable level.
+#include "..\DexSimulatorApp\resource.h"
+
 #include "DexMonitorServer.h"
 #include "Dexterous.h"
 #include "DexTargets.h"
@@ -48,12 +51,14 @@ DexApparatus::DexApparatus( void ) {
 DexApparatus::DexApparatus( DexTracker  *tracker,
 						    DexTargets  *targets,
 							DexSounds	*sounds,
-							DexADC		*adc ) {
+							DexADC		*adc,
+							HWND		dlg ) {
 
 	this->tracker = tracker;
 	this->targets = targets;
 	this->sounds = sounds;
 	this->adc = adc;
+	status_dlg = dlg;
 
 }
 
@@ -792,6 +797,23 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 
 }
 
+/***************************************************************************/
+
+// Show the status to the subject.
+
+void DexApparatus::ShowStatus ( const char *message ) {
+	ShowWindow( status_dlg, SW_SHOW );
+	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
+	// If we are updating the status, it is usually an interesting break point in the procedure.
+	// So we automatically insert a comment in the script file to make it easy to find.
+	Comment( message );
+	// Tell the ground the same information.
+	SignalEvent( message );
+}
+
+void DexApparatus::HideStatus ( void ) {
+	ShowStatus( "" );
+}
 
 
 /*********************************************************************************/
@@ -1587,7 +1609,7 @@ int DexApparatus::StopAcquisition( const char *msg ) {
 	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	adc->StopAcquisition();
-	monitor->SendEvent( "Acquisition terminated." );
+	ShowStatus( "Acquisition terminated.\nComputing kinematic values ..." );
 	// Retrieve the marker data.
 	for ( unit = 0; unit <= nCodas; unit++ ) {
 		nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition[unit], DEX_MAX_MARKER_FRAMES, unit );
@@ -1649,6 +1671,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	sprintf( fileroot, "DexSimulatorOutput.%s", tag );
 	
 	// Write a file with raw marker data.
+	ShowStatus( "Writing marker data ..." );
 	sprintf( filename, "%s.mrk", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
@@ -1677,6 +1700,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 	
 	// Write a file with the computed manipulandum position and orientation.
+	ShowStatus( "Writing kinematic data ..." );
 	sprintf( filename, "%s.mnp", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime\tVisible\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
@@ -1698,6 +1722,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 
 	// Write a file with raw adc data.
+	ShowStatus( "Writing ADC data ..." );
 	sprintf( filename, "%s.adc", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
@@ -1713,6 +1738,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 		
 	// Write a file with computed force data.
+	ShowStatus( "Writing computed analog data ..." );
 	sprintf( filename, "%s.frc", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
@@ -1740,6 +1766,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	fclose( fp );
 	// Note that the file was written.
 	monitor->SendEvent( "Data file written: %s", filename );
+	HideStatus();
 
 	
 }

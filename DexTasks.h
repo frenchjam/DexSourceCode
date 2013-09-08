@@ -58,8 +58,6 @@ extern unsigned long fovMarkerMask;			// A bit mask describing which markers are
 
 
 // Some helper functions provided by DexSimulatorApp.
-void ShowStatus ( DexApparatus *apparatus, const char *message );
-void HideStatus ( void );
 void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );

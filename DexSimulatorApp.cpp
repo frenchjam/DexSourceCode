@@ -74,7 +74,7 @@ float cop_range = 0.03;
 float load_range = 100.0;
 float grip_range = 25.0;
 
-HWND	dlg;
+HWND	mouse_tracker_dlg;
 HWND	status_dlg;
 
 double Vt[DEX_MAX_MARKER_FRAMES];
@@ -92,17 +92,6 @@ void BlinkAll ( DexApparatus *apparatus ) {
 	apparatus->TargetsOff();
 	apparatus->Wait( flashDuration );
 
-}
-
-void ShowStatus ( DexApparatus *apparatus, const char *message ) {
-	ShowWindow( status_dlg, SW_SHOW );
-	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
-	apparatus->Comment( message );
-	apparatus->SignalEvent( message );
-}
-
-void HideStatus ( void ) {
-	ShowWindow( status_dlg, SW_HIDE );
 }
 
 int ParseForPosture ( const char *cmd ) {
@@ -534,16 +523,16 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		case MOUSE_TRACKER:
 
-			dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexDlgCallback );
-			CheckRadioButton( dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
-			CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
-			CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
-			CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
-			CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
-			CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
-			ShowWindow( dlg, SW_SHOW );
+			mouse_tracker_dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexDlgCallback );
+			CheckRadioButton( mouse_tracker_dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
+			CheckRadioButton( mouse_tracker_dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
+			CheckRadioButton( mouse_tracker_dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
+			CheckRadioButton( mouse_tracker_dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
+			CheckDlgButton( mouse_tracker_dlg, IDC_CODA_ALIGNED, true );
+			CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED, true );
+			ShowWindow( mouse_tracker_dlg, SW_SHOW );
 
-			tracker = new DexMouseTracker( dlg );
+			tracker = new DexMouseTracker( mouse_tracker_dlg );
 			break;
 
 		case CODA_TRACKER:
@@ -596,7 +585,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 			break;
 
 		case MOUSE_ADC:
-			adc = new DexMouseADC( dlg, GLM_CHANNELS ); 
+			adc = new DexMouseADC( mouse_tracker_dlg, GLM_CHANNELS ); 
 			break;
 
 		default:
@@ -604,7 +593,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		}
 
-		apparatus = new DexApparatus( tracker, targets, sounds, adc );
+		// Create a dialog box to emulate the DEX status window.
+		status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
+		apparatus = new DexApparatus( tracker, targets, sounds, adc, status_dlg );
 		init_plots();
 
 	}
@@ -613,9 +604,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	apparatus->Initialize();
 
-	// Create a dialog box locally that we can display while the data is being saved.
-	status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
-	HideStatus();
+	apparatus->HideStatus();
 	
 
 	// If the command line flag was set to do the transducer offset cancellation, then do it.

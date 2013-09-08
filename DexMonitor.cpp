@@ -700,6 +700,9 @@ int DexMonitorServer::SendEvent( const char* format, ... ) {
 	
 	// Create a timestamped event.
 	sprintf( packet, "DEX_EVENT %8u %s %s * %s", messageCounter, datestr, timestr, message );
+
+	// Take out any newlines.
+	for ( char *ptr = packet; *ptr && ptr < packet + sizeof( packet ); ptr++ ) if ( *ptr == '\n' ) *ptr = '|';
 	
 	// Broadcast the event on UDP.
 	DexUDPSendPacket( &udp_parameters, packet );

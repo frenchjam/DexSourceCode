@@ -117,12 +117,12 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->SignalEvent( "Acquisition terminated." );
 	
 	// Check if trial was completed as instructed.
-	ShowStatus( apparatus, "Checking movement directions ..." );
+	apparatus->ShowStatus( "Checking movement directions ..." );
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
-	ShowStatus( apparatus, "Checking collision forces ..." );
+	apparatus->ShowStatus( "Checking collision forces ..." );
 	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 

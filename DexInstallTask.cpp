@@ -78,7 +78,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
-	ShowStatus( apparatus, "Checking field of view ..." );
+	apparatus->ShowStatus( "Checking field of view ..." );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	if ( apparatus->nCodas > 1 ) {
@@ -87,12 +87,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Perform the alignment based on those markers.
-	ShowStatus( apparatus, "Performing alignment ..." );
+	apparatus->ShowStatus( "Performing alignment ..." );
 	status = apparatus->PerformTrackerAlignment();
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
-	ShowStatus( apparatus, "Check tracker placement ..." );
+	apparatus->ShowStatus( "Check tracker placement ..." );
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
 	Vector3 expected_position[2] = { {-622.0, 267.0, 2382.0}, {-178.0, 828.0, 2168.0} };
@@ -124,7 +124,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
-		ShowStatus( apparatus, "Check tracker alignment ..." );
+		apparatus->ShowStatus( "Check tracker alignment ..." );
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misaligned!" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -132,16 +132,16 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	
 
 	// Perform a short acquisition to measure where the manipulandum is.
-	ShowStatus( apparatus, "Acquire data ..." );
+	apparatus->ShowStatus( "Acquire data ..." );
 	apparatus->StartAcquisition( "ALGN", maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
 
-	ShowStatus( apparatus, "Check visibility ..." );
+	apparatus->ShowStatus( "Check visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum obscured from view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	HideStatus();
+	apparatus->HideStatus();
 
 	return( NORMAL_EXIT );
 }

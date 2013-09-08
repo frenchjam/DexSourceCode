@@ -454,7 +454,14 @@ void DexCompiler::MarkEvent( int event, unsigned long param ) {
 
 void DexCompiler::SignalEvent( const char *event ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_LOG_MESSAGE, 1, %s\n", quoteMessage( event ) );
+	// Log a message, without showing it to the subject.
+	fprintf( fp, "CMD_LOG_MESSAGE, 0, %s\n", quoteMessage( event ) );
+}
+
+void DexCompiler::ShowStatus (const char *message ) {
+	AddStepNumber();
+	// Log the message and show it on the DEX screen.
+	fprintf( fp, "CMD_LOG_MESSAGE, 1, %s\n", quoteMessage( message ) );
 }
 
 void DexCompiler::Comment( const char *txt ) {

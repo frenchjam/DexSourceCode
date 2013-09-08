@@ -40,17 +40,17 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	if ( status == ABORT_EXIT ) return( status );
 
 	// Acquire some data.
-	ShowStatus( apparatus, "Acquiring offsets ..." );
+	apparatus->ShowStatus( "Acquiring offsets ..." );
 	apparatus->StartAcquisition( "OFFS", maxTrialDuration );
 	apparatus->Wait( offsetAcquireTime );
-	ShowStatus( apparatus, "Saving data ..." );
+	apparatus->ShowStatus( "Saving data ..." );
 	apparatus->StopAcquisition();
 
-	ShowStatus( apparatus, "Processing data ..." );
+	apparatus->ShowStatus( "Processing data ..." );
 	// Compute the offsets and insert them into force calculations.
 	apparatus->ComputeAndNullifyStrainGaugeOffsets();
-	ShowStatus( apparatus, "Force offsets nullified." );
-	HideStatus();
+	apparatus->ShowStatus( "Force offsets nullified." );
+	apparatus->HideStatus();
 
 	return( NORMAL_EXIT );
 

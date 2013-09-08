@@ -80,11 +80,11 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, slipThreshold, slipTimeout, "Slip not achieved."  );
 	apparatus->MarkEvent( SLIP_OK );
-	HideStatus();
+	apparatus->HideStatus();
 
 	apparatus->StopAcquisition();
 
-	HideStatus();
+	apparatus->HideStatus();
 
 	return( NORMAL_EXIT );
 

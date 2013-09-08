@@ -104,14 +104,14 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 //	apparatus->TargetOn(1);
 //	apparatus->TargetOn(2);
 	apparatus->MarkEvent( SLIP_OK );
-	HideStatus();
+	apparatus->HideStatus();
 
 //    apparatus->TargetOn(0);
 //	apparatus->TargetOn(1);
 //	apparatus->TargetOn(2);
 	apparatus->StopAcquisition();
 
-	HideStatus();
+	apparatus->HideStatus();
 
 	return( NORMAL_EXIT );
 

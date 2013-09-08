@@ -58,6 +58,8 @@ private:
 	void MapForceToLED( float min_grip, float max_grip, float min_load, float max_load );
 	void UpdateForceToLED( float grip, float load );
 
+	HWND	status_dlg;
+
 
 protected:
 	
@@ -149,7 +151,8 @@ public:
 	DexApparatus::DexApparatus(	DexTracker			*tracker,
 								DexTargets			*targets,
 								DexSounds			*sounds,
-								DexADC				*adc 
+								DexADC				*adc,
+								HWND				dlg
 							);
 	
 	// Called once all the components are defined.
@@ -280,6 +283,10 @@ public:
 	virtual void FindAnalysisEventRange( int &first, int &last );
 	virtual void FindAnalysisFrameRange( int &first, int &last );
 	
+	// Show status to subject.
+	void DexApparatus::ShowStatus (const char *message );
+	void DexApparatus::HideStatus ( void );
+
 	// Tracker installation and alignment.
 	virtual int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 											float min_x, float max_x,
@@ -433,6 +440,7 @@ public:
 	void SignalConfiguration( void );
 	void SignalEvent( const char *event );
 	void Comment( const char *txt );
+	void ShowStatus (const char *message );
 
 	void AddStepNumber( void );
 
