@@ -440,7 +440,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 {
 	
 	DexApparatus *apparatus;
-	DexTimer session_timer;
 	
 	TrackerType	tracker_type;
 	TargetType	target_type;
@@ -455,7 +454,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	int task = TARGETED_TASK;
 	int direction = VERTICAL;
 	bool eyes_closed = false;
-	bool use_compiler = false;
+	bool compile = false;
+	bool raz = false;
 
 	int return_code;
 	
@@ -490,6 +490,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 
+	// Resetting the offsets on the force sensors can be considered as a task in itself.
+	// Here we give the opportunity to execute it in addition to the specified task, making
+	//  it available to be run at the start of a simuation session.
+
+	if ( strstr( lpCmdLine, "-raz"  ) ) raz = true;
+
+
 
 	// This should invoke the command interpreter on the specified script.
 	// For the moment, the interpreter is not working.
@@ -508,7 +515,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		if ( ( ptr = strstr( lpCmdLine, "-compile=" ) ) ) {
 			sscanf( ptr + strlen( "-compile=" ), "%s", outputScript );
 		}
-		use_compiler = true;
+		compile = true;
 	}
 
 	// We can set some parameters for certain tasks from the command line.
@@ -519,97 +526,108 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-open"  ) ) eyes_closed = false;
 	if ( strstr( lpCmdLine, "-closed"  ) ) eyes_closed = true;
 
-	switch ( tracker_type ) {
+	// Now we create the component devices. This need not be done if we are in compiler mode.
 
-	case MOUSE_TRACKER:
+	if ( !compile ) {
 
-		dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexDlgCallback );
-		CheckRadioButton( dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
-		CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
-		CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
-		CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
-		CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
-		CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
-		ShowWindow( dlg, SW_SHOW );
+		switch ( tracker_type ) {
 
-		tracker = new DexMouseTracker( dlg );
-		break;
+		case MOUSE_TRACKER:
 
-	case CODA_TRACKER:
-		tracker = new DexCodaTracker();
-		break;
+			dlg = CreateDialog(hInstance, (LPCSTR)IDD_CONFIG, HWND_DESKTOP, dexDlgCallback );
+			CheckRadioButton( dlg, IDC_SEATED, IDC_SUPINE, IDC_SEATED ); 
+			CheckRadioButton( dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
+			CheckRadioButton( dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
+			CheckRadioButton( dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
+			CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+			CheckDlgButton( dlg, IDC_CODA_POSITIONED, true );
+			ShowWindow( dlg, SW_SHOW );
 
-	case RTNET_TRACKER:
-		tracker = new DexRTnetTracker();
-		break;
+			tracker = new DexMouseTracker( dlg );
+			break;
 
-	default:
-		MessageBox( NULL, "Unkown tracker type.", "Error", MB_OK );
+		case CODA_TRACKER:
+			tracker = new DexCodaTracker();
+			break;
 
-	}
+		case RTNET_TRACKER:
+			tracker = new DexRTnetTracker();
+			break;
+
+		default:
+			MessageBox( NULL, "Unkown tracker type.", "Error", MB_OK );
+
+		}
+			
+		switch ( target_type ) {
+
+		case GLM_TARGETS:
+			targets = new DexNiDaqTargets(); // GLM
+			break;
+
+		case SCREEN_TARGETS:
+			targets = new DexScreenTargets(); 
+			break;
+
+		default:
+			MessageBox( NULL, "Unknown target type.", "Error", MB_OK );
+
+		}
+
+		switch ( sound_type ) {
+
+		case SOUNDBLASTER_SOUNDS:
+			sounds = new DexScreenSounds(); // Soundblaster sounds not yet implemented.
+			break;
+
+		case SCREEN_SOUNDS:
+			sounds = new DexScreenSounds(); 
+			break;
+
+		default:
+			MessageBox( NULL, "Unknown sound type.", "Error", MB_OK );
+
+		}
 		
-	switch ( target_type ) {
+		switch ( adc_type ) {
 
-	case GLM_TARGETS:
-		targets = new DexNiDaqTargets(); // GLM
-		break;
+		case GLM_ADC:
+			adc = new DexNiDaqADC(); // GLM targets not yet implemented.
+			break;
 
-	case SCREEN_TARGETS:
-		targets = new DexScreenTargets(); 
-		break;
+		case MOUSE_ADC:
+			adc = new DexMouseADC( dlg, GLM_CHANNELS ); 
+			break;
 
-	default:
-		MessageBox( NULL, "Unknown target type.", "Error", MB_OK );
+		default:
+			MessageBox( NULL, "Unknown adc type.", "Error", MB_OK );
 
-	}
+		}
 
-	switch ( sound_type ) {
-
-	case SOUNDBLASTER_SOUNDS:
-		sounds = new DexScreenSounds(); // Soundblaster sounds not yet implemented.
-		break;
-
-	case SCREEN_SOUNDS:
-		sounds = new DexScreenSounds(); 
-		break;
-
-	default:
-		MessageBox( NULL, "Unknown sound type.", "Error", MB_OK );
-
-	}
-	
-	switch ( adc_type ) {
-
-	case GLM_ADC:
-		adc = new DexNiDaqADC(); // GLM targets not yet implemented.
-		break;
-
-	case MOUSE_ADC:
-		adc = new DexMouseADC( dlg, GLM_CHANNELS ); 
-		break;
-
-	default:
-		MessageBox( NULL, "Unknown adc type.", "Error", MB_OK );
+		apparatus = new DexApparatus( tracker, targets, sounds, adc );
+		init_plots();
 
 	}
 
-	// Create an apparatus by piecing together the components.
-	if ( use_compiler ) apparatus = new DexCompiler( tracker, targets, sounds, adc, outputScript );
-	else apparatus = new DexApparatus( tracker, targets, sounds, adc );
+	else apparatus = new DexCompiler( outputScript );
 
 	apparatus->Initialize();
-
-	// Keep track of the elapsed time from the start of the first trial.
-	DexTimerStart( session_timer );
-
-	if ( !use_compiler ) init_plots();
 
 	// Create a dialog box locally that we can display while the data is being saved.
 	status_dlg = CreateDialog(hInstance, (LPCSTR)IDD_STATUS, HWND_DESKTOP, dexDlgCallback );
 	HideStatus();
 	
-	// Run one of the protocols.
+
+	// If the command line flag was set to do the transducer offset cancellation, then do it.
+	if ( raz ) {
+
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+
+	}
+
 	
+	// Run one of the protocols.
 	switch ( task ) {
 
 	case CALIBRATE_TARGETS:
@@ -618,42 +636,30 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case RUN_SCRIPT:
 		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, inputScript ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
+		break;
+		
+	case OFFSETS_TASK:
+		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		break;
 		
 	case OSCILLATION_TASK:
-		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunOscillations( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 		
 	case COLLISION_TASK:
-		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunCollisions( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case FRICTION_TASK:
-		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunFrictionMeasurement( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case TARGETED_TASK:
-		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunTargeted( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case DISCRETE_TASK:
-		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 		while ( RETRY_EXIT == ( return_code = RunDiscrete( apparatus, lpCmdLine ) ) );
-		if ( return_code != ABORT_EXIT && !use_compiler ) plot_data( apparatus );
 		break;
 
 	case INSTALL_PROCEDURE:
@@ -661,6 +667,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	}
+	if ( return_code != ABORT_EXIT && !compile ) plot_data( apparatus );
 	
 	apparatus->Quit();
 	return 0;

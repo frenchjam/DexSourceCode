@@ -31,6 +31,8 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	int status;
 
+	// Clearly demark this operation in the script file. 
+	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operation to cancel force sensor offsets." );
 	apparatus->SignalEvent( "Preparing for force offset acquisition ..." );
 
