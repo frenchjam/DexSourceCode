@@ -27,7 +27,7 @@
 
 
 // Targeted trial parameters;
-int delaySequence[] = { 1, 1, 2, 3, 1, 1, 2, 3, 1 };	// Delays between the discrete movements.
+int delaySequence[] = { 3, 5, 4, 3, 5, 5, 5, 3, 4 };	// Delays between the discrete movements.
 int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
 int discreteTargets[2] = { 3, 7};
 
@@ -66,14 +66,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// I am calling this method separately, but it could be incorporated into SelectAndCheckConfiguration().
-	apparatus->SetTargetPositions();
-	
-	// Send information about the actual configuration to the ground.
-	// This is redundant, because the SelectAndCheckConfiguration() command will do this as well.
-	// But I want to demonstrate that it can be used independent from the check as well.
-	apparatus->SignalConfiguration();
-	
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );

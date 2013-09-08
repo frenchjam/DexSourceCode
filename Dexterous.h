@@ -83,9 +83,9 @@
 #define N_ERROR_BLINKS 3
 #define N_NORMAL_BLINKS 3
 
-#define BEEP_TONE	4
+#define BEEP_TONE	7
 #define BEEP_VOLUME	8
-#define BEEP_DURATION 0.200
+#define BEEP_DURATION 0.2
 
 /* 
  * The follwing constants allow one to select different configurations of the target LEDs.

@@ -31,6 +31,9 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	int status;
 
+	apparatus->Comment( "Operation to cancel force sensor offsets." );
+	apparatus->SignalEvent( "Preparing for force offset acquisition ..." );
+
 	status = apparatus->WaitSubjectReady( "Place manipulandum in holder. !!! REMOVE HAND !!! Press OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
