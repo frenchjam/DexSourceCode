@@ -95,15 +95,27 @@ void BlinkAll ( DexApparatus *apparatus ) {
 
 }
 
+DexMass ParseForMass ( const char *cmd ) {
+	if ( !cmd ) return( MassIndifferent );
+	if ( strstr( cmd, "-small" ) ) return( MassSmall );
+	else if ( strstr( cmd, "-medium" ) ) return( MassMedium );
+	else if ( strstr( cmd, "-large" ) ) return( MassLarge );
+	else if ( strstr( cmd, "-nomass" ) ) return( MassNone );
+	else return( MassIndifferent );
+}
+
+
 int ParseForPosture ( const char *cmd ) {
-	if ( cmd && strstr( cmd, "-sup" ) ) return( SUPINE );
+	if ( !cmd ) return( DEFAULT );
+	if ( strstr( cmd, "-sup" ) ) return( SUPINE );
 	else if ( strstr( cmd, "-up" ) ) return( UPRIGHT );
 	else return( DEFAULT );
 }
 
 
 int ParseForEyeState ( const char *cmd ) {
-	if ( cmd && strstr( cmd, "-open" ) ) return( OPEN );
+	if ( !cmd ) return( OPEN );
+	if ( strstr( cmd, "-open" ) ) return( OPEN );
 	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
 	else return( DEFAULT );
 }
@@ -113,7 +125,15 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, 
 	int direction = VERTICAL;
 	int pos = ParseForPosture( cmd );	
 
-	if ( cmd && strstr( cmd, "-ver" ) ) direction = VERTICAL;
+	if ( !cmd ) {
+		posture = UPRIGHT;
+		bar_position = TargetBarRight;
+		apparatus->CopyVector( direction_vector, apparatus->jVector );
+		apparatus->CopyQuaternion( desired_orientation, uprightNullOrientation );
+		return( direction );
+	}
+
+	if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
 	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
 
 	if ( pos == UPRIGHT ) {

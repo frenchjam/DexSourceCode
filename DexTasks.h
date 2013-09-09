@@ -64,6 +64,8 @@ int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForPosture( const char *cmd );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
+DexMass ParseForMass ( const char *cmd );
+
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
 int RunOscillations( DexApparatus *apparatus, const char *params = NULL );

@@ -925,7 +925,7 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 		// Signal to the subject that the configuration is currently not correct.
 		// Allow them to retry to achieve the desired configuration, to ignore and move on, or to abort the session.
 		int response = fSignalError(  MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION,
-			"Configuration incorrect.\n\nDesired configuration:\n\n  Subject Restraint:     %s\n  Target Bar:               %s\n  Tapping Surfaces:     %s", 
+			"Configuration incorrect.\n\nDesired configuration:\n\n  Subject Restraint:     %s\n  Target Bar:                %s\n  Tapping Surfaces:     %s", 
 			PostureString[posture], TargetBarString[bar_position], TappingSurfaceString[tapping] );
 		if ( response == IDABORT ) {
 			SignalEvent(  "Manual Abort from SelectAndCheckConfiguration." );
@@ -947,6 +947,8 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 
 	char *cradle;
 	int  answer;
+
+	if ( mass == MassIndifferent ) return( NORMAL_EXIT );
 
 	do {
 
@@ -980,7 +982,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 
 			}
 
-			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\n", cradle );
+			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );

@@ -53,21 +53,16 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+
+	// Which mass should be used for this set of trials?
+	DexMass mass = ParseForMass( params );
+
+	// Set certain parameters according to the desired movement and the posture of the subject.
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
-#ifndef SKIP_PREP
-
-	// Clearly demark this operation in the script file. 
-	apparatus->Comment( "################################################################################" );
-
-	apparatus->ShowStatus( "Initiating hardware configuration phase ..." );
-
-	// Tell the subject which configuration should be used.
-	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
-	//   blocks of trials in the same configuration.
-	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\nPress <OK> when ready.",
-		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
+	// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Seated? Belts attached? Wristbox on wrist?\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the tracker is still aligned.
@@ -81,27 +76,15 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	apparatus->ShowStatus( "Ready to start test ..." );
-
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Take the seat and attach the belts and the wrist box. Press OK when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->SelectAndCheckMass( MassSmall );
+	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
-
-	// Clearly demark this operation in the script file. 
-	apparatus->Comment( "################################################################################" );
-
-#endif
 
 	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand. Be sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
