@@ -579,6 +579,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-friction"   ) ) task = FRICTION_TASK;
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
+	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself.
 	// Here we give the opportunity to execute it in addition to the specified task, making
@@ -757,7 +758,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 
 	case INSTALL_PROCEDURE:
-		while ( RETRY_EXIT == RunInstall( apparatus, lpCmdLine ) );
+		while ( RETRY_EXIT == ( return_code = RunInstall( apparatus, lpCmdLine ) ) );
 		break;
 
 	}

@@ -36,7 +36,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	apparatus->Comment( "Operation to cancel force sensor offsets." );
 	apparatus->SignalEvent( "Preparing for force offset acquisition ..." );
 
-	status = apparatus->WaitSubjectReady( "Place manipulandum in holder. !!! REMOVE HAND !!! Press OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Place manipulandum and weight in empty cradle.\n    !!! REMOVE HAND !!!\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	// Acquire some data.
@@ -50,7 +50,8 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	// Compute the offsets and insert them into force calculations.
 	apparatus->ComputeAndNullifyStrainGaugeOffsets();
 	apparatus->ShowStatus( "Force offsets nullified." );
-	apparatus->HideStatus();
+
+	apparatus->SignalNormalCompletion();
 
 	return( NORMAL_EXIT );
 

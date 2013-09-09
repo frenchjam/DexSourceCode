@@ -626,6 +626,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 	Comment( "Signal Normal Completion." );
 	for ( int blinks = 0; blinks < N_NORMAL_BLINKS; blinks++ ) {
 		
+		Beep();
 		TargetsOff();
 		Wait( BLINK_PERIOD );
 		

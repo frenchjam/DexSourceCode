@@ -283,10 +283,29 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 	// I am putting the maximum for the timeout, because I don't believe that this one should timeout.
 	// I had three states for posture and bar position, including an 'indifferent' state. 
 	// Here I translate those to the 0 and 1 defined by DEX.
-	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %d \n", quoteMessage( message ), "", 
+	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ), "", 
 		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), DEX_MAX_TIMEOUT );
 	return( NORMAL_EXIT );
 }
+
+/*********************************************************************************/
+
+int DexCompiler::SelectAndCheckMass( int mass ) {
+
+	int mass_id;
+
+	if ( mass == MassIndifferent ) return( NORMAL_EXIT );
+	if ( mass == MassNone ) MessageBox( NULL, "DEX does not handle MassNone.", "DexApparatus", MB_OK );
+	else if ( mass == MassSmall ) mass_id = 0;
+	else if ( mass == MassLarge ) mass_id = 2;
+	else mass_id = 1;
+
+	AddStepNumber();
+	fprintf( fp, "Select mass: , , %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
+	return( NORMAL_EXIT );
+}
+
+
 
 /**************************************************************************************************************/
 

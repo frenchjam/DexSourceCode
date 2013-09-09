@@ -407,6 +407,7 @@ public:
 									 float timeout, const char *msg = "Slip not achieved." );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
+	int SelectAndCheckMass( int mass );
 
 	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = "Manipulandum occluded too often." );
 	int CheckOverrun(  const char *msg );
