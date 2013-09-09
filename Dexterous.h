@@ -117,6 +117,15 @@ typedef enum {
 } DexTappingSurfaceConfiguration;
 extern	char *TappingSurfaceString[];
 
+typedef enum {
+	MassIndifferent = 0, 
+	MassNone,
+	MassSmall, 
+	MassMedium,
+	MassLarge,
+	MassUnknown
+} DexMass;
+extern	char *MassString[];
 
 // Parameters used when waiting for the hand to be at a target.
 

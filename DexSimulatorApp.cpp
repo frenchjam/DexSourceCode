@@ -388,6 +388,9 @@ void plot_data( DexApparatus *apparatus ) {
 
 BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+
+	int inA, inB, inC, onM;
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -399,6 +402,7 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
     case WM_TIMER:
 		return TRUE;
 		break;
+
 		
     case WM_CLOSE:
 		EndDialog(hDlg, LOWORD(wParam));
@@ -407,10 +411,86 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		break;
 		
     case WM_COMMAND:
+
 		switch ( LOWORD( wParam ) ) {
 		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
 			exit( 0 );
+			return TRUE;
+			break;
+		}
+
+
+
+		switch ( HIWORD( wParam ) ) {
+		case BN_CLICKED:
+
+			
+			if ( IsDlgButtonChecked( hDlg, IDC_MASS1M ) ) onM = 1;
+			else if ( IsDlgButtonChecked( hDlg, IDC_MASS2M ) ) onM = 2;
+			else if ( IsDlgButtonChecked( hDlg, IDC_MASS3M ) ) onM = 3;
+			else onM = 0;
+						
+			switch ( LOWORD( wParam ) ) {
+			case IDC_CRADLEA:
+
+				if ( IsDlgButtonChecked( hDlg, IDC_MASS1A ) ) inA = 1;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS2A ) ) inA = 2;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS3M ) ) inA = 3;
+				else inA = 0;
+				if ( !onM ) {
+					if ( inA == 1 ) CheckDlgButton( hDlg, IDC_MASS1M, 1 ), CheckDlgButton( hDlg, IDC_MASS1A, 0 ); 
+					if ( inA == 2 ) CheckDlgButton( hDlg, IDC_MASS2M, 1 ), CheckDlgButton( hDlg, IDC_MASS2A, 0 ); 
+					if ( inA == 3 ) CheckDlgButton( hDlg, IDC_MASS3M, 1 ), CheckDlgButton( hDlg, IDC_MASS3A, 0 );
+				}
+				else if ( inA == 0 ) {
+					if ( onM == 1 ) CheckDlgButton( hDlg, IDC_MASS1A, 1 ), CheckDlgButton( hDlg, IDC_MASS1M, 0 ); 
+					if ( onM == 2 ) CheckDlgButton( hDlg, IDC_MASS2A, 1 ), CheckDlgButton( hDlg, IDC_MASS2M, 0 ); 
+					if ( onM == 3 ) CheckDlgButton( hDlg, IDC_MASS3A, 1 ), CheckDlgButton( hDlg, IDC_MASS3M, 0 );
+				}
+				return TRUE;
+				break;
+
+			case IDC_CRADLEB:
+
+				if ( IsDlgButtonChecked( hDlg, IDC_MASS1B ) ) inB = 1;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS2B ) ) inB = 2;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS3B ) ) inB = 3;
+				else inB = 0;
+				if ( !onM ) {
+					if ( inB == 1 ) CheckDlgButton( hDlg, IDC_MASS1M, 1 ), CheckDlgButton( hDlg, IDC_MASS1B, 0 ); 
+					if ( inB == 2 ) CheckDlgButton( hDlg, IDC_MASS2M, 1 ), CheckDlgButton( hDlg, IDC_MASS2B, 0 ); 
+					if ( inB == 3 ) CheckDlgButton( hDlg, IDC_MASS3M, 1 ), CheckDlgButton( hDlg, IDC_MASS3B, 0 );
+				}
+				else if ( inB == 0 ) {
+					if ( onM == 1 ) CheckDlgButton( hDlg, IDC_MASS1B, 1 ), CheckDlgButton( hDlg, IDC_MASS1M, 0 ); 
+					if ( onM == 2 ) CheckDlgButton( hDlg, IDC_MASS2B, 1 ), CheckDlgButton( hDlg, IDC_MASS2M, 0 ); 
+					if ( onM == 3 ) CheckDlgButton( hDlg, IDC_MASS3B, 1 ), CheckDlgButton( hDlg, IDC_MASS3M, 0 );
+				}
+				return TRUE;
+				break;
+
+			case IDC_CRADLEC:
+
+				if ( IsDlgButtonChecked( hDlg, IDC_MASS1C ) ) inC = 1;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS2C ) ) inC = 2;
+				else if ( IsDlgButtonChecked( hDlg, IDC_MASS3C ) ) inC = 3;
+				else inC = 0;
+				if ( !onM ) {
+					if ( inC == 1 ) CheckDlgButton( hDlg, IDC_MASS1M, 1 ), CheckDlgButton( hDlg, IDC_MASS1C, 0 ); 
+					if ( inC == 2 ) CheckDlgButton( hDlg, IDC_MASS2M, 1 ), CheckDlgButton( hDlg, IDC_MASS2C, 0 ); 
+					if ( inC == 3 ) CheckDlgButton( hDlg, IDC_MASS3M, 1 ), CheckDlgButton( hDlg, IDC_MASS3C, 0 );
+				}
+				else if ( inC == 0 ) {
+					if ( onM == 1 ) CheckDlgButton( hDlg, IDC_MASS1C, 1 ), CheckDlgButton( hDlg, IDC_MASS1M, 0 ); 
+					if ( onM == 2 ) CheckDlgButton( hDlg, IDC_MASS2C, 1 ), CheckDlgButton( hDlg, IDC_MASS2M, 0 ); 
+					if ( onM == 3 ) CheckDlgButton( hDlg, IDC_MASS3C, 1 ), CheckDlgButton( hDlg, IDC_MASS3M, 0 );
+				}
+				return TRUE;
+				break;
+			
+			}
+
 			return TRUE;
 			break;
 		}
@@ -599,7 +679,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		// Create a dialog box to emulate selection of the extra masses.
 		mass_dlg = CreateDialog(hInstance, (LPCSTR)IDD_MASS, HWND_DESKTOP, dexDlgCallback );
-		CheckRadioButton( mass_dlg, IDC_MASS1A, IDC_RADIO12, IDC_MASS1A ); 
+		CheckRadioButton( mass_dlg, IDC_MASS1A, IDC_MASS1M, IDC_MASS1A ); 
+		CheckRadioButton( mass_dlg, IDC_MASS2A, IDC_MASS2M, IDC_MASS2B ); 
+		CheckRadioButton( mass_dlg, IDC_MASS3A, IDC_MASS3M, IDC_MASS3C ); 
 
 		apparatus = new DexApparatus( tracker, targets, sounds, adc, status_dlg, mass_dlg );
 		init_plots();

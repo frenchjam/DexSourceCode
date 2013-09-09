@@ -942,6 +942,55 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 	// Should never get here.
 	
 }
+
+int DexApparatus::SelectAndCheckMass( int mass ) {
+
+	char *cradle;
+	int  answer;
+
+	do {
+
+		if ( mass == MassNone && ( IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ) ) {
+			answer =  fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
+		}
+		else {
+
+			switch ( mass ) {
+
+			case MassSmall:
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ) return( NORMAL_EXIT );
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS1A ) ) cradle = "A";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS1B ) ) cradle = "B";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS1C ) ) cradle = "C";
+				break;
+
+			case MassMedium:
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS2M ) ) return( NORMAL_EXIT );
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS2A ) ) cradle = "A";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS2B ) ) cradle = "B";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS2C ) ) cradle = "C";
+				break;
+
+			case MassLarge:
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS3M ) ) return( NORMAL_EXIT );
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS3A ) ) cradle = "A";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS3B ) ) cradle = "B";
+				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS3C ) ) cradle = "C";
+				break;
+
+			}
+
+			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\n", cradle );
+
+		}
+	} while ( answer == IDRETRY );
+
+	if ( answer == IDIGNORE ) return( IGNORE_EXIT );
+	else return( ABORT_EXIT );
+
+}
+
+
 /***************************************************************************/
 /*                                                                         */
 /*                                 Wait Methods		                       */

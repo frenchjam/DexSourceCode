@@ -53,6 +53,7 @@ double waitTimeLimit = 10.0;			// Signal time out if we wait this long.
 char *TargetBarString[] = { "Indifferent", "Left", "Right", "Unknown" };
 char *PostureString[] = { "Indifferent", "Seated", "Supine", "Unknown" };
 char *TappingSurfaceString[] = { "Indifferent", "Extended", "Folded", "Unknown" };
+char *MassString[] = { "Indifferent", "None", "Small", "Medium", "Large", "Unknown" };
 
 // Null orientation of the manipulandum when in the upright (seated) posture.
 // Orientations are expressed as quaternions.

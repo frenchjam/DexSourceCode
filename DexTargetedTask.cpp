@@ -88,6 +88,10 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady( "Take the seat and attach the belts and the wrist box. Press OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// Instruct subject to take the specified mass.
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->SelectAndCheckMass( MassSmall );
+	if ( status == ABORT_EXIT ) exit( status );
 
 	// Clearly demark this operation in the script file. 
 	apparatus->Comment( "################################################################################" );
