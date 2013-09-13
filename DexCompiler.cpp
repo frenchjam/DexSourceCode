@@ -96,8 +96,10 @@ void DexCompiler::Initialize( void ) {
 	// Step numbers are output as comments just before each executable step in the script file.
 	// This allows one to easily find offending commands when the DEX interpreter signals an error.
 
-	nextStep = 0;
+	nextStep = 1;
 
+	// Show warnings or not.
+	verbose = false;
 	
 	// The base class sets the targets and sounds off at initialization.
 	// DEX does that automatically, so I removed those commands from the compiler.
@@ -161,7 +163,7 @@ char *DexCompiler::quoteMessage( const char *message ) {
 	}
 
 	int j = 0;
-	result[j++] = '\"';
+	// result[j++] = '\"';
 
 	// Limit the message to the size handled by DEX and replace some special characters.
 	for ( int i = 0; i < DEX_MAX_MESSAGE_LENGTH && j < sizeof( result ) - 1 && message[i] != 0; i++ ) {
@@ -179,7 +181,7 @@ char *DexCompiler::quoteMessage( const char *message ) {
 		else result[j++] = message[i];
 
 	}
-	result[j++] = '\"';
+	// result[j++] = '\"';
 	result[j++] = 0;
 
 	return( result );
@@ -189,7 +191,7 @@ char *DexCompiler::quoteMessage( const char *message ) {
 
 /***************************************************************************/
 
-int DexCompiler::WaitSubjectReady( const char *message ) {
+int DexCompiler::WaitSubjectReady( const char *picture, const char *message ) {
 
 	// There is no provision yet for an image file, so just put an empty field.
 	// I did not foresee a timeout for this command. I am setting the timeout 
@@ -231,11 +233,11 @@ int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float time
 	static bool once = false;
 	if ( timeout > DEX_MAX_TIMEOUT && !once ) {
 		once = true;
-		MessageBox( NULL, "Warning - Timeout exceeds limit.", "DexCompiler", MB_OK );
+		if ( verbose ) MessageBox( NULL, "Warning - Timeout exceeds limit.", "DexCompiler", MB_OK );
 	}
 	if ( timeout < 0 && !once ) {
 		once = true;
-		MessageBox( NULL, "Warning - Timeout cannot be negative.", "DexCompiler", MB_OK );
+		if ( verbose ) MessageBox( NULL, "Warning - Timeout cannot be negative.", "DexCompiler", MB_OK );
 	}
 	AddStepNumber();
 	fprintf( fp, "CMD_WAIT_MANIP_GRIP, %f, %.0f, %f, \"%s\"\n", min_force, tolerance, timeout, msg );
@@ -301,7 +303,7 @@ int DexCompiler::SelectAndCheckMass( int mass ) {
 	else mass_id = 1;
 
 	AddStepNumber();
-	fprintf( fp, "Select mass: , , %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
+	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass: , , %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
 	return( NORMAL_EXIT );
 }
 
@@ -331,7 +333,7 @@ void DexCompiler::SetTargetStateInternal( unsigned long target_state ) {
 void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
 	static bool once = false;
 	if ( volume != 0 && volume != 1 && !once ) {
-		MessageBox( NULL, "Warning - Sound volume on DEX is 0 or 1", "DexCompiler", MB_OK );
+		if ( verbose ) MessageBox( NULL, "Warning - Sound volume on DEX is 0 or 1", "DexCompiler", MB_OK );
 		once = true;
 	}
 	if ( ( tone < 0 || tone >= nTones ) && !once ) {
@@ -375,7 +377,7 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 
 int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg ) {
 	AddStepNumber();
-	MessageBox( NULL, "CheckEarlyStarts()\nWhat about the filter constant?!?!", "DexCompiler", MB_OK | MB_ICONQUESTION );
+	if (verbose ) MessageBox( NULL, "CheckEarlyStarts()\nWhat about the filter constant?!?!", "DexCompiler", MB_OK | MB_ICONQUESTION );
 	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %f, %s\n", n_false_starts, hold_time * 10, threshold, quoteMessage( msg ) );
 	return( NORMAL_EXIT );
 }

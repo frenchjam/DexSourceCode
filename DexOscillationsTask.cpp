@@ -31,10 +31,10 @@
 int oscillationUpperTarget = 2;						// Targets showing desired amplitude of cyclic movement.
 int oscillationLowerTarget = 10;
 int oscillationCenterTarget = 6;
-double oscillationTime = 30.0;
+double oscillationTime = 20.0;
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double oscillationMinMovementExtent = 30.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double oscillationMaxMovementExtent = 50; //HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationMaxMovementExtent = 1000.0; //HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 int	oscillationMinCycles = 20;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
 int oscillationMaxCycles = 40;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
 double oscillationCycleHysteresis = 10.0;	// Parameter used to adjust the detection of cycles. 
@@ -98,8 +98,25 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetOn( oscillationUpperTarget );
 	
 	// Measure data during oscillations performed over a fixed duration.
-	apparatus->Wait( oscillationTime );
-    
+	double osc_time_step = 0.1;
+	double time;
+	for ( time = 0.0; time < 12.0; time += osc_time_step ) {
+		int tone = floor( 3.9 * ( sin( time * PI ) + 1.0 ) );
+		apparatus->SetSoundStateInternal( tone, 1 );
+		apparatus->Wait( osc_time_step );
+	}
+	apparatus->SetSoundState( 4, 0 );
+	apparatus->Wait( oscillationTime / 2.0 );
+	
+ 	// Measure data during oscillations performed over a fixed duration.
+	for ( time = 0.0; time < 12.0; time += osc_time_step ) {
+		int tone = floor( 3.9 * ( sin( time * PI * 2.0 ) + 1.0 ) );
+		apparatus->SetSoundStateInternal( tone, 1 );
+		apparatus->Wait( osc_time_step );
+	}
+	apparatus->SetSoundState( 4, 0 );
+	apparatus->Wait( oscillationTime / 2.0 );
+   
 	// Turn off the target
 	BlinkAll(apparatus);
 
@@ -110,15 +127,15 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ..." );
 	
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum occluded too often." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
-	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, NULL );
+	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement extent out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
-	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, NULL );
+	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Indicate to the subject that they are done.

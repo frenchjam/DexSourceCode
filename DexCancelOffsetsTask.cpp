@@ -53,6 +53,9 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	apparatus->SignalNormalCompletion();
 
+	// Clearly demark this operation in the script file. 
+	apparatus->Comment( "################################################################################" );
+
 	return( NORMAL_EXIT );
 
 }

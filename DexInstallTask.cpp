@@ -68,7 +68,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 
 	// Prompt the subject to place the manipulandum on the chair.
-	status = apparatus->WaitSubjectReady( "Place the target bar in the left side position." );
+	status = apparatus->WaitSubjectReady( "Place the target bar in the right side position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 
@@ -140,6 +140,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Check visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum obscured from view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	apparatus->ShowStatus( "Visibility OK." );
+	apparatus->Wait( 1.0 );
+
+	status = apparatus->WaitSubjectReady( "Move the manipulandum to the target frame holder." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
 
 	apparatus->HideStatus();
 

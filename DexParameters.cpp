@@ -51,7 +51,7 @@ double waitHoldPeriod = 1.0;			// Required hold time in zone.
 double waitTimeLimit = 10.0;			// Signal time out if we wait this long.
 
 char *TargetBarString[] = { "Indifferent", "Left", "Right", "Unknown" };
-char *PostureString[] = { "Indifferent", "Seated", "Supine", "Unknown" };
+char *PostureString[] = { "Indifferent", "Upright", "Supine", "Unknown" };
 char *TappingSurfaceString[] = { "Indifferent", "Extended", "Folded", "Unknown" };
 char *MassString[] = { "Indifferent", "None", "Small", "Medium", "Large", "Unknown" };
 
