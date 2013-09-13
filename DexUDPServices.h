@@ -62,7 +62,7 @@ unsigned int DexUDPGetPacket( DexUDP *dex_udp_parameters, char *packet );
  */
 
 int DexUDPInitServer( DexUDP *dex_udp_parameters, char *broadcast_address );
-unsigned int DexUDPSendPacket( DexUDP *dex_udp_parameters, char *packet );
+unsigned int DexUDPSendPacket( DexUDP *dex_udp_parameters, const char *packet );
 
 #ifdef __cplusplus
 }

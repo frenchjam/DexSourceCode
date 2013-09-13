@@ -91,7 +91,7 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 
 
 	RECT rect;
-	int width_in_pixels, height_in_pixels;
+	int width_in_pixels;
 
 	// The creator of this device specifies how many tones it can produce.
 	nTones = tones;
@@ -101,15 +101,11 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 
 	// Create a window to display the virtual speaker.
 	GetWindowRect( GetDesktopWindow(), &rect );
-	width_in_pixels = ( rect.bottom - rect.top ) / 10;
-	height_in_pixels = width_in_pixels + 48;
+	width_in_pixels = ( rect.right - rect.left ) / 20;
 
 	window = new OpenGLWindow();
-	// I would rather not have a border on this window, but not having
-	// a border causes the mouse pointer to dissappear in the other 
-	// windows as well.
-	window->Border = true;
-	window->Create( NULL, "DEX", rect.right - width_in_pixels - 200, rect.top + 120, width_in_pixels, height_in_pixels );
+	window->Border = false;
+	window->Create( NULL, "DEX", rect.right - 2 * width_in_pixels - 2, rect.top, width_in_pixels, width_in_pixels );
 
 	viewpoint = new Viewpoint();
 	speaker = new Sphere();

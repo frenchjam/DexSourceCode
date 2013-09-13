@@ -68,10 +68,10 @@ int DexUDPInitServer( DexUDP *dex_udp_parameters, char *broadcast_address ) {
 
 /************************************************************************/
 
-unsigned int DexUDPSendPacket( DexUDP *dex_udp_parameters, char data[DEX_UDP_PACKET_SIZE] )
+unsigned int DexUDPSendPacket( DexUDP *dex_udp_parameters, const char data[DEX_UDP_PACKET_SIZE] )
 {
 	
-	DWORD			dwBytesSent = 0;
+	DWORD	  dwBytesSent = 0;
 	DWORD     dwFlags = 0;
 	WSABUF    wbSend;
 	

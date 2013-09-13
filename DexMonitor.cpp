@@ -55,6 +55,7 @@
 #include "DexMonitorServer.h"
 
 #include "DexUDPServices.h"
+#include "DexSimulatorGUI.h"
 
 // #define AUTOSCALE
 
@@ -526,15 +527,11 @@ void DexMonitor::RunWindow( void ) {
 DexMonitorServer::DexMonitorServer( int n_vertical_targets, int n_horizontal_targets, int n_codas ) {
 	
 	messageCounter = 0;
-	
+
 	// For demonstration purposes, we pipe the data packets to a program that will display
 	//  them. In the real thing, the packets should be sent to ground and displayed there.
 	fp = stdout;
-	
-	DexUDPInitServer( &udp_parameters, NULL );
-	
-	Sleep( 1000 );
-	
+		
 }
 
 /*********************************************************************************/
@@ -557,7 +554,7 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 	fflush( fp );
 
 	// Broadcast on UDP as well.
-	DexUDPSendPacket( &udp_parameters, packet );
+	SendPacket( packet );
 	Sleep( DEX_UDP_WAIT );
 	
 	// Send out each sample to the output stream.
@@ -586,7 +583,7 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 			samples_in_packet++;
 		}
 		sprintf( packet, "DEX_RECORDING_RECORD %8d", samples_in_packet );
-		DexUDPSendPacket( &udp_parameters, packet );
+		SendPacket( packet );
 		Sleep( DEX_UDP_WAIT );
 	}
 
@@ -594,7 +591,7 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 	sprintf( packet, "DEX_RECORDING_END %8u %d", messageCounter, samples_to_send );
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
-	DexUDPSendPacket( &udp_parameters, packet );
+	SendPacket( packet );
 	Sleep( DEX_UDP_WAIT );
 	
 	messageCounter++;
@@ -620,8 +617,8 @@ int DexMonitorServer::SendConfiguration( int nCodas, int nTargets,
 	fprintf( fp, "%s\n", packet );
 	fflush( fp );
 	
-	// Broadcast on UDP as well.
-	DexUDPSendPacket( &udp_parameters, packet );
+	// Broadcast as well.
+	SendPacket( packet );
 	Sleep( DEX_UDP_WAIT );
 	
 	messageCounter++;
@@ -658,9 +655,8 @@ int DexMonitorServer::SendState( bool acquisitionState, unsigned long targetStat
 	
 	fflush( fp );
 	
-	// Broadcast on UDP as well.
+	// Broadcast as well.
 	char packet[DEX_UDP_PACKET_SIZE];
-	DexUDPSendPacket( &udp_parameters, packet );
 	
 	sprintf( packet, 
 		"DEX_STATE %8u (%1d) | 0x%08x | %1d < %.3f %.3f %.3f >  [ %.3f %.3f %.3f %.3f ] ", 
@@ -668,7 +664,7 @@ int DexMonitorServer::SendState( bool acquisitionState, unsigned long targetStat
 		manipulandum_visibility, manipulandum_position[X],  manipulandum_position[Y],  manipulandum_position[Z],
 		manipulandum_orientation[X],  manipulandum_orientation[Y],  manipulandum_orientation[Z], manipulandum_orientation[M] );
 	
-	DexUDPSendPacket( &udp_parameters, packet );
+	SendPacket( packet );
 	
 	messageCounter++;
 	
@@ -704,8 +700,8 @@ int DexMonitorServer::SendEvent( const char* format, ... ) {
 	// Take out any newlines.
 	for ( char *ptr = packet; *ptr && ptr < packet + sizeof( packet ); ptr++ ) if ( *ptr == '\n' ) *ptr = '|';
 	
-	// Broadcast the event on UDP.
-	DexUDPSendPacket( &udp_parameters, packet );
+	// Broadcast the event.
+	SendPacket( packet );
 	
 	// Send out the event on the data stream.
 	fprintf( fp, "%s\n", packet );
@@ -732,3 +728,32 @@ void DexMonitorServer::Quit( void ) {
 	fflush( fp );
 	
 }
+
+/*********************************************************************************/
+
+// Send out packets via UDP, to be monitored on the ground.
+
+DexMonitorServerUDP::DexMonitorServerUDP( int n_vertical_targets, int n_horizontal_targets, int n_codas ) {
+	
+	messageCounter = 0;
+	DexUDPInitServer( &udp_parameters, NULL );
+	Sleep( 1000 );
+	
+}
+
+void DexMonitorServerUDP::SendPacket( const char *packet ) {
+	// Broadcast the event.
+	DexUDPSendPacket( &udp_parameters, packet );
+}
+
+/*********************************************************************************/
+
+// Send out packets via the DEX GUI.
+
+DexMonitorServerGUI::DexMonitorServerGUI( int n_vertical_targets, int n_horizontal_targets, int n_codas ) {}
+
+void DexMonitorServerGUI::SendPacket( const char *packet ) {
+	// Broadcast the event.
+	DexAddToLogGUI( packet );
+}
+

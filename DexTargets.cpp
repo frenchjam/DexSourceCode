@@ -119,31 +119,33 @@ void DexTargets::Quit( void ) {}
 /*                                                                         */
 /***************************************************************************/
 
-DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
+DexScreenTargets::DexScreenTargets( HWND parent, int n_vertical, int n_horizontal ) {
 		
 	RECT rect;
 	int width_in_pixels, height_in_pixels;
-	double width = 25.0, height = 300.0;
+	double height, target_width = 25.0, target_thickness = 10.0;
 	int trg, i;
 	
-	// Create a window to display the virtual targets.
-	GetWindowRect( GetDesktopWindow(), &rect );
+	// If a parent window was not specified, use the desktop.
+	if ( parent == NULL ) parent = GetDesktopWindow();
 
-	width_in_pixels = ( rect.right - rect.left ) / 10;
+	// Create a window to display the virtual targets.
+	GetWindowRect( parent, &rect );
+
+	width_in_pixels = ( rect.right - rect.left ) / 20;
 	height_in_pixels = rect.bottom - rect.top - 1;
 	
 	vertical_window = new OpenGLWindow();
-	// I would rather not have a border on this window, but not having
-	// a border causes the mouse pointer to dissappear in the other 
-	// windows as well.
-	vertical_window->Border = true;
-	vertical_window->Create( NULL, "DEX", rect.right - width_in_pixels - 10, 0, width_in_pixels, height_in_pixels - 50 );
-	vertical_viewpoint = new OrthoViewpoint( - width / 2, width / 2, 0, height, -100, 100 );	
+	vertical_window->Border = false;
+	vertical_window->Create( NULL, "DEX", rect.right - width_in_pixels, 0, width_in_pixels, height_in_pixels - 50 );
+	vertical_viewpoint = new OrthoViewpoint( - width_in_pixels / 2, width_in_pixels / 2, 0, height_in_pixels, -100, 100 );	
 	vertical_targets = new Assembly;
+
+	height = height_in_pixels;
 	for ( trg = 0; trg < n_vertical; trg++ ) {
 				
 		// The next are the positions of the targets in the target window on the screen.
-		target[trg] = new Slab( .9 * width, 5.0 );
+		target[trg] = new Slab( target_width, target_thickness );
 		target[trg]->SetPosition( 0.0, height - height / n_vertical * (trg + 0.5), 0.0 );
 		target[trg]->SetColor( RED );
 		vertical_targets->AddComponent( target[trg] );
@@ -151,19 +153,22 @@ DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 	}
 
 	// Now do the same as above for the horizontal target bar across the top of the screen.
-	width_in_pixels = ( rect.right - rect.left ) - width_in_pixels - 25;
-	height_in_pixels = ( rect.bottom - rect.top ) / 10;
+	// Height of this bar is the same as the width of the vertical bar.
+	height_in_pixels = width_in_pixels;
+	// Width of this bar is full width of screen, minus enough space for the vertical bar at the right.
+	width_in_pixels = ( rect.right - rect.left ) - 2 * width_in_pixels - 4;
 	horizontal_window = new OpenGLWindow();
-	horizontal_window->Border = true;
-	horizontal_window->Create( NULL, "DEX", 5, 0, width_in_pixels, height_in_pixels );
+	horizontal_window->Border = false;
+	horizontal_window->Create( NULL, "DEX", 0, 0, width_in_pixels, height_in_pixels );
 
-	horizontal_viewpoint = new OrthoViewpoint( 0, height, - width / 2, width / 2, -100, 100 );	
-
+	horizontal_viewpoint = new OrthoViewpoint( 0, width_in_pixels, - height_in_pixels / 2, height_in_pixels / 2, -100, 100 );	
 	horizontal_targets = new Assembly;
+
+	height = width_in_pixels;
 	for ( trg = trg, i = 0; i < n_horizontal; trg++, i++ ) {
 				
 		// These are the positions of the targets in the target window on the screen.
-		target[trg] = new Slab( 0.9 * width, 5.0 );
+		target[trg] = new Slab( target_width, target_thickness );
 		target[trg]->SetPosition( height - height / n_horizontal * (i + 0.5), 0.0, 0.0 );
 		
 		target[trg]->SetOrientation( 90.0, k_vector );
@@ -175,6 +180,8 @@ DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 	nTargets = n_vertical + n_horizontal;
 	nVerticalTargets = n_vertical;
 	nHorizontalTargets = n_horizontal;
+	
+	Draw();
 
 }
 

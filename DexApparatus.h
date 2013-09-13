@@ -58,8 +58,10 @@ private:
 	void MapForceToLED( float min_grip, float max_grip, float min_load, float max_load );
 	void UpdateForceToLED( float grip, float load );
 
-	HWND	status_dlg;
-	HWND	mass_dlg;
+	// These pointers are needed for the GUI interface.
+	// They get passed down from the App at initialization.
+	HWND		workspace_dlg;
+	HWND		mass_dlg;
 
 
 protected:
@@ -153,7 +155,8 @@ public:
 								DexTargets			*targets,
 								DexSounds			*sounds,
 								DexADC				*adc,
-								HWND				status_dlg,
+								DexMonitorServer	*monitor,
+								HWND				workspace_dlg,
 								HWND				mass_dlg
 							);
 	
@@ -209,8 +212,8 @@ public:
 	
 	// Flow control
 	virtual void Wait( double seconds );
-	virtual int  WaitSubjectReady( const char *message = "Ready to continue?" );
-	virtual int  fWaitSubjectReady( const char *format = "Ready to continue?", ... );
+	virtual int  WaitSubjectReady( const char *picture = NULL, const char *message = "Ready to continue?" );
+	virtual int  fWaitSubjectReady( const char *picture = NULL, const char *format = "Ready to continue?", ... );
 	virtual int	 WaitUntilAtTarget( int target_id,  
 									const Quaternion desired_orientation = uprightNullOrientation, 
 									Vector3 position_tolerance = defaultPositionTolerance, 
@@ -317,8 +320,8 @@ public:
 	virtual bool GetTargetFramePosition( Vector3 pos, Quaternion ori );
 	
 	// Communicate to the subject that an error has occured and see what he wants to do.
-	virtual int SignalError( unsigned int mb_type, const char *message = "Error." );
-	virtual int fSignalError( unsigned int mb_type, const char *format, ... );
+	virtual int SignalError( unsigned int mb_type, const char *picture, const char *message = "Error." );
+	virtual int fSignalError( unsigned int mb_type, const char *picture, const char *format, ... );
 	
 	virtual int SignalNormalCompletion( const char *message = "Task completed normally." );
 	virtual int fSignalNormalCompletion( const char *format = "Task completed normally.", ... );
@@ -356,6 +359,9 @@ private:
 	char *script_filename;
 	FILE *fp;
 	unsigned long nextStep;
+	// Show warnings or not.
+	bool verbose;
+
 
 	void CloseScript( void );
 	void UnhandledCommand( const char *cmd );
@@ -386,7 +392,7 @@ public:
 	int  StopAcquisition( const char *msg = "Buffer overrun or error writing data file." );
 
 	void Wait( double seconds );
-	int  WaitSubjectReady( const char *message = "Ready to continue?" );
+	int  WaitSubjectReady( const char *picture = NULL, const char *message = "Ready to continue?" );
 	int	 WaitUntilAtTarget( int target_id, 
 									const Quaternion desired_orientation,
 									Vector3 position_tolerance, 

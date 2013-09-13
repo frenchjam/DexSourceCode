@@ -38,8 +38,8 @@ int targetSequence[] = { 2, 5, 2, 11, 8, 5, 2, 11, 2, 8,
 int targetSequenceN = 4;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
-double targetedMinMovementExtent = 10.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double targetedMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double targetedMinMovementExtent =  100.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double targetedMaxMovementExtent = 1000.0;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 
 /*********************************************************************************/
 
@@ -60,11 +60,6 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Set certain parameters according to the desired movement and the posture of the subject.
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Seated? Belts attached? Wristbox on wrist?\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Check that the tracker is still aligned.
 	apparatus->ShowStatus( "Tracker alignment check ..." );
 	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
@@ -76,6 +71,14 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	status = apparatus->WaitSubjectReady( "Pictures\\TappingFolded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Pictures\\SubjectReady.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
 	status = apparatus->SelectAndCheckMass( mass );
@@ -84,7 +87,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Check that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.

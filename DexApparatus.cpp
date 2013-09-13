@@ -32,6 +32,8 @@
 #include "DexSounds.h"
 #include "DexApparatus.h"
 
+#include "DexSimulatorGUI.h"
+
 /***************************************************************************/
 
 const int DexApparatus::negativeBoxMarker = DEX_NEGATIVE_BOX_MARKER;
@@ -52,7 +54,8 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 						    DexTargets  *targets,
 							DexSounds	*sounds,
 							DexADC		*adc,
-							HWND		status_dlg,
+							DexMonitorServer *monitor,
+							HWND		workspace_dlg,
 							HWND		mass_dlg
 						) {
 
@@ -60,8 +63,10 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 	this->targets = targets;
 	this->sounds = sounds;
 	this->adc = adc;
-	this->status_dlg = status_dlg;
+	this->monitor = monitor;
+
 	this->mass_dlg = mass_dlg;
+	this->workspace_dlg = workspace_dlg;
 
 }
 
@@ -98,8 +103,6 @@ void DexApparatus::Initialize( void ) {
 	nGauges = N_GAUGES;
 	nSamplesForAverage = N_SAMPLES_FOR_AVERAGE;
 
-	monitor = new DexMonitorServer( nVerticalTargets, nHorizontalTargets, nCodas );
-
 	// Load the most recently defined target positions.
 	LoadTargetPositions();
 	// Load the calibration for each of the force transducers.
@@ -129,8 +132,6 @@ void DexApparatus::Initialize( void ) {
 	// Send information about the actual configuration to the ground.
 	SignalConfiguration();
 	
-
-
 }
 
 void DexApparatus::Quit( void ) {
@@ -573,7 +574,7 @@ void DexApparatus::Update( void ) {
 // We flash the target LEDs in some special way to signal to the subject that
 // there is a message on the screen.
 
-int DexApparatus::SignalError( unsigned int mb_type, const char *message ) {
+int DexApparatus::SignalError( unsigned int mb_type, const char *picture, const char *message ) {
 		
 	DexTimer move_timer;
 
@@ -593,13 +594,13 @@ int DexApparatus::SignalError( unsigned int mb_type, const char *message ) {
 	while( !DexTimerTimeout( move_timer ) ) Update();
 	
 	monitor->SendEvent( message );
-	return( MessageBox( NULL, message, "DEX Message", mb_type ) );
+	return( IllustratedMessageBox( picture, message, "DEX Message", mb_type ) );
 	
 }
 
 // fprintf version of the above.
 
-int DexApparatus::fSignalError( unsigned int mb_type, const char *format, ... ) {
+int DexApparatus::fSignalError( unsigned int mb_type, const char *picture, const char *format, ... ) {
 
 	va_list args;
 	char message[10240];
@@ -608,7 +609,7 @@ int DexApparatus::fSignalError( unsigned int mb_type, const char *format, ... ) 
 	vsprintf(message, format, args);
 	va_end(args);
 
-	return( SignalError( mb_type, message ) );
+	return( SignalError( mb_type, picture, message ) );
 
 }
 
@@ -635,7 +636,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 		
 	}
 	
-	status = WaitSubjectReady( message );
+	status = WaitSubjectReady( "Pictures\\info.bmp", message );
 	if ( status == NORMAL_EXIT ) SignalEvent( "Normal Completion." );
 	return( status );
 	
@@ -660,15 +661,17 @@ int DexApparatus::fSignalNormalCompletion( const char* format, ... ) {
 // Wait until the subject signals that he or she is ready to continue.
 //
 
-int DexApparatus::WaitSubjectReady( const char *message ) {
+int DexApparatus::WaitSubjectReady( const char *picture, const char *message ) {
 	
 	Update();
 	monitor->SendEvent( "WaitSubjectReady - %s", message );
+
 	// There is a problem here. Update should be called while waiting for the subject's
 	// response. Update() could perhaps be run in a thread.
 	// But in the real system, the subsystems will presumably run in background 
 	// threads, so this is not an issue.
-	int response = MessageBox( NULL, message, "DEX", MB_OKCANCEL | MB_ICONQUESTION );
+//	int response = MessageBox( NULL, message, "DEX", MB_OKCANCEL | MB_ICONQUESTION );
+	int response = IllustratedMessageBox( picture, message, "DEX", MB_OKCANCEL );
 	Update();
 	if ( response == IDCANCEL ) {
 		monitor->SendEvent( "Manual Abort from WaitSubjectReady." );
@@ -681,7 +684,7 @@ int DexApparatus::WaitSubjectReady( const char *message ) {
 
 // fprintf version of the above.
 
-int DexApparatus::fWaitSubjectReady( const char* format, ... ) {
+int DexApparatus::fWaitSubjectReady( const char *picture, const char* format, ... ) {
 	
 	va_list args;
 	char message[10240];
@@ -690,7 +693,7 @@ int DexApparatus::fWaitSubjectReady( const char* format, ... ) {
 	vsprintf(message, format, args);
 	va_end(args);
 
-	return( WaitSubjectReady( message ) );
+	return( WaitSubjectReady( picture, message ) );
 
 }
 
@@ -806,8 +809,7 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 // Show the status to the subject.
 
 void DexApparatus::ShowStatus ( const char *message ) {
-	ShowWindow( status_dlg, SW_SHOW );
-	SetDlgItemText( status_dlg, IDC_STATUS_TEXT, message );
+	SetDlgItemText( workspace_dlg, IDC_STATUS_TEXT, message );
 	// If we are updating the status, it is usually an interesting break point in the procedure.
 	// So we automatically insert a comment in the script file to make it easy to find.
 	Comment( message );
@@ -888,6 +890,7 @@ DexTappingSurfaceConfiguration DexApparatus::TappingDeployment( void ) {
 int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
 	
 	int pass = 0;
+	char *picture = 0;
 	
 	// Current simulated configuration.
 	int current_posture;
@@ -922,12 +925,23 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 			SignalEvent( "Successful configuration check." );
 			return( NORMAL_EXIT );
 		}
+
+		// Select a picture file depending on the desired configuration.
+		if ( posture == PostureSupine ) {
+			if ( bar_position == TargetBarLeft ) picture = "Pictures\\SupineAside.bmp";
+			else picture = "Pictures\\SupineInUse.bmp";
+		}
+		else {
+			if ( bar_position == TargetBarLeft ) picture = "Pictures\\SitAside.bmp";
+			else picture = "Pictures\\SitInUse.bmp";
+		}
+
 		
 		// Signal to the subject that the configuration is currently not correct.
 		// Allow them to retry to achieve the desired configuration, to ignore and move on, or to abort the session.
-		int response = fSignalError(  MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION,
-			"Configuration incorrect.\n\nDesired configuration:\n\n  Subject Restraint:     %s\n  Target Bar:                %s\n  Tapping Surfaces:     %s", 
-			PostureString[posture], TargetBarString[bar_position], TappingSurfaceString[tapping] );
+		int response = fSignalError(  MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture,
+			"Change configuration to:\n  Subject Posture: %s\n  Target Bar: %s\nPress <Retry> when ready.", 
+			PostureString[posture], TargetBarString[bar_position] );
 		if ( response == IDABORT ) {
 			SignalEvent(  "Manual Abort from SelectAndCheckConfiguration." );
 			return( ABORT_EXIT );
@@ -954,7 +968,8 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 	do {
 
 		if ( mass == MassNone && ( IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ) ) {
-			answer =  fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
+//			answer =  fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
+			answer =  fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
 		}
 		else {
 
@@ -983,7 +998,8 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 
 			}
 
-			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
+//			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
+			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );
@@ -1005,9 +1021,9 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 //
 void DexApparatus::Wait( double duration ) {
 	
-	DexTimer move_timer;
-	DexTimerSet( move_timer, duration );
-	while( !DexTimerTimeout( move_timer ) ) Update(); // This does the updating.
+	DexTimer wait_timer;
+	DexTimerSet( wait_timer, duration );
+	while( !DexTimerTimeout( wait_timer ) ) Update(); // This does the updating.
 	
 }
 
@@ -1206,7 +1222,7 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 			// Timeout has been reached. Signal the error to the user.
 			if ( !msg ) msg = "Time to achieve centered grip exceeded.";
 			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
-				"%s\n\n Tolerance: %.1f mm\n Min Force: %.2f N\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
+				"%s\n Tolerance: %.1f mm\n Min Force: %.2f N\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
 				msg, tolerance, min_force,
 				cop_offset[0] * 1000.0, vstr( cop[0] ), cop_offset[1] * 1000.0, vstr( cop[1] )  );
 			// Exit, signalling that the subject wants to abort.
