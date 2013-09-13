@@ -74,7 +74,7 @@ protected:
 	
 public:
 	
-	DexScreenTargets( HWND parent = NULL, int n_vertical = N_VERTICAL_TARGETS, int n_horizontal = N_HORIZONTAL_TARGETS );
+	DexScreenTargets( int n_vertical = N_VERTICAL_TARGETS, int n_horizontal = N_HORIZONTAL_TARGETS );
 	void SetTargetStateInternal( unsigned long target_bit_pattern );
 	int  Update( void );
 	void  Initialize( void );

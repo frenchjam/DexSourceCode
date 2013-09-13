@@ -56,11 +56,12 @@ void DexNiDaqTargets::Initialize( void ) {
 	// Initialize the ports for digital output.
 	error_code = DAQmxCreateTask("",&taskHandle);
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
-	// Set to read single-ended voltages in the range +/- 5 volts.
+	// Set to treat all digital lines as a single multi-bit channel..
 	error_code = DAQmxCreateDOChan(taskHandle, channel_range, "", DAQmx_Val_ChanForAllLines );
 	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
 	// Here we don't set a clock. The read will read all the channels once as quickly as possible.
 
+	// Initialize the screen targets that we run in parallel.
 	screen_targets->Initialize();
 
 }

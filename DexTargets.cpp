@@ -119,15 +119,15 @@ void DexTargets::Quit( void ) {}
 /*                                                                         */
 /***************************************************************************/
 
-DexScreenTargets::DexScreenTargets( HWND parent, int n_vertical, int n_horizontal ) {
+DexScreenTargets::DexScreenTargets( int n_vertical, int n_horizontal ) {
 		
 	RECT rect;
 	int width_in_pixels, height_in_pixels;
 	double height, target_width = 25.0, target_thickness = 10.0;
 	int trg, i;
 	
-	// If a parent window was not specified, use the desktop.
-	if ( parent == NULL ) parent = GetDesktopWindow();
+	// Uuse the desktop.
+	HWND parent = GetDesktopWindow();
 
 	// Create a window to display the virtual targets.
 	GetWindowRect( parent, &rect );
