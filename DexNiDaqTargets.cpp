@@ -49,8 +49,9 @@ void DexNiDaqTargets::Initialize( void ) {
 	int32 error_code;
 
 	// Define the channels to be acquired.
-	// NI-DAQ uses this string based method to select channels. So first
-	// I construct the appropriate string based on the number of channels.
+	// NI-DAQ uses this string based method to select channels. 
+	// We need 23 bits to cover the horizontal and vertical channels,
+	//  so we need 3 8-bit ports.
 	sprintf( channel_range, "Dev1/port0:2" );
 
 	// Initialize the ports for digital output.
@@ -70,7 +71,7 @@ void DexNiDaqTargets::Initialize( void ) {
 void DexNiDaqTargets::SetTargetStateInternal( unsigned long state ) {
 	int32 channels_written;
 	DAQmxWriteDigitalU32( taskHandle, 1, true, 1.0, DAQmx_Val_GroupByScanNumber, &state, &channels_written, NULL );
-	screen_targets->SetTargetState( state );
+	screen_targets->SetTargetStateInternal( state );
 }
 
 int DexNiDaqTargets::Update( void ) {

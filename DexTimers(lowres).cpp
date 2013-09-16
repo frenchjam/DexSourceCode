@@ -39,15 +39,13 @@ void DexTimerSetSlowmotion( float factor ) {
 
 void DexTimerStart ( DexTimer &timer ) {
 
-	LARGE_INTEGER	li;
-
-	QueryPerformanceFrequency( &li );
-	timer.frequency = (double) li.QuadPart;
-
-	QueryPerformanceCounter( &li );
-	timer.mark = li.QuadPart;
-
+#ifdef HIRES
+	QueryPerformanceCounter( &timer.hr_mark );
+	timer.hr_split = timer.hr_mark;
+#else
+	timer.mark = clock();
 	timer.split = timer.mark;
+#endif
 
 }
 	
@@ -55,37 +53,40 @@ void DexTimerStart ( DexTimer &timer ) {
 
 double DexTimerElapsedTime ( DexTimer &timer ) {
 	
-	LARGE_INTEGER	li;
-	__int64			current_time;
-	double			duration;
+	clock_t		current_time;
+	double		duration;
 	
 	/* Compute the true time interval since the timer was started. */
 
-	QueryPerformanceCounter( &li );
-	current_time = li.QuadPart;
-	duration = (double) (current_time - timer.mark) / timer.frequency / dex_slow_motion;
+#ifdef HIRES
+	QueryPerformanceCounter( &timer.hr_mark );
+	timer.hr_split = timer.hr_mark;
+#else
+	current_time = clock();
+	duration = (double) (current_time - timer.mark) / CLOCKS_PER_SEC / dex_slow_motion;
 
 	return( duration );
 
 }
 
 double DexTimerRemainingTime( DexTimer &timer ) {
+
 	return( timer.alarm - DexTimerElapsedTime( timer ) );
+
 }
 
 /****************************************************************************/
 
 double DexTimerSplitTime ( DexTimer &timer ) {
 	
-	LARGE_INTEGER	li;
-	__int64			current_time;
-	double			duration;
+	clock_t		current_time;
+	double		duration;
 	
-	/* Compute the true time interval since the last split was set. */
+  /* Compute the true time interval since the timer was started. */
+	current_time = clock();
+	duration = (double) (current_time - timer.split) / CLOCKS_PER_SEC / dex_slow_motion;
+	timer.split = current_time;
 
-	QueryPerformanceCounter( &li );
-	current_time = li.QuadPart;
-	duration = (double) (current_time - timer.split) / timer.frequency / dex_slow_motion;
 
 	return( duration );
 

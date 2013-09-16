@@ -15,9 +15,6 @@ private:
 
 protected:
 
-	// A pointer to the pipe where we send the messages.
-	FILE			*fp;
-
 	// Count the number of messages sent out;
 	unsigned long		messageCounter;
 
@@ -73,6 +70,25 @@ public:
 
 
 	DexMonitorServerGUI( int vertical_targets = N_VERTICAL_TARGETS, 
+					  int horizontal_targets = N_HORIZONTAL_TARGETS,
+					  int codas = N_CODAS );
+	void SendPacket( const char *packet );
+
+};
+
+
+class DexMonitorServerPIPE : public DexMonitorServer {
+
+private:
+
+	// A pointer to the pipe where we send the messages.
+	FILE			*fp;
+
+protected:
+
+public:
+
+	DexMonitorServerPIPE( int vertical_targets = N_VERTICAL_TARGETS, 
 					  int horizontal_targets = N_HORIZONTAL_TARGETS,
 					  int codas = N_CODAS );
 	void SendPacket( const char *packet );

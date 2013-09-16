@@ -34,6 +34,8 @@
 
 #include "DexSimulatorGUI.h"
 
+#define DEX_SIMULATOR_UPDATE_PERIOD 0.1
+
 /***************************************************************************/
 
 const int DexApparatus::negativeBoxMarker = DEX_NEGATIVE_BOX_MARKER;
@@ -67,6 +69,10 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 
 	this->mass_dlg = mass_dlg;
 	this->workspace_dlg = workspace_dlg;
+
+	update_count = 0;
+	update_period = DEX_SIMULATOR_UPDATE_PERIOD;
+	DexTimerSet( update_timer, update_period );
 
 }
 
@@ -204,8 +210,8 @@ void DexApparatus::SetTargetPositions( void ) {
 	// Now compute an additional offset that corrects the offset of the bar markers 
 	// in front of the targets LEDs and that places the target position to the right of the bar,
 	// all of this the current reference frame of the target frame.
-	RotateVector( shift, rotation, BarMarkersToTargets );
-	AddVectors( offset, offset, shift );
+//	RotateVector( shift, rotation, BarMarkersToTargets );
+//	AddVectors( offset, offset, shift );
 
 	// Shift the target positions to match the position of the target bar.
 	// Only the vertical targets move.
@@ -495,7 +501,7 @@ bool DexApparatus::GetManipulandumPosition( Vector3 pos, Quaternion ori, Quatern
 	// This is probably only an issue for the simulated trackers.
 	// Actually, this is probably no longer an issue, since I stopped 
 	// storing the state of the markers in the tracker.
-	if ( int exit_status = tracker->Update() ) exit( exit_status );
+	// if ( int exit_status = tracker->Update() ) exit( exit_status );
 
 	// Here we ask for the current position of the markers from the tracker.
 	tracker->GetCurrentMarkerFrame( marker_frame );
@@ -543,7 +549,10 @@ void DexApparatus::Update( void ) {
 	unsigned long	target_state;
 	
 	int exit_status;
-	
+
+	// Don't actually run the update more often than necessary.
+	if ( !DexTimerTimeout( update_timer ) ) return;
+
 	// Allow each of the components to update as needed.
 	if ( exit_status = targets->Update() ) exit( exit_status );
 	if ( exit_status = tracker->Update() ) exit( exit_status );
@@ -560,7 +569,11 @@ void DexApparatus::Update( void ) {
 	acquisition_state = tracker->GetAcquisitionState();
 	target_state = targets->GetTargetState();
 	monitor->SendState( acquisition_state, target_state, manipulandum_visible, pos, ori );
-	
+
+	// Wait at least update_period before running this update again.
+	DexTimerSet( update_timer, update_period );
+	update_count++;
+
 }
 
 /***************************************************************************/
@@ -580,13 +593,15 @@ int DexApparatus::SignalError( unsigned int mb_type, const char *picture, const 
 
 	for ( int blinks = 0; blinks < N_ERROR_BLINKS; blinks++ ) {
 		
+		SoundOn( 2, BEEP_VOLUME );
 		targets->SetTargetState( 0x55555555 );
 		DexTimerSet( move_timer, BLINK_PERIOD );
 		while( !DexTimerTimeout( move_timer ) ) Update();
+		SoundOn( 5, BEEP_VOLUME );
 		targets->SetTargetState( ~0x55555555 );
 		DexTimerSet( move_timer, BLINK_PERIOD );
 		while( !DexTimerTimeout( move_timer ) ) Update();
-		
+		SoundOff();	
 	}
 	
 	targets->SetTargetState( ~0x00000000 );
@@ -627,14 +642,16 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 	Comment( "Signal Normal Completion." );
 	for ( int blinks = 0; blinks < N_NORMAL_BLINKS; blinks++ ) {
 		
-		Beep();
+		SoundOff();
 		TargetsOff();
 		Wait( BLINK_PERIOD );
 		
+		SoundOn( BEEP_TONE, BEEP_VOLUME );
 		SetTargetState( ~0 );
 		Wait( BLINK_PERIOD );
 		
 	}
+	SoundOff();
 	
 	status = WaitSubjectReady( "Pictures\\info.bmp", message );
 	if ( status == NORMAL_EXIT ) SignalEvent( "Normal Completion." );
@@ -1023,8 +1040,10 @@ void DexApparatus::Wait( double duration ) {
 	
 	DexTimer wait_timer;
 	DexTimerSet( wait_timer, duration );
-	while( !DexTimerTimeout( wait_timer ) ) Update(); // This does the updating.
-	
+	while( !DexTimerTimeout( wait_timer ) ) {
+		Update(); // This does the updating.
+	}
+
 }
 
 /***************************************************************************/
@@ -1041,7 +1060,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 									char *msg  ) {
 	
 	// These are objects of my own making, based on the Windows clock.
-	DexTimer blink_timer;
+	DexTimer blink_timer;	
 	DexTimer hold_timer;
 	DexTimer timeout_timer;
 

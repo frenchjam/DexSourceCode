@@ -79,7 +79,7 @@
 // Behavior of some of the built-in routines.
 // Can also be used in the paradigms.
 
-#define BLINK_PERIOD 0.166
+#define BLINK_PERIOD 0.250
 #define N_ERROR_BLINKS 3
 #define N_NORMAL_BLINKS 3
 

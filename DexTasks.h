@@ -14,7 +14,7 @@
 typedef enum { MOUSE_TRACKER, CODA_TRACKER, RTNET_TRACKER } TrackerType;
 typedef enum { MOUSE_ADC, GLM_ADC } AdcType;
 typedef enum { SCREEN_TARGETS, GLM_TARGETS } TargetType;
-typedef enum { SCREEN_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
+typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 
 #define HORIZONTAL	0
 #define VERTICAL	1

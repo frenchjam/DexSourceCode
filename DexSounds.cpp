@@ -10,6 +10,9 @@
 #include <memory.h>
 #include <process.h>
 
+#include <NIDAQmx.h>
+#include <fMessageBox.h>
+
 #include "VectorsMixin.h"  // This has to be before 3dMatrix.h.
 
 #include <useful.h>
@@ -42,31 +45,32 @@ DexSounds::DexSounds( void ) {
 
 	nTones = 0;
 	mute = false;
+	hold_tone_for_mute = 0;
 
 }
 
 void DexSounds::Initialize( void ) {}
 
 void DexSounds::SoundOff( void ) {
-	SetSoundState( 0, 0 );
+	SetSoundState( hold_tone_for_mute, 0 );
 }
 void DexSounds::Mute( bool on_off ) { 
 	mute = on_off;
 	if ( mute ) {
-		SetSoundStateInternal( 0, 0 );
+		SetSoundStateInternal( hold_tone_for_mute, 0 );
 	}
 	else {
-		SetSoundStateInternal( hold_tone, hold_volume );
+		SetSoundStateInternal( hold_tone_for_mute, hold_volume_for_mute );
 	}
 }
 
 void DexSounds::SetSoundState( int tone, int volume ) {
 
-	hold_tone = tone;
-	hold_volume = volume;
 
 	if ( tone >= N_TONES ) tone = N_TONES - 1;
 	if ( volume >= N_VOLUMES ) volume = N_VOLUMES - 1;
+	hold_tone_for_mute = tone;
+	hold_volume_for_mute = volume;
 	if ( !mute ) SetSoundStateInternal( tone, volume );
 
 }
@@ -130,7 +134,6 @@ void DexScreenSounds::SetSoundStateInternal( int tone, int volume ) {
 	speaker->SetRadius( volume + 0.5 );
 	speaker->SetColor( tone_to_color[tone] );
 
-
 }
 
 /*********************************************************************************/
@@ -156,12 +159,94 @@ int DexScreenSounds::Update( void ) {
 	int exit_status = 0;
 	int input = 0;
 
-	input = window->GetInput( 0.1 );
-	if ( input == WM_QUIT ) exit_status = ESCAPE_EXIT;
+//	input = window->GetInput( 0.001 );
+//	if ( input == WM_QUIT ) exit_status = ESCAPE_EXIT;
 	Draw();
 	return( exit_status );
 
 }
 
+/***************************************************************************/
+/*                                                                         */
+/*                           DexNidaqAdcSounds                             */
+/*                                                                         */
+/***************************************************************************/
+
+// Use an analog output to generate tones. Useful with GLMbox, because the
+// GLMbox metronome uses digital output bits that we need for driving targets.
+
+DexNiDaqAdcSounds::DexNiDaqAdcSounds( int tones ) {
+
+	// The creator of this device specifies how many tones it can produce.
+	nTones = tones;
+
+	// Do whatever the base class would do first.
+	DexSounds::DexSounds();
+	
+	char channel_range[32];
+	int32 error_code;
+
+	int i, tone;
+	double volume;
+	char *taskname = "";
+
+	// Fill the buffers with a single cycle of a sine wave at different frequencies.
+	// Attenuate the amplitude as the frequency goes up to give a more-or-less even volume.
+	double freq[N_TONES] = { 220.000, 261.626, 329.628, 391.995, 2 * 220.000, 2 * 261.626, 2 * 329.628, 2 * 391.995  };
+	for ( tone = 0, volume = 0.1; tone < N_TONES; tone++, volume *= .8 ) {
+		nidaq_samples[tone] = floor( DEX_NIDAC_SOUND_SAMPLE_FREQUENCY / freq[tone] );
+		for ( i = 0; i < nidaq_samples[tone]; i++ ) {
+			double theta = (double) i * PI * 2.0 / (double) nidaq_samples[tone];
+			buffer[tone][i] = volume * sin( theta );
+		}
+	}
+
+	// Define the analog channel onto which we will output sine waves.
+	sprintf( channel_range, "Dev1/ao1" );
+
+	// Initialize the ports for analog output.
+	error_code = DAQmxCreateTask( taskname, &taskHandle );
+	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+	// Set to treat the single hardware channel as a single virtual channel.
+	error_code = DAQmxCreateAOVoltageChan( taskHandle, channel_range, "", -5.0, 5.0, DAQmx_Val_Volts, NULL );
+	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+	// Set a clock to output the buffered samples.
+	error_code = DAQmxCfgSampClkTiming( taskHandle, "OnboardClock", DEX_NIDAC_SOUND_SAMPLE_FREQUENCY, DAQmx_Val_Rising, DAQmx_Val_ContSamps, DEX_NIDAC_SOUND_BUFFER_MAX_SAMPLES );
+	if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+
+	last_tone = -1;
+	last_volume = -1;
+
+}
+
 /*********************************************************************************/
+
+// This actually turns sounds on and off. 
+
+void DexNiDaqAdcSounds::SetSoundStateInternal( int tone, int volume ) {
+
+	int32 error_code;
+	int32 samples;
+
+	if ( tone != last_tone || volume != last_volume ) {
+	error_code = DAQmxStopTask( taskHandle );
+		if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+		if ( volume ) {
+			error_code = DAQmxWriteAnalogF64 ( taskHandle, nidaq_samples[tone], 0, 0.01, DAQmx_Val_GroupByChannel, buffer[tone % nTones], &samples, 0);
+			if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+			error_code = DAQmxStartTask( taskHandle );
+			if( DAQmxFailed( error_code ) ) ReportNiDaqError();
+		}
+
+		last_tone = tone;
+		last_volume = volume;
+	}
+	
+}
+
+void DexNiDaqAdcSounds::ReportNiDaqError ( void ) {
+	char errBuff[2048]={'\0'};
+	DAQmxGetExtendedErrorInfo( errBuff, 2048);
+	fMessageBox( MB_OK, "DexNiDaqADC", errBuff );
+}
 

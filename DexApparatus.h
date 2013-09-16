@@ -50,6 +50,12 @@ private:
 	DexTimer	blink_timer;
 	bool		blink;
 
+	// Update gets called inside of wait loops.
+	// This timer is used to actually do an update only when needed.
+	double		update_period;
+	DexTimer	update_timer;
+	int			update_count;
+
 	// Saves force values between calls, so that recursive filtering 
 	// can be applied.
 	double		filteredLoad;

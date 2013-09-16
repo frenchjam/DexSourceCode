@@ -5,8 +5,11 @@
 /*********************************************************************************/
 
 // Contains 2 modules that work together.
+
 // One is the DexMonitorServer. It provide a mechanism for the DEX apparatus
 // to transmit data to the ground or to a remote computer.
+// There are three flavors: UDP based, pipe based and sending to a local GUI.
+
 // The second implements a graphical interface that receives the transmitted
 // data and displays it on the screen.
 
@@ -528,10 +531,6 @@ DexMonitorServer::DexMonitorServer( int n_vertical_targets, int n_horizontal_tar
 	
 	messageCounter = 0;
 
-	// For demonstration purposes, we pipe the data packets to a program that will display
-	//  them. In the real thing, the packets should be sent to ground and displayed there.
-	fp = stdout;
-		
 }
 
 /*********************************************************************************/
@@ -543,32 +542,14 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 	
 	char packet[DEX_UDP_PACKET_SIZE];
 	float *ptr;
-	int i;
 
 	int skip = samples / DEX_SAMPLES_PER_PACKET + 1;
 	int samples_to_send = samples / skip + 1;
 
 	// Send out on a data stream. Could be stdout or a pipe to another process.
 	sprintf( packet, "DEX_RECORDING_START %8u %d", messageCounter, samples_to_send );
-	fprintf( fp, "%s\n", packet );
-	fflush( fp );
-
-	// Broadcast on UDP as well.
 	SendPacket( packet );
-	Sleep( DEX_UDP_WAIT );
-	
-	// Send out each sample to the output stream.
-	for ( i = 0; i < samples; i++ ) {
-		sprintf( packet, "DEX_RECORDING_SAMPLE %8d %8.2f %8.2f %8.2f %8.2f", 
-			i,
-			state[i].time, 
-			state[i].position[X], 
-			state[i].position[Y], 
-			state[i].position[Z] );
-		fprintf( fp, "%s\n", packet );
-		fflush( fp );
-	}
-	
+		
 	// Send out a subset of samples to the UDP broadcast.
 	int sample = 0;
 	while ( sample < samples ) {
@@ -584,15 +565,11 @@ void DexMonitorServer::SendRecording( ManipulandumState state[], int samples, fl
 		}
 		sprintf( packet, "DEX_RECORDING_RECORD %8d", samples_in_packet );
 		SendPacket( packet );
-		Sleep( DEX_UDP_WAIT );
 	}
 
 	// Signal that we are done on both streams.
 	sprintf( packet, "DEX_RECORDING_END %8u %d", messageCounter, samples_to_send );
-	fprintf( fp, "%s\n", packet );
-	fflush( fp );
 	SendPacket( packet );
-	Sleep( DEX_UDP_WAIT );
 	
 	messageCounter++;
 	
@@ -614,12 +591,7 @@ int DexMonitorServer::SendConfiguration( int nCodas, int nTargets,
 	sprintf( packet, "DEX_CONFIGURATION %8u %1d %2d [%d %d %d]", 
 		messageCounter, nCodas, nTargets, 
 		subjectPosture, targetBarConfig, tappingSurfaceConfig );
-	fprintf( fp, "%s\n", packet );
-	fflush( fp );
-	
-	// Broadcast as well.
 	SendPacket( packet );
-	Sleep( DEX_UDP_WAIT );
 	
 	messageCounter++;
 	
@@ -635,35 +607,14 @@ int DexMonitorServer::SendState( bool acquisitionState, unsigned long targetStat
 	int i = 0;
 	int exit_status = NORMAL_EXIT;
 	unsigned long bit = 0x01;
-	
-	// Send a packet with the current state of the apparatus.
-	
-	fprintf( fp, "DEX_STATE %8u (%1d) ", messageCounter, acquisitionState );
-	fprintf( fp, "|" );
-	for ( i = 0, bit = 0x01; i < DEX_MAX_TARGETS; i++, bit = bit << 1 ) {
-		fprintf( fp, "%1d", ( targetState & bit ? "O" : "-" ) );
-	}
-	fprintf( fp, "|" );
-	
-	
-	fprintf( fp, " %1d < %.3f %.3f %.3f > ", 
-		manipulandum_visibility, manipulandum_position[X],  manipulandum_position[Y],  manipulandum_position[Z] );
-	fprintf( fp, " [ %.3f %.3f %.3f %.3f ] ", 
-		manipulandum_orientation[X],  manipulandum_orientation[Y],  manipulandum_orientation[Z], manipulandum_orientation[M] );
-	
-	fprintf( fp, "\n" );
-	
-	fflush( fp );
-	
-	// Broadcast as well.
 	char packet[DEX_UDP_PACKET_SIZE];
 	
+	// Send a packet with the current state of the apparatus.	
 	sprintf( packet, 
 		"DEX_STATE %8u (%1d) | 0x%08x | %1d < %.3f %.3f %.3f >  [ %.3f %.3f %.3f %.3f ] ", 
 		messageCounter, acquisitionState, targetState,
 		manipulandum_visibility, manipulandum_position[X],  manipulandum_position[Y],  manipulandum_position[Z],
 		manipulandum_orientation[X],  manipulandum_orientation[Y],  manipulandum_orientation[Z], manipulandum_orientation[M] );
-	
 	SendPacket( packet );
 	
 	messageCounter++;
@@ -702,15 +653,10 @@ int DexMonitorServer::SendEvent( const char* format, ... ) {
 	
 	// Broadcast the event.
 	SendPacket( packet );
-	
-	// Send out the event on the data stream.
-	fprintf( fp, "%s\n", packet );
-	fflush( fp );
 
 	// Show it in the Debug window.
 	fOutputDebugString( "%s\n", packet );
 	
-	Sleep( DEX_UDP_WAIT );
 	messageCounter++;
 	
 	return( exit_status );
@@ -724,8 +670,9 @@ int DexMonitorServer::SendEvent( const char* format, ... ) {
 
 void DexMonitorServer::Quit( void ) {
 	
-	fprintf( fp, "DEX_QUIT\n" );
-	fflush( fp );
+	char packet[DEX_UDP_PACKET_SIZE];
+	sprintf( packet, "DEX_QUIT\n" );
+	SendPacket( packet );
 	
 }
 
@@ -744,6 +691,7 @@ DexMonitorServerUDP::DexMonitorServerUDP( int n_vertical_targets, int n_horizont
 void DexMonitorServerUDP::SendPacket( const char *packet ) {
 	// Broadcast the event.
 	DexUDPSendPacket( &udp_parameters, packet );
+	Sleep( DEX_UDP_WAIT );
 }
 
 /*********************************************************************************/
@@ -755,5 +703,23 @@ DexMonitorServerGUI::DexMonitorServerGUI( int n_vertical_targets, int n_horizont
 void DexMonitorServerGUI::SendPacket( const char *packet ) {
 	// Broadcast the event.
 	DexAddToLogGUI( packet );
+}
+
+/*********************************************************************************/
+
+// Send out packets via the DEX GUI.
+
+DexMonitorServerPIPE::DexMonitorServerPIPE( int n_vertical_targets, int n_horizontal_targets, int n_codas ) {
+
+	// For demonstration purposes, we pipe the data packets to a program that will display
+	//  them. In the real thing, the packets should be sent to ground and displayed there.
+	fp = stdout;
+		
+}
+
+void DexMonitorServerPIPE::SendPacket( const char *packet ) {
+	// Broadcast the event.
+	fprintf( fp, "%s\n", packet );
+	fflush( fp );
 }
 

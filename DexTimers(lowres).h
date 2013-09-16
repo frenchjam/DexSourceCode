@@ -12,15 +12,28 @@
 extern "C" {
 #endif
 
+#define HIRES
+#include <time.h>
+#ifdef HIRES
 #include "Windows.h"
+#endif
 
 typedef struct {
 
 #ifdef WIN32		/* Windows NT */
 
-	__int64 mark;
-	__int64 split;
-	double frequency;
+#ifdef HIRES
+
+	LARGE_INTEGER hr_mark;
+	LARGE_INTEGER hr_split;
+
+#else
+
+    clock_t	mark;	
+    clock_t	split;
+
+#endif
+
     double	alarm;
 
 #else				/* SGI Irix */

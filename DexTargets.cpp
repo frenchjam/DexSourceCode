@@ -222,10 +222,8 @@ int DexScreenTargets::Update( void ) {
 	int exit_status = 0;
 	int input = 0;
 	
-	input = vertical_window->GetInput( 0.1 );
-	if ( input == WM_QUIT ) {
-		exit_status = ESCAPE_EXIT;
-	}
+//	input = vertical_window->GetInput( 0.001 );
+//	if ( input == WM_QUIT )	exit_status = ESCAPE_EXIT;
 	Draw();
 	return( exit_status );
 	

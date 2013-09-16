@@ -30,6 +30,9 @@
 #include <Views.h>
 #include <Layouts.h>
 
+#include <fOutputDebugString.h>
+#include <DateTimeString.h>
+
 /*********************************************************************************/
 
 // Parameters that are common to more than one task.
@@ -41,7 +44,7 @@ double initialMovementTime = 5.0;			// Time allowed to reach the starting positi
 double continuousDropoutTimeLimit = 0.050;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double beepDuration = BEEP_DURATION;
-double flashDuration = 0.1;
+double flashDuration = 0.2;
 double copTolerance = 10.0;					// Tolerance on how well the fingers are centered on the manipulandum.
 double copForceThreshold = 0.25;			// Threshold of grip force to test if the manipulandum is in the hand.
 double copWaitTime = 1.0;					// Gives time to achieve the centered grip. 
@@ -163,21 +166,27 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Parse command line.
 	
 	// First, define the devices.
+
+	// By default, the mouse simulates movement of the manipulandum.
+	tracker_type = MOUSE_TRACKER;
+
+	// By default, simulate sounds on the screen.
+	sound_type = SCREEN_SOUNDS;
+	// By default, simulate analog inputs with mouse movements.
+	adc_type = MOUSE_ADC;
+	// By default, use the screen to present targets.
+	target_type = SCREEN_TARGETS;
+
 	if ( strstr( lpCmdLine, "-coda"   ) ) tracker_type = CODA_TRACKER;
-	else if ( strstr( lpCmdLine, "-rt"     ) ) tracker_type = RTNET_TRACKER;
-	else tracker_type = MOUSE_TRACKER;
+	if ( strstr( lpCmdLine, "-rt"     ) ) tracker_type = RTNET_TRACKER;
 
 	if ( strstr( lpCmdLine, "-glm"   ) ) {
 		adc_type = GLM_ADC;
 		target_type = GLM_TARGETS;
-	}
-	else {
-		adc_type = MOUSE_ADC;
-		target_type = SCREEN_TARGETS;
+		sound_type = GLM_SOUNDS;
 	}
 
 	if ( strstr( lpCmdLine, "-blaster"   ) ) sound_type = SOUNDBLASTER_SOUNDS;
-	else sound_type = SCREEN_SOUNDS;
 
 	// Now specify what task or protocol to run.
 
@@ -284,6 +293,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 			sounds = new DexScreenSounds(); 
 			break;
 
+		case GLM_SOUNDS:
+			sounds = new DexNiDaqAdcSounds(); 
+			break;
+
 		default:
 			MessageBox( NULL, "Unknown sound type.", "Error", MB_OK );
 
@@ -317,6 +330,21 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// Create the apparatus.
 	apparatus->Initialize();
+
+#if 0
+	// Just testing the Wait function. Should take this out.
+	DexTimer test_timer;
+	fOutputDebugString( "%s\n", DateTimeString() );
+	for ( int jj = 0; jj < 600; jj++ ) {
+		DexTimerSet( test_timer, 0.01 );
+		while ( !DexTimerTimeout( test_timer ) );
+	}
+	fOutputDebugString( "%s\n", DateTimeString() );
+
+	fOutputDebugString( "%s\n", DateTimeString() );
+	for ( jj = 0; jj < 600; jj++ ) apparatus->Wait( 0.01 );
+	fOutputDebugString( "%s\n", DateTimeString() );
+#endif
 
 	// If the command line flag was set to do the transducer offset cancellation, then do it.
 	if ( raz ) {

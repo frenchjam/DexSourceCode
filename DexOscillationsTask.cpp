@@ -31,7 +31,9 @@
 int oscillationUpperTarget = 2;						// Targets showing desired amplitude of cyclic movement.
 int oscillationLowerTarget = 10;
 int oscillationCenterTarget = 6;
-double oscillationTime = 20.0;
+double oscillationDuration = 20.0;
+double oscillationEntrainDuration = 4.0;
+
 double oscillationMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double oscillationMinMovementExtent = 30.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 double oscillationMaxMovementExtent = 1000.0; //HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
@@ -55,7 +57,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
 	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( 
+	status = apparatus->fWaitSubjectReady( NULL,
 		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\n\nPress <OK> when ready.",
 		PostureString[posture], TargetBarString[bar_position], TappingSurfaceString[TappingUnknown] );
 	if ( status == ABORT_EXIT ) exit( status );
@@ -67,7 +69,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
@@ -75,7 +77,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( "Move to the flashing target.\nWhen 2 new targets appear, make oscillating\nmovements at approx. 1 Hz. " );
+	status = apparatus->fWaitSubjectReady( NULL, "Move to the flashing target.\nWhen 2 new targets appear, make oscillating\nmovements at approx. 1 Hz. " );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Light up the central target.
@@ -97,27 +99,21 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetOn( oscillationLowerTarget );
 	apparatus->TargetOn( oscillationUpperTarget );
 	
-	// Measure data during oscillations performed over a fixed duration.
-	double osc_time_step = 0.1;
+	// Output a sound pattern to establish the oscillation frequency.
+	// This will play for the first 4 seconds of the trial.
+	double osc_time_step = 0.025;
 	double time;
-	for ( time = 0.0; time < 12.0; time += osc_time_step ) {
-		int tone = floor( 3.9 * ( sin( time * PI ) + 1.0 ) );
+	for ( time = 0.0; time < oscillationEntrainDuration; time += osc_time_step ) {
+		int tone = floor( 3.9 * ( sin( time * 2.0 * PI ) + 1.0 ) );
 		apparatus->SetSoundStateInternal( tone, 1 );
-		apparatus->Wait( osc_time_step );
+		apparatus->Wait( osc_time_step - 0.01 );
 	}
 	apparatus->SetSoundState( 4, 0 );
-	apparatus->Wait( oscillationTime / 2.0 );
-	
- 	// Measure data during oscillations performed over a fixed duration.
-	for ( time = 0.0; time < 12.0; time += osc_time_step ) {
-		int tone = floor( 3.9 * ( sin( time * PI * 2.0 ) + 1.0 ) );
-		apparatus->SetSoundStateInternal( tone, 1 );
-		apparatus->Wait( osc_time_step );
-	}
-	apparatus->SetSoundState( 4, 0 );
-	apparatus->Wait( oscillationTime / 2.0 );
-   
-	// Turn off the target
+
+	// Now finish out the trial
+	apparatus->Wait( oscillationDuration - oscillationEntrainDuration );
+	  
+	// Blink the targets to signal the end of the recording.
 	BlinkAll(apparatus);
 
 	// Stop acquiring.

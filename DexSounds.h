@@ -8,12 +8,13 @@
 * Objects that run sound generation.
 */
 
-#ifndef DexSoundH
-#define DexSoundH
+#pragma once
 
 #include <OpenGLObjects.h>
 #include <OpenGLUseful.h>
 #include <OpenGLColors.h>
+
+#include <NIDAQmx.h>
 
 #include "Dexterous.h"
 
@@ -24,8 +25,8 @@ private:
 protected:
 
 	bool	mute;
-	int		hold_volume;
-	int		hold_tone;
+	int		hold_volume_for_mute;
+	int		hold_tone_for_mute;
 
 	// The work horse. Must be provided by derived class.
 	// Will be invoked by the public method SetSoundState().
@@ -96,4 +97,42 @@ public:
 		
 };
 
-#endif
+/***************************************************************************/
+/*                                                                         */
+/*                           DexNiDaqAdcSounds                             */
+/*                                                                         */
+/***************************************************************************/
+
+// Use an analog output to generate tones. Useful with GLMbox, because the
+// GLMbox metronome uses digital output bits that we need for driving targets.
+
+// Sampling frequency, in Hertz.
+#define DEX_NIDAC_SOUND_SAMPLE_FREQUENCY		11000.0
+
+// The following value determines the lowest frequency that can be played.
+// Fmin = Fsample / Nsamples.
+#define DEX_NIDAC_SOUND_BUFFER_MAX_SAMPLES	1100		
+
+class DexNiDaqAdcSounds : public DexSounds {
+	
+private:
+		
+	void		ReportNiDaqError ( void );
+	float64		buffer[N_TONES][DEX_NIDAC_SOUND_BUFFER_MAX_SAMPLES];
+	int32		nidaq_samples[N_TONES];
+	TaskHandle	taskHandle;	
+
+	int last_tone;
+	int last_volume;
+
+protected:
+
+	void SetSoundStateInternal( int tone, int volume );
+	
+public:
+	
+	DexNiDaqAdcSounds( int tones = N_TONES );
+		
+};
+
+

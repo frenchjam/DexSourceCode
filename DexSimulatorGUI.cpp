@@ -557,6 +557,8 @@ void DexAddToLogGUI( const char *message ) {
 	_strdate( date_str);
 	_strtime( time_str );
 
+	return;
+
 	for ( i = 0; i < strlen( date_str ) && _dexLogNext < sizeof( _dexLog ) - 1; i++, _dexLogNext++ ) _dexLog[_dexLogNext] = date_str[i];
 	if ( _dexLogNext < sizeof( _dexLog ) - 1 ) _dexLog[_dexLogNext++] = ' ';
 	for ( i = 0; i < strlen( time_str ) && _dexLogNext < sizeof( _dexLog ) - 1; i++, _dexLogNext++ ) _dexLog[_dexLogNext] = time_str[i];
