@@ -55,7 +55,7 @@ Layout  layout;
 View	view, yz_view, cop_view;
 
 int plot_screen_left = 225;
-int plot_screen_top = 120;
+int plot_screen_top = 10;
 int plot_screen_width = 772;
 int plot_screen_height = 600;
 float _plot_z_min = -500.0;
@@ -552,17 +552,17 @@ void DexAddToLogGUI( const char *message ) {
 
 	int i;
 
+#if 0
 	char date_str [9];
 	char time_str [9];
 	_strdate( date_str);
 	_strtime( time_str );
 
-	return;
-
 	for ( i = 0; i < strlen( date_str ) && _dexLogNext < sizeof( _dexLog ) - 1; i++, _dexLogNext++ ) _dexLog[_dexLogNext] = date_str[i];
 	if ( _dexLogNext < sizeof( _dexLog ) - 1 ) _dexLog[_dexLogNext++] = ' ';
 	for ( i = 0; i < strlen( time_str ) && _dexLogNext < sizeof( _dexLog ) - 1; i++, _dexLogNext++ ) _dexLog[_dexLogNext] = time_str[i];
 	if ( _dexLogNext < sizeof( _dexLog ) - 1 ) _dexLog[_dexLogNext++] = ' ';
+#endif
 
 	for ( i = 0; i < strlen( message ) && _dexLogNext < sizeof( _dexLog ) - 1; i++ ) {
 		if ( message[i] == '\n' ) _dexLog[ _dexLogNext ] = '|';
