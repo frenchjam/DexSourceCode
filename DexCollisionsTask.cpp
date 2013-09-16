@@ -59,10 +59,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	Sleep( 1000 );
 	apparatus->StartAcquisition( "COLL", collisionMaxTrialTime );
 	
-	status = apparatus->WaitSubjectReady( "`Perform collisions task.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Perform collisions task.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
-	status = apparatus->WaitSubjectReady( "`Pick up manipulandum between thumb and forefinger.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Pick up manipulandum between thumb and forefinger.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	// Check that the grip is properly centered.
