@@ -986,7 +986,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 
 		if ( mass == MassNone && ( IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ) ) {
 //			answer =  fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
-			answer =  fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
+			answer =  fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Place manipulandum in empty cradle.\n" );
 		}
 		else {
 
@@ -1016,7 +1016,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 			}
 
 //			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
-			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
+			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );

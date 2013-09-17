@@ -54,6 +54,10 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+
+	// Which mass should be used for this set of trials?
+	DexMass mass = ParseForMass( params );
+
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
 	// Tell the subject which configuration should be used.
@@ -67,17 +71,23 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, TappingUnknown );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Instruct subject to pick up the manipulandum
+		// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( NULL, "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Grip not centered or not in hand." );
+		// Instruct subject to pick up the manipulandum
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( NULL, "Hold the manipulandum vertically with thumb and \nforefinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+   
+	// Check that the grip is properly centered.
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 
 	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( NULL, "Move to the flashing target.\nWhen 2 new targets appear, make oscillating\nmovements at approx. 1 Hz. " );
+	status = apparatus->fWaitSubjectReady( NULL, "Align the manipulandum with the flashing target \nand then oscillate it between the two lid targets \nfollowing the frequency given by sound. " );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Light up the central target.

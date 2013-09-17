@@ -51,29 +51,48 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+	// Which mass should be used for this set of trials?
+	DexMass mass = ParseForMass( params );
+
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
-	// TODO: Add the appropriate hardware checks.
+		// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	apparatus->ShowStatus( "Hardware configuration check ..." );
+	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	status = apparatus->WaitSubjectReady( "Pictures\\TappingFolded.bmp", "Check that tapping surfaces are unfolded.\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Pictures\\SubjectReady.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Instruct subject to take the specified mass.
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->SelectAndCheckMass( mass );
+	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->SignalEvent( "Initiating set of collisions." );
 	Sleep( 1000 );
 	apparatus->StartAcquisition( "COLL", collisionMaxTrialTime );
 	
-	status = apparatus->WaitSubjectReady( NULL, "Perform collisions task.\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-
-	status = apparatus->WaitSubjectReady( NULL, "Pick up manipulandum between thumb and forefinger.\nPress OK when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-
-	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Grip not centered or not in hand." );
+	// Instruct subject to pick up the manipulandum
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( NULL, "Hold the manipulandum vertically with thumb and \nforefinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+   
+    // Check that the grip is properly centered.
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
+	if ( status == ABORT_EXIT ) exit( status );
+	
 
-	// Wait until the subject gets to the target before moving on.
+// Now wait until the subject gets to the target before moving on.
 	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
-
-	apparatus->SignalEvent( "Ready to start." );
+	
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );

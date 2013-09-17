@@ -28,14 +28,14 @@
 
 
 // Targeted trial parameters;
-int targetSequence[] = { 2, 5, 2, 11, 8, 5, 2, 11, 2, 8,
+int targetSequence[] = { 2, 5, 2, 11, 8, 5, 2, 11, 2, 8/*,
 						 2, 11, 8, 11, 5, 8, 5, 2, 8, 11,
 						 2, 8, 2, 11, 5, 8, 2, 8,  2,  5,
 						 11, 2, 11, 2, 11, 5, 8, 5, 11, 2,
 						 8, 2, 11, 2, 8, 5, 11, 2, 11, 2,
-						 11, 8, 11, 5, 8, 2, 11, 11, 9, 12
+						 11, 8, 11, 5, 8, 2, 11, 11, 9, 12*/
 						};	// List of targets for point-to-point movements.
-int targetSequenceN = 40;
+int targetSequenceN = 10;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
 double targetedMinMovementExtent =  100.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
@@ -87,11 +87,14 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( NULL, "Check that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Hold the manipulandum vertically with thumb and \nforefinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
-
+   
 	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Grip not centered or not in hand." );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
+	if ( status == ABORT_EXIT ) exit( status );
+	
+	status = apparatus->WaitSubjectReady( NULL, "Align the manipulandum with the flashing target \nand then move it beside each lid target. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.

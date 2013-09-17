@@ -52,44 +52,52 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+	// Which mass should be used for this set of trials?
+	DexMass mass = ParseForMass( params );
+
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 	static int eyes = ParseForEyeState( params );
 
-#ifndef SKIP_PREP
-
-	// Check that the tracker is still aligned.
-	status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, 5.0, 2, "Coda misaligned!" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	// Verify that it is in the correct configuration, and if not, 
+	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
+	apparatus->ShowStatus( "Hardware configuration check ..." );
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	status = apparatus->WaitSubjectReady( "Pictures\\TappingFolded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Take a seat and attach the belts.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\SubjectReady.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-#endif
+	// Instruct subject to take the specified mass.
+	//  and wait for confimation that he or she is ready.
+//	status = apparatus->SelectAndCheckMass( mass );
+//	if ( status == ABORT_EXIT ) exit( status );
 
+	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pick up the manipulandum in the right hand.\nBe sure that thumb and forefinger are centered.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( NULL, "Hold the manipulandum vertically with thumb and \nforefinger centered. \nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+   
+	// Check that the grip is properly centered.
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( 10.0, 0.25, 1.0 );
+	status = apparatus->WaitSubjectReady( NULL, "Align the manipulandum with the flashing target. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.
-	apparatus->StartAcquisition( "DISC", maxTrialDuration );
+	apparatus->StartAcquisition( "TRGT", maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0], desired_orientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[0], desired_orientation ); 
+	char *wait_at_target_message = "Too long to reach desired target.";
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
+	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[0] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
 	if ( status == ABORT_EXIT ) exit( status );
-
 	// Light up the next target, alternating between the two.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
@@ -101,8 +109,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[1] );
 	}
 		
-	if ( eyes == CLOSED ) apparatus->WaitSubjectReady( "Close your eyes.\nPress OK when ready to continue." );
-	else apparatus->WaitSubjectReady( "Close your eyes.\nPress OK when ready to continue." );
+	if ( eyes == CLOSED ) apparatus->WaitSubjectReady(NULL, "Close your eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
+	else apparatus->WaitSubjectReady(NULL, "Open eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
+	
 
 	if ( status == ABORT_EXIT ) exit( status );
 	// Collect baseline data while holding at the starting position.
