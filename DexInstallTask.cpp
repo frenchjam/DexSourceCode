@@ -50,7 +50,7 @@ double alignmentAcquisitionDuration = 5.0;		// Acquire some data to verify where
 /*********************************************************************************/
 
 // A bit mask describing which markers are used to perform the alignment check.
-// This should be set to correspond to the 4 markers on the reference frame.
+// This should be set to correspond to the 4 markers on the reference frame. (Marker 8 9 10 11)
 unsigned long alignmentMarkerMask = 0x00000f00;
 
 // A bit mask describing which markers are used to perform the field-of-view check.
@@ -67,13 +67,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
     Quaternion transition_orientation[2];
 
 
-	// Prompt the subject to place the manipulandum on the chair.
-	status = apparatus->WaitSubjectReady( "Place the target bar in the right side position." );
+	// Prompt the subject to place the target bar in the right side position.
+	status = apparatus->WaitSubjectReady(NULL, "Place the target bar in the right side position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 
 	// Prompt the subject to place the manipulandum on the chair.
-	status = apparatus->WaitSubjectReady( "Place maniplandum in specified position on the chair." );
+	status = apparatus->WaitSubjectReady(NULL, "Place maniplandum in specified position on the chair." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 
@@ -95,16 +95,18 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Check tracker placement ..." );
 
 	// Where do we expect the CODAs to be with respect to the reference frame?.
-	Vector3 expected_position[2] = { {-622.0, 267.0, 2382.0}, {-178.0, 828.0, 2168.0} };
-
+	Vector3 expected_position[2] = { {-600.0, 300.0, 2000.0}, {-100.0, 800.0, 2000.0} };
+	
 	// At what orientation? Need to make 2 quaternion rotations for the vertical Coda bar.
-	apparatus->SetQuaterniond( transition_orientation[0], -90.0, apparatus->kVector );
-	apparatus->SetQuaterniond( transition_orientation[1], -90.0, apparatus->iVector);
+	apparatus->SetQuaterniond( transition_orientation[0], -90.0, apparatus->iVector );
+	apparatus->SetQuaterniond( transition_orientation[1],  90.0, apparatus->jVector);
 	apparatus->MultiplyQuaternions(expected_orientation[0],transition_orientation[0],transition_orientation[1]);
 	status = apparatus->CheckTrackerPlacement( 0, 
 										expected_position[0], codaUnitPositionTolerance, 
 										expected_orientation[0], codaUnitOrientationTolerance, 
 										"Placement error - Coda Unit 1." );
+
+	
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	if ( apparatus->nCodas > 1 ) {
@@ -112,9 +114,9 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		// This is for the 'horizontal' coda. I don't know if this is right.
 
 		// Flip it 180° in the horizontal plane (i.e. around the Y axis).
-		apparatus->SetQuaterniond( transition_orientation[1],  180.0, apparatus->jVector );
+		apparatus->SetQuaterniond( transition_orientation[1],  180.0, apparatus->kVector );
 		// Tilt from pointing up to pointing slightly down.
-		apparatus->SetQuaterniond( transition_orientation[0],   -115.0, apparatus->iVector);
+		apparatus->SetQuaterniond( transition_orientation[0],   90.0, apparatus->iVector);
 		apparatus->MultiplyQuaternions(expected_orientation[1],transition_orientation[0], transition_orientation[1]);
 	
 		status = apparatus->CheckTrackerPlacement( 1, 
@@ -143,7 +145,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Visibility OK." );
 	apparatus->Wait( 1.0 );
 
-	status = apparatus->WaitSubjectReady( "Move the manipulandum to the target frame holder." );
+	status = apparatus->WaitSubjectReady(NULL, "Move the manipulandum to the target frame holder." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 

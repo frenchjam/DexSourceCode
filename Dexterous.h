@@ -234,10 +234,10 @@ extern Vector3 BarMarkersToTargets;
 // I am going to avoid the terms 'left', 'right', 'top' and 'bottom'
 //  because this leads to confusion between the subject left and right
 //  or left and right from the viewpoint of the CODAs.
-#define DEX_NEGATIVE_BOX_MARKER	22
-#define DEX_POSITIVE_BOX_MARKER	23
-#define DEX_NEGATIVE_BAR_MARKER	24
-#define DEX_POSITIVE_BAR_MARKER	25
+#define DEX_NEGATIVE_BOX_MARKER	8
+#define DEX_POSITIVE_BOX_MARKER	9
+#define DEX_NEGATIVE_BAR_MARKER	10
+#define DEX_POSITIVE_BAR_MARKER	11
 
 // A structure to hold the position and orientation of the target bar,
 //  and the position of each target at the configuration.
