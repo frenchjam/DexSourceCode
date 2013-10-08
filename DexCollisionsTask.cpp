@@ -81,7 +81,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( NULL, "Hold the manipulandum vertically with thumb and \nforefinger centered. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nforefinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
    
     // Check that the grip is properly centered.
