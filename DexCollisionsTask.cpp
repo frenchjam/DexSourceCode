@@ -27,9 +27,9 @@ int collisionDownTarget = 1;
 
 #define UP		0
 #define DOWN	1
-int collisionSequenceN = 3;
-int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, DOWN, UP, DOWN, UP, UP };
-double collisionTime = 2.0;
+int collisionSequenceN = 6;
+int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, UP };
+double collisionTime = 1.5;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
 
@@ -103,27 +103,44 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 		apparatus->TargetOn( collisionInitialTarget );
 		
 		// Allow a fixed time to reach the starting point before triggering the first movement.
-		apparatus->Wait( initialMovementTime );
+		//apparatus->Wait( initialMovementTime );
 				
 		apparatus->TargetsOff();
 		if ( collisionSequence[target] ) {
+		int tone = 2.0;
+		apparatus->SetSoundStateInternal( tone, 1 );
 			apparatus->VerticalTargetOn( collisionUpTarget );
+			apparatus->VerticalTargetOn( collisionUpTarget-1 );
+			apparatus->VerticalTargetOn( collisionUpTarget-2 );
+			apparatus->VerticalTargetOn( collisionUpTarget-3 );
+			apparatus->VerticalTargetOn( collisionUpTarget-4 );
+			apparatus->VerticalTargetOn( collisionUpTarget-5 );
 			apparatus->MarkEvent( TRIGGER_MOVE_UP);
 		}
 		else {
+			int tone = 3.9;
+		    apparatus->SetSoundStateInternal( tone, 1 );
 			apparatus->VerticalTargetOn( collisionDownTarget );
+			apparatus->VerticalTargetOn( collisionDownTarget+1 );
+			apparatus->VerticalTargetOn( collisionDownTarget+2 );
+			apparatus->VerticalTargetOn( collisionDownTarget+3 );
+			apparatus->VerticalTargetOn( collisionDownTarget+4 );
+            apparatus->VerticalTargetOn( collisionDownTarget+5 );
 			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
 		}
 
 		// Turn off the LED (sound) after a brief instant and turn the
-		apparatus->Wait( flashDuration );
+		apparatus->Wait( 0.5 );
+		apparatus->SetSoundState( 4, 0 );
+        apparatus->Wait( 0.25 );
 		apparatus->TargetsOff();
+	
 		// Wait a fixed time to finish the movement.
-		apparatus->Wait( initialMovementTime - flashDuration );
+		apparatus->Wait( 1.5 - 0.74 );
 		// Light the center target to bring the hand back to the starting point.
-		apparatus->TargetOn( collisionInitialTarget );
+		//apparatus->TargetOn( collisionInitialTarget );
 
-		
+	
 	}
 	
 	apparatus->TargetsOff();
