@@ -28,12 +28,7 @@
 
 
 // Targeted trial parameters;
-int targetSequence[] = { 2, 5, 2, 11, 8, 5, 2, 11, 2, 8/*,
-						 2, 11, 8, 11, 5, 8, 5, 2, 8, 11,
-						 2, 8, 2, 11, 5, 8, 2, 8,  2,  5,
-						 11, 2, 11, 2, 11, 5, 8, 5, 11, 2,
-						 8, 2, 11, 2, 8, 5, 11, 2, 11, 2,
-						 11, 8, 11, 5, 8, 2, 11, 11, 9, 12*/
+int targetSequence[] = { 5, 2, 11, 5, 11, 2, 5, 8, 5, 11
 						};	// List of targets for point-to-point movements.
 int targetSequenceN = 10;
 
