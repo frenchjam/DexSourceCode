@@ -71,7 +71,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\TappingFolded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus

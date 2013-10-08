@@ -62,12 +62,12 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\TappingFolded.bmp", "Check that tapping surfaces are unfolded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\Unfolded.bmp", "Check that tapping surfaces are unfolded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\SubjectReady.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
