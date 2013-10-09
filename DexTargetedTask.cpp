@@ -122,16 +122,17 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( targetSequence[ target ] );
 		else apparatus->HorizontalTargetOn( targetSequence[ target ] ); 
 
-
+		//We have decided no beep during targeted task (Sept 2013)
+		/*
 		// Make a beep. 
-		apparatus->SoundOn( 4, 1 );
+		//apparatus->SoundOn( 4, 1 );
 		apparatus->Wait( beepDuration );
 		apparatus->SoundOff();
-		
+		*/
 		// Allow a fixed time to reach the target.
 		// Takes into account the duration of the beep.
-		apparatus->Wait( targetedMovementTime - beepDuration );
-		
+		apparatus->Wait( targetedMovementTime); // - beepDuration );
+
 	}
 	
 	// Mark the ending point in the recording where post hoc tests should be applied.
