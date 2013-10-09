@@ -27,7 +27,7 @@
 
 
 // Targeted trial parameters;
-int delaySequence[] = { 3, 5, 4, 3, 5, 5, 5, 3, 4 };	// Delays between the discrete movements.
+int delaySequence[] = { 1, 1.5, 1, 2, 1.5, 3, 1, 2, 1 };	// Delays between the discrete movements.
 int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
 int discreteTargets[2] = { 3, 7};
 
@@ -69,7 +69,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Belts", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Pictures\\Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
