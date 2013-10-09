@@ -1233,7 +1233,7 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 	// Log that the method has started.
 	monitor->SendEvent( "WaitCenteredGrip - Start." );
 	DexTimerSet( timeout_timer, timeout );
-		
+	ShowStatus( "Acquisition..." );	
 	do {
 
 		if ( DexTimerTimeout( timeout_timer ) ) {
