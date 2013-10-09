@@ -88,6 +88,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
+    // Instruct subject to perform collision with the manipulandum
+	//  and wait for confimation that he or she is ready.
+	status = apparatus->WaitSubjectReady( "Pictures\\Collision.bmp", "Make collision with the manipulandum and the \ntapping surface following beep and lid target. \n\nPress OK when ready to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
 
 // Now wait until the subject gets to the target before moving on.
 	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
