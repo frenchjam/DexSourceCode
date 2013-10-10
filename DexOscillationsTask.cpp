@@ -32,14 +32,14 @@ int oscillationUpperTarget = 2;						// Targets showing desired amplitude of cyc
 int oscillationLowerTarget = 10;
 int oscillationCenterTarget = 6;
 double oscillationDuration = 30.0;
-double oscillationEntrainDuration = 10.0; // Audio metronom duration on one trial
-double osc_time_step = 1/1.5; // Oscillation Period
-double oscillationMaxTrialTime = 30.0;		// Max time to perform the whole list of movements.
-double oscillationMinMovementExtent = 19.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double oscillationMaxMovementExtent = 1000.0; //HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-int	oscillationMinCycles = 5;	// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
-int oscillationMaxCycles = 40;	// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
-double oscillationCycleHysteresis = 10.0;	// Parameter used to adjust the detection of cycles. 
+double oscillationEntrainDuration = 10.0;		// Audio metronom duration on one trial
+double osc_time_step = 1/1.5;					// Oscillation Period
+double oscillationMaxTrialTime = 30.0;			// Max time to perform the whole list of movements.
+double oscillationMinMovementExtent = 19.0;		// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationMaxMovementExtent = 1000.0;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+int	oscillationMinCycles = 5;					// Minimum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+int oscillationMaxCycles = 40;					// Maximum cycles along the movement direction (Y). Set to 1000.0 to simulate error.
+double oscillationCycleHysteresis = 10.0;		// Parameter used to adjust the detection of cycles. 
 Vector3	oscillationDirection = {0.0, 1.0, 0.0};	// Oscillations are nominally in the vertical direction. Could change at some point, I suppose.
 
 /*********************************************************************************/
@@ -66,7 +66,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 		// Instruct subject to take the specified mass.
@@ -76,7 +76,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 		// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nforefinger centered. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
    
 	// Check that the grip is properly centered.
@@ -85,7 +85,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 
 	// Tell the subject which configuration should be used.
-	status = apparatus->fWaitSubjectReady( "Pictures\\Oscillation.bmp", "Align the manipulandum with the flashing target \nand then oscillate it between the two lid targets \nfollowing the frequency given by sound. " );
+	status = apparatus->fWaitSubjectReady( "Oscillation.bmp", "Align the manipulandum with the flashing target \nand then oscillate it between the two lid targets \nfollowing the frequency given by sound. " );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Light up the central target.

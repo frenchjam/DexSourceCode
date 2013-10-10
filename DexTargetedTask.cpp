@@ -66,12 +66,12 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
@@ -82,14 +82,14 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nforefinger centered. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "InHand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
    
 	// Check that the grip is properly centered.
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
-	status = apparatus->WaitSubjectReady( "Pictures\\Targeted.bmp", "Align the manipulandum with the flashing target \nand then move it beside each lid target. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Targeted.bmp", "Align the manipulandum with the flashing target \nand then move it beside each lid target. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.

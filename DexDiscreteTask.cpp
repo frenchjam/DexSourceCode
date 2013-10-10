@@ -37,7 +37,7 @@ double discreteFalseStartHoldTime = 0.250;
 double discreteFalseStartFilterConstant = 1.0;
 
 double discreteMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
-double discreteMaxMovementExtent = HUGE;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double discreteMaxMovementExtent = 200.0;	// Maximum amplitude along the movement direction (Y). Set to 1g.0 to simulate error.
 double discreteCycleHysteresis = 10.0;	// Parameter used to adjust the detection of cycles. 
 
 /*********************************************************************************/
@@ -64,12 +64,12 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
@@ -80,14 +80,14 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Starting set of targeted trials ..." );
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Pictures\\Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nforefinger centered. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Manip_in_hand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
    
 	// Check that the grip is properly centered.
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Pictures\\Wait_discrete.bmp", "Align the manipulandum with the flashing target. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Wait_discrete.bmp", "Align the manipulandum with the flashing target. \nPress OK when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquiring data.
@@ -109,8 +109,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[1] );
 	}
 		
-	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Pictures\\Discrete.bmp", "Close your eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
-	else apparatus->WaitSubjectReady("Pictures\\Discrete.bmp", "Open eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
+	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
+	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
 	
 
 	if ( status == ABORT_EXIT ) exit( status );

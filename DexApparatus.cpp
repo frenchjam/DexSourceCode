@@ -74,6 +74,8 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 	update_period = DEX_SIMULATOR_UPDATE_PERIOD;
 	DexTimerSet( update_timer, update_period );
 
+	nEvents = 0;
+
 }
 
 /***************************************************************************/
@@ -191,7 +193,7 @@ void DexApparatus::SetTargetPositions( void ) {
 	CodaFrame	frame;
 	Vector3	bar_position;
 	Vector3 target_position;
-	Vector3 shift;
+//	Vector3 shift;
 
 	// Get the current marker positions.
 	tracker->GetCurrentMarkerFrame( frame );
@@ -653,7 +655,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 	}
 	SoundOff();
 	
-	status = WaitSubjectReady( "Pictures\\info.bmp", message );
+	status = WaitSubjectReady( "info.bmp", message );
 	if ( status == NORMAL_EXIT ) SignalEvent( "Normal Completion." );
 	return( status );
 	
@@ -945,12 +947,12 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 
 		// Select a picture file depending on the desired configuration.
 		if ( posture == PostureSupine ) {
-			if ( bar_position == TargetBarLeft ) picture = "Pictures\\SupineAside.bmp";
-			else picture = "Pictures\\SupineInUse.bmp";
+			if ( bar_position == TargetBarLeft ) picture = "SupineAside.bmp";
+			else picture = "SupineInUse.bmp";
 		}
 		else {
-			if ( bar_position == TargetBarLeft ) picture = "Pictures\\SitAside.bmp";
-			else picture = "Pictures\\SitInUse.bmp";
+			if ( bar_position == TargetBarLeft ) picture = "SitAside.bmp";
+			else picture = "SitInUse.bmp";
 		}
 
 		
@@ -1016,7 +1018,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 			}
 
 //			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
-			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"Pictures\\CradleA.bmp" , "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
+			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"CradleA.bmp" , "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );
@@ -1587,7 +1589,7 @@ void DexApparatus::SetTargetStateInternal( unsigned long target_state ) {
 void DexApparatus::SetTargetState( unsigned long target_state ) {
 	SetTargetStateInternal( target_state );
 	currentTargetState = target_state;
-	MarkTargetEvent( target_state );
+//	MarkTargetEvent( target_state );
 }
 
 // The following are convenience methods for my own use.
