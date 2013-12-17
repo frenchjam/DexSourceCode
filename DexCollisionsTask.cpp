@@ -62,12 +62,12 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
@@ -81,7 +81,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	// Instruct subject to pick up the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "InHand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "InHand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
    
     // Check that the grip is properly centered.
@@ -90,7 +90,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
     // Instruct subject to perform collision with the manipulandum
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Collision.bmp", "Make collision with the manipulandum and the \ntapping surface following beep and lid target. \n\nPress OK when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Collision.bmp", "Make collision with the manipulandum and the \ntapping surface following beep and lid target. \n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 // Now wait until the subject gets to the target before moving on.
