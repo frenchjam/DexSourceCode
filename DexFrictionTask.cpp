@@ -33,7 +33,7 @@ double frictionMaxLoad = 20.0;
 double forceFilterConstant = 1.0;
 
 // Define the pull direction. This should be up.
-Vector3 frictionLoadDirection = { 0.0, 0.0, 1.0 };
+Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
 
 double slipThreshold = 1.0;
 double slipTimeout = 10.0;
@@ -58,21 +58,22 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// The following routine does that, but it will have no effect on the real
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
 	apparatus->adc->AllowPollingDuringAcquisition();
-	
-	status = apparatus->WaitSubjectReady( "pinch.bmp", "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.\nPress <<OK>> when ready to continue." );
+
+
+	status = apparatus->WaitSubjectReady( "pinch.bmp", "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	status = apparatus->WaitCenteredGrip( copTolerance, copMinForce, copCheckTimeout, "Grip not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 
-	// we still need to flip the horizontal and vertical bar for displaying the LED's feedback pinch force. 
+	// we still need to flip the horizontal and vertical bar for displaying the LED's as feedback for pinch force. 
     apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, frictionTimeout, "Use the LEDs to achieve the desired grip force level." );
 	
 
-	status = apparatus->WaitSubjectReady( "Coef_frict_osc.bmp","Rub the manipulandum from center to periphery\n without releasing the grip.\n\nPress <<OK>> when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Coef_frict_osc.bmp","Rub the manipulandum from center to periphery\n without releasing the grip.\n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
     apparatus->StartAcquisition( "FRIC", maxTrialDuration );

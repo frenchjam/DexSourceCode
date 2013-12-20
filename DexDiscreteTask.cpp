@@ -69,7 +69,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Belts.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress <OK> when ready to continue." );
+	status = apparatus->WaitSubjectReady( "Belts2.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the specified mass.
@@ -109,8 +109,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[1] );
 	}
 		
-	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and \nmove the manipulandum with respect to the sound.\nPress OK when ready to continue." );
-	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and \nmove the manipulandum with respect to the sound.\nPress <OK> when ready to continue." );
+	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and move the manipulandum \n to the opposite target at beep.\nPress OK when ready to continue." );
+	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and move the manipulandum \n to the opposite target at beep.\nPress <OK> when ready to continue." );
 	
 
 	if ( status == ABORT_EXIT ) exit( status );
