@@ -9,7 +9,7 @@
  */
 
 #include <windows.h>
-#include <mmsystem.h>
+#include <mmsystem.h>s
 
 #include <stdio.h>
 #include <stdlib.h>
