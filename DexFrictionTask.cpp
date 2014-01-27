@@ -9,7 +9,7 @@
  */
 
 #include <windows.h>
-#include <mmsystem.h>s
+#include <mmsystem.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,49 +52,59 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	
 	int status;
 
-	// Start acquiring Data.
-	// Note: DexNiDaqADC must be run in polling mode so that we can both record the 
-	// continuous data, but all monitor the COP in real time.
+	// DexNiDaqADC must be run in polling mode so that we can record the 
+	// continuous data, but also monitor the COP in real time.
 	// The following routine does that, but it will have no effect on the real
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
 	apparatus->adc->AllowPollingDuringAcquisition();
 
-
+	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
 	status = apparatus->WaitSubjectReady( "pinch.bmp", "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
-
 	status = apparatus->WaitCenteredGrip( copTolerance, copMinForce, copCheckTimeout, "Grip not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
-
-
-	// we still need to flip the horizontal and vertical bar for displaying the LED's as feedback for pinch force. 
     apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, frictionTimeout, "Use the LEDs to achieve the desired grip force level." );
-	
+	// Mark when the desired force is achieved.
+	apparatus->MarkEvent( FORCE_OK );
 
+	// Instruct the subject to perform the rubbing motion. 
+	// !JMc I think that these instructions have to occur prior to achieving the desired force.
+	// !JMc Otherwise, I think that the subject will lose the force level while reading the new instructions.
 	status = apparatus->WaitSubjectReady( "Coef_frict_osc.bmp","Rub the manipulandum from center to periphery\n without releasing the grip.\n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
+	// Start acquiring.
     apparatus->StartAcquisition( "FRIC", maxTrialDuration );
-    apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
+
+	// Wait for the initial slip.
+    status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
 			frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 			forceFilterConstant, slipThreshold, slipTimeout, "Slip not achieved."  );
-	apparatus->MarkEvent( SLIP_OK );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
+	// Mark when slip has occured. Note that if the subject hit <IGNORE> 
+	// this signal will also occur.
+	apparatus->MarkEvent( SLIP );
+
+	// Allow 15 more seconds for the rubbing motion.
 	apparatus->Wait( 15 );
 	
-	//Sound off
+	// !JMc Not sure what sound would be on.
+	// !JMc Maybe this could be removed.
 	apparatus->SoundOff();
 
-	apparatus->MarkEvent( FORCE_OK );
-
+	// Beep to indicate the end of the recording.
 	apparatus->Beep();
 
+	// Terminate the acquisition. This will also close the data file.
 	apparatus->StopAcquisition();
 
+	// Erase any lingering message.
 	apparatus->HideStatus();
 
+	// Apparently we were successful.
 	return( NORMAL_EXIT );
 
 }

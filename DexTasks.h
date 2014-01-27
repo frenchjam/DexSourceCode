@@ -31,7 +31,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 #define DEFAULT -1
 
 // These are the user-defined markers. 
-enum { FORCE_OK = 0, SLIP_OK };
+enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
 enum { OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
