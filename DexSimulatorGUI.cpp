@@ -434,6 +434,9 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 // Reproduce the functionality of MessageBox(), but with illustrations and remaining
 //  inside the DexSimulatorGUI box.
 
+// Picture file prefix (automatically added to picture filenames)
+static char _illustrated_message_picture_filename_prefix[] = "Pictures\\";
+
 // Store here temporarily the information that is to be displayed.
 // It gets put into the dialog by WM_INITDIALOG.
 static char _illustrated_message_picture_filename[256] = "";
@@ -496,9 +499,12 @@ int IllustratedMessageBox( const char *picture, const char *message, const char 
 	// Store the information that is to be displayed temporarily, so that it can be put into the dialog by WM_INITDIALOG.
 	// Be careful not to excede the limits of the buffers and be careful to have a null-terminated string.
 	if ( picture ) {
-		strncpy( _illustrated_message_picture_filename, picture, sizeof( _illustrated_message_picture_filename ) );
+		strncpy(  _illustrated_message_picture_filename, _illustrated_message_picture_filename_prefix, sizeof( _illustrated_message_picture_filename ) );
+		strncpy( _illustrated_message_picture_filename + strlen( _illustrated_message_picture_filename_prefix ), 
+			picture, 
+			sizeof( _illustrated_message_picture_filename ) - strlen( _illustrated_message_picture_filename_prefix ) );
 		_illustrated_message_picture_filename[sizeof( _illustrated_message_picture_filename ) - 1] = 0;
-		_illustrated_message_picture_bitmap = (HBITMAP) LoadImage( NULL, picture, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
+		_illustrated_message_picture_bitmap = (HBITMAP) LoadImage( NULL, _illustrated_message_picture_filename, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
 	}
 	else {
 		_illustrated_message_picture_filename[0] = 0;
