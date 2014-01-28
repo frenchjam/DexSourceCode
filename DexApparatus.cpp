@@ -373,11 +373,11 @@ int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolera
 			return( ABORT_EXIT );
 		}
 		else if ( response == IDIGNORE ) {
-			monitor->SendEvent( "Ignore Error from SelectAndCheckConfiguration." );
+			monitor->SendEvent( "Ignore Error from CheckTrackerAlignment()." );
 			return( IGNORE_EXIT );
 		}
 		else {
-			monitor->SendEvent( "Retry exit from SelectAndCheckConfiguration." );
+			monitor->SendEvent( "Retry exit from CheckTrackerAlignment()." );
 			return( RETRY_EXIT );
 		}
 	}

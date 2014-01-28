@@ -193,7 +193,6 @@ char *DexCompiler::quoteMessage( const char *message ) {
 
 int DexCompiler::WaitSubjectReady( const char *picture, const char *message ) {
 
-	// There is no provision yet for an image file, so just put an empty field.
 	// I did not foresee a timeout for this command. I am setting the timeout 
 	// to the maximum.
 	AddStepNumber();
@@ -277,16 +276,34 @@ int DexCompiler::WaitSlip( float min_grip, float max_grip,
 /***************************************************************************/
 
 int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
+
 	char message[256];
+	char *picture;
+	double timeout;
+
 	sprintf( message, "Please set the following configuration:\\n   Posture: %s   Target Bar: %s",
 		( posture ? "supine" : "seated" ),
 		( bar_position ? "Right" : "Left" ));
 	AddStepNumber();
+
+	// Select a picture file depending on the desired configuration.
+	// This picture will be displayed if the configuration needs to be corrected.
+	if ( posture == PostureSupine ) {
+		if ( bar_position == TargetBarLeft ) picture = "SupineAside.bmp";
+		else picture = "SupineInUse.bmp";
+	}
+	else {
+		if ( bar_position == TargetBarLeft ) picture = "SitAside.bmp";
+		else picture = "SitInUse.bmp";
+	}
+
 	// I am putting the maximum for the timeout, because I don't believe that this one should timeout.
+	timeout = DEX_MAX_TIMEOUT;
+
 	// I had three states for posture and bar position, including an 'indifferent' state. 
 	// Here I translate those to the 0 and 1 defined by DEX.
 	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ),"", 
-		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), DEX_MAX_TIMEOUT );
+		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
 	return( NORMAL_EXIT );
 }
 
