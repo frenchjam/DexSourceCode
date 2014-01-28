@@ -252,6 +252,7 @@ int DexApparatus::CalibrateTargets( void ) {
 	Vector3		position;
 	Quaternion	orientation;
 	FILE *fp;
+	char *picture = "";
 
 	for ( int trg = 0; trg < nTargets; trg++ ) {
 		TargetOn( trg );
@@ -269,7 +270,7 @@ int DexApparatus::CalibrateTargets( void ) {
 
 	fp = fopen( targetPositionFilename, "w" );
 	if ( !fp ) {
-		fSignalError( MB_OK, "Error writing to %s.\nAborting.", targetPositionFilename );
+		fSignalError( MB_OK, picture, "Error writing to %s.\nAborting.", targetPositionFilename );
 		return( ABORT_EXIT );
 	}
 	for ( trg = 0; trg < nTargets; trg++ ) {
@@ -284,7 +285,8 @@ int DexApparatus::CalibrateTargets( void ) {
 int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 										   float min_x, float max_x,
 										   float min_y, float max_y,
-										   float min_z, float max_z, const char *msg ) {
+										   float min_z, float max_z, 
+										   const char *msg, const char *picture ) {
 
 	CodaFrame frame;
 	int mrk;
@@ -330,7 +332,7 @@ int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 
 		strcat( info, "\n\nNOTE: XYZ refers to intrinsic CODA bar axes." );
 		// Report the error to the user.
-		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s%s", msg, info );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, "%s%s", msg, info );
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDIGNORE ) return( IGNORE_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -340,7 +342,8 @@ int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 
 /***************************************************************************/
 
-int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg ) {
+int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, 
+										 const char *msg, const char *picture ) {
 
 	CodaFrame	frame[2];
 
@@ -367,7 +370,7 @@ int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolera
 	}
 
 	if ( good < n_good ) {
-		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s", msg );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, "%s", msg );
 		if ( response == IDABORT ) {
 			monitor->SendEvent( "Manual Abort from CheckTrackerAlignment()." );
 			return( ABORT_EXIT );
@@ -389,7 +392,7 @@ int DexApparatus::CheckTrackerAlignment( unsigned long marker_mask, float tolera
 int DexApparatus::CheckTrackerPlacement( int unit, 
 											const Vector3 expected_pos, float p_tolerance,
 											const Quaternion expected_ori, float o_tolerance,
-											const char *msg ) {
+											const char *msg, const char *picture ) {
 	Vector3 pos;
 	Quaternion ori;
 
@@ -405,7 +408,7 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 	angle = ToDegrees( AngleBetween( ori, expected_ori ) );
 	
 	if ( distance > p_tolerance || abs( angle ) > o_tolerance ) {
-		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle );
 	
 		if ( response == IDABORT ) {
 			monitor->SendEvent( "Manual Abort from CheckTrackerPlacement()." );
@@ -425,7 +428,7 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 
 /***************************************************************************/
 
-int DexApparatus::PerformTrackerAlignment( const char *msg ) {
+int DexApparatus::PerformTrackerAlignment( const char *msg, const char *picture ) {
 	int error_code;
 	// Ask the tracker to perform the alignment.
 	error_code = tracker->PerformAlignment( negativeBoxMarker, 
@@ -655,7 +658,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 	}
 	SoundOff();
 	
-	status = WaitSubjectReady( "info.bmp", message );
+	status = WaitSubjectReady( "ok.bmp", message );
 	if ( status == NORMAL_EXIT ) SignalEvent( "Normal Completion." );
 	return( status );
 	
@@ -827,7 +830,7 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 
 // Show the status to the subject.
 
-void DexApparatus::ShowStatus ( const char *message ) {
+void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
 	SetDlgItemText( workspace_dlg, IDC_STATUS_TEXT, message );
 	// If we are updating the status, it is usually an interesting break point in the procedure.
 	// So we automatically insert a comment in the script file to make it easy to find.
@@ -837,7 +840,7 @@ void DexApparatus::ShowStatus ( const char *message ) {
 }
 
 void DexApparatus::HideStatus ( void ) {
-	ShowStatus( "" );
+	ShowStatus( "", "" );
 }
 
 
@@ -1059,7 +1062,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 									double orientation_tolerance,
 									double hold_time, 
 									double timeout, 
-									char *msg  ) {
+									const char *msg, const char *picture ) {
 	
 	// These are objects of my own making, based on the Windows clock.
 	DexTimer blink_timer;	
@@ -1094,7 +1097,7 @@ int DexApparatus::WaitUntilAtTarget( int target_id,
 				
 				// Timeout has been reached. Signal the error to the user.
 				if ( !msg ) msg = "Time to reach target exceeded.\n Is the manipulandum visible?\n Is the manipulandum upright?\n";
-				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
+				mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture,
 					"%s\n  Target ID: %d\n  Max time: %.2f\n  Manipulandum Visible: %s\n Manipulandum Position: <%.3f %.3f %.3f>\n Position Error: <%.3f %.3f %.3f>\n Manipuladum orientation: <%.3f %.3f %.3f %.3f>\n  Orientation Error: %.0f degrees",
 					msg, target_id,
 					timeout, ( manipulandum_visible ? "yes" : "no" ), 
@@ -1201,8 +1204,8 @@ int DexApparatus::WaitUntilAtVerticalTarget( int target_id,
 									double orientation_tolerance,
 									double hold_time, 
 									double timeout, 
-									char *msg  ) {
-	return( WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg ) );
+									const char *msg, const char *picture  ) {
+	return( WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg, picture ) );
 }
 
 int DexApparatus::WaitUntilAtHorizontalTarget( int target_id, 
@@ -1211,8 +1214,8 @@ int DexApparatus::WaitUntilAtHorizontalTarget( int target_id,
 									double orientation_tolerance,
 									double hold_time, 
 									double timeout, 
-									char *msg  ) {
-	return( WaitUntilAtTarget( nVerticalTargets + target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg  ) );
+									const char *msg, const char *picture  ) {
+	return( WaitUntilAtTarget( nVerticalTargets + target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, msg, picture  ) );
 }
 
 /***************************************************************************/
@@ -1220,7 +1223,7 @@ int DexApparatus::WaitUntilAtHorizontalTarget( int target_id,
 //
 // Wait until the grip is properly centered.
 //
-int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg  ) {
+int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float timeout, const char *msg, const char *picture  ) {
 	
 	// These are objects of my own making, based on the Windows clock.
 	DexTimer timeout_timer;
@@ -1235,14 +1238,14 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 	// Log that the method has started.
 	monitor->SendEvent( "WaitCenteredGrip - Start." );
 	DexTimerSet( timeout_timer, timeout );
-	ShowStatus( "Acquisition..." );	
+	ShowStatus( "Acquisition...", "" );	
 	do {
 
 		if ( DexTimerTimeout( timeout_timer ) ) {
 			
 			// Timeout has been reached. Signal the error to the user.
 			if ( !msg ) msg = "Time to achieve centered grip exceeded.";
-			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, 
+			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture,
 				"%s\n Tolerance: %.1f mm\n Min Force: %.2f N\n Unit 0: %.1f %s\n Unit 1: %.1f %s\n", 
 				msg, tolerance, min_force,
 				cop_offset[0] * 1000.0, vstr( cop[0] ), cop_offset[1] * 1000.0, vstr( cop[1] )  );
@@ -1410,7 +1413,7 @@ int DexApparatus::WaitDesiredForces( float min_grip, float max_grip,
 									 float min_load, float max_load, 
 									 Vector3 direction,
 									 float filter_constant,
-									 float hold_time, float timeout, const char *msg ) {
+									 float hold_time, float timeout, const char *msg, const char *picture ) {
 
 	Vector3		force[N_FORCE_TRANSDUCERS], torque[N_FORCE_TRANSDUCERS];
 
@@ -1494,7 +1497,7 @@ int DexApparatus::WaitSlip( float min_grip, float max_grip,
 							float min_load, float max_load, 
 							Vector3 direction,
 							float filter_constant,
-							float slip_threshold, float timeout, const char *msg ) {
+							float slip_threshold, float timeout, const char *msg, const char *picture ) {
 
 	Vector3		force[N_FORCE_TRANSDUCERS], torque[N_FORCE_TRANSDUCERS];
 	Vector3		cop[N_FORCE_TRANSDUCERS], initial_cop[N_FORCE_TRANSDUCERS], delta_cop[N_FORCE_TRANSDUCERS];
@@ -1529,7 +1532,7 @@ int DexApparatus::WaitSlip( float min_grip, float max_grip,
 			
 			// Timeout has been reached. Signal the error to the user.
 			if ( !msg ) msg = "Time to achieve finger slip exceeded.";
-			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, "%s", msg );
+			mb_reply = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, "%s", msg );
 			// Exit, signalling that the subject wants to abort.
 			if ( mb_reply == IDABORT ) {
 				monitor->SendEvent( "Manual Abort from WaitSlip()." );
@@ -1701,7 +1704,7 @@ int DexApparatus::StopAcquisition( const char *msg ) {
 	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	adc->StopAcquisition();
-	ShowStatus( "Acquisition terminated.\nComputing kinematic values ..." );
+	ShowStatus( "Acquisition terminated.\nComputing kinematic values ...", "wait.bmp" );
 	// Retrieve the marker data.
 	for ( unit = 0; unit <= nCodas; unit++ ) {
 		nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition[unit], DEX_MAX_MARKER_FRAMES, unit );
@@ -1763,7 +1766,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	sprintf( fileroot, "DexSimulatorOutput.%s", tag );
 	
 	// Write a file with raw marker data.
-	ShowStatus( "Writing marker data ..." );
+	ShowStatus( "Writing marker data ...", "wait.bmp" );
 	sprintf( filename, "%s.mrk", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
@@ -1792,7 +1795,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 	
 	// Write a file with the computed manipulandum position and orientation.
-	ShowStatus( "Writing kinematic data ..." );
+	ShowStatus( "Writing kinematic data ...", "wait.bmp" );
 	sprintf( filename, "%s.mnp", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime\tVisible\tPx\tPy\tPz\tQx\tQy\tQz\tQm\n" );
@@ -1814,7 +1817,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 
 	// Write a file with raw adc data.
-	ShowStatus( "Writing ADC data ..." );
+	ShowStatus( "Writing ADC data ...", "wait.bmp" );
 	sprintf( filename, "%s.adc", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );
@@ -1830,7 +1833,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	monitor->SendEvent( "Data file written: %s", filename );
 		
 	// Write a file with computed force data.
-	ShowStatus( "Writing computed analog data ..." );
+	ShowStatus( "Writing computed analog data ...", "wait.bmp" );
 	sprintf( filename, "%s.frc", fileroot );
 	fp = fopen( filename, "w" );
 	fprintf( fp, "Sample\tTime" );

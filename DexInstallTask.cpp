@@ -68,7 +68,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 
 	// Prompt the subject to place the target bar in the right side position.
-	status = apparatus->WaitSubjectReady(NULL, "Place the target bar in the right side position." );
+	status = apparatus->WaitSubjectReady("BarRight.bmp", "Place the target bar in the right side position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 
@@ -145,7 +145,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Visibility OK." );
 	apparatus->Wait( 1.0 );
 
-	status = apparatus->WaitSubjectReady(NULL, "Move the manipulandum to the target frame holder." );
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the target frame holder." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 

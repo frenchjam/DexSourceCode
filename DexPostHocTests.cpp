@@ -59,7 +59,7 @@ int DexApparatus::CheckOverrun(  const char *msg ) {
 
 int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time, 
 								    double max_continuous_dropout_time,
-								    const char *msg ) {
+								    const char *msg, const char *picture ) {
 
 	int first, last;
 	
@@ -104,7 +104,7 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 		// If not, generate a generic message.
 		if ( !msg ) msg = "Manipulandum Visibility Error.";
 		fmt = "%s\n  Total Time Invisible:   %.3f (%.3f)\n  Longest Gap:             %.3f (%.3f)";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg,
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg,
 			overall_time, max_cumulative_dropout_time, max_time_gap, max_continuous_dropout_time );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
@@ -130,7 +130,7 @@ int DexApparatus::CheckVisibility(  double max_cumulative_dropout_time,
 
 int DexApparatus::CheckMovementAmplitude(  double min, double max, 
 										   double dirX, double dirY, double dirZ,
-										   const char *msg ) {
+										   const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -232,7 +232,7 @@ int DexApparatus::CheckMovementAmplitude(  double min, double max,
 		// was not moved enough, or if it just could not be seen.
 		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
 		else fmt = "%s\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, sd, min, max, dirX, dirY, dirZ );
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, sd, min, max, dirX, dirY, dirZ );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -247,8 +247,8 @@ int DexApparatus::CheckMovementAmplitude(  double min, double max,
 }
 
 // Same as above, but with a array as an input to specify the direction.
-int DexApparatus::CheckMovementAmplitude(  double min, double max, const Vector3 direction, char *msg ) {
-	return ( CheckMovementAmplitude( min, max, direction[X], direction[Y], direction[Z], msg ) );
+int DexApparatus::CheckMovementAmplitude(  double min, double max, const Vector3 direction, const char *msg, const char *picture ) {
+	return ( CheckMovementAmplitude( min, max, direction[X], direction[Y], direction[Z], msg, picture ) );
 }
 
 /********************************************************************************************/
@@ -261,7 +261,7 @@ int DexApparatus::CheckMovementAmplitude(  double min, double max, const Vector3
 
 int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, 
 										   float dirX, float dirY, float dirZ,
-										   float hysteresis, const char *msg ) {
+										   float hysteresis, const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -350,7 +350,7 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles,
 		// was not moved enough, or if it just could not be seen.
 		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
 		else fmt = "%s\n Measured cycles: %d\n Desired range: %d - %d\n Direction: < %.2f %.2f %.2f>";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -365,8 +365,8 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles,
 }
 
 // Same as above, but with a array as an input to specify the direction.
-int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, const Vector3 direction, float hysteresis, const char *msg ) {
-	return ( CheckMovementCycles( min_cycles, max_cycles, direction[X], direction[Y], direction[Z], hysteresis, msg ) );
+int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, const Vector3 direction, float hysteresis, const char *msg, const char *picture ) {
+	return ( CheckMovementCycles( min_cycles, max_cycles, direction[X], direction[Y], direction[Z], hysteresis, msg, picture ) );
 }
 
 /********************************************************************************************/
@@ -377,7 +377,8 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles, const Ve
 // 
 // TODO: Not yet tested!
 
-int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, float threshold, float filter_constant, const char *msg ) {
+int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, float threshold, float filter_constant, 
+									 const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -455,7 +456,7 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 		// was not moved enough, or if it just could not be seen.
 		if ( N <= 0.0 ) fmt = "%s\n Manipulandum not visible.";
 		else fmt = "%s\n False Starts Detected: %d\nMaximum Allowed: %d";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, early_starts, max_early_starts );
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, early_starts, max_early_starts );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -477,7 +478,8 @@ int DexApparatus::CheckEarlyStarts(  int max_early_starts, float hold_time, floa
 // 
 // TODO: Not yet tested!
 
-int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float tolY, float tolZ, int max_bad_positions, const char *msg ) {
+int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float tolY, float tolZ, int max_bad_positions, 
+											const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -520,7 +522,7 @@ int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float t
 		// The message could be different depending on whether the maniplulandum
 		// was not moved enough, or if it just could not be seen.
 		fmt = "%s\n  Total Movements: %d\n  Erroneous Positions: %d\nMaximum Allowed: %d";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, movements, bad_positions, max_bad_positions );
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, movements, bad_positions, max_bad_positions );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -541,7 +543,8 @@ int DexApparatus::CheckCorrectStartPosition(  int target_id, float tolX, float t
 // 
 // TODO: Not fully tested yet!
 
-int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg ) {
+int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX, float dirY, float dirZ, float threshold, 
+											const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -629,7 +632,7 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 		// If the user provided a message to signal a visibilty error, use it.
 		// If not, generate a generic message.
 		if ( !msg ) msg = "To many starts in wrong direction.";
-		int response = fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, movements, starts, bad_movements, max_false_directions );
+		int response = fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, movements, starts, bad_movements, max_false_directions );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );
@@ -644,8 +647,8 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, float dirX,
 }
 
 // Same as above, but with a array as an input to specify the direction.
-int DexApparatus::CheckMovementDirection(  int max_false_directions, Vector3 direction, float threshold, const char *msg ) {
-	return ( CheckMovementDirection( max_false_directions, direction[X], direction[Y], direction[Z], threshold, msg ) );
+int DexApparatus::CheckMovementDirection(  int max_false_directions, Vector3 direction, float threshold, const char *msg, const char *picture ) {
+	return ( CheckMovementDirection( max_false_directions, direction[X], direction[Y], direction[Z], threshold, msg, picture ) );
 }
 
 /********************************************************************************************/
@@ -656,7 +659,7 @@ int DexApparatus::CheckMovementDirection(  int max_false_directions, Vector3 dir
 // 
 // TODO: Not fully tested yet!
 
-int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg ) {
+int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -724,7 +727,7 @@ int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int
 		// If not, generate a generic message.
 		if ( !msg ) msg = "To many collisions outside force range.";
 		int response = 
-			fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, min_amplitude, max_amplitude, 
+			fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, min_amplitude, max_amplitude, 
 							movements, bad_peaks, highs, lows, max_bad_peaks );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
@@ -747,7 +750,7 @@ int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int
 // Here we use the accelerometer data instead of force data.
 // TODO: Not fully tested yet!
 
-int DexApparatus::CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg ) {
+int DexApparatus::CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg, const char *picture ) {
 	
 	const char *fmt;
 	bool  error = false;
@@ -815,7 +818,7 @@ int DexApparatus::CheckAccelerationPeaks( float min_amplitude, float max_amplitu
 		// If not, generate a generic message.
 		if ( !msg ) msg = "To many collisions outside acceleration range.";
 		int response = 
-			fSignalError( MB_ABORTRETRYIGNORE, fmt, msg, min_amplitude, max_amplitude, 
+			fSignalError( MB_ABORTRETRYIGNORE, picture, fmt, msg, min_amplitude, max_amplitude, 
 							movements, bad_peaks, highs, lows, max_bad_peaks );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );

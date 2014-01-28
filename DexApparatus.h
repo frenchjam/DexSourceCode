@@ -75,6 +75,10 @@ protected:
 	unsigned long currentTargetState;
 	unsigned long horizontalTargetMask;
 	unsigned long verticalTargetMask;
+
+	int  CheckOverrun(  const char *msg );	 // To be integrated with stop acquisition.
+	void SaveAcquisition( const char *tag ); // To be integrated with stop acquisition.
+
 	
 public:
 	
@@ -213,8 +217,6 @@ public:
 	// Acquisition
 	virtual void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION ); 
 	virtual int  StopAcquisition( const char *msg = "Error - Maybe file overrun." );
-	virtual int  CheckOverrun(  const char *msg );	 // To be integrated with stop acquisition.
-	virtual void SaveAcquisition( const char *tag ); // To be integrated with stop acquisition.
 	
 	// Flow control
 	virtual void Wait( double seconds );
@@ -225,33 +227,33 @@ public:
 									Vector3 position_tolerance = defaultPositionTolerance, 
 									double orientation_tolerance = defaultOrientationTolerance, 
 									double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-									char *msg = NULL );
+									const char *msg = NULL, const char *picture = "alert.bmp" );
 	
 	virtual int  WaitUntilAtVerticalTarget( int target_id, 
 											const Quaternion desired_orientation = uprightNullOrientation, 
 											Vector3 position_tolerance = defaultPositionTolerance, 
 											double orientation_tolerance = defaultOrientationTolerance, 
 											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-											char *msg = NULL );
+											const char *msg = NULL, const char *picture = "alert.bmp" );
 	virtual int  WaitUntilAtHorizontalTarget( int target_id, 
 											const Quaternion desired_orientation = uprightNullOrientation, 
 											Vector3 position_tolerance = defaultPositionTolerance, 
 											double orientation_tolerance = defaultOrientationTolerance, 
 											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-											char *msg = NULL );
+											const char *msg = NULL, const char *picture = "alert.bmp" );
 
-	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = NULL  );
+	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, const char *msg = NULL, const char *picture = "alert.bmp"  );
 
 	virtual int	 WaitDesiredForces( float min_grip, float max_grip, 
 									 float min_load, float max_load,
 									 Vector3 direction, float filter_constant,
-									 float hold_time, float timeout, const char *msg = NULL );
+									 float hold_time, float timeout, const char *msg = NULL, const char *picture = "alert.bmp" );
 	virtual int WaitSlip( float min_grip, float max_grip, 
 									 float min_load, float max_load, 
 									 Vector3 direction,
 									 float filter_constant,
 									 float slip_threshold, 
-									 float timeout, const char *msg = NULL );
+									 float timeout, const char *msg = NULL, const char *picture = "alert.bmp" );
 
 	// Hardware configuration
 	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
@@ -261,22 +263,22 @@ public:
 	virtual int SelectAndCheckMass( int mass );
 	
 	// Post hoc tests of data validity.
-	virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL );
-	virtual int CheckMovementAmplitude(  double min, double max, double dirX, double dirY, double dirZ, const char *msg = NULL );
-	virtual int CheckMovementAmplitude(  double min, double max, const Vector3 direction, char *msg = NULL );
+	virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckMovementAmplitude(  double min, double max, double dirX, double dirY, double dirZ, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckMovementAmplitude(  double min, double max, const Vector3 direction, const char *msg = NULL, const char *picture = "alert.bmp" );
 	
 	virtual int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								float dirX, float dirY, float dirZ,
-								float hysteresis, const char *msg );
+								float hysteresis, const char *msg, const char *picture = "alert.bmp" );
 	virtual int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								const Vector3 direction,
-								float hysteresis, const char *msg );
-	virtual int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
-	virtual int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
-	virtual int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
-	virtual int CheckMovementDirection(  int n_false_directions, Vector3 direction, float threshold, const char *msg = NULL );
-	virtual int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
-	virtual int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
+								float hysteresis, const char *msg, const char *picture = "alert.bmp" );
+	virtual int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL, const char *picture = "alert.bmp");
+	virtual int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckMovementDirection(  int n_false_directions, Vector3 direction, float threshold, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL, const char *picture = "alert.bmp" );
+	virtual int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL, const char *picture = "alert.bmp" );
 	
 	// Signalling events to the ground.
 	virtual void SignalConfiguration( void );
@@ -296,7 +298,7 @@ public:
 	virtual void FindAnalysisFrameRange( int &first, int &last );
 	
 	// Show status to subject.
-	void DexApparatus::ShowStatus (const char *message );
+	void DexApparatus::ShowStatus (const char *message = "", const char *picture = "" );
 	void DexApparatus::HideStatus ( void );
 
 	// Tracker installation and alignment.
@@ -304,14 +306,15 @@ public:
 											float min_x, float max_x,
 											float min_y, float max_y,
 											float min_z, float max_z, 
-											const char *msg = "Markers not centered in view." );		
-	virtual int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment." );
+											const char *msg = "Markers not centered in view.", const char *picture = "alert.bmp" );		
+	virtual int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment.", const char *picture = "alert.bmp" );
 	virtual int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, 
-										const char *msg ="Codas out of alignment!" );
+										const char *msg ="Codas out of alignment!", const char *picture = "alert.bmp" );
 	virtual	int CheckTrackerPlacement( int unit, 
 										const Vector3 expected_pos, float p_tolerance,
 										const Quaternion expected_ori, float o_tolerance,
-										const char *msg = "Codas bars not placed as expected.");
+										const char *msg = "Codas bars not placed as expected.",
+										const char *picture = "alert.bmp" );
 	
 	// Measure the position and orientation of the manipulandum 
 	// based on a frame of Coda marker data.
@@ -405,58 +408,58 @@ public:
 									double orientation_tolerance,
 									double hold_time, 
 									double timeout, 
-									char *msg = "Timeout waiting to reach target." );
-	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, char *msg = "Grip not centered"  );
+									const char *msg = "Timeout waiting to reach target.", const char *picture = "alert.bmp" );
+	int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, const char *msg = "Grip not centered", const char *picture = "alert.bmp"  );
 	int	 WaitDesiredForces( float min_grip, float max_grip, 
 									 float min_load, float max_load,
 									 Vector3 direction, float filter_constant,
-									 float hold_time, float timeout, const char *msg = "Desired force not achieved." );
+									 float hold_time, float timeout, 
+									 const char *msg = "Desired force not achieved.", const char *picture = "alert.bmp" );
 	int WaitSlip( float min_grip, float max_grip, 
 									 float min_load, float max_load, 
 									 Vector3 direction,
 									 float filter_constant,
 									 float slip_threshold, 
-									 float timeout, const char *msg = "Slip not achieved." );
+									 float timeout, const char *msg = "Slip not achieved.", const char *picture = "alert.bmp" );
 
 	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 	int SelectAndCheckMass( int mass );
 
-	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = "Manipulandum occluded too often." );
-	int CheckOverrun(  const char *msg );
+	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = "Manipulandum occluded too often.", const char *picture = "alert.bmp" );
 	int CheckMovementAmplitude(  double min, double max, 
 								 double dirX, double dirY, double dirZ,
-								 const char *msg = "Movement amplitude outside range." );
+								 const char *msg = "Movement amplitude outside range.", const char *picture = "alert.bmp" );
 	int CheckMovementCycles(  int min_cycles, int max_cycles, 
 								float dirX, float dirY, float dirZ,
-								float hysteresis, const char *msg );
-	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL );
-	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL);
-	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL );
-	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL );
-	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL );
+								float hysteresis, const char *msg, const char *picture = "alert.bmp" );
+	int CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg = NULL, const char *picture = "alert.bmp" );
+	int CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg = NULL, const char *picture = "alert.bmp");
+	int CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg = NULL, const char *picture = "alert.bmp" );
+	int CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg = NULL, const char *picture = "alert.bmp" );
+	int CheckAccelerationPeaks( float min_amplitude, float max_amplitude, int max_bad_peaks, const char *msg = NULL, const char *picture = "alert.bmp" );
 	void ComputeAndNullifyStrainGaugeOffsets( void );
 
 	void MarkEvent( int event, unsigned long param = 0x00L );
 
-	int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment." );
+	int PerformTrackerAlignment( const char *message = "Error performing the tracker alignment.", const char *picture = "alert.bmp" );
 	int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 											float min_x, float max_x,
 											float min_y, float max_y,
 											float min_z, float max_z, 
-											const char *msg = "Markers not centered in view." );		
+											const char *msg = "Markers not centered in view.", const char *picture = "alert.bmp" );		
 	int CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, 
-										const char *msg ="Codas out of alignment!" );
+										const char *msg ="Codas out of alignment!", const char *picture = "alert.bmp" );
 	int CheckTrackerPlacement( int unit, 
 										const Vector3 expected_pos, float p_tolerance,
 										const Quaternion expected_ori, float o_tolerance,
-										const char *msg = "Codas bars not placed as expected.");
+										const char *msg = "Codas bars not placed as expected.", const char *picture = "alert.bmp");
 
 
 	void SetTargetPositions( void );
 	void SignalConfiguration( void );
 	void SignalEvent( const char *event );
 	void Comment( const char *txt );
-	void ShowStatus (const char *message );
+	void ShowStatus (const char *message = "", const char *picture = "" );
 
 	void AddStepNumber( void );
 
