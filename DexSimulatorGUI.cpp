@@ -435,7 +435,7 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 //  inside the DexSimulatorGUI box.
 
 // Picture file prefix (automatically added to picture filenames)
-static char _illustrated_message_picture_filename_prefix[] = "Pictures\\";
+static char _illustrated_message_picture_filename_prefix[] = "..\\DexPictures\\";
 
 // Store here temporarily the information that is to be displayed.
 // It gets put into the dialog by WM_INITDIALOG.
