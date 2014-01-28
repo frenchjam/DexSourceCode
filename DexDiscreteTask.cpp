@@ -150,10 +150,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ..." );
 
-
-	status = apparatus->CheckOverrun( "Acquisition overrun. Request instructions from ground." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
