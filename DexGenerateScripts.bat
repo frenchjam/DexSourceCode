@@ -1,0 +1,9 @@
+DexSimulatorApp -targeted 		-small -vertical 	-compile=_TargetedScriptVerticalSmall.dex
+DexSimulatorApp -oscillation 	-small -vertical 	-compile=_OscillationsVerticalSmall.dex
+DexSimulatorApp -oscillation 	-small -horizontal 	-compile=_OscillationsHorizontalSmall.dex
+DexSimulatorApp -targeted 		-small -horizontal 	-compile=_TargetedScriptHorizontalMedium.dex
+DexSimulatorApp -discrete 		-open 				-compile=_DiscreteScript.dex
+DexSimulatorApp -discrete 		-closed 			-compile=_DiscreteClosed.dex
+DexSimulatorApp -discrete 		-open   			-compile=_DiscreteOpen.dex
+DexSimulatorApp -collisions 						-compile=_CollisionsScript.dex
+DexSimulatorApp -offsets 							-compile=_CancelOffsetsScript.dex
