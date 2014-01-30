@@ -1021,7 +1021,10 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 			}
 
 //			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );
-			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"CradleA.bmp" , "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
+//			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"CradleA.bmp" , "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
+
+			// Cannot have a cradle-specific picture.
+			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"cradles.bmp" , "DexApparatus", "Take the mass with the manipulandum \n from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );
