@@ -28,8 +28,8 @@
 
 
 // Targeted trial parameters;
-int targetSequence[] = { 5, 2, 11, 5, 11, 2, 5, 8, 5, 11
-						};	// List of targets for point-to-point movements.
+// These may be overridden by the -targets= command line argument.
+int targetSequence[MAX_SEQUENCE_ENTRIES] = { 5, 2, 11, 5, 11, 2, 5, 8, 5, 11 };	// List of targets for point-to-point movements.
 int targetSequenceN = 10;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
@@ -48,6 +48,10 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+	char *target_filename;
+
+	// What is the target sequence? If not specified in the command line, use the default.
+	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( target_filename, targetSequence, MAX_SEQUENCE_ENTRIES );
 
 	// Which mass should be used for this set of trials?
 	DexMass mass = ParseForMass( params );

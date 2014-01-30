@@ -30,6 +30,8 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 
 #define DEFAULT -1
 
+#define MAX_SEQUENCE_ENTRIES	1024
+
 // These are the user-defined markers. 
 enum { FORCE_OK = 0, SLIP };
 
@@ -56,7 +58,6 @@ extern double copWaitTime;					// Gives time to achieve the centered grip.
 extern unsigned long alignmentMarkerMask;	// A bit mask describing which markers are used to perform the alignment check.
 extern unsigned long fovMarkerMask;			// A bit mask describing which markers are used to check the fov of each CODA.
 
-
 // Some helper functions provided by DexSimulatorApp.
 void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
@@ -64,6 +65,10 @@ int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForPosture( const char *cmd );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
+char *ParseForTargetFile ( const char *cmd );
+char *ParseForDelayFile ( const char *cmd );
+int LoadSequence( const char *filename, int   *sequence, const int max_entries );
+int LoadSequence( const char *filename, float *sequence, const int max_entries );
 DexMass ParseForMass ( const char *cmd );
 
 // Here are the different tasks.

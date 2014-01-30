@@ -68,9 +68,9 @@ void BlinkAll ( DexApparatus *apparatus ) {
 
 DexMass ParseForMass ( const char *cmd ) {
 	if ( !cmd ) return( MassIndifferent );
-	if ( strstr( cmd, "-small" ) ) return( MassSmall );
-	else if ( strstr( cmd, "-medium" ) ) return( MassMedium );
-	else if ( strstr( cmd, "-large" ) ) return( MassLarge );
+	if ( strstr( cmd, "-400" ) ) return( MassSmall );
+	else if ( strstr( cmd, "-600" ) ) return( MassMedium );
+	else if ( strstr( cmd, "-800" ) ) return( MassLarge );
 	else if ( strstr( cmd, "-nomass" ) ) return( MassNone );
 	else return( MassIndifferent );
 }
@@ -89,6 +89,70 @@ int ParseForEyeState ( const char *cmd ) {
 	if ( strstr( cmd, "-open" ) ) return( OPEN );
 	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
 	else return( DEFAULT );
+}
+
+char *ParseForTargetFile ( const char *cmd ) {
+	static char filename[1024] = "";
+	char *ptr;
+
+	if ( !cmd ) return( NULL );
+	else if ( ptr = strstr( cmd, "-targets=" ) ) sscanf( ptr + strlen( "-targets=" ), "%s", filename);
+	else ptr = NULL;
+	return( filename );
+}
+
+char *ParseForDelayFile ( const char *cmd ) {
+	static char filename[1024] = "";
+	char *ptr;
+
+	if ( !cmd ) return( NULL );
+	else if ( ptr = strstr( cmd, "-delays=" ) ) sscanf( ptr + strlen( "-delays=" ), "%s", filename);
+	else ptr = NULL;
+	return( filename );
+}
+
+// Load a sequence of integers, e.g. a list of target IDs.
+int LoadSequence( const char *filename, int *sequence, const int max_entries ) {
+
+	FILE *fp;
+	char path[1024];
+	int	 count = 0;
+
+	strcpy( path, "..\\DexSequences\\" );
+	strcat( path, filename );
+	if ( !( fp = fopen( path, "r" ) ) ) {
+		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
+		exit( -1 );
+	}
+
+	while ( 1 == fscanf( fp, "%d", &sequence[count] ) ) count++;
+	
+	fclose( fp );
+
+	return( count );
+
+}
+
+// Load a sequence of floating point numbers, e.g. time delays in seconds.
+int LoadSequence( const char *filename, float *sequence, const int max_entries ) {
+
+	FILE *fp;
+	char path[1024];
+	int	 count = 0;
+
+	strcpy( path, "..\\DexSequences\\" );
+	strcat( path, filename );
+	if ( !( fp = fopen( path, "r" ) ) ) {
+		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
+		exit( -1 );
+	}
+
+	while ( 1 == fscanf( fp, "%f", &sequence[count] ) ) count++;
+	
+	fclose( fp );
+
+	return( count );
+
 }
 
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation ) {
