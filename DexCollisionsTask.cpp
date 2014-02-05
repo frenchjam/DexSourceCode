@@ -48,9 +48,9 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int	direction = VERTICAL;
 	DexTargetBarConfiguration bar_position = TargetBarRight;
 	DexSubjectPosture posture = PostureSeated;
-	static Vector3 direction_vector = {0.0, 1.0, 0.0};
-	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
-	char *target_filename;
+	Vector3 direction_vector = {0.0, 1.0, 0.0};
+	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+	char *target_filename = 0;
 
 	int tone, tgt;
 
@@ -65,7 +65,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
 
-		// Verify that the apparatus is in the correct configuration, and if not, 
+	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	apparatus->ShowStatus( "Hardware configuration check ..." );
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );

@@ -72,7 +72,7 @@ DexMass ParseForMass ( const char *cmd ) {
 	else if ( strstr( cmd, "-600" ) ) return( MassMedium );
 	else if ( strstr( cmd, "-800" ) ) return( MassLarge );
 	else if ( strstr( cmd, "-nomass" ) ) return( MassNone );
-	else return( MassIndifferent );
+	else return( MassSmall );
 }
 
 
@@ -80,7 +80,7 @@ DexSubjectPosture ParseForPosture ( const char *cmd ) {
 	if ( !cmd ) return( PostureIndifferent );
 	if ( strstr( cmd, "-sup" )) return( PostureSupine );
 	else if ( strstr( cmd, "-up" )) return( PostureSeated );
-	else return( PostureIndifferent );
+	else return( PostureSeated );
 }
 
 
@@ -88,7 +88,7 @@ int ParseForEyeState ( const char *cmd ) {
 	if ( !cmd ) return( OPEN );
 	if ( strstr( cmd, "-open" ) ) return( OPEN );
 	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
-	else return( DEFAULT );
+	else return( OPEN );
 }
 
 char *ParseForTargetFile ( const char *cmd ) {
@@ -96,9 +96,11 @@ char *ParseForTargetFile ( const char *cmd ) {
 	char *ptr;
 
 	if ( !cmd ) return( NULL );
-	else if ( ptr = strstr( cmd, "-targets=" ) ) sscanf( ptr + strlen( "-targets=" ), "%s", filename);
-	else ptr = NULL;
-	return( filename );
+	else if ( ptr = strstr( cmd, "-targets=" ) ) {
+		sscanf( ptr + strlen( "-targets=" ), "%s", filename);
+		return( filename );
+	}
+	else return( NULL );
 }
 
 char *ParseForDelayFile ( const char *cmd ) {
