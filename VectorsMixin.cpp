@@ -387,14 +387,53 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 	// So I think that using this method is OK.
 	OrthonormalizeMatrix( ortho, m );
 
+	/*
 	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
 	r = sqrt( 1.0 + t );
 	s = 0.5 / r;
 
+	if 
 	result[M] = 0.5 * r;
 	result[X] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
 	result[Y] = ( ortho[Z][X] - ortho[X][Z] ) * s;
 	result[Z] = ( ortho[X][Y] - ortho[Y][X] ) * s;
+	*/
+
+	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
+
+	if ( t > 0.0 ) {
+		r = sqrt( 1.0 + ortho[X][X] + ortho[Y][Y] + ortho[Z][Z] );
+		s = 0.5 / r;
+		result[M] = 0.5 * r;
+		result[X] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
+		result[Y] = ( ortho[Z][X] - ortho[X][Z] ) * s;
+		result[Z] = ( ortho[X][Y] - ortho[Y][X] ) * s;
+	}
+	else if ( (ortho[X][X] > ortho[Y][Y]) && (ortho[X][X] > ortho[Z][Z]) ) {
+		r = sqrt( 1.0 + ortho[X][X] - ortho[Y][Y] - ortho[Z][Z] );
+		s = 0.5 / r;
+		result[X] = 0.5 * r;
+		result[M] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
+		result[Y] = ( ortho[Y][X] + ortho[X][Y] ) * s;
+		result[Z] = ( ortho[X][Z] + ortho[Z][X] ) * s;
+
+	}
+	else if ( ortho[Y][Y] > ortho[Z][Z] ) {
+		r = sqrt( 1.0 + ortho[Y][Y] - ortho[X][X] - ortho[Z][Z] );
+		s = 0.5 / r;
+		result[Y] = 0.5 * r;
+		result[X] = ( ortho[Y][X] + ortho[X][Y] ) * s;
+		result[M] = ( ortho[Z][X] - ortho[X][Z] ) * s;
+		result[Z] = ( ortho[Z][Y] + ortho[Y][Z] ) * s;
+	}
+	else {
+		r = sqrt( 1.0 + ortho[Z][Z] - ortho[X][X] - ortho[Y][Y] );
+		s = 0.5 / r;
+		result[Z] = 0.5 * r;
+		result[X] = ( ortho[Z][X] + ortho[X][Z] ) * s;
+		result[Y] = ( ortho[Z][Y] + ortho[Y][Z] ) * s;
+		result[M] = ( ortho[X][Y] - ortho[Y][X] ) * s;
+	}
 
 }
 
