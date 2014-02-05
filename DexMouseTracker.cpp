@@ -262,7 +262,7 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		}
 		MatrixToQuaternion( nominalQ, xform );
 	}
-	else CopyQuaternion( Q, nullQuaternion );
+	else CopyQuaternion( nominalQ, nullQuaternion );
 
 	// Map mouse coordinates to world coordinates. The factors used here are empirical.
 	
