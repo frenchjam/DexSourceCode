@@ -256,10 +256,11 @@ int DexApparatus::CalibrateTargets( void ) {
 
 	for ( int trg = 0; trg < nTargets; trg++ ) {
 		TargetOn( trg );
-		status = WaitSubjectReady( "Place manipulandum at lighted target.\nPress <RETURN> to continue." );
+		Update();
+		status = WaitSubjectReady( NULL, "Place manipulandum at lighted target.\nPress <RETURN> to continue." );
 		if ( status == ABORT_EXIT ) break;
 		if ( !GetManipulandumPosition( position, orientation ) ) {
-			status = SignalError( MB_ABORTRETRYIGNORE, "Manipulandum not visible." );
+			status = SignalError( MB_ABORTRETRYIGNORE, NULL, "Manipulandum not visible." );
 			if ( status == IDABORT ) return( ABORT_EXIT );
 			if ( status == IDRETRY ) trg--;
 		}
