@@ -59,8 +59,8 @@ char *MassString[] = { "Indifferent", "None", "Small", "Medium", "Large", "Unkno
 // Orientations are expressed as quaternions.
 const Quaternion uprightNullOrientation = { 0.0, 0.0, 0.0, 1.0 };
 // Null orientation of the manipulandum when in the supine position.
-// TODO: This is wrong. Need to compute the required quaternion.
-const Quaternion supineNullOrientation = { (ROOT2/2.0), 0.0, 0.0, (ROOT2/2.0) }; 
+// I believe that this is now correct.
+const Quaternion supineNullOrientation = { 0.0, (ROOT2/2.0), (ROOT2/2.0), 0.0 }; 
 
 
 // Position of the markers relative to the control point of the manipulandum.

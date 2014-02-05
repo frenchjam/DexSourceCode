@@ -24,12 +24,26 @@
 // DexMouseTracker will return these values when the current
 // Coda transformation is requested.
 
-Vector3		SimulatedCodaOffset[2] = {
-	{  1000,    0.0, -2500.0 }, 
-	{   0.0, -900.0, -2500.0 }
+// Values returned when the alignment is assumed to have been done in the upright configuration.
+
+Vector3		SimulatedUprightCodaOffset[2] = {
+	{  1000.0,    0.0, -2500.0 }, 
+	{     0.0, -900.0, -2500.0 }
 };
 
-Matrix3x3	SimulatedCodaRotation[2] = {
+Matrix3x3	SimulatedUprightCodaRotation[2] = {
+	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
+	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+};
+
+// Values returned when the alignment is assumed to have been done in the supine configuration.
+Vector3		SimulatedSupineCodaOffset[2] = {
+	{  -1000.0, 2500.0,    0.0 }, 
+	{      0.0, 2500.0, -900.0 }
+};
+
+// The following is certainly wrong.
+Matrix3x3	SimulatedSupineCodaRotation[2] = {
 	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
 	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
 };
@@ -74,8 +88,15 @@ void DexMouseTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &ro
 
 	// Return constant values for the Coda unit placement.
 	// The real tracker will compute these from the Coda transformations.
-	CopyVector( offset, SimulatedCodaOffset[unit] );
-	CopyMatrix( rotation, SimulatedCodaRotation[unit] );
+	if ( aligned_in_supine ) {
+		CopyVector( offset, SimulatedSupineCodaOffset[unit] );
+		CopyMatrix( rotation, SimulatedSupineCodaRotation[unit] );
+	}
+	else {
+		CopyVector( offset, SimulatedUprightCodaOffset[unit] );
+		CopyMatrix( rotation, SimulatedUprightCodaRotation[unit] );
+	}
+
 
 }
 
@@ -89,6 +110,11 @@ int DexMouseTracker::PerformAlignment ( int origin, int x_negative, int x_positi
 
 	// Unchecking the box shows that we did the alignment.
 	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+
+	// Remember what is the configuration when the alignment is performed.
+	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) aligned_in_supine = true;
+	else aligned_in_supine = false;
+
 	// For now I just assume that it will be successful.
 	return( NORMAL_EXIT );
 
@@ -197,34 +223,87 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	GetWindowRect( GetDesktopWindow(), &rect );
 
 	Vector3		position, rotated;
-	Quaternion	Ry, Rz, Q;
+	Vector3	x_dir, y_span, z_span;
+	Vector3		x_displacement, y_displacement, z_displacement;
+
+	double		x, y, z;
+
+	Quaternion	Ry, Rz, Q, nominalQ, midQ;
+	Matrix3x3	xform = {{-1.0, 0.0, 0.0},{0.0, 0.0, 1.0},{0.0, 1.0, 0.0}};
 
 	int mrk, id;
 
-	// Map mouse coordinates to world coordinates. The factors used here are empirical.
-	float y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top ) * 230.0;
-	float z =  (double) -100.0 + (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 305.0;
-	float x;
 	
+	// Just set the target frame markers at their nominal fixed positions.
+	for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
+		id = FrameMarkerID[mrk];
+		CopyVector( frame.marker[id].position, TargetFrameBody[mrk] );
+	}
+
+	// Shift the vertical bar markers to simulate being in the left position.
+	if ( IsDlgButtonChecked( dlg, IDC_LEFT ) ) {
+		frame.marker[DEX_NEGATIVE_BAR_MARKER].position[X] += 300.0;
+		frame.marker[DEX_POSITIVE_BAR_MARKER].position[X] += 300.0;
+	}
+
+	// Transform the marker positions of the target box and frame according 
+	//  to whether the system was upright or supine when it was aligned and
+	//  according to whether the system is currently installed in the upright
+	//  or supine configuration.
+	if ( ( IsDlgButtonChecked( dlg, IDC_SUPINE ) && ! aligned_in_supine ) ||
+		 ( ! IsDlgButtonChecked( dlg, IDC_SUPINE ) && aligned_in_supine )	) {
+		for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
+			id = FrameMarkerID[mrk];
+			position[X] = - frame.marker[id].position[X];
+			position[Z] =   frame.marker[id].position[Y];
+			position[Y] =   frame.marker[id].position[Z];
+
+			CopyVector( frame.marker[id].position, position );
+		}
+		MatrixToQuaternion( nominalQ, xform );
+	}
+	else CopyQuaternion( Q, nullQuaternion );
+
+	// Map mouse coordinates to world coordinates. The factors used here are empirical.
+	
+	y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top );
+	z =  (double) (mouse_position.x - rect.right) / (double) ( rect.left - rect.right );
+
 	if ( IsDlgButtonChecked( dlg, IDC_CODA_WOBBLY ) ) {
 		// We will make the manipulandum rotate in a strange way as a function of the distance from 0.
 		// This is just so that we can test the routines that compute the manipulandum position and orientation.
-		double theta = (double) (mouse_position.y - rect.top) / (double) ( rect.bottom - rect.top ) * 45.0;
-		double gamma = (double) (mouse_position.x - rect.right) / (double) ( rect.right - rect.left ) * 45.0;
+		double theta = y * 45.0;
+		double gamma = - z * 45.0;
 		SetQuaterniond( Ry, theta, iVector );
 		SetQuaterniond( Rz, gamma, jVector );
-		MultiplyQuaternions( Q, Ry, Rz );
+		MultiplyQuaternions( midQ, Rz, nominalQ );
+		MultiplyQuaternions( Q, Ry, midQ );
 		// Make the movement a little bit in X as well so that we test the routines in 3D.
 		x = 0.0 + 5.0 * sin( y / 80.0);
 	}
 	else {
-		CopyQuaternion( Q, nullQuaternion );
+		CopyQuaternion( Q, nominalQ );
 		x = 0.0;
 	}
 
-	position[X] = x;
-	position[Y] = y;
-	position[Z] = z;
+
+	// Map screen position of the mouse pointer to 3D position of the wrist and manipulandum.
+	// Top of the screen corresponds to the bottom of the bar and vice versa. It's inverted to protect the right hand rule.
+	// Right of the screen correponds to the nearest horizontal target and left corresponds to the farthest.
+	// The X position is set to be just to the right of the target bar, wherever it is.
+
+	SubtractVectors( y_span, frame.marker[DEX_POSITIVE_BAR_MARKER].position, frame.marker[DEX_NEGATIVE_BAR_MARKER].position );
+	SubtractVectors( x_dir, frame.marker[DEX_POSITIVE_BOX_MARKER].position, frame.marker[DEX_NEGATIVE_BOX_MARKER].position );
+	NormalizeVector( x_dir );
+	ComputeCrossProduct( z_span, x_dir, y_span );
+	 
+	ScaleVector( y_displacement, y_span, y );
+	ScaleVector( z_displacement, z_span, z );
+	ScaleVector( x_displacement, x_dir, x );
+
+	AddVectors( position, frame.marker[DEX_NEGATIVE_BAR_MARKER].position, x_displacement );
+	AddVectors( position, position, y_displacement );
+	AddVectors( position, position, z_displacement );
 
 	frame.time = DexTimerElapsedTime( acquisitionTimer );
 
@@ -241,23 +320,6 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		id = WristMarkerID[mrk];
 		AddVectors( frame.marker[id].position, position, WristBody[mrk] );
 		frame.marker[id].visibility = true;
-	}
-
-	// Just set the target frame markers at their nominal fixed positions.
-	for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
-		id = FrameMarkerID[mrk];
-		CopyVector( frame.marker[id].position, TargetFrameBody[mrk] );
-	}
-
-	// Shift the vertical bar markers to simulate being in the left position.
-	if ( IsDlgButtonChecked( dlg, IDC_LEFT ) ) {
-		frame.marker[FrameMarkerID[2]].position[X] += 300.0;
-		frame.marker[FrameMarkerID[3]].position[X] += 300.0;
-	}
-
-	// TODO: Transform all the marker positions if the dialog box
-	// says that the apparatus is in the supine position.
-	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) {
 	}
 
 	// Output the position and orientation used to compute the simulated

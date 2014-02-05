@@ -229,6 +229,7 @@ private:
 	DexTimer	acquisitionTimer;
 	double		duration;
 	int			nPolled;
+	bool		aligned_in_supine;
 
 	HWND		dlg;
 
@@ -241,7 +242,7 @@ protected:
 
 public:
 
-	DexMouseTracker( HWND dlg = NULL ) : acquisitionOn(false), overrun(false) {
+	DexMouseTracker( HWND dlg = NULL ) : acquisitionOn(false), overrun(false), aligned_in_supine(false) {
 		this->dlg = dlg;
 	}
 
