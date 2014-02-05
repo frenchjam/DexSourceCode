@@ -25,8 +25,8 @@ int collisionInitialTarget = 6;
 int collisionUpTarget = 11;
 int collisionDownTarget = 1;
 
-#define UP		0
-#define DOWN	1
+#define UP		1
+#define DOWN	-1
 int collisionSequenceN = 6;
 int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, UP };
 double collisionTime = 1.5;
@@ -45,12 +45,21 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 	
-	static int	direction = VERTICAL;
-	static int bar_position = TargetBarRight;
-	static int posture = PostureSeated;
+	int	direction = VERTICAL;
+	DexTargetBarConfiguration bar_position = TargetBarRight;
+	DexSubjectPosture posture = PostureSeated;
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+	char *target_filename;
 
+	int tone, tgt;
+
+	// What is the target sequence? If not specified in the command line, use the default.
+	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( target_filename, collisionSequence, MAX_SEQUENCE_ENTRIES );
+
+	// What is the expected posture?
+	posture = ParseForPosture( params );
+	
 	// Which mass should be used for this set of trials?
 	DexMass mass = ParseForMass( params );
 
@@ -93,7 +102,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady( "Collision.bmp", "Make collision with the manipulandum and the \ntapping surface following beep and lid target. \n\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-// Now wait until the subject gets to the target before moving on.
+	// Now wait until the subject gets to the target before moving on.
 	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
@@ -110,37 +119,36 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 		//apparatus->Wait( initialMovementTime );
 				
 		apparatus->TargetsOff();
-		if ( collisionSequence[target] ) {
-		int tone = 2.0;
-		apparatus->SetSoundStateInternal( tone, 1 );
-			apparatus->VerticalTargetOn( collisionUpTarget );
-			apparatus->VerticalTargetOn( collisionUpTarget-1 );
-			apparatus->VerticalTargetOn( collisionUpTarget-2 );
-			apparatus->VerticalTargetOn( collisionUpTarget-3 );
-			apparatus->VerticalTargetOn( collisionUpTarget-4 );
-			apparatus->VerticalTargetOn( collisionUpTarget-5 );
-			apparatus->MarkEvent( TRIGGER_MOVE_UP);
+		if ( collisionSequence[target] == UP ) {
+			tone = 2;
+			apparatus->SetSoundStateInternal( tone, 1 );
+			for ( tgt = collisionInitialTarget; tgt <= collisionUpTarget; tgt++ ) apparatus->VerticalTargetOn( tgt );
 		}
+		else if ( collisionSequence[target] == DOWN ) {
+			tone = 3;
+			apparatus->SetSoundStateInternal( tone, 1 );
+			// Why is this 3.9 and not 3?
+			for ( tgt = collisionInitialTarget; tgt >= collisionDownTarget; tgt--) apparatus->VerticalTargetOn( tgt );
+		}
+		// If the direction is neither UP nor DOWN, go to the center.
+		// This option may never be used, but who knows.
 		else {
-			int tone = 3.9;
-		    apparatus->SetSoundStateInternal( tone, 1 );
-			apparatus->VerticalTargetOn( collisionDownTarget );
-			apparatus->VerticalTargetOn( collisionDownTarget+1 );
-			apparatus->VerticalTargetOn( collisionDownTarget+2 );
-			apparatus->VerticalTargetOn( collisionDownTarget+3 );
-			apparatus->VerticalTargetOn( collisionDownTarget+4 );
-            apparatus->VerticalTargetOn( collisionDownTarget+5 );
-			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
+			tone = 1;
+			apparatus->SetSoundStateInternal( tone, 1 );
+			apparatus->TargetOn( collisionInitialTarget );
 		}
 
-		// Turn off the LED (sound) after a brief instant and turn the
+		// Turn off the sound after a brief instant.
 		apparatus->Wait( 0.5 );
 		apparatus->SetSoundState( 4, 0 );
+		// Then turn off the targets after the sound finishes.
         apparatus->Wait( 0.25 );
 		apparatus->TargetsOff();
 	
 		// Wait a fixed time to finish the movement.
-		apparatus->Wait( 1.5 - 0.74 );
+		// The 0.74 compensates for the two Wait() calls above.
+		apparatus->Wait( collisionTime - 0.74 );
+
 		// Light the center target to bring the hand back to the starting point.
 		//apparatus->TargetOn( collisionInitialTarget );
 

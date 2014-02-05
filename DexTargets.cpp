@@ -196,6 +196,7 @@ void DexScreenTargets::SetTargetStateInternal( unsigned long state ) {
 		if ( bit & state ) target[trg]->SetColor( RED );
 		else target[trg]->SetColor( GRAY );
 	}
+//	Draw();
 }
 
 /*********************************************************************************/

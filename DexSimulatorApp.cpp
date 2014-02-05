@@ -76,11 +76,11 @@ DexMass ParseForMass ( const char *cmd ) {
 }
 
 
-int ParseForPosture ( const char *cmd ) {
-	if ( !cmd ) return( DEFAULT );
-	if ( strstr( cmd, "-sup" ) ) return( SUPINE );
-	else if ( strstr( cmd, "-up" ) ) return( UPRIGHT );
-	else return( DEFAULT );
+DexSubjectPosture ParseForPosture ( const char *cmd ) {
+	if ( !cmd ) return( PostureIndifferent );
+	if ( strstr( cmd, "-sup" )) return( PostureSupine );
+	else if ( strstr( cmd, "-up" )) return( PostureSeated );
+	else return( PostureIndifferent );
 }
 
 
@@ -155,13 +155,13 @@ int LoadSequence( const char *filename, float *sequence, const int max_entries )
 
 }
 
-int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation ) {
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation ) {
 
 	int direction = VERTICAL;
-	int pos = ParseForPosture( cmd );	
+	DexSubjectPosture pos = ParseForPosture( cmd );	
 
 	if ( !cmd ) {
-		posture = UPRIGHT;
+		posture = PostureSeated;
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( direction_vector, apparatus->jVector );
 		apparatus->CopyQuaternion( desired_orientation, uprightNullOrientation );
@@ -171,7 +171,7 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, 
 	if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
 	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
 
-	if ( pos == SUPINE ) {
+	if ( pos == PostureSupine ) {
 		apparatus->CopyQuaternion( desired_orientation, supineNullOrientation );
 		if ( direction == HORIZONTAL ) {
 			bar_position = TargetBarLeft;
@@ -218,8 +218,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexMonitorServer *monitor;
 	
 	int task = TARGETED_TASK;
-	int direction = VERTICAL;
-	bool eyes_closed = false;
 	bool compile = false;
 	bool raz = false;
 
@@ -271,8 +269,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( strstr( lpCmdLine, "-raz"  ) ) raz = true;
 
-
-
 	// This should invoke the command interpreter on the specified script.
 	// For the moment, the interpreter is not working.
 	if ( strstr( lpCmdLine, "-script" ) ) {
@@ -292,14 +288,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		compile = true;
 	}
-
-	// We can set some parameters for certain tasks from the command line.
-
-	if ( strstr( lpCmdLine, "-horiz"  ) ) direction = HORIZONTAL;
-	if ( strstr( lpCmdLine, "-vert"  ) ) direction = VERTICAL;
-
-	if ( strstr( lpCmdLine, "-open"  ) ) eyes_closed = false;
-	if ( strstr( lpCmdLine, "-closed"  ) ) eyes_closed = true;
 
 	// Now we create the component devices. This need not be done if we are in compiler mode.
 
@@ -418,11 +406,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	}
 
+	if ( !compile ) {
+		return_code = apparatus->WaitSubjectReady( "", "Use the GUI to set the initial configuration.\nPress OK when ready to continue." );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+	}
+
 	// Run one of the protocols.
 	switch ( task ) {
 
 	case CALIBRATE_TARGETS:
 		while ( RETRY_EXIT == ( return_code = RunTargetCalibration( apparatus, lpCmdLine ) ) );
+		apparatus->Quit();
+		return 0;
 		break;
 		
 	case RUN_SCRIPT:

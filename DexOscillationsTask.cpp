@@ -48,9 +48,11 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 	
+	// These are static so that if the params string does not specify a value,
+	//  whatever was used the previous call will be used again.
 	static int	direction = VERTICAL;
-	static int bar_position = TargetBarRight;
-	static int posture = PostureSeated;
+	static DexTargetBarConfiguration bar_position = TargetBarRight;
+	static DexSubjectPosture posture = PostureSeated;
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
@@ -58,14 +60,14 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Which mass should be used for this set of trials?
 	DexMass mass = ParseForMass( params );
 
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
-
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
 	apparatus->ShowStatus( "Hardware configuration check ..." );
 	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
 	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 

@@ -19,12 +19,6 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 #define HORIZONTAL	0
 #define VERTICAL	1
 
-#define LEFT	0
-#define RIGHT	1
-
-#define UPRIGHT	0
-#define SUPINE	1
-
 #define OPEN	0
 #define CLOSED	1
 
@@ -62,14 +56,14 @@ extern unsigned long fovMarkerMask;			// A bit mask describing which markers are
 void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
-int ParseForPosture( const char *cmd );
 int ParseForEyeState( const char *cmd );
-int ParseForDirection ( DexApparatus *apparatus, const char *cmd, int &posture, int &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );
 char *ParseForDelayFile ( const char *cmd );
 int LoadSequence( const char *filename, int   *sequence, const int max_entries );
 int LoadSequence( const char *filename, float *sequence, const int max_entries );
 DexMass ParseForMass ( const char *cmd );
+DexSubjectPosture ParseForPosture( const char *cmd );
 
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );

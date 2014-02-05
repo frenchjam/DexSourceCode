@@ -46,9 +46,11 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
 
+	// These are static so that if the params string does not specify a value,
+	//  whatever was used the previous call will be used again.
 	static int	direction = VERTICAL;
-	static int bar_position = TargetBarRight;
-	static int posture = PostureSeated;
+	static DexTargetBarConfiguration bar_position = TargetBarRight;
+	static DexSubjectPosture posture = PostureSeated;
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
