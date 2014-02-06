@@ -53,9 +53,32 @@ double copWaitTime = 1.0;					// Gives time to achieve the centered grip.
 char inputScript[256] = "DexSampleScript.dex";
 char outputScript[256] = "DexSampleScript.dex";
 
+char *OkToContinue ="";
+
+int	next_directive = 0;						// Counter for showing a sequence of instructions to the subject.
+
 /*********************************************************************************/
 
 // These are some helper functions that can be used in the task and procedures.
+// The first ones provide routines to present a set of task instructions in a stereotypical fashion.
+// By making these helper functions, it is easier to maintain a common format.
+
+void RestartDirectives( DexApparatus *apparatus ) {
+	next_directive = 0;
+}
+
+void GiveDirective( DexApparatus *apparatus, const char *directive, const char *picture ) {
+	next_directive++;
+	int status = apparatus->fWaitSubjectReady( picture, "                           TASK INSTRUCTION   (%d)\n%s%s", next_directive, directive, OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+}
+
+void ReadyToGo( DexApparatus *apparatus ) {
+	int status = apparatus->fWaitSubjectReady( NULL, "READY?\n\nPress <OK> to start ..." );
+	if ( status == ABORT_EXIT ) exit( status );
+}
+
+/*********************************************************************************/
 
 void BlinkAll ( DexApparatus *apparatus ) {
 
@@ -65,6 +88,10 @@ void BlinkAll ( DexApparatus *apparatus ) {
 	apparatus->Wait( flashDuration );
 
 }
+
+/*********************************************************************************/
+
+// Parse command line commands.
 
 DexMass ParseForMass ( const char *cmd ) {
 	if ( !cmd ) return( MassIndifferent );
