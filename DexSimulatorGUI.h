@@ -19,3 +19,6 @@ HWND DexInitGUI( HINSTANCE hInstance );
 HWND DexCreateMouseTrackerGUI( void );
 HWND DexCreateMassGUI( void );
 void DexAddToLogGUI( const char *message );
+
+void SaveGUIState( void );
+void LoadGUIState( void );

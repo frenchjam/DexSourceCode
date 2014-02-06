@@ -633,3 +633,116 @@ HWND DexCreateMassGUI( void ) {
 }
 
 
+/**************************************************************************************/
+
+// Save and restore the simulated configuration from one run to the next.
+
+void SaveGUIState( void ) {
+
+	FILE *fp;
+
+	fp = fopen( "DexSimulatorApp.cfg", "w" );
+	if ( !fp ) {
+		MessageBox( NULL, "saveInitialState() failed.", "DexSimulatorApp", IDOK );
+	}
+	else {
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_SUPINE ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_SEATED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_RIGHT ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_LEFT ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_HORIZ ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_VERT ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_FOLDED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_EXTENDED ) ); 
+
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_ALIGNED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_POSITIONED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_NOISY ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_WOBBLY ) ); 
+
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1A ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1B ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1C ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ); 
+
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2A ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2B ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2C ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2M ) ); 
+
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3A ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3B ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3C ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3M ) ); 
+		fclose( fp );
+	}
+
+
+}
+
+void LoadGUIState( void ) {
+
+	FILE	*fp;
+	int		value;
+
+	fp = fopen( "DexSimulatorApp.cfg", "r" );
+	if ( !fp ) {
+		MessageBox( NULL, "loadInitialState() failed.", "DexSimulatorApp", IDOK );
+	}
+	else {
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_SUPINE, value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_SEATED , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_RIGHT , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_LEFT , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_HORIZ , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_VERT , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_FOLDED , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_EXTENDED , value );
+
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_ALIGNED , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_NOISY , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_WOBBLY , value );
+
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS1A , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS1B , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS1C , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS1M , value );
+
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS2A , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS2B , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS2C , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS2M , value );
+
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS3A , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS3B , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS3C , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mass_dlg, IDC_MASS3M , value );
+
+		fclose( fp );
+	}
+}
