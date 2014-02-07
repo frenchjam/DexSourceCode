@@ -71,6 +71,7 @@ int LoadSequence( const char *filename, int   *sequence, const int max_entries )
 int LoadSequence( const char *filename, float *sequence, const int max_entries );
 DexMass ParseForMass ( const char *cmd );
 DexSubjectPosture ParseForPosture( const char *cmd );
+bool ParseForPrep ( const char *cmd );
 
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );

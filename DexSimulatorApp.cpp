@@ -69,7 +69,7 @@ void RestartDirectives( DexApparatus *apparatus ) {
 
 void GiveDirective( DexApparatus *apparatus, const char *directive, const char *picture ) {
 	next_directive++;
-	int status = apparatus->fWaitSubjectReady( picture, "                           TASK INSTRUCTION   (%d)\n%s%s", next_directive, directive, OkToContinue );
+	int status = apparatus->fWaitSubjectReady( picture, "                           TASK REMINDER   (%d)\n%s%s", next_directive, directive, OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 }
 
@@ -116,6 +116,12 @@ int ParseForEyeState ( const char *cmd ) {
 	if ( strstr( cmd, "-open" ) ) return( OPEN );
 	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
 	else return( OPEN );
+}
+
+bool ParseForPrep ( const char *cmd ) {
+	if ( !cmd ) return( false );
+	if ( strstr( cmd, "-prep" ) ) return( true );
+	else return( false );
 }
 
 char *ParseForTargetFile ( const char *cmd ) {
@@ -412,31 +418,17 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Create the apparatus.
 	apparatus->Initialize();
 
-#if 0
-	// Just testing the Wait function. Should take this out.
-	DexTimer test_timer;
-	fOutputDebugString( "%s\n", DateTimeString() );
-	for ( int jj = 0; jj < 600; jj++ ) {
-		DexTimerSet( test_timer, 0.01 );
-		while ( !DexTimerTimeout( test_timer ) );
+	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.
+	if ( !compile ) {
+		LoadGUIState();
+		return_code = apparatus->WaitSubjectReady( "", "Use the GUI to set the initial configuration.\nPress OK when ready to continue." );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+		SaveGUIState();
 	}
-	fOutputDebugString( "%s\n", DateTimeString() );
-
-	fOutputDebugString( "%s\n", DateTimeString() );
-	for ( jj = 0; jj < 600; jj++ ) apparatus->Wait( 0.01 );
-	fOutputDebugString( "%s\n", DateTimeString() );
-#endif
 
 	// If the command line flag was set to do the transducer offset cancellation, then do it.
 	if ( raz ) {
-
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
-		if ( return_code == ABORT_EXIT ) exit( return_code );
-
-	}
-
-	if ( !compile ) {
-		return_code = apparatus->WaitSubjectReady( "", "Use the GUI to set the initial configuration.\nPress OK when ready to continue." );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 	}
 
