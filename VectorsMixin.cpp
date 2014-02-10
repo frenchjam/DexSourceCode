@@ -387,17 +387,35 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 	// So I think that using this method is OK.
 	OrthonormalizeMatrix( ortho, m );
 
-	/*
+#ifdef DEX_IMPLEMENTATION
+
+	// At the time that I defined the DEX routines, I thought that there would be no
+	// problem with singularities and large rotations. So I used only this formula.
+	// But if the setup is in the supine position and if one computes the orientation
+	// of the target frame, this solution is ill-conditioned. If one want to 
+	// simulate DEX behavior, then better define DEX_IMPLEMENTATION. Otherwise, the following
+	// algorithm is more robust.
+
+	// NB Both algorithms assume that the rotation matrix is set up for row vectors and right multiplication
+	//    of a vector. So the formulas may appear to be backwards, since what you find on 
+	//    the web is likely to be for left multiplication.
+
 	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
 	r = sqrt( 1.0 + t );
 	s = 0.5 / r;
 
-	if 
 	result[M] = 0.5 * r;
 	result[X] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
 	result[Y] = ( ortho[Z][X] - ortho[X][Z] ) * s;
 	result[Z] = ( ortho[X][Y] - ortho[Y][X] ) * s;
-	*/
+
+#else
+
+	// This implementation avoids ill-conditioned responses.
+
+	// NB Both algorithms assume that the rotation matrix is set up for row vectors and right multiplication
+	//    of a vector. So the subtractions may appear to be backwards, since what you find on 
+	//    the web is likely to be for left multiplication.
 
 	t = ortho[X][X] + ortho[Y][Y] + ortho[Z][Z];
 
@@ -415,7 +433,7 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 		result[X] = 0.5 * r;
 		result[M] = ( ortho[Y][Z] - ortho[Z][Y] ) * s;
 		result[Y] = ( ortho[Y][X] + ortho[X][Y] ) * s;
-		result[Z] = ( ortho[X][Z] + ortho[Z][X] ) * s;
+		result[Z] = ( ortho[Z][X] + ortho[X][Z] ) * s;
 
 	}
 	else if ( ortho[Y][Y] > ortho[Z][Z] ) {
@@ -434,7 +452,7 @@ void VectorsMixin::MatrixToQuaternion( Quaternion result, Matrix3x3 m ) {
 		result[Y] = ( ortho[Z][Y] + ortho[Y][Z] ) * s;
 		result[M] = ( ortho[X][Y] - ortho[Y][X] ) * s;
 	}
-
+#endif
 }
 
 
