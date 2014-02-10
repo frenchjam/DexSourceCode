@@ -159,7 +159,7 @@ char *DexCompiler::quoteMessage( const char *message ) {
 
 	if ( !message ) {
 //		strcpy( result, "\"\"" );
-		return( result );
+		return( "" );
 	}
 
 	int j = 0;
