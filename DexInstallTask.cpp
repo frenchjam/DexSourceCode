@@ -135,21 +135,21 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	if ( apparatus->nCodas > 1 ) {
 
-	if ( desired_posture == PostureSeated ) {
+		if ( desired_posture == PostureSeated ) {
 
-		status = apparatus->CheckTrackerPlacement( 1, 
-											expected_coda2_position_upright, codaUnitPositionTolerance, 
-											expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 2.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "SetupSeated.bmp" );
-	}
-	else {
-		status = apparatus->CheckTrackerPlacement( 1, 
-											expected_coda2_position_supine, codaUnitPositionTolerance, 
-											expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "SetupSupine.bmp" );
+			status = apparatus->CheckTrackerPlacement( 1, 
+												expected_coda2_position_upright, codaUnitPositionTolerance, 
+												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
+												"Placement error - Coda Unit 2.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "SetupSeated.bmp" );
+		}
+		else {
+			status = apparatus->CheckTrackerPlacement( 1, 
+												expected_coda2_position_supine, codaUnitPositionTolerance, 
+												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
+												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "SetupSupine.bmp" );
 
-	}
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		}
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Check tracker alignment ..." );
