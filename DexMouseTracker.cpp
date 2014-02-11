@@ -25,27 +25,27 @@
 // Coda transformation is requested.
 
 // Values returned when the alignment is assumed to have been done in the upright configuration.
+// These are taken from a real DEX file, rounded to 90° rotations. 
 
 Vector3		SimulatedUprightCodaOffset[2] = {
-	{  1000.0,    0.0, -2500.0 }, 
-	{     0.0, -900.0, -2500.0 }
+	{  -600.0,  700.0,  2200.0 }, 
+	{     0.0, 1200.0,  2000.0 }
 };
 
 Matrix3x3	SimulatedUprightCodaRotation[2] = {
-	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
-	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+	{{ 0.0, -1.0, 0.0},{ 0.0,  0.0, -1.0}, {1.0,  0.0, 0.0}},
+	{{-1.0,  0.0, 0.0},{ 0.0,  0.0, -1.0}, {0.0, -1.0, 0.0}}
 };
 
 // Values returned when the alignment is assumed to have been done in the supine configuration.
 Vector3		SimulatedSupineCodaOffset[2] = {
-	{  -1000.0, 2500.0,    0.0 }, 
-	{      0.0, 2500.0, -900.0 }
+	{  550.0, 2600.0,    400.0 }, 
+	{    0.0, 2500.0,    900.0 }
 };
 
-// The following is certainly wrong.
 Matrix3x3	SimulatedSupineCodaRotation[2] = {
-	{{0.0, 1.0, 0.0},{-1.0, 0.0, 0.0}, {0.0, 0.0, 1.0}},
-	{{1.0, 0.0, 0.0},{ 0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+	{{0.0, 0.0, -1.0},{0.0, -1.0, 0.0}, {-1.0, 0.0, 0.0}},
+	{{1.0, 0.0, 0.0},{ 0.0, -1.0, 0.0}, {0.0, 0.0, -1.0}}
 };
 
 /*********************************************************************************/
