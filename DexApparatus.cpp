@@ -442,7 +442,24 @@ int DexApparatus::PerformTrackerAlignment( const char *msg, const char *picture 
 	error_code = tracker->PerformAlignment( negativeBoxMarker, 
 													negativeBoxMarker, positiveBoxMarker, 
 													negativeBarMarker, positiveBarMarker );
-	return( error_code );
+	if ( error_code != NORMAL_EXIT ) {
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, msg );
+	
+		if ( response == IDABORT ) {
+			monitor->SendEvent( "Manual Abort from PerformTrackerAlignment()." );
+			return( ABORT_EXIT );
+		}
+		else if ( response == IDIGNORE ) {
+			monitor->SendEvent( "Ignore Error from PerformTrackerAlignment()." );
+			return( IGNORE_EXIT );
+		}
+		else {
+			monitor->SendEvent( "Retry exit from PerformTrackerAlignment()." );
+			return( RETRY_EXIT );
+		}
+	}
+	else return( NORMAL_EXIT );
+
 }
 
 /***************************************************************************/

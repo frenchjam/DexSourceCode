@@ -108,7 +108,9 @@ int DexMouseTracker::PerformAlignment ( int origin, int x_negative, int x_positi
 	// for the CODA marker alignment procedure, then execute it.
 	// It should return any errors reported by the CODA.
 
-	// Unchecking the box shows that we did the alignment.
+	// Simulate an error if the reference markers are not visible.
+	if ( IsDlgButtonChecked( dlg, IDC_BAR_OCCLUDED ) || IsDlgButtonChecked( dlg, IDC_BOX_OCCLUDED ) ) return( ERROR_EXIT );
+	// Checking the box shows that we did the alignment.
 	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
 
 	// Remember what is the configuration when the alignment is performed.
