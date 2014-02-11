@@ -14,6 +14,8 @@
 #include <memory.h>
 #include <process.h>
 
+#include <fOutputDebugString.h>
+
 // ATI Force/Torque Sensor Library
 #include <ATIDAQ\ftconfig.h>
 
@@ -407,9 +409,14 @@ int DexApparatus::CheckTrackerPlacement( int unit,
 	SubtractVectors( delta_pos, pos, expected_pos );
 	distance = VectorNorm( delta_pos );
 	angle = ToDegrees( AngleBetween( ori, expected_ori ) );
+
+	// Send some debug information. This allows us to get the measured position
+	//  and orientations of the CODA units from the simulator, to be then put in the scripts.
+	fOutputDebugString( "Position:   %s %s\n", vstr( expected_pos ), vstr( pos ) );
+	fOutputDebugString( "Quaternion: %s %s\n", qstr( expected_ori ), qstr( ori ) );
 	
 	if ( distance > p_tolerance || abs( angle ) > o_tolerance ) {
-		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, "%s\n  Position error: %f\n  Orientation error: %f", msg, distance, angle );
+		int response = fSignalError( MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, msg );
 	
 		if ( response == IDABORT ) {
 			monitor->SendEvent( "Manual Abort from CheckTrackerPlacement()." );
