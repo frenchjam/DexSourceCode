@@ -264,6 +264,26 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	}
 	else CopyQuaternion( nominalQ, nullQuaternion );
 
+	// Now set the visibility flag as a funciton of the GUI.
+	if ( IsDlgButtonChecked( dlg, IDC_BAR_OCCLUDED ) ) {
+		frame.marker[DEX_NEGATIVE_BAR_MARKER].visibility = false;
+		frame.marker[DEX_POSITIVE_BAR_MARKER].visibility = false;
+	}
+	else {
+		frame.marker[DEX_NEGATIVE_BAR_MARKER].visibility = true;
+		frame.marker[DEX_POSITIVE_BAR_MARKER].visibility = true;
+	}
+	if ( IsDlgButtonChecked( dlg, IDC_BOX_OCCLUDED ) ) {
+		frame.marker[DEX_NEGATIVE_BOX_MARKER].visibility = false;
+		frame.marker[DEX_POSITIVE_BOX_MARKER].visibility = false;
+	}
+	else {
+		frame.marker[DEX_NEGATIVE_BOX_MARKER].visibility = true;
+		frame.marker[DEX_POSITIVE_BOX_MARKER].visibility = true;
+	}
+
+
+
 	// Map mouse coordinates to world coordinates. The factors used here are empirical.
 	
 	y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top );

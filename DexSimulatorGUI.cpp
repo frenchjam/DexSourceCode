@@ -344,7 +344,7 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 		switch ( LOWORD( wParam ) ) {
 		case IDCANCEL:
-		case IDC_INTERRUPT:
+//		case IDC_INTERRUPT:
 			// Closing any of the component dialogs quits the program.
 			EndDialog(hDlg, LOWORD(wParam));
 			exit( 0 );
@@ -648,8 +648,10 @@ void SaveGUIState( void ) {
 	else {
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_SUPINE ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_SEATED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_BOX_OCCLUDED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_RIGHT ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_LEFT ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_BAR_OCCLUDED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_HORIZ ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_VERT ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_FOLDED ) ); 
@@ -695,9 +697,13 @@ void LoadGUIState( void ) {
 		fscanf( fp, "%d", &value );
 		CheckDlgButton( mouse_tracker_dlg, IDC_SEATED , value );
 		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_BOX_OCCLUDED , value );
+		fscanf( fp, "%d", &value );
 		CheckDlgButton( mouse_tracker_dlg, IDC_RIGHT , value );
 		fscanf( fp, "%d", &value );
 		CheckDlgButton( mouse_tracker_dlg, IDC_LEFT , value );
+		fscanf( fp, "%d", &value );
+		CheckDlgButton( mouse_tracker_dlg, IDC_BAR_OCCLUDED , value );
 		fscanf( fp, "%d", &value );
 		CheckDlgButton( mouse_tracker_dlg, IDC_HORIZ , value );
 		fscanf( fp, "%d", &value );
