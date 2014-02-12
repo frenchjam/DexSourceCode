@@ -22,3 +22,7 @@ void DexAddToLogGUI( const char *message );
 
 void SaveGUIState( void );
 void LoadGUIState( void );
+
+#define TRACKER_UNALIGNED		0
+#define TRACKER_ALIGNED_UPRIGHT	1
+#define TRACKER_ALIGNED_SUPINE	2

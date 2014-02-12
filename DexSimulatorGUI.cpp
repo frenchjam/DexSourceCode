@@ -612,8 +612,13 @@ HWND DexCreateMouseTrackerGUI( void ) {
 	CheckRadioButton( mouse_tracker_dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
 	CheckRadioButton( mouse_tracker_dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
 	CheckRadioButton( mouse_tracker_dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
-	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_ALIGNED, true );
 	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED, true );
+
+	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_UNALIGNED,       (LPARAM) "  <not aligned>  " );
+	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_UPRIGHT, (LPARAM) "Aligned Upright" );
+	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_SUPINE, (LPARAM) "Aligned Supine" );
+	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, 0, NULL );
+
 	ShowWindow( mouse_tracker_dlg, SW_SHOW );
 
 	return( mouse_tracker_dlg );
@@ -657,7 +662,12 @@ void SaveGUIState( void ) {
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_FOLDED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_EXTENDED ) ); 
 
-		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_ALIGNED ) ); 
+//		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_ALIGNED ) ); 
+//		fprintf( fp, "%d ", aligned_when_supine ); 
+
+		fprintf( fp, "%d ", SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_GETCURSEL, NULL, NULL ) );
+		
+
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_POSITIONED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_NOISY ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_WOBBLY ) ); 
@@ -714,7 +724,8 @@ void LoadGUIState( void ) {
 		CheckDlgButton( mouse_tracker_dlg, IDC_EXTENDED , value );
 
 		fscanf( fp, "%d", &value );
-		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_ALIGNED , value );
+		SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, value, NULL );
+
 		fscanf( fp, "%d", &value );
 		CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , value );
 		fscanf( fp, "%d", &value );

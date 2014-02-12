@@ -476,6 +476,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 	if ( return_code != ABORT_EXIT && !compile ) DexPlotData( apparatus );
 	
+	SaveGUIState();
 	apparatus->Quit();
 	return 0;
 }

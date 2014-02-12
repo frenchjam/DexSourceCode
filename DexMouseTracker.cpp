@@ -19,6 +19,7 @@
 
 #include <VectorsMixin.h>
 #include "..\DexSimulatorApp\resource.h"
+#include "DexSimulatorGUI.h"
 #include "DexTracker.h"
 
 // DexMouseTracker will return these values when the current
@@ -88,7 +89,7 @@ void DexMouseTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &ro
 
 	// Return constant values for the Coda unit placement.
 	// The real tracker will compute these from the Coda transformations.
-	if ( aligned_in_supine ) {
+	if ( TRACKER_ALIGNED_SUPINE == SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_GETCURSEL, 0, 0 ) ) {
 		CopyVector( offset, SimulatedSupineCodaOffset[unit] );
 		CopyMatrix( rotation, SimulatedSupineCodaRotation[unit] );
 	}
@@ -109,15 +110,16 @@ int DexMouseTracker::PerformAlignment ( int origin, int x_negative, int x_positi
 	// It should return any errors reported by the CODA.
 
 	// Simulate an error if the reference markers are not visible.
-	if ( IsDlgButtonChecked( dlg, IDC_BAR_OCCLUDED ) || IsDlgButtonChecked( dlg, IDC_BOX_OCCLUDED ) ) return( ERROR_EXIT );
-	// Checking the box shows that we did the alignment.
-	CheckDlgButton( dlg, IDC_CODA_ALIGNED, true );
+	if ( IsDlgButtonChecked( dlg, IDC_BAR_OCCLUDED ) || IsDlgButtonChecked( dlg, IDC_BOX_OCCLUDED ) ) {
+		SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_SETCURSEL, TRACKER_UNALIGNED, 0 );
+		return( ERROR_EXIT );
+	}
 
 	// Remember what is the configuration when the alignment is performed.
-	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) aligned_in_supine = true;
-	else aligned_in_supine = false;
+	if ( IsDlgButtonChecked( dlg, IDC_SUPINE ) ) SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_SETCURSEL, TRACKER_ALIGNED_SUPINE, 0 );
+	else if ( IsDlgButtonChecked( dlg, IDC_SEATED ) ) SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_SETCURSEL, TRACKER_ALIGNED_UPRIGHT, 0 );
+	else SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_SETCURSEL, TRACKER_UNALIGNED, 0 );
 
-	// For now I just assume that it will be successful.
 	return( NORMAL_EXIT );
 
 }
@@ -234,7 +236,6 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	Matrix3x3	xform = {{-1.0, 0.0, 0.0},{0.0, 0.0, 1.0},{0.0, 1.0, 0.0}};
 
 	int mrk, id;
-
 	
 	// Just set the target frame markers at their nominal fixed positions.
 	for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
@@ -252,9 +253,10 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	//  to whether the system was upright or supine when it was aligned and
 	//  according to whether the system is currently installed in the upright
 	//  or supine configuration.
-	if ( ( IsDlgButtonChecked( dlg, IDC_SUPINE ) && ! aligned_in_supine ) ||
-		 ( ! IsDlgButtonChecked( dlg, IDC_SUPINE ) && aligned_in_supine )	) {
-		for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
+	if ( ( IsDlgButtonChecked( dlg, IDC_SUPINE ) && TRACKER_ALIGNED_SUPINE  != SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_GETCURSEL, 0, 0 ) ) ||
+		 ( IsDlgButtonChecked( dlg, IDC_SEATED ) && TRACKER_ALIGNED_UPRIGHT != SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_GETCURSEL, 0, 0 ) ) )	{	
+		 for ( mrk = 0; mrk < nFrameMarkers; mrk++ ) {
+
 			id = FrameMarkerID[mrk];
 			position[X] = - frame.marker[id].position[X];
 			position[Z] =   frame.marker[id].position[Y];
@@ -283,8 +285,6 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		frame.marker[DEX_NEGATIVE_BOX_MARKER].visibility = true;
 		frame.marker[DEX_POSITIVE_BOX_MARKER].visibility = true;
 	}
-
-
 
 	// Map mouse coordinates to world coordinates. The factors used here are empirical.
 	
@@ -362,7 +362,7 @@ bool DexMouseTracker::GetCurrentMarkerFrameUnit( CodaFrame &frame, int unit ) {
 	GetCurrentMarkerFrame( frame );
 
 	// Simulate mis-alignment if the aligned box is not checked.
-	if( !IsDlgButtonChecked( dlg, IDC_CODA_ALIGNED ) ) {
+	if( TRACKER_UNALIGNED == SendDlgItemMessage( dlg, IDC_ALIGNMENT, CB_GETCURSEL, 0, 0 ) ) {
 		if ( unit == 0 ) {
 			for ( int mrk = 0; mrk < nMarkers; mrk++ ) frame.marker[mrk].position[X] += 10.0;
 		}
