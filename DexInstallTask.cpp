@@ -37,9 +37,11 @@ double fov_min_x = -1500.0, fov_max_x = 1500.0;
 double fov_min_y =  1500.0, fov_max_y = 4000.0;
 double fov_min_z = -1500.0, fov_max_z = 1500.0;
 
+// How close do we need to be to the expected position and orientation?
 double codaUnitOrientationTolerance = 30.0;		// Allowable rotation wrt expected orientation, in degrees.
 double codaUnitPositionTolerance = 500.0;		// Allowable displacement wrt expected position, in mm.
 
+// Paramters used to test if the tracker units are still aligned.
 double	alignmentTolerance = 5.0;				// Allowable misalignment of marker positions between CODAs.
 int		alignmentRequiredGood = 2;				// How many of the markers used to check the alignment must be within threshold?
 												// If the alignment is off, all will be off. If the alignment is good,
@@ -47,7 +49,9 @@ int		alignmentRequiredGood = 2;				// How many of the markers used to check the 
 												// This allows for the possibility that some of the markers may not be visible,
 												//  or that some are disturbed by a poor viewing angle or a reflection.
 
-double alignmentAcquisitionDuration = 5.0;		// Acquire some data to verify where the chair and frame were at the time of alignment.
+// Acquire some data to verify where the chair and frame were at the time of alignment.
+double alignmentAcquisitionDuration = 5.0;		// How much data to acquire. In theory, it could be 1 sample, 
+												//  but taking more allows us to assess the noise.
 
 // The following are the specifications of the expected position and orientation of the
 //  CODA units, depending on whether the alignment was done in the upright or supine configurations.
@@ -82,6 +86,9 @@ unsigned long fovMarkerMask = 0x00000f00;
 
 /*********************************************************************************/
 
+// This routine takes the operator through the steps of setting the configuration of the hardware (upright or supine)
+//  and doing the tracker alignment. It is intended to be a separate script that will be run as part of a procedure.
+
 int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
@@ -112,7 +119,6 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Performing alignment ..." );
 	status = apparatus->PerformTrackerAlignment( "Error performing the tracker alignment.\n - Is the target mast in the right-hand position?\n - Are the reference markers in view?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
 
 	// Are the Coda bars where we think they should be?
 	apparatus->ShowStatus( "Check tracker placement ..." );
@@ -178,4 +184,79 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->HideStatus();
 
 	return( NORMAL_EXIT );
+}
+
+/************************************************************************************************************************************/
+
+// This routine provides the steps to see if hardware is in the configuration that we expect it to be in.
+// If the configuration is already good, it simply returns. If it is not as expected, it gives hints about what to do.
+// This routine is meant to be run at the start of other tasks. Basically it is there to check if the hardware is in the
+// right configuration if the task is executed out of order.
+
+int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration desired_bar_position ) {
+
+	int status = 0;
+
+	// Are the Coda bars where we think they should be?
+	apparatus->ShowStatus( "Check tracker placement ..." );
+	if ( desired_posture == PostureSeated ) {
+
+		status = apparatus->CheckTrackerPlacement( 0, 
+											expected_coda1_position_upright, codaUnitPositionTolerance, 
+											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
+											"Placement error - Coda Unit 1.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "SetupSeated.bmp" );
+	}
+	else {
+		status = apparatus->CheckTrackerPlacement( 0, 
+											expected_coda1_position_supine, codaUnitPositionTolerance, 
+											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
+											"Placement error - Coda Unit 1.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "SetupSupine.bmp" );
+
+	}
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+
+	if ( apparatus->nCodas > 1 ) {
+
+		if ( desired_posture == PostureSeated ) {
+
+			status = apparatus->CheckTrackerPlacement( 1, 
+												expected_coda2_position_upright, codaUnitPositionTolerance, 
+												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
+												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "SetupSeated.bmp" );
+		}
+		else {
+			status = apparatus->CheckTrackerPlacement( 1, 
+												expected_coda2_position_supine, codaUnitPositionTolerance, 
+												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
+												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "SetupSupine.bmp" );
+
+		}
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+		// Check that the trackers are still aligned with each other.
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Are the markers in the line-of-sight?\n - Did a CODA unit get bumped?" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	}
+		
+
+	// The current implementation of SelectAndCheckConfiguration() does not handle doing the aligment in the supine configuration. 
+	// The test to decide if the hdw is in the upright or supine configuration assumes that the alignment was done in the upright 
+	//  configuration. If the alignment is done in the supine configuration, then the test will say that it is in the upright 
+	//  configuration when the apparatus is in the supine configuration and vice versa.
+	// Not to fear. The tests of the tracker placement above have already determined that the hardware was installed in the proper
+	//  configuation and that the alignment was done in that configuration. So what we do here is set the desired configuration 
+	//  to be upright (seated), which will appear to be true in both the supine and upright cases. Nevertheless, the error message
+	//  and picture displayed to the subject if the test fails should be what we really want.
+	if ( desired_posture == PostureSupine ) {
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the LEFT position?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the RIGHT position?", PostureSeated, desired_bar_position, DONT_CARE );
+	}
+	else {
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the LEFT position?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the RIGHT position?", PostureSeated, desired_bar_position, DONT_CARE );
+	}
+		
+	return( status );
 }

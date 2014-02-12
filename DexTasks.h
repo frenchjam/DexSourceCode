@@ -82,3 +82,4 @@ int RunDiscrete( DexApparatus *apparatus, const char *params = NULL );
 int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL );
 int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params = NULL );
 int RunInstall( DexApparatus *apparatus, const char *params = NULL );
+int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration bar );

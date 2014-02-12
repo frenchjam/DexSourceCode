@@ -85,27 +85,27 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
 	
-	int	direction = VERTICAL;
+	// Get the subject posture from the command line.
+	DexSubjectPosture posture = ParseForPosture( params );
+
+	// Collisions are always done with the mast on the right side.
 	DexTargetBarConfiguration bar_position = TargetBarRight;
-	DexSubjectPosture posture = PostureSeated;
+
+	// Collisions are done only in the vertical direction.
+	int	direction = VERTICAL;
 	Vector3 direction_vector = {0.0, 1.0, 0.0};
 	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+
 	char *target_filename = 0;
-
 	int tone, tgt;
-
 
 	// What is the target sequence? If not specified in the command line, use the default.
 	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( target_filename, collisionSequence, MAX_SEQUENCE_ENTRIES );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	posture = ParseForPosture( params );
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
-	apparatus->ShowStatus( "Hardware configuration check ..." );
-	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
-	if ( status == ABORT_EXIT ) exit( status );
-	apparatus->HideStatus();
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
