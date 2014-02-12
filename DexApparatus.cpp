@@ -934,6 +934,46 @@ DexTappingSurfaceConfiguration DexApparatus::TappingDeployment( void ) {
 //  configuration and prompts the subject to change until the desired configuration is achieved.
 // User can specify TargetBarAny, PostureAny and/or TappingAny to ignore the test.
 
+int DexApparatus::SelectAndCheckConfiguration( const char *picture, const char *message, int posture, int bar_position, int tapping ) {
+
+	while ( 1 ) {
+
+		// Check what is the current configuration to be compared with the desired.
+		// Super classes implement tests to detect the target frame orientation and
+		// the position of the vertical target bar.
+		int current_posture = Posture();
+		int current_bar_position = BarPosition();
+		int current_tapping = DONT_CARE;
+
+		if (  ( posture == DONT_CARE || posture == PostureIndifferent || posture == current_posture ) &&
+			  ( bar_position == DONT_CARE || bar_position == TargetBarIndifferent || bar_position == current_bar_position ) && 
+			  ( tapping == DONT_CARE || tapping == current_tapping ) 
+		   ) {
+			SignalEvent( "Successful configuration check." );
+			return( NORMAL_EXIT );
+		}
+		
+		// Signal to the subject that the configuration is currently not correct.
+		// Allow them to retry to achieve the desired configuration, to ignore and move on, or to abort the session.
+		int response = SignalError(  MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION, picture, message );
+		if ( response == IDABORT ) {
+			SignalEvent(  "Manual Abort from SelectAndCheckConfiguration." );
+			return( ABORT_EXIT );
+		}
+		if ( response == IDIGNORE ) {
+			SignalEvent(  "Ignore Error from SelectAndCheckConfiguration." );
+			return( IGNORE_EXIT );
+		}
+		// If we get here, it's a retry. Loop again to check if the change was successful.
+		
+	}
+	
+
+
+
+}
+
+#if 0
 int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
 	
 	int pass = 0;
@@ -1004,6 +1044,7 @@ int DexApparatus::SelectAndCheckConfiguration( int posture, int bar_position, in
 	// Should never get here.
 	
 }
+#endif
 
 int DexApparatus::SelectAndCheckMass( int mass ) {
 

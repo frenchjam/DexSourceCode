@@ -256,7 +256,8 @@ public:
 									 float timeout, const char *msg = NULL, const char *picture = "alert.bmp" );
 
 	// Hardware configuration
-	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
+//	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
+	virtual int SelectAndCheckConfiguration( const char *picture, const char *message, int posture, int bar_position, int tapping );
 	virtual DexSubjectPosture Posture( void );
 	virtual DexTargetBarConfiguration BarPosition( void );
 	virtual DexTappingSurfaceConfiguration TappingDeployment( void );	
@@ -422,7 +423,8 @@ public:
 									 float slip_threshold, 
 									 float timeout, const char *msg = "Slip not achieved.", const char *picture = "alert.bmp" );
 
-	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
+//	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
+	int SelectAndCheckConfiguration( const char *picture, const char *message, int posture, int bar_position, int tapping );
 	int SelectAndCheckMass( int mass );
 
 	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg = "Manipulandum occluded too often.", const char *picture = "alert.bmp" );

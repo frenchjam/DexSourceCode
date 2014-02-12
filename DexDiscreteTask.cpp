@@ -63,7 +63,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	apparatus->ShowStatus( "Hardware configuration check ..." );
-	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
+//	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress <OK> when ready to continue." );

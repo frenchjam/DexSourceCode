@@ -275,6 +275,23 @@ int DexCompiler::WaitSlip( float min_grip, float max_grip,
 
 /***************************************************************************/
 
+int DexCompiler::SelectAndCheckConfiguration( const char *picture, const char *message, int posture, int bar_position, int tapping ) {
+
+	double timeout;
+
+	// I am putting the maximum for the timeout, because I don't believe that this one should timeout.
+	timeout = DEX_MAX_TIMEOUT;
+
+	// I had three states for posture and bar position, including an 'indifferent' state. 
+	// Here I translate those to the 0 and 1 defined by DEX.
+	// Note that DEX has no way to check whether the tapping surfaces are deployed or not, so 
+	//  the tapping parameter is ignored.
+	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
+		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
+	return( NORMAL_EXIT );
+}
+
+#if 0
 int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int tapping ) {
 
 	char message[256];
@@ -308,7 +325,7 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
 	return( NORMAL_EXIT );
 }
-
+#endif
 /*********************************************************************************/
 
 int DexCompiler::SelectAndCheckMass( int mass ) {
@@ -584,7 +601,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			// Select which configuration of the hardware should be used.
 			// Verify that it is in the correct configuration, and if not, 
 			//  give instructions to the subject about what to do.
-			status = apparatus->SelectAndCheckConfiguration( posture, target_config, tapping_config );
+//			status = apparatus->SelectAndCheckConfiguration( posture, target_config, tapping_config );
 			if ( status == ABORT_EXIT ) exit( status );
 			
 		}

@@ -61,7 +61,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	DexMass mass = ParseForMass( params );
 
 	apparatus->ShowStatus( "Hardware configuration check ..." );
-	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
+//	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
