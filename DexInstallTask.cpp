@@ -198,7 +198,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	int status = 0;
 
 	// Are the Coda bars where we think they should be?
-	apparatus->ShowStatus( "Check tracker placement ..." );
+	apparatus->ShowStatus( "Checking hardware configuration ..." );
 	if ( desired_posture == PostureSeated ) {
 
 		status = apparatus->CheckTrackerPlacement( 0, 
@@ -257,6 +257,8 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the LEFT position?", PostureSeated, desired_bar_position, DONT_CARE );
 		else status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the RIGHT position?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
-		
+	
+	apparatus->HideStatus();
+
 	return( status );
 }

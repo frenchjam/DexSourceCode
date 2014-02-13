@@ -95,9 +95,9 @@ void BlinkAll ( DexApparatus *apparatus ) {
 
 DexMass ParseForMass ( const char *cmd ) {
 	if ( !cmd ) return( MassIndifferent );
-	if ( strstr( cmd, "-400" ) ) return( MassSmall );
-	else if ( strstr( cmd, "-600" ) ) return( MassMedium );
-	else if ( strstr( cmd, "-800" ) ) return( MassLarge );
+	if ( strstr( cmd, "-4" ) ) return( MassSmall );
+	else if ( strstr( cmd, "-6" ) ) return( MassMedium );
+	else if ( strstr( cmd, "-8" ) ) return( MassLarge );
 	else if ( strstr( cmd, "-nomass" ) ) return( MassNone );
 	else return( MassSmall );
 }
