@@ -682,7 +682,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			if ( !prompt ) prompt = "Terminated normally.";
 			
 			// Indicate to the subject that they are done.
-			status = apparatus->SignalNormalCompletion( prompt );
+			status = apparatus->SignalNormalCompletion( NULL, prompt );
 			if ( status == ABORT_EXIT ) exit( status );
 			
 		}

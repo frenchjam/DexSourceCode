@@ -149,6 +149,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	
 	// Let the subject know that they are done.
 	BlinkAll( apparatus );
+	BlinkAll( apparatus );
 
 	// Stop collecting data.
 	apparatus->ShowStatus( "Retrieving data ..." );
@@ -166,7 +167,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->HideStatus();
 	
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );

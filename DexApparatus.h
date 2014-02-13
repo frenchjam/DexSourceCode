@@ -333,8 +333,8 @@ public:
 	virtual int SignalError( unsigned int mb_type, const char *picture, const char *message = "Error." );
 	virtual int fSignalError( unsigned int mb_type, const char *picture, const char *format, ... );
 	
-	virtual int SignalNormalCompletion( const char *message = "Task completed normally." );
-	virtual int fSignalNormalCompletion( const char *format = "Task completed normally.", ... );
+	virtual int SignalNormalCompletion( const char *picture, const char *message = "Task completed normally." );
+	virtual int fSignalNormalCompletion( const char *picture, const char *format = "Task completed normally.", ... );
 	
 	// Methods to deal with the manipulandum force/torque measurements.
 	virtual void InitForceTransducers( void );

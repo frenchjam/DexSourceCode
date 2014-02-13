@@ -665,9 +665,13 @@ int DexApparatus::fSignalError( unsigned int mb_type, const char *picture, const
 // behavior will be written to the script.
 // Thus, the Dex interpreter does not have to handle this command directly.
 
-int DexApparatus::SignalNormalCompletion( const char *message ) {
+int DexApparatus::SignalNormalCompletion( const char *picture, const char *message ) {
 		
 	int status;
+	const char *ptr;
+
+	if ( !picture ) ptr = "ok.bmp";
+	else ptr = picture;
 
 	Comment( "Signal Normal Completion." );
 	for ( int blinks = 0; blinks < N_NORMAL_BLINKS; blinks++ ) {
@@ -683,7 +687,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 	}
 	SoundOff();
 	
-	status = WaitSubjectReady( "ok.bmp", message );
+	status = WaitSubjectReady( ptr, message );
 	if ( status == NORMAL_EXIT ) SignalEvent( "Normal Completion." );
 	return( status );
 	
@@ -691,7 +695,7 @@ int DexApparatus::SignalNormalCompletion( const char *message ) {
 
 // fprintf version of the above.
 
-int DexApparatus::fSignalNormalCompletion( const char* format, ... ) {
+int DexApparatus::fSignalNormalCompletion( const char *picture, const char* format, ... ) {
 	
 	va_list args;
 	char message[10240];
@@ -700,7 +704,7 @@ int DexApparatus::fSignalNormalCompletion( const char* format, ... ) {
 	vsprintf(message, format, args);
 	va_end(args);
 
-	return( SignalNormalCompletion( message ) );
+	return( picture, SignalNormalCompletion( message ) );
 
 }
 

@@ -183,8 +183,6 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	apparatus->TargetsOff();
 	BlinkAll( apparatus );
-	status = apparatus->fWaitSubjectReady( "cradles.bmp", "Trial terminated.\nYou may place the maniplandum in the empty cradle.\nPress <OK> to continue ..." );
-	if ( status == ABORT_EXIT ) exit( status );
 
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );
@@ -204,7 +202,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( "cradles.bmp", "Trial terminated.\nYou may place the maniplandum in the empty cradle.\nPress <OK> to continue ..." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );

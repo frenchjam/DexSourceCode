@@ -170,7 +170,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );
