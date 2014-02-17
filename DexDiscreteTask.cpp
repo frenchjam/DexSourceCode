@@ -21,11 +21,6 @@
 
 /*********************************************************************************/
 
-//#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
-
-/*********************************************************************************/
-
-
 // Targeted trial parameters;
 int delaySequence[] = { 1, 1.5, 1, 2, 1.5, 3, 1, 2, 1 };	// Delays between the discrete movements.
 int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
@@ -42,6 +37,66 @@ double discreteCycleHysteresis = 10.0;	// Parameter used to adjust the detection
 
 /*********************************************************************************/
 
+int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
+
+	int status = 0;
+	char *target_filename = 0;
+	char *mtb, *dsc;
+	
+	int	direction = ParseForDirection( apparatus, params );
+	int eyes = ParseForEyeState( params );
+	DexSubjectPosture posture = ParseForPosture( params );
+
+	DexTargetBarConfiguration bar_position;
+	Vector3 direction_vector = {0.0, 1.0, 0.0};
+	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+
+	if ( direction == VERTICAL ) bar_position = TargetBarRight;
+	else bar_position = TargetBarLeft;
+
+	// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	if ( posture == PostureSeated ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
+	}
+	else if ( posture == PostureSupine ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Prompt the subject to stow the tapping surfaces.
+	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Cancel any force offsets.
+	RunTransducerOffsetCompensation( apparatus, params );
+
+	// Instruct the subject on the task to be done.
+	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	if ( direction == VERTICAL ) {
+		mtb = "MoveToBlinkingV.bmp";
+		dsc = "DiscreteV.bmp";
+	}
+	else {
+		mtb = "MoveToBlinkingH.bmp";
+		dsc = "DiscreteH.bmp";
+	}
+
+	if ( eyes == OPEN )	{
+		GiveDirective( apparatus, "To start, move to the target that is blinking.", mtb );
+		GiveDirective( apparatus, "On each beep,move quickly and accurately to the other\nlit target. Keep your eyes OPEN the entire time.", dsc );
+	}
+	else {
+		GiveDirective( apparatus, "To start, move to the target that is blinking.\nThen CLOSE your eyes.", mtb );
+		GiveDirective( apparatus, "On each beep,move quickly and accurately\nto the remebered location of the other target.", dsc );
+	}
+
+	return( NORMAL_EXIT );
+}
+
+
+/*********************************************************************************/
+
 int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	int status = 0;
@@ -49,51 +104,53 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// These are static so that if the params string does not specify a value,
 	//  whatever was used the previous call will be used again.
 	static int	direction = VERTICAL;
+	static int	eyes = OPEN;
+	static DexMass mass = MassMedium;
 	static DexTargetBarConfiguration bar_position = TargetBarRight;
 	static DexSubjectPosture posture = PostureSeated;
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
-	// Which mass should be used for this set of trials?
-	DexMass mass = ParseForMass( params );
+	char *target_filename = 0;
 
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
-	static int eyes = ParseForEyeState( params );
+	// Which mass should be used for this set of trials?
+	mass = ParseForMass( params );
+
+	// Horizontal or vertical movements?
+	direction = ParseForDirection( apparatus, params );
+	if ( direction == VERTICAL ) bar_position = TargetBarRight;
+	else bar_position = TargetBarLeft;
+
+	// Eyes open or closed?
+	eyes = ParseForEyeState( params );
+
+	// What is the target sequence? If not specified in the command line, use the default.
+	if ( target_filename = ParseForTargetFile( params ) ) delaySequenceN = LoadSequence( target_filename, delaySequence, MAX_SEQUENCE_ENTRIES );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	apparatus->ShowStatus( "Hardware configuration check ..." );
-//	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
-	if ( status == ABORT_EXIT ) exit( status );
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
 
-	status = apparatus->WaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.\nPress <OK> when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
+	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
+	// If this is the first block, we should do this. If not, it can be skipped.
+	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
 
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "Belts2.bmp", "Seated?   Belts attached?   Wristbox on wrist?\n\nPress <OK> when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
+	// Start acquisition and acquire a baseline.
+	apparatus->SignalEvent( "Initiating set of discrete movements." );
+	apparatus->StartAcquisition( "DISC", maxTrialDuration );
+	
+	// Acquire
+	Sleep( 1000 );
 
 	// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
-//	status = apparatus->SelectAndCheckMass( mass );
-//	if ( status == ABORT_EXIT ) exit( status );
-
-	apparatus->ShowStatus( "Starting set of targeted trials ..." );
-	// Instruct subject to pick up the manipulandum
-	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "InHand.bmp", "Hold the manipulandum with thumb and \nindexfinger centered. \nPress <OK> when ready to continue." );
+	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
    
 	// Check that the grip is properly centered.
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
-
-	status = apparatus->WaitSubjectReady( "Wait_discrete.bmp", "Align the manipulandum with the flashing target. \nPress <OK> when ready to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Start acquiring data.
-	apparatus->StartAcquisition( "TRGT", maxTrialDuration );
 
 	// Wait until the subject gets to the target before moving on.
 	char *wait_at_target_message = "Too long to reach desired target.";
@@ -111,11 +168,10 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[1] );
 	}
 		
-	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and move the manipulandum \n to the opposite target at beep.\nPress OK when ready to continue." );
-	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and move the manipulandum \n to the opposite target at beep.\nPress <OK> when ready to continue." );
-	
-
+//	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and move the manipulandum \n to the opposite target at beep.\nPress OK when ready to continue." );
+//	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and move the manipulandum \n to the opposite target at beep.\nPress <OK> when ready to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
+
 	// Collect baseline data while holding at the starting position.
 	apparatus->Wait( baselineTime );
 	

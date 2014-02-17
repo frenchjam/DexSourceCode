@@ -250,12 +250,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	//  to be upright (seated), which will appear to be true in both the supine and upright cases. Nevertheless, the error message
 	//  and picture displayed to the subject if the test fails should be what we really want.
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the LEFT position?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the RIGHT position?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the LEFT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the RIGHT position?\n - Are the reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the LEFT position?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the RIGHT position?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the LEFT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the RIGHT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();

@@ -678,6 +678,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		
 		if ( !strcmp( token, "SignalNormalCompletion" ) ) {
 			
+			// Need to read in the picture filename as well.
 			char *prompt = strpbrk( line, " \t" );
 			if ( !prompt ) prompt = "Terminated normally.";
 			
