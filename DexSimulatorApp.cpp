@@ -190,6 +190,16 @@ int LoadSequence( const char *filename, float *sequence, const int max_entries )
 
 }
 
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd ) {
+
+	int direction = VERTICAL;
+	if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
+	return( direction );
+
+}
+
+#if 0
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation ) {
 
 	int direction = VERTICAL;
@@ -230,7 +240,7 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPost
 	}
 	return( direction );
 }
-
+#endif
 /**************************************************************************************/
 
 int APIENTRY WinMain(HINSTANCE hInstance,

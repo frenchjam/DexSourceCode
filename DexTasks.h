@@ -64,7 +64,9 @@ void BlinkAll ( DexApparatus *apparatus );
 int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForEyeState( const char *cmd );
-int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
+int ParseForDirection ( DexApparatus *apparatus, const char *cmd );
+
+//int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );
 char *ParseForDelayFile ( const char *cmd );
 int LoadSequence( const char *filename, int   *sequence, const int max_entries );

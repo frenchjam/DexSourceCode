@@ -54,7 +54,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	posture = ParseForPosture( params );
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+	direction = ParseForDirection( apparatus, params );
 	if ( posture == PostureSeated ) {
 		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
 	}

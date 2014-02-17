@@ -64,7 +64,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 //	status = apparatus->SelectAndCheckConfiguration( posture, bar_position, DONT_CARE );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+	direction = ParseForDirection( apparatus, params );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.

@@ -59,7 +59,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	DexMass mass = ParseForMass( params );
 
 	// Set certain parameters according to the desired movement and the posture of the subject.
-	direction = ParseForDirection( apparatus, params, posture, bar_position, direction_vector, desired_orientation );
+	direction = ParseForDirection( apparatus, params );
 
 	// Check that the tracker is still aligned.
 	apparatus->ShowStatus( "Tracker alignment check ..." );
