@@ -65,6 +65,8 @@ int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd );
+double ParseForFrequency ( DexApparatus *apparatus, const char *cmd );
+double ParseForDuration ( DexApparatus *apparatus, const char *cmd );
 
 //int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );

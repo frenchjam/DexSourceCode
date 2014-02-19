@@ -191,6 +191,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Signal to subject that the task is complete.
 	apparatus->SignalEvent( "Acquisition terminated." );
 
+	// Was the manipulandum obscured?
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	
 	// Check if trial was completed as instructed.
 	apparatus->ShowStatus( "Checking movement directions ..." );
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );

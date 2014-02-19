@@ -72,13 +72,26 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	RunTransducerOffsetCompensation( apparatus, params );
 
 	// Instruct the subject on the task to be done.
+	
+	// Show them the targets that will be used.
+	apparatus->TargetsOff();
+	if ( direction == VERTICAL ) {
+		apparatus->VerticalTargetOn( discreteTargets[0] );
+		apparatus->VerticalTargetOn( discreteTargets[1] );
+	}
+	else {
+		apparatus->HorizontalTargetOn( discreteTargets[0] );
+		apparatus->HorizontalTargetOn( discreteTargets[1] );
+	}
+
+	// Describe how to do the task, according to the desired conditions.
 	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
 	if ( direction == VERTICAL ) {
-		mtb = "MoveToBlinkingV.bmp";
+		mtb = "MvToBlkV.bmp";
 		dsc = "DiscreteV.bmp";
 	}
 	else {
-		mtb = "MoveToBlinkingH.bmp";
+		mtb = "MvToBlkH.bmp";
 		dsc = "DiscreteH.bmp";
 	}
 
@@ -112,6 +125,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename = 0;
+	char *delay_filename = 0;
 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
@@ -124,13 +138,14 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Eyes open or closed?
 	eyes = ParseForEyeState( params );
 
-	// What is the target sequence? If not specified in the command line, use the default.
-	if ( target_filename = ParseForTargetFile( params ) ) delaySequenceN = LoadSequence( target_filename, delaySequence, MAX_SEQUENCE_ENTRIES );
+	// What is the sequence of delays? If not specified in the command line, use the default.
+	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delay_filename, delaySequence, MAX_SEQUENCE_ENTRIES );
+	if ( target_filename = ParseForTargetFile( params ) ) LoadSequence( target_filename, discreteTargets, 2 );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
+	if ( status == ABORT_EXIT ) return( status );
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
@@ -151,6 +166,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Check that the grip is properly centered.
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
+
 
 	// Wait until the subject gets to the target before moving on.
 	char *wait_at_target_message = "Too long to reach desired target.";
@@ -208,18 +224,21 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ..." );
 
+	// Was the manipulandum obscured?
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
+	// Check that we got a reasonable amount of movement.
 	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, direction_vector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	// Check that we got a reasonable amount of movement. 
+	// Check that we got a reasonable number of movements. 
 	// We expect as many as there are items in the sequence. 
 	// We accept if there are a few less.
 	status = apparatus->CheckMovementCycles( delaySequenceN / 2 - 2, delaySequenceN, direction_vector, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
+	// Did the subject anticipate the starting signal too often?
 	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
 		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?" );

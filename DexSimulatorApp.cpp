@@ -37,7 +37,9 @@
 
 // Parameters that are common to more than one task.
 
-double maxTrialDuration = 60.0;				// Trials can be up to this long, but may be shorter.
+double maxTrialDuration = 120.0;			// Used to set the maximum duration of an acquisition.
+											// Trials can be up to this long, but may be shorter.
+											// May not be applicable to the DEX hardware.
 
 double baselineTime = 1.0;					// Duration of pause at first target before starting movement.
 double initialMovementTime = 5.0;			// Time allowed to reach the starting position.
@@ -196,6 +198,34 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd ) {
 	if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
 	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
 	return( direction );
+
+}
+
+double ParseForFrequency ( DexApparatus *apparatus, const char *cmd ) {
+
+	double frequency;
+	char *ptr;
+
+	if ( !cmd ) return( 1.0 );
+	else if ( ptr = strstr( cmd, "-frequency=" ) ) {
+		sscanf( ptr + strlen( "-frequency=" ), "%lf", &frequency );
+		return( frequency );
+	}
+	else return( 1.0 );
+
+}
+
+double ParseForDuration ( DexApparatus *apparatus, const char *cmd ) {
+
+	double duration = 30.0;
+	char *ptr;
+
+	if ( !cmd ) return( duration );	// 30 seconds by default.
+	else if ( ptr = strstr( cmd, "-duration=" ) ) {
+		sscanf( ptr + strlen( "-duration=" ), "%lf", &duration );
+		return( duration );
+	}
+	else return( duration );
 
 }
 

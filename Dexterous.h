@@ -188,6 +188,7 @@ typedef struct {
 #define TRIGGER_MOVEMENT	107	// Used to test for false starts.
 #define TRIGGER_MOVE_UP		108	// Used to test for tapping movements in the wrong direction.
 #define TRIGGER_MOVE_DOWN	109
+#define END_ENTRAIN			110	// Mark when the beeps stop in the oscillations protocol.
 
 #define ACQUISITION_SAVE	-666
 
