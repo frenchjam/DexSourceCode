@@ -1665,7 +1665,7 @@ void DexApparatus::SetTargetStateInternal( unsigned long target_state ) {
 void DexApparatus::SetTargetState( unsigned long target_state ) {
 	SetTargetStateInternal( target_state );
 	currentTargetState = target_state;
-//	MarkTargetEvent( target_state );
+	MarkTargetEvent( target_state );
 }
 
 // The following are convenience methods for my own use.

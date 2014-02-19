@@ -109,6 +109,8 @@ void DexPlotData( DexApparatus *apparatus ) {
 	double max_time;
 	double filtered, filter_constant = 1.0;
 
+	if ( apparatus->nAcqFrames < 1 ) return;
+
 	// Compute velocity.
 	for ( i = 0; i < apparatus->nAcqFrames - 1; i++ ) {
 		apparatus->SubtractVectors( delta, apparatus->acquiredManipulandumState[i+1].position, apparatus->acquiredManipulandumState[i].position );
@@ -270,8 +272,8 @@ void DexPlotData( DexApparatus *apparatus ) {
 	
 		ViewSetXLimits( view, 0.0, max_time );
 		ViewSetYLimits( view, - 2.0 * copTolerance / 1000.0, 2.0 * copTolerance / 1000.0 );
-		ViewLine( view, 0.0,   copTolerance / 1000.0, samples,   copTolerance / 1000.0 );
-		ViewLine( view, 0.0, - copTolerance / 1000.0, samples, - copTolerance / 1000.0 );
+		ViewLine( view, 0.0,   copTolerance / 1000.0, max_time,   copTolerance / 1000.0 );
+		ViewLine( view, 0.0, - copTolerance / 1000.0, max_time, - copTolerance / 1000.0 );
 		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
 			for ( j = 0; j < 2; j++ ) {
 				ViewSelectColor( view, i * N_FORCE_TRANSDUCERS + j );
