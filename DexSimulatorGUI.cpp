@@ -232,6 +232,9 @@ void DexPlotData( DexApparatus *apparatus ) {
 		ViewAutoScaleSetInterval( view, grip_range );			
 		ViewSetXLimits( view, 0.0, max_time );
 		
+		ViewColor( view, GREY4 );	
+		ViewLine( view, 0.0, 0.0, max_time, 0.0 );
+
 		ViewColor( view, RED );
 		ViewXYPlotAvailableDoubles( view,
 			&apparatus->acquiredAnalog[0].time, 

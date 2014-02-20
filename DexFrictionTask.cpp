@@ -37,8 +37,8 @@ Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
 
 double slipThreshold = 1.0;
 double slipTimeout = 10.0;
-double slipWait = 0.5;
-int    slipMovements = 5;
+double slipWait = 0.25;
+int    slipMovements = 15;
 
 double copMinForce = 1.0;
 double copTimeout = 10.0;
@@ -59,24 +59,28 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->adc->AllowPollingDuringAcquisition();
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
-	status = apparatus->WaitSubjectReady( "pinch.bmp", "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.\nPress <OK> when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
-	status = apparatus->WaitCenteredGrip( copTolerance, copMinForce, copCheckTimeout, "Grip not centered." );
-	if ( status == ABORT_EXIT ) exit( status );
-    apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
+	GiveDirective( apparatus, "You will first grasp the manipulandum with\nthumb and index finger centered, while the\nmanipulandum remains in the retainer.", "pinch.bmp" );
+	GiveDirective( apparatus, "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.", "pinch.bmp" );
+	GiveDirective( apparatus, "Rub the manipulandum from center to periphery\n without releasing the grip.", "Coef_frict_osc.bmp" );
+	
+	// Start acquiring.
+    apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+
+	// Collect some data with zero force.
+	apparatus->Wait( 2.0 );
+
+    status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, frictionTimeout, "Use the LEDs to achieve the desired grip force level." );
 	// Mark when the desired force is achieved.
+	if ( status == ABORT_EXIT ) exit( status );
 	apparatus->MarkEvent( FORCE_OK );
 
-	// Instruct the subject to perform the rubbing motion. 
-	// !JMc I think that these instructions have to occur prior to achieving the desired force.
-	// !JMc Otherwise, I think that the subject will lose the force level while reading the new instructions.
-	status = apparatus->WaitSubjectReady( "Coef_frict_osc.bmp","Rub the manipulandum from center to periphery\n without releasing the grip.\n\nPress <OK> when ready to continue." );
-	if ( status == ABORT_EXIT ) return( status );
+	status = apparatus->WaitCenteredGrip( copTolerance, copMinForce, copCheckTimeout, "Grip not centered." );
+	if ( status == ABORT_EXIT ) exit( status );
 
-	// Start acquiring.
-    apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	// Beep to let the subject know that he or she can start rubbing.
+	apparatus->Beep();
 
 	// Wait for the initial slip.
     status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
@@ -88,8 +92,21 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// this signal will also occur.
 	apparatus->MarkEvent( SLIP );
 
+#if 0
 	// Allow 15 more seconds for the rubbing motion.
 	apparatus->Wait( 15 );
+#else
+	for ( int slip = 0; slip < slipMovements; slip++ ) {
+		status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
+				frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.", "alert.bmp"  );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		apparatus->MarkEvent( SLIP );
+		apparatus->Wait( slipWait );
+	}
+#endif
+
+
 	
 	// !JMc Not sure what sound would be on.
 	// !JMc Maybe this could be removed.
@@ -98,11 +115,25 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// Beep to indicate the end of the recording.
 	apparatus->Beep();
 
+	// Let the subject know that they are done.
+	BlinkAll( apparatus );
+	BlinkAll( apparatus );
+
+	apparatus->WaitSubjectReady( "ok.bmp", "Release the maniplandum and press <OK> to continue." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	// Collect some data with zero force.
+	apparatus->Wait( 2.0 );
+
 	// Terminate the acquisition. This will also close the data file.
 	apparatus->StopAcquisition();
 
 	// Erase any lingering message.
 	apparatus->HideStatus();
+
+	// Indicate to the subject that they are done.
+	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	if ( status == ABORT_EXIT ) exit( status );
 
 	// Apparently we were successful.
 	return( NORMAL_EXIT );
