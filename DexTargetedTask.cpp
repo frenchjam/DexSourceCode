@@ -101,6 +101,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 	char *target_filename;
 
+	// Get the subject posture from the command line.
+	posture = ParseForPosture( params );
+
 	// Which mass should be used for this set of trials?
 	DexMass mass = ParseForMass( params );
 
@@ -115,7 +118,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status == ABORT_EXIT ) return( status );
+	if ( status != NORMAL_EXIT ) return( status );
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.

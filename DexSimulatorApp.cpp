@@ -120,32 +120,37 @@ int ParseForEyeState ( const char *cmd ) {
 	else return( OPEN );
 }
 
-bool ParseForPrep ( const char *cmd ) {
+bool ParseForBool( const char *cmd, const char *flag ) {
 	if ( !cmd ) return( false );
-	if ( strstr( cmd, "-prep" ) ) return( true );
+	if ( strstr( cmd, flag ) ) return( true );
 	else return( false );
 }
+bool ParseForPrep ( const char *cmd ) {
+	return( ParseForBool( cmd, "-prep" ) );
+}
 
-char *ParseForTargetFile ( const char *cmd ) {
-	static char filename[1024] = "";
+#define BUFFER_N	10
+char *ParseForFilename ( const char *cmd, const char *key ) {
+
+	static char filename[BUFFER_N][1024];
+	static call = 0;
 	char *ptr;
 
+	call = (call++) % BUFFER_N;
 	if ( !cmd ) return( NULL );
-	else if ( ptr = strstr( cmd, "-targets=" ) ) {
-		sscanf( ptr + strlen( "-targets=" ), "%s", filename);
-		return( filename );
+	else if ( ptr = strstr( cmd, key ) ) {
+		sscanf( ptr + strlen( key ) + 1, "%s", filename[call] ); // The '+1' takes care of the = sign, if there is one, or a space.
+		return( filename[call] );
 	}
 	else return( NULL );
 }
 
-char *ParseForDelayFile ( const char *cmd ) {
-	static char filename[1024] = "";
-	char *ptr;
+char *ParseForTargetFile ( const char *cmd ) {
+	return( ParseForFilename( cmd, "-targets" ) );
+}
 
-	if ( !cmd ) return( NULL );
-	else if ( ptr = strstr( cmd, "-delays=" ) ) sscanf( ptr + strlen( "-delays=" ), "%s", filename);
-	else ptr = NULL;
-	return( filename );
+char *ParseForDelayFile ( const char *cmd ) {
+	return( ParseForFilename( cmd, "-delays" ) );
 }
 
 // Load a sequence of integers, e.g. a list of target IDs.
@@ -161,11 +166,8 @@ int LoadSequence( const char *filename, int *sequence, const int max_entries ) {
 		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
 		exit( -1 );
 	}
-
-	while ( 1 == fscanf( fp, "%d", &sequence[count] ) ) count++;
-	
+	while ( 1 == fscanf( fp, "%d", &sequence[count] ) ) count++;	
 	fclose( fp );
-
 	return( count );
 
 }
@@ -183,11 +185,8 @@ int LoadSequence( const char *filename, float *sequence, const int max_entries )
 		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
 		exit( -1 );
 	}
-
-	while ( 1 == fscanf( fp, "%f", &sequence[count] ) ) count++;
-	
+	while ( 1 == fscanf( fp, "%f", &sequence[count] ) ) count++;	
 	fclose( fp );
-
 	return( count );
 
 }
@@ -201,32 +200,32 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd ) {
 
 }
 
-double ParseForFrequency ( DexApparatus *apparatus, const char *cmd ) {
+double ParseForDouble ( DexApparatus *apparatus, const char *cmd, const char *key ) {
 
-	double frequency;
+	double value;
+	int	 values;
 	char *ptr;
 
-	if ( !cmd ) return( 1.0 );
-	else if ( ptr = strstr( cmd, "-frequency=" ) ) {
-		sscanf( ptr + strlen( "-frequency=" ), "%lf", &frequency );
-		return( frequency );
+	if ( !cmd ) return( NaN );
+	else if ( ptr = strstr( cmd, key ) ) {
+		values = sscanf( ptr + strlen( key ) + 1, "%lf", &value );
+		if ( values == 1) return( value );
+		else return( NaN );
 	}
-	else return( 1.0 );
-
+	else return( NaN );
 }
 
+double ParseForFrequency ( DexApparatus *apparatus, const char *cmd ) {
+	double frequency;
+	if ( _isnan( frequency = ParseForDouble( apparatus, cmd, "-frequency" ) ) ) return( frequency );
+	else return( 1.0 );
+}
+
+
 double ParseForDuration ( DexApparatus *apparatus, const char *cmd ) {
-
-	double duration = 30.0;
-	char *ptr;
-
-	if ( !cmd ) return( duration );	// 30 seconds by default.
-	else if ( ptr = strstr( cmd, "-duration=" ) ) {
-		sscanf( ptr + strlen( "-duration=" ), "%lf", &duration );
-		return( duration );
-	}
-	else return( duration );
-
+	double duration;
+	if ( _isnan( duration = ParseForDouble( apparatus, cmd, "-duration" ) ) ) return( duration );
+	else return( 30.0 );
 }
 
 #if 0
