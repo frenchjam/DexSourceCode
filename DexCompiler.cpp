@@ -19,6 +19,7 @@
 #include <OpenGLViewpoints.h>
 
 #include <VectorsMixin.h> 
+#include <fOutputDebugString.h>
 
 #include "Dexterous.h"
 #include "DexMonitorServer.h"
@@ -184,6 +185,15 @@ char *DexCompiler::quoteMessage( const char *message ) {
 	// result[j++] = '\"';
 	result[j++] = 0;
 
+	if ( strlen( result ) > 128 ) {
+		fprintf( stderr, "WARNING: Message too long. Truncating.\n%s\n", result );
+		result[127] = 0;
+		fprintf( stderr, "%s\n\n", result );
+		fOutputDebugString( "\nWARNING: Message too long. Truncating.\n%s\n", result );
+	}
+
+	
+
 	return( result );
 
 }
@@ -339,7 +349,7 @@ int DexCompiler::SelectAndCheckMass( int mass ) {
 	else mass_id = 1;
 
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass: , cradles.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
+	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass, cradles.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
 	return( NORMAL_EXIT );
 }
 
@@ -403,7 +413,7 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 							float dirX, float dirY, float dirZ,
 							float hysteresis, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MOVEMENTS_CYCLES, %.0f, %.0f, %f, %f, %f, %.0f, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_MOVEMENTS_CYCLES, %d, %d, %f, %f, %f, %.0f, %s, %s \n", 
 		min_cycles, max_cycles, dirX, dirY, dirZ, hysteresis, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -484,7 +494,7 @@ int DexCompiler::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 										   float min_y, float max_y,
 										   float min_z, float max_z, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_CODA_FIELDOFVIEW, %d, 0x%08lx, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %s, \n", 
+	fprintf( fp, "CMD_CHK_CODA_FIELDOFVIEW, %d, 0x%08lx, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %s, %s\n", 
 		unit + 1, marker_mask, min_x, max_x, min_y, max_y, min_z, max_z, quoteMessage( msg ),  ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -494,7 +504,7 @@ int DexCompiler::CheckTrackerPlacement( int unit,
 										const Quaternion expected_ori, float o_tolerance,
 										const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_CODA_PLACEMENT, %d, %.0f, %.0f, %.0f, %f, %f, %f, %f, %.0f, %.0f, %s, \n", 
+	fprintf( fp, "CMD_CHK_CODA_PLACEMENT, %d, %.0f, %.0f, %.0f, %f, %f, %f, %f, %.0f, %.0f, %s, %s \n", 
 		unit + 1, expected_pos[X], expected_pos[Y], expected_pos[Z],  
 		expected_ori[X], expected_ori[Y], expected_ori[Z], expected_ori[M], 
 		p_tolerance, o_tolerance, quoteMessage( msg ),  ( picture ? picture : "" ) );
@@ -519,6 +529,7 @@ void DexCompiler::ShowStatus (const char *message, const char *picture ) {
 	AddStepNumber();
 	// Log the message and show it on the DEX screen.
 	fprintf( fp, "CMD_LOG_MESSAGE, 1, %s\n", quoteMessage( message ) );
+	AddStepNumber();
 	fprintf( fp, "CMD_SET_PICTURE, %s\n", ( picture ? picture : "") );
 }
 
