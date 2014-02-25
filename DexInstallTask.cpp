@@ -69,10 +69,10 @@ Quaternion	expected_coda2_orientation_supine = { 1.0, 0.0, 0.0, 0.0};
 
 // How close do we need to be to the expected position and orientation?
 double codaUnitPositionTolerance = 500.0;		// Allowable displacement wrt expected position, in mm.
-double codaUnitOrientationTolerance = 30.0;		// Allowable rotation wrt expected orientation, in degrees.
+double codaUnitOrientationTolerance = 90.0;		// Allowable rotation wrt expected orientation, in degrees.
 
 double codaUnitPositionRelaxed =  1000.0;		// Use this if all you really care about is upright vs. supine..
-double codaUnitOrientationIgnore = 361.0;		// Use this if you don't care what the orientation is.
+double codaUnitOrientationIgnore = 179.9;		// Use this if you don't care what the orientation is.
 
 
 /*********************************************************************************/
@@ -98,8 +98,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for upright (seated) operation.\nPlace the manipulandum in the holder\ninside the chair locker as shown." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation.\nPlace the manipulandum in the holder\ninside the chair locker as shown." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for upright (seated) operation. Place the manipulandum in the holder as shown." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation.\nPlace the manipulandum in the holder as shown." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the target bar in the right side position.
@@ -165,7 +165,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Check tracker alignment ..." );
-		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers in the line-of-sight?" );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers occluded?" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -208,6 +208,9 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	// We don't care so much if the CODAs are swapped or installed in a different configuration.
 	// So we use a relaxed constraint on the position of each unit and we ignore the orientation of the units.
 
+	apparatus->Comment( "################################################################################" );
+	apparatus->Comment( "Operations to check the hardware configuration." );
+
 	apparatus->ShowStatus( "Checking hardware configuration ..." );
 	if ( desired_posture == PostureSeated ) {
 
@@ -245,7 +248,8 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
-		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Are the markers in the line-of-sight?\n - Did a CODA unit get bumped?" );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
+			"Coda misalignment detected!\n - Are the markers in the line-of-sight?\n - Did a CODA unit get bumped?", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
