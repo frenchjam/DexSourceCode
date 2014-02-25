@@ -8,6 +8,10 @@ extern HWND	status_dlg;
 extern HWND	mass_dlg;
 extern HWND	workspace_dlg;
 
+// Picture file prefix (automatically added to picture filenames)
+extern char PictureFilenamePrefix[];
+
+
 BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 int IllustratedMessageBox( const char *picture, const char *message, const char *label, int buttons );
 int fIllustratedMessageBox( int mb_type, const char *picture, const char *caption, const char *format, ... );

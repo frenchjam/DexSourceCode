@@ -299,8 +299,8 @@ public:
 	virtual void FindAnalysisFrameRange( int &first, int &last );
 	
 	// Show status to subject.
-	void DexApparatus::ShowStatus (const char *message = "", const char *picture = "" );
-	void DexApparatus::HideStatus ( void );
+	virtual void DexApparatus::ShowStatus (const char *message = "", const char *picture = "blank.bmp" );
+	virtual void DexApparatus::HideStatus ( void );
 
 	// Tracker installation and alignment.
 	virtual int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 

@@ -860,7 +860,19 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 // Show the status to the subject.
 
 void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
+	char picture_filename[1024];
 	SetDlgItemText( workspace_dlg, IDC_STATUS_TEXT, message );
+	strcpy( picture_filename, PictureFilenamePrefix );
+	strcat( picture_filename, "blank.bmp" );
+	HBITMAP bitmap = (HBITMAP) LoadImage( NULL, picture_filename, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
+	SendDlgItemMessage( workspace_dlg, IDC_PICTURE, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) bitmap );
+	if ( picture ) {
+		strcpy( picture_filename, PictureFilenamePrefix );
+		strcat( picture_filename, picture );
+		bitmap = (HBITMAP) LoadImage( NULL, picture_filename, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
+		if ( bitmap ) SendDlgItemMessage( workspace_dlg, IDC_PICTURE, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) bitmap );
+	}
+	Update();
 	// If we are updating the status, it is usually an interesting break point in the procedure.
 	// So we automatically insert a comment in the script file to make it easy to find.
 	Comment( message );
@@ -869,7 +881,7 @@ void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
 }
 
 void DexApparatus::HideStatus ( void ) {
-	ShowStatus( "", "" );
+	ShowStatus( "", NULL );
 }
 
 
@@ -1311,7 +1323,6 @@ int DexApparatus::WaitCenteredGrip( float tolerance, float min_force, float time
 	// Log that the method has started.
 	monitor->SendEvent( "WaitCenteredGrip - Start." );
 	DexTimerSet( timeout_timer, timeout );
-	ShowStatus( "Acquisition...", "" );	
 	do {
 
 		if ( DexTimerTimeout( timeout_timer ) ) {
