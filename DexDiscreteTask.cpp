@@ -167,6 +167,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	apparatus->ShowStatus( "Trial started ...", "working.bmp" );
 
 	// Wait until the subject gets to the target before moving on.
 	char *wait_at_target_message = "Too long to reach desired target.";
@@ -213,38 +214,59 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Collect one final second of data.
 	apparatus->Wait( baselineTime );
 	
-	// Let the subject know that they are done.
-	BlinkAll( apparatus );
+	// We're done.
+	apparatus->TargetsOff();
 
-	// Stop collecting data.
-	apparatus->ShowStatus( "Retrieving data ..." );
+	// Mark the ending point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( END_ANALYSIS );
+
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	BlinkAll( apparatus );
+	BlinkAll( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	if ( status == ABORT_EXIT ) exit( status );
+	
+	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
+	apparatus->Wait( 1.0 );
+
+	// Stop acquiring.
 	apparatus->StopAcquisition();
+	// Signal to subject that the task is complete.
+	apparatus->SignalEvent( "Acquisition terminated." );
 	
 	
 	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ..." );
+	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+	int n_post_hoc_steps = 4;
+	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
 	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, direction_vector, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
 	// We expect as many as there are items in the sequence. 
 	// We accept if there are a few less.
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for nubmer of movement ..." );
 	status = apparatus->CheckMovementCycles( delaySequenceN / 2 - 2, delaySequenceN, direction_vector, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Did the subject anticipate the starting signal too often?
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for early starts ..." );
 	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
 		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
 
 	// Indicate to the subject that they are done.
+	// The first NULL parameter says to use the default picture.
 	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	

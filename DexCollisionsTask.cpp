@@ -181,11 +181,21 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	}
 	
+	// We're done.
 	apparatus->TargetsOff();
-	BlinkAll( apparatus );
 
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );
+
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	BlinkAll( apparatus );
+	BlinkAll( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	if ( status == ABORT_EXIT ) exit( status );
+	
+	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
+	apparatus->Wait( 1.0 );
+
 	// Stop acquiring.
 	apparatus->StopAcquisition();
 	// Signal to subject that the task is complete.
@@ -205,10 +215,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
-	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "cradles.bmp", "Trial terminated.\nYou may place the maniplandum in the empty cradle.\nPress <OK> to continue ..." );
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	status = apparatus->SignalNormalCompletion( "ok.bmp", "Trial terminated successfully.\n\nPress <OK> to continue ..." );
 	if ( status == ABORT_EXIT ) exit( status );
-	
+
 	return( NORMAL_EXIT );
 	
 }

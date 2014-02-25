@@ -174,16 +174,21 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Collect one final second of data.
 	apparatus->Wait( baselineTime );
 	
-	// Let the subject know that they are done.
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	BlinkAll( apparatus );
 	BlinkAll( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+
+	if ( status == ABORT_EXIT ) exit( status );
+	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
+	apparatus->Wait( 1.0 );
 
 	// Stop collecting data.
-	apparatus->ShowStatus( "Retrieving data ..." );
+	apparatus->ShowStatus( "Retrieving data ...", "working.bmp" );
 	apparatus->StopAcquisition();
 	
 	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ..." );
+	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
 	
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -196,7 +201,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->HideStatus();
 	
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( "ok.bmp", "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );

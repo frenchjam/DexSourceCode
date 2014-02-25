@@ -173,6 +173,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Start acquisition and acquire a baseline.
 	apparatus->SignalEvent( "Initiating set of oscillation movements." );
 	apparatus->StartAcquisition( "OSCI", maxTrialDuration );
+	apparatus->ShowStatus( "Acquisition started ...", "working.bmp" );
 
 	// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
@@ -227,31 +228,50 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ANALYSIS );
 	apparatus->Wait( 1.0 );
 
-	// Blink the targets to signal the end of the recording.
-	BlinkAll(apparatus);
+	// We're done.
+	apparatus->TargetsOff();
+
+	// Mark the ending point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( END_ANALYSIS );
+
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	BlinkAll( apparatus );
+	BlinkAll( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	if ( status == ABORT_EXIT ) exit( status );
+	
+	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
+	apparatus->Wait( 1.0 );
 
 	// Stop acquiring.
-	apparatus->ShowStatus( "Retrieving data ..." );
-	apparatus->SignalEvent( "Terminating recording." );
 	apparatus->StopAcquisition();
-	
+	// Signal to subject that the task is complete.
+	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->HideStatus();
+
 	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ..." );
-	
+	int n_post_hoc_steps = 3;
+	int post_hoc_step = 0;
+
 	// Was the manipulandum obscured?
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum occluded too often." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
 	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement extent out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	// Check that we got a reasonable amount of movement.
+	// Check that we got a reasonable number of oscillations.
 	// Here I have set it to +/- 20% of the ideal number.
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking number of oscillations ..." );
 	oscillationMinCycles = 0.8 * oscillationDuration * frequency;
 	oscillationMaxCycles = 1.2 * oscillationDuration * frequency;
 	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
 
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
