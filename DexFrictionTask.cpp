@@ -96,6 +96,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// Allow 15 more seconds for the rubbing motion.
 	apparatus->Wait( 15 );
 #else
+
+	// In this version we wait for a certain number of slips to be detected. 
+	// There is a small delay between each call to WaitSlip() with the hopes that
+	//  the same slip will not be detected twice, but even that should not be a problem.
 	for ( int slip = 0; slip < slipMovements; slip++ ) {
 		status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
 				frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
@@ -105,8 +109,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 		apparatus->Wait( slipWait );
 	}
 #endif
-
-
 	
 	// !JMc Not sure what sound would be on.
 	// !JMc Maybe this could be removed.
