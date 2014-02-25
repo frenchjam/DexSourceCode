@@ -56,6 +56,8 @@ extern char *OkToContinue;					// A standardized message about pressing OK to co
 
 // Some helper functions provided by DexSimulatorApp.
 
+void AnalysisProgress( DexApparatus *apparatus, int which, int total, const char *message );
+
 void RestartDirectives( DexApparatus *apparatus );
 void GiveDirective( DexApparatus *apparatus, const char *directive, const char *picture = NULL );
 void ReadyToGo( DexApparatus *apparatus );

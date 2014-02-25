@@ -61,6 +61,20 @@ int	next_directive = 0;						// Counter for showing a sequence of instructions t
 
 /*********************************************************************************/
 
+#define NUMBER_OF_PROGRESS_BARS	10
+void AnalysisProgress( DexApparatus *apparatus, int which, int total, const char *message ) {
+
+	char picture[1024];
+	int bar = (NUMBER_OF_PROGRESS_BARS * which) / total;
+
+	if ( bar >= NUMBER_OF_PROGRESS_BARS ) strcpy( picture, "PrgBarF.bmp" );
+	else sprintf( picture, "PrgBar%1d.bmp", bar );
+	apparatus->ShowStatus( message, picture );
+
+}
+
+/*********************************************************************************/
+
 // These are some helper functions that can be used in the task and procedures.
 // The first ones provide routines to present a set of task instructions in a stereotypical fashion.
 // By making these helper functions, it is easier to maintain a common format.
@@ -217,14 +231,14 @@ double ParseForDouble ( DexApparatus *apparatus, const char *cmd, const char *ke
 
 double ParseForFrequency ( DexApparatus *apparatus, const char *cmd ) {
 	double frequency;
-	if ( _isnan( frequency = ParseForDouble( apparatus, cmd, "-frequency" ) ) ) return( frequency );
+	if ( !_isnan( frequency = ParseForDouble( apparatus, cmd, "-frequency" ) ) ) return( frequency );
 	else return( 1.0 );
 }
 
 
 double ParseForDuration ( DexApparatus *apparatus, const char *cmd ) {
 	double duration;
-	if ( _isnan( duration = ParseForDouble( apparatus, cmd, "-duration" ) ) ) return( duration );
+	if ( !_isnan( duration = ParseForDouble( apparatus, cmd, "-duration" ) ) ) return( duration );
 	else return( 30.0 );
 }
 
@@ -456,11 +470,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// Create the apparatus.
 	apparatus->Initialize();
+	apparatus->HideStatus();
 
 	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.
 	if ( !compile ) {
+
 		LoadGUIState();
-		return_code = apparatus->WaitSubjectReady( "", "Use the GUI to set the initial configuration.\nPress OK when ready to continue." );
+		return_code = apparatus->WaitSubjectReady( "Desktop-Computer.bmp", "DEX Desktop Simulator\nUse the GUI to set the initial configuration that you want to test." );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		SaveGUIState();
 	}
