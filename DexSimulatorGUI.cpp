@@ -666,12 +666,8 @@ void SaveGUIState( void ) {
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_FOLDED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_EXTENDED ) ); 
 
-//		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_ALIGNED ) ); 
-//		fprintf( fp, "%d ", aligned_when_supine ); 
-
 		fprintf( fp, "%d ", SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_GETCURSEL, NULL, NULL ) );
 		
-
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_POSITIONED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_NOISY ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_WOBBLY ) ); 

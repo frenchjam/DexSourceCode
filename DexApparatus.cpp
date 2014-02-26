@@ -1100,6 +1100,9 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 				if ( IsDlgButtonChecked( mass_dlg, IDC_MASS3C ) ) cradle = "C";
 				break;
 
+			default:
+				cradle = "A";
+
 			}
 
 //			answer = fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Take manipulandum weight from cradle %s.\nPress RETRY when ready.", cradle );

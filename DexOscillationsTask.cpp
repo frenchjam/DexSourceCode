@@ -31,7 +31,7 @@
 #define UPPER 2
 #define MIDDLE 1
 #define LOWER 0
-int oscillationTargets[3] = { 2, 6, 10};		// Targets showing desired amplitude of cyclic movement.
+int oscillationTargets[3] = { 0, 4, 8};		// Targets showing desired amplitude of cyclic movement.
 
 double oscillationDuration = 30.0;				// Total duration of a single trial
 double oscillationEntrainDuration = 10.0;		// Audio metronom duration on one trial
