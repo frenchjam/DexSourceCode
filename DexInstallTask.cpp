@@ -217,13 +217,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Placement error - Coda Unit 1.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "SetupSeated.bmp" );
+											"Is setup in SEATED configuration?\nWas CODA alignment performed?", "SetupSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Placement error - Coda Unit 1.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "SetupSupine.bmp" );
+											"Is setup in SUPINE configuration?\nWas CODA alignment performed?", "SetupSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -266,12 +266,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the LEFT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the SUPINE configuration?\n - Is the target mast in the RIGHT position?\n - Are the reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Setup in SUPINE configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in SUPINE configuration?\n - Is the target mast in the RIGHT position?\n - Reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the LEFT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Is the setup in the UPRIGHT configuration?\n - Is the target mast in the RIGHT position?\n - Are the reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Setup in UPRIGHT configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Setup in UPRIGHT configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();

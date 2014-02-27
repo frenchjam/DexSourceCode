@@ -65,10 +65,10 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?\nBelts attached?\nWristbox on wrist?%s", OkToContinue );
 	}
 	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?/nWristbox on wrist?%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -77,9 +77,6 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
 		if ( status == ABORT_EXIT ) exit( status );
 	}
-
-	// Cancel any force offsets.
-	RunTransducerOffsetCompensation( apparatus, params );
 
 	// Instruct the subject on the task to be done.
 	
@@ -95,7 +92,7 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Describe how to do the task, according to the desired conditions.
-	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, "You will pick up the manipulandum\nwith thumb and index finger centered.", "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
 		dsc = "OscillateV.bmp";
@@ -106,13 +103,17 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		GiveDirective( apparatus, "To start, move to the target that is blinking.", mtb );
-		GiveDirective( apparatus, "Oscillate continuously between the two lit targets\nfollowing the frequency given by the sound.\nKeep your eyes OPEN the entire time.", dsc );
+		AddDirective( apparatus, "To start you will move\nto the blinking target.", mtb );
+		AddDirective( apparatus, "You will then oscillate between targets, one full cycle per beep.", dsc );
+		AddDirective( apparatus, "When the beeps stop, continue oscillating. Keep your eyes OPEN.", dsc );
 	}
 	else {
-		GiveDirective( apparatus, "To start, move to the target that is blinking.\nThen CLOSE your eyes.", mtb );
-		GiveDirective( apparatus, "On each beep,move quickly and accurately\nto the remebered location of the other target.", dsc );
+		AddDirective( apparatus, "To start you will move\nto the blinking target.", mtb );
+		AddDirective( apparatus, "You will then CLOSE your eyes and move between targets, one full cycle per beep.", dsc );
+		AddDirective( apparatus, "When the beeps stop, continue oscillating. Keep your eyes CLOSED.", dsc );
 	}
+
+	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
 }
@@ -170,10 +171,18 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepOscillations( apparatus, params );
 
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "We are ready to start.\nIs the manipulandum in a cradle?\nRemove hand and press <OK> to start." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Start acquisition and acquire a baseline.
+	// Presumably the manipulandum is not in the hand. 
+	// It should have been left either in a cradle or the retainer at the end of the last action.
 	apparatus->SignalEvent( "Initiating set of oscillation movements." );
+	apparatus->StartFilming();
 	apparatus->StartAcquisition( "OSCI", maxTrialDuration );
-	apparatus->ShowStatus( "Acquisition started ...", "working.bmp" );
+	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->Wait( baselineDuration );
 
 	// Instruct subject to take the specified mass.
 	//  and wait for confimation that he or she is ready.
@@ -181,18 +190,23 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
+	apparatus->ShowStatus( "Make sure that the grip is centered.", "working.bmp" );
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Now wait until the subject gets to the target before moving on.
+	apparatus->ShowStatus( "Trial started.\nMove to blinking target.", "working.bmp" );
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( oscillationTargets[MIDDLE], desired_orientation );
 	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Collect one second of data while holding at the starting position.
-	apparatus->Wait( baselineTime );
+	apparatus->Wait( baselineDuration );
 	
+	// Indicate what to do next.
+	apparatus->ShowStatus( "Start oscillating movements.\nOne cycle per beep.", "working.bmp" );
+
 	// Show the limits of the oscillation movement by lighting 2 targets.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
@@ -204,12 +218,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( oscillationTargets[UPPER] );
 	}
 	
-	// Mark the starting point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( BEGIN_ANALYSIS );
-
 	// Output a sound pattern to establish the oscillation frequency.
 	// This will play for the first part of each trial trial.
-	
 	double time;
 	for ( time = 0.0; time < oscillationEntrainDuration; time += oscillationPeriod ) {
 		int tone = 3.9; //floor( 3.9 * ( sin( time * 2.0 * PI ) + 1.0 ) );
@@ -221,7 +231,11 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ENTRAIN );
 	apparatus->SetSoundState( 4, 0 );
 
+	// Mark the starting point in the recording where post hoc tests should be applied.
+	apparatus->MarkEvent( BEGIN_ANALYSIS );
+
 	// Now finish out the trial
+	apparatus->ShowStatus( "Continue oscillating movements.\nMaintain the same rhythm.", "working.bmp" );
 	apparatus->Wait( oscillationDuration - oscillationEntrainDuration );
 	  
 	// Mark the ending point in the recording where post hoc tests should be applied.
@@ -231,21 +245,18 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// We're done.
 	apparatus->TargetsOff();
 
-	// Mark the ending point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( END_ANALYSIS );
-
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
+	SignalEndOfRecording( apparatus );
 	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
+	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
 	apparatus->Wait( 1.0 );
 
 	// Stop acquiring.
 	apparatus->StopAcquisition();
-	// Signal to subject that the task is complete.
+	apparatus->StopFilming();
 	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->HideStatus();
 
@@ -266,8 +277,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Check that we got a reasonable number of oscillations.
 	// Here I have set it to +/- 20% of the ideal number.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking number of oscillations ..." );
-	oscillationMinCycles = 0.8 * oscillationDuration * frequency;
-	oscillationMaxCycles = 1.2 * oscillationDuration * frequency;
+	oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+	oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
 	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
