@@ -7,6 +7,7 @@ extern HWND	mouse_tracker_dlg;
 extern HWND	status_dlg;
 extern HWND	mass_dlg;
 extern HWND	workspace_dlg;
+extern HWND camera_dlg;
 
 // Picture file prefix (automatically added to picture filenames)
 extern char PictureFilenamePrefix[];
@@ -26,6 +27,8 @@ void DexAddToLogGUI( const char *message );
 
 void SaveGUIState( void );
 void LoadGUIState( void );
+
+HWND DexCreatePhotoCameraGUI( void );
 
 #define TRACKER_UNALIGNED		0
 #define TRACKER_ALIGNED_UPRIGHT	1

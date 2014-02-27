@@ -60,7 +60,8 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 							DexADC		*adc,
 							DexMonitorServer *monitor,
 							HWND		workspace_dlg,
-							HWND		mass_dlg
+							HWND		mass_dlg,
+							HWND		camera_dlg
 						) {
 
 	this->tracker = tracker;
@@ -71,6 +72,7 @@ DexApparatus::DexApparatus( DexTracker  *tracker,
 
 	this->mass_dlg = mass_dlg;
 	this->workspace_dlg = workspace_dlg;
+	this->camera_dlg = camera_dlg;
 
 	update_count = 0;
 	update_period = DEX_SIMULATOR_UPDATE_PERIOD;
@@ -1953,5 +1955,28 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 	
 }
 
+/*********************************************************************************/
+/*                                                                               */
+/*                                Image Acquisition                              */
+/*                                                                               */
+/*********************************************************************************/
 
+void DexApparatus::SnapPhoto( void ) {
+	ShowWindow( camera_dlg, SW_SHOW );
+	Update();
+	Wait( 0.1 );
+	ShowWindow( camera_dlg, SW_HIDE );
+	Update();
 
+}
+
+void DexApparatus::StartFilming( void ) {
+	ShowWindow( camera_dlg, SW_SHOW );
+	Update();
+}
+
+void DexApparatus::StopFilming( void ) {
+	ShowWindow( camera_dlg, SW_HIDE );
+	Wait( 0.1 );
+	Update();
+}

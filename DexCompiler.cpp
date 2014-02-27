@@ -703,3 +703,15 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 	return( NORMAL_EXIT );
 	
 }
+
+void DexCompiler::SnapPhoto( void ) {}
+void DexCompiler::StartFilming( void ) {
+	AddStepNumber();
+	// Log the message and show it on the DEX screen.
+	fprintf( fp, "CMD_CTRL_CAMERA, 1\n" );
+}
+void DexCompiler::StopFilming( void ) {
+	AddStepNumber();
+	// Log the message and show it on the DEX screen.
+	fprintf( fp, "CMD_CTRL_CAMERA, 0\n" );
+}

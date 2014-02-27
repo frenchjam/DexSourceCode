@@ -39,6 +39,7 @@ HINSTANCE app_instance;
 HWND	mouse_tracker_dlg;
 HWND	status_dlg;
 HWND	mass_dlg;
+HWND	camera_dlg;
 HWND	workspace_dlg;
 
 // Holds the text of the log messages.
@@ -628,6 +629,13 @@ HWND DexCreateMouseTrackerGUI( void ) {
 	return( mouse_tracker_dlg );
 
 }
+
+HWND DexCreatePhotoCameraGUI( void ) {
+	camera_dlg = CreateDialog( app_instance, (LPCSTR)IDD_CAMERA, HWND_DESKTOP, dexDlgCallback );
+	ShowWindow( camera_dlg, SW_HIDE );
+	return( camera_dlg );
+}
+
 
 HWND DexCreateMassGUI( void ) {
 

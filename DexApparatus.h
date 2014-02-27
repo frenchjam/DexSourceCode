@@ -68,6 +68,7 @@ private:
 	// They get passed down from the App at initialization.
 	HWND		workspace_dlg;
 	HWND		mass_dlg;
+	HWND		camera_dlg;
 
 
 protected:
@@ -167,7 +168,8 @@ public:
 								DexADC				*adc,
 								DexMonitorServer	*monitor,
 								HWND				workspace_dlg,
-								HWND				mass_dlg
+								HWND				mass_dlg,
+								HWND				camera_dlg
 							);
 	
 	// Called once all the components are defined.
@@ -217,6 +219,10 @@ public:
 	// Acquisition
 	virtual void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION ); 
 	virtual int  StopAcquisition( const char *msg = "Error - Maybe file overrun." );
+
+	virtual void SnapPhoto( void );
+	virtual void StartFilming( void );
+	virtual void StopFilming( void );
 	
 	// Flow control
 	virtual void Wait( double seconds );
@@ -464,6 +470,10 @@ public:
 	void ShowStatus (const char *message = "", const char *picture = "" );
 
 	void AddStepNumber( void );
+
+	void SnapPhoto( void );
+	void StartFilming( void );
+	void StopFilming( void );
 
 };
 
