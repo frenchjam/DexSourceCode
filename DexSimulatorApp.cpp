@@ -41,7 +41,7 @@ double maxTrialDuration = 120.0;			// Used to set the maximum duration of an acq
 											// Trials can be up to this long, but may be shorter.
 											// May not be applicable to the DEX hardware.
 
-double baselineTime = 1.0;					// Duration of pause at first target before starting movement.
+double baselineDuration = 1.0;				// Duration of pause at first target before starting movement.
 double initialMovementTime = 5.0;			// Time allowed to reach the starting position.
 double continuousDropoutTimeLimit = 0.050;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double cumulativeDropoutTimeLimit = 1.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
@@ -49,15 +49,13 @@ double beepDuration = BEEP_DURATION;
 double flashDuration = 0.2;
 double copTolerance = 10.0;					// Tolerance on how well the fingers are centered on the manipulandum.
 double copForceThreshold = 0.25;			// Threshold of grip force to test if the manipulandum is in the hand.
-double copWaitTime = 1.0;					// Gives time to achieve the centered grip. 
+double copWaitTime = 10.0;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
 
 char inputScript[256] = "DexSampleScript.dex";
 char outputScript[256] = "DexSampleScript.dex";
 
 char *OkToContinue ="";
-
-int	next_directive = 0;						// Counter for showing a sequence of instructions to the subject.
 
 /*********************************************************************************/
 
@@ -79,14 +77,26 @@ void AnalysisProgress( DexApparatus *apparatus, int which, int total, const char
 // The first ones provide routines to present a set of task instructions in a stereotypical fashion.
 // By making these helper functions, it is easier to maintain a common format.
 
+int	n_directives = 0;						// Counter for showing a sequence of instructions to the subject.
+char directive_text[128][128];
+char directive_picture[128][32];
+
 void RestartDirectives( DexApparatus *apparatus ) {
-	next_directive = 0;
+	n_directives = 0;
 }
 
-void GiveDirective( DexApparatus *apparatus, const char *directive, const char *picture ) {
-	next_directive++;
-	int status = apparatus->fWaitSubjectReady( picture, "                           TASK REMINDER   (%d)\n%s%s", next_directive, directive, OkToContinue );
-	if ( status == ABORT_EXIT ) exit( status );
+void AddDirective( DexApparatus *apparatus, const char *directive, const char *picture ) {
+	strncpy( directive_text[n_directives], directive, 128 ); directive_text[n_directives][127] = 0;
+	strcpy( directive_picture[n_directives], picture );
+	n_directives++;
+}
+
+void ShowDirectives( DexApparatus *apparatus ) {
+
+	for ( int i = 0; i < n_directives; i++ ) {
+		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK REMINDER (%d/%d):\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+	}
 }
 
 void ReadyToGo( DexApparatus *apparatus ) {
@@ -102,6 +112,18 @@ void BlinkAll ( DexApparatus *apparatus ) {
 	apparatus->Wait( flashDuration );
 	apparatus->TargetsOff();
 	apparatus->Wait( flashDuration );
+
+}
+
+void SignalEndOfRecording ( DexApparatus *apparatus ) {
+
+	for ( int i = 0; i < 3; i++ ) {
+		apparatus->SetTargetState( ~0 );
+		apparatus->Beep();
+		apparatus->Wait( flashDuration );
+		apparatus->TargetsOff();
+		apparatus->Wait( flashDuration );
+	}
 
 }
 
@@ -311,7 +333,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	int return_code;
 
-	HWND work_dlg, mouse_dlg, mass_dlg;
+	HWND work_dlg, mouse_dlg, mass_dlg, camera_dlg;
 	
 	// Parse command line.
 	
@@ -457,19 +479,26 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		}
 
+		// Create an interface to a remote monitoring station.
 		monitor = new DexMonitorServerGUI( targets->nVerticalTargets, targets->nHorizontalTargets, tracker->nCodas );
-
 
 		// Create a dialog box to emulate selection of the extra masses.
 		mass_dlg = DexCreateMassGUI();
-		apparatus = new DexApparatus( tracker, targets, sounds, adc, monitor, work_dlg, mass_dlg );
+
+		// And the photo camera.
+		camera_dlg = DexCreatePhotoCameraGUI();
+
+		// Now put all the pieces together to create a simulator of the DEX hardware.
+		apparatus = new DexApparatus( tracker, targets, sounds, adc, monitor, work_dlg, mass_dlg, camera_dlg );
 
 	}
 
 	else apparatus = new DexCompiler( outputScript );
 
-	// Create the apparatus.
+	// Run the initialization for the apparatus (or compiler).
 	apparatus->Initialize();
+
+	// Clear the information window.
 	apparatus->HideStatus();
 
 	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.

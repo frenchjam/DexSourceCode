@@ -71,9 +71,10 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	RunTransducerOffsetCompensation( apparatus, params );
 
 	// Instruct the subject on the task to be done.
-	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
-	GiveDirective( apparatus, "You should move to the center target\nwhenever it is blinking.", "MoveToBlinking.bmp" );
-	GiveDirective( apparatus, "You will then make collisions with the manipulandum.\nTap up or down according to the beeps and lights.", "Collision.bmp" );
+	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, "You should move to the center target\nwhenever it is blinking.", "MoveToBlinking.bmp" );
+	AddDirective( apparatus, "You will then make collisions with the manipulandum.\nTap up or down according to the beeps and lights.", "Collision.bmp" );
+	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
 }

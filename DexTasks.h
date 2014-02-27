@@ -35,8 +35,8 @@ enum { OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_T
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
 
-extern double baselineTime;					// Duration of pause at first target before starting movement.
-extern double initialMovementTime;			// Time allowed to reach the starting position.
+extern double baselineDuration;				// Duration of pause at first target before starting movement.
+extern double initialMovementDuration;		// Time allowed to reach the starting position.
 
 extern double continuousDropoutTimeLimit;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 extern double cumulativeDropoutTimeLimit;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
@@ -59,11 +59,14 @@ extern char *OkToContinue;					// A standardized message about pressing OK to co
 void AnalysisProgress( DexApparatus *apparatus, int which, int total, const char *message );
 
 void RestartDirectives( DexApparatus *apparatus );
-void GiveDirective( DexApparatus *apparatus, const char *directive, const char *picture = NULL );
+void AddDirective( DexApparatus *apparatus, const char *directive, const char *picture = NULL );
+void ShowDirectives( DexApparatus *apparatus );
 void ReadyToGo( DexApparatus *apparatus );
 
 void BlinkAll ( DexApparatus *apparatus );
-int RunScript( DexApparatus *apparatus, const char *filename );
+void SignalEndOfRecording ( DexApparatus *apparatus );
+
+	int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd );

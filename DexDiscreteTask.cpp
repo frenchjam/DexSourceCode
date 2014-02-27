@@ -85,7 +85,7 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Describe how to do the task, according to the desired conditions.
-	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
 		dsc = "DiscreteV.bmp";
@@ -96,13 +96,14 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		GiveDirective( apparatus, "To start, move to the target that is blinking.", mtb );
-		GiveDirective( apparatus, "On each beep,move quickly and accurately to the other\nlit target. Keep your eyes OPEN the entire time.", dsc );
+		AddDirective( apparatus, "To start, move to the target that is blinking.", mtb );
+		AddDirective( apparatus, "On each beep,move quickly and accurately to the other\nlit target. Keep your eyes OPEN the entire time.", dsc );
 	}
 	else {
-		GiveDirective( apparatus, "To start, move to the target that is blinking.\nThen CLOSE your eyes.", mtb );
-		GiveDirective( apparatus, "On each beep,move quickly and accurately\nto the remebered location of the other target.", dsc );
+		AddDirective( apparatus, "To start, move to the target that is blinking.\nThen CLOSE your eyes.", mtb );
+		AddDirective( apparatus, "On each beep,move quickly and accurately\nto the remebered location of the other target.", dsc );
 	}
+	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
 }
@@ -190,7 +191,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Collect baseline data while holding at the starting position.
-	apparatus->Wait( baselineTime );
+	apparatus->Wait( baselineDuration );
 	
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
@@ -212,7 +213,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ANALYSIS );
 
 	// Collect one final second of data.
-	apparatus->Wait( baselineTime );
+	apparatus->Wait( baselineDuration );
 	
 	// We're done.
 	apparatus->TargetsOff();

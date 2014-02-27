@@ -69,7 +69,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct the subject on the task to be done.
 	
-	GiveDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
 		dsc = "TargetedV.bmp";
@@ -79,8 +79,9 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 		dsc = "TargetedH.bmp";
 	}
 
-	GiveDirective( apparatus, "To start, move to the target that is blinking.", mtb );
-	GiveDirective( apparatus, "Move quickly and accurately to each lighted target.", dsc );
+	AddDirective( apparatus, "To start, move to the target that is blinking.", mtb );
+	AddDirective( apparatus, "Move quickly and accurately to each lighted target.", dsc );
+	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
 }
@@ -149,7 +150,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	else apparatus->HorizontalTargetOn( targetSequence[0] );
 
 	// Collect basline data while holding at the starting position.
-	apparatus->Wait( baselineTime );
+	apparatus->Wait( baselineDuration );
 	
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
@@ -172,7 +173,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ANALYSIS );
 
 	// Collect one final second of data.
-	apparatus->Wait( baselineTime );
+	apparatus->Wait( baselineDuration );
 	
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	BlinkAll( apparatus );

@@ -59,9 +59,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->adc->AllowPollingDuringAcquisition();
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
-	GiveDirective( apparatus, "You will first grasp the manipulandum with\nthumb and index finger centered, while the\nmanipulandum remains in the retainer.", "pinch.bmp" );
-	GiveDirective( apparatus, "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.", "pinch.bmp" );
-	GiveDirective( apparatus, "Rub the manipulandum from center to periphery\n without releasing the grip.", "Coef_frict_osc.bmp" );
+	AddDirective( apparatus, "You will first grasp the manipulandum with\nthumb and index finger centered, while the\nmanipulandum remains in the retainer.", "pinch.bmp" );
+	AddDirective( apparatus, "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.", "pinch.bmp" );
+	AddDirective( apparatus, "Rub the manipulandum from center to periphery\n without releasing the grip.", "Coef_frict_osc.bmp" );
+	ShowDirectives( apparatus );
 	
 	// Start acquiring.
     apparatus->StartAcquisition( "FRIC", maxTrialDuration );
