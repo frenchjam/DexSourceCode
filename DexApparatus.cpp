@@ -568,8 +568,11 @@ bool DexApparatus::GetTargetFramePosition( Vector3 pos, Quaternion ori ) {
 /***************************************************************************/
 
 // 
-// This method gets called periodically during wait cycles.
+// This method gets called periodically during wait cycles
+//  and should also be called whenever the DexApparatus is going to 
+//  have control of the process for a while.
 // It calls the update methods for each of the subsystems.
+// It also handles and Windows messages.
 //
 
 void DexApparatus::Update( void ) {
@@ -582,7 +585,18 @@ void DexApparatus::Update( void ) {
 	
 	int exit_status;
 
-	// Don't actually run the update more often than necessary.
+	// Handle any Windows messages that might be pending.
+	// This makes sure that the dialogs are refrehed as necessary.
+
+	MSG msg;				/* message */
+	while ( PeekMessage( &msg, NULL, 0, 0, 0 ) ) {
+		GetMessage( &msg, NULL, 0, 0 );    
+		TranslateMessage( &msg );
+		DispatchMessage( &msg );
+	}
+
+	// Now do what really needs to be done by the DexApparatus.
+	// But don't actually run the update more often than necessary.
 	if ( !DexTimerTimeout( update_timer ) ) return;
 
 	// Allow each of the components to update as needed.
