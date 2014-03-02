@@ -28,9 +28,6 @@
 /*********************************************************************************/
 
 // Oscillation trial parameters.
-#define UPPER 2
-#define MIDDLE 1
-#define LOWER 0
 int oscillationTargets[3] = { 0, 4, 8};		// Targets showing desired amplitude of cyclic movement.
 
 double oscillationDuration = 30.0;				// Total duration of a single trial
@@ -128,39 +125,47 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	//  whatever was used the previous call will be used again.
 	static int	direction = VERTICAL;
 	static int	eyes = OPEN;
+	static double frequency = 1.0;
+
 	static DexMass mass = MassMedium;
 	static DexTargetBarConfiguration bar_position = TargetBarRight;
 	static DexSubjectPosture posture = PostureSeated;
-	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename = 0;
 	char *delay_filename = 0;
+	char tag[5] = "O";	// O is for oscillations.
 
-	double frequency = ParseForFrequency( apparatus, params );
+	// How quickly should it oscillate?
+	frequency = ParseForFrequency( apparatus, params );
 	oscillationPeriod = 1.0 / frequency;
 	oscillationDuration = ParseForDuration( apparatus, params );
 
+	// Seated or supine?
+	posture = ParseForPosture( params );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
+
+	// Eyes open or closed?
+	eyes = ParseForEyeState( params );
+	if ( eyes == OPEN ) strcat( tag, "O" ); 
+	else strcat( tag, "C" ); 
 
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) {
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( oscillationDirection, apparatus->jVector );
+		strcat( tag, "V" );
 	}
 	else {
 		bar_position = TargetBarLeft;
 		apparatus->CopyVector( oscillationDirection, apparatus->kVector );
+		strcat( tag, "H" );
 	}
-
-	// Eyes open or closed?
-	eyes = ParseForEyeState( params );
-
-	// What are the three targets to be used (lower, middle, upper) If not specified in the command line, use the default.
-	if ( target_filename = ParseForTargetFile( params ) ) LoadSequence( target_filename, oscillationTargets, 3 );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
@@ -171,7 +176,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepOscillations( apparatus, params );
 
-	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "cradles.bmp", "We are ready to start.\nIs the manipulandum in a cradle?\nRemove hand and press <OK> to start." );
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -180,7 +185,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// It should have been left either in a cradle or the retainer at the end of the last action.
 	apparatus->SignalEvent( "Initiating set of oscillation movements." );
 	apparatus->StartFilming();
-	apparatus->StartAcquisition( "OSCI", maxTrialDuration );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 
@@ -240,7 +245,9 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	  
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );
-	apparatus->Wait( 1.0 );
+
+	// Collect one final bit of data.
+	apparatus->Wait( baselineDuration );
 
 	// We're done.
 	apparatus->TargetsOff();
@@ -252,11 +259,11 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
-	apparatus->Wait( 1.0 );
+	apparatus->Wait( baselineDuration );
 
 	// Stop acquiring.
-	apparatus->StopAcquisition();
 	apparatus->StopFilming();
+	apparatus->StopAcquisition();
 	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->HideStatus();
 

@@ -24,7 +24,7 @@
 // Targeted trial parameters;
 int delaySequence[] = { 1, 1.5, 1, 2, 1.5, 3, 1, 2, 1 };	// Delays between the discrete movements.
 int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
-int discreteTargets[2] = { 3, 7};
+int discreteTargets[3] = {3, 5, 7};
 
 int discreteFalseStartTolerance = 5;
 double discreteFalseStartThreshold = 1.0;
@@ -34,6 +34,7 @@ double discreteFalseStartFilterConstant = 1.0;
 double discreteMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 double discreteMaxMovementExtent = 200.0;	// Maximum amplitude along the movement direction (Y). Set to 1g.0 to simulate error.
 double discreteCycleHysteresis = 10.0;	// Parameter used to adjust the detection of cycles. 
+Vector3	discreteMovementDirection = {0.0, 1.0, 0.0};	// Movements are nominally in the vertical direction. Could change at some point, I suppose.
 
 /*********************************************************************************/
 
@@ -43,24 +44,21 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	char *target_filename = 0;
 	char *mtb, *dsc;
 	
-	int	direction = ParseForDirection( apparatus, params );
-	int eyes = ParseForEyeState( params );
-	DexSubjectPosture posture = ParseForPosture( params );
-
+	// What conditions are we about to use.
 	DexTargetBarConfiguration bar_position;
-	Vector3 direction_vector = {0.0, 1.0, 0.0};
-	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
-
+	DexSubjectPosture posture = ParseForPosture( params );
+	int eyes = ParseForEyeState( params );
+	int	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?\nBelts attached?\nWristbox on wrist?%s", OkToContinue );
 	}
 	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?\nBelts attached?\nWristbox on wrist?%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -68,11 +66,6 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Cancel any force offsets.
-	RunTransducerOffsetCompensation( apparatus, params );
-
-	// Instruct the subject on the task to be done.
-	
 	// Show them the targets that will be used.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
@@ -96,12 +89,14 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		AddDirective( apparatus, "To start, move to the target that is blinking.", mtb );
-		AddDirective( apparatus, "On each beep,move quickly and accurately to the other\nlit target. Keep your eyes OPEN the entire time.", dsc );
+		AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
+		AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
+		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", "needpic.bmp" );
 	}
 	else {
-		AddDirective( apparatus, "To start, move to the target that is blinking.\nThen CLOSE your eyes.", mtb );
-		AddDirective( apparatus, "On each beep,move quickly and accurately\nto the remebered location of the other target.", dsc );
+		AddDirective( apparatus, "To start, you will move to the target that is blinking, then CLOSE your eyes.", mtb );
+		AddDirective( apparatus, "On each beep, move quickly and accurately to the other (remembered) target location.", dsc );
+		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", "needpic.bmp" );
 	}
 	ShowDirectives( apparatus );
 
@@ -122,26 +117,41 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	static DexMass mass = MassMedium;
 	static DexTargetBarConfiguration bar_position = TargetBarRight;
 	static DexSubjectPosture posture = PostureSeated;
-	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename = 0;
 	char *delay_filename = 0;
+	char tag[5] = "D";			// D is for discrete.
 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 
+	// Seated or supine?
+	posture = ParseForPosture( params );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
+
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
-	if ( direction == VERTICAL ) bar_position = TargetBarRight;
-	else bar_position = TargetBarLeft;
+	if ( direction == VERTICAL ) {
+		bar_position = TargetBarRight;
+		apparatus->CopyVector( discreteMovementDirection, apparatus->jVector );
+	}
+	else {
+		bar_position = TargetBarLeft;
+		apparatus->CopyVector( discreteMovementDirection, apparatus->kVector );
+	}
 
 	// Eyes open or closed?
 	eyes = ParseForEyeState( params );
+	if ( eyes == OPEN ) strcat( tag, "O" ); 
+	else strcat( tag, "C" ); 
 
 	// What is the sequence of delays? If not specified in the command line, use the default.
-	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delay_filename, delaySequence, MAX_SEQUENCE_ENTRIES );
-	if ( target_filename = ParseForTargetFile( params ) ) LoadSequence( target_filename, discreteTargets, 2 );
+	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delaySequence, delay_filename );
+
+	// What are the limits of each discrete movement?
+	if ( target_filename = ParseForTargetFile( params ) ) LoadTargetRange( discreteTargets, target_filename );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
@@ -152,51 +162,65 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
 
-	// Start acquisition and acquire a baseline.
-	apparatus->SignalEvent( "Initiating set of discrete movements." );
-	apparatus->StartAcquisition( "DISC", maxTrialDuration );
-	
-	// Acquire
-	Sleep( 1000 );
+	// Indicate to the subject that we are ready to start and wait for their go signal.
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "We are ready to start.\nPlace the maniplandum in any cradle.\nRemove hand and press <OK> to start." );
+	if ( status == ABORT_EXIT ) exit( status );
 
+	// Start acquisition and acquire a baseline.
+	// Presumably the manipulandum is not in the hand. 
+	// It should have been left either in a cradle or the retainer at the end of the last action.
+	apparatus->SignalEvent( "Initiating set of discrete movements." );
+	apparatus->StartFilming();
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->Wait( baselineDuration );
+	
 	// Instruct subject to take the specified mass.
-	//  and wait for confimation that he or she is ready.
+	// If the correct mass is already on the manipulandum and out of the cradle, 
+	//  this will move right on to the next step.
 	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
-   
+
 	// Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n Or \n Fingers not centered." );
+	apparatus->ShowStatus( "Make sure that the grip is centered.", "working.bmp" );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Trial started ...", "working.bmp" );
 
 	// Wait until the subject gets to the target before moving on.
-	char *wait_at_target_message = "Too long to reach desired target.";
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[0] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
-	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[0] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
-	if ( status == ABORT_EXIT ) exit( status );
-	// Light up the next target, alternating between the two.
+	apparatus->ShowStatus( "Trial started.\nMove to blinking target.", "working.bmp" );
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) {
-		apparatus->VerticalTargetOn( discreteTargets[0] );
-		apparatus->VerticalTargetOn( discreteTargets[1] );
-	}
-	else {
-		apparatus->HorizontalTargetOn( discreteTargets[0] );
-		apparatus->HorizontalTargetOn( discreteTargets[1] );
-	}
-		
-//	if ( eyes == CLOSED ) apparatus->WaitSubjectReady("Discrete.bmp", "Close your eyes and move the manipulandum \n to the opposite target at beep.\nPress OK when ready to continue." );
-//	else apparatus->WaitSubjectReady("Discrete.bmp", "Open eyes and move the manipulandum \n to the opposite target at beep.\nPress <OK> when ready to continue." );
+	char *wait_at_target_message = "Too long to reach desired target.";
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
+	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Collect baseline data while holding at the starting position.
+	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
+	// Light up the pair of targets.
+	apparatus->TargetsOff();
+	if ( direction == VERTICAL ) {
+		apparatus->VerticalTargetOn( discreteTargets[LOWER] );
+		apparatus->VerticalTargetOn( discreteTargets[UPPER] );
+	}
+	else {
+		apparatus->HorizontalTargetOn( discreteTargets[LOWER] );
+		apparatus->HorizontalTargetOn( discreteTargets[UPPER] );
+	}
+			
+	// Indicate what to do next.
+	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements. Wait for each beep. Stop at each target. Keep your eyes OPEN.", "working.bmp" ); 
+	else apparatus->ShowStatus( "Start point-to-point movements. Wait for each beep. Stop at each target. Keep your eyes CLOSED.", "working.bmp" ); 
+
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 
-	// Step through the list of targets.
+	// Wait a little to give the subject time to react, in case they were looking at the screen.
+	apparatus->Wait( baselineDuration );
+
+	// Step through the list of delays.
 	for ( int delay = 1; delay < delaySequenceN; delay++ ) {
 		
 		// Make a beep.
@@ -212,29 +236,26 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );
 
-	// Collect one final second of data.
+	// Collect one final bit of data.
 	apparatus->Wait( baselineDuration );
 	
 	// We're done.
 	apparatus->TargetsOff();
 
-	// Mark the ending point in the recording where post hoc tests should be applied.
-	apparatus->MarkEvent( END_ANALYSIS );
-
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
+	SignalEndOfRecording( apparatus );
 	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
-	apparatus->Wait( 1.0 );
-
-	// Stop acquiring.
-	apparatus->StopAcquisition();
-	// Signal to subject that the task is complete.
-	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->Wait( baselineDuration );
 	
+	// Stop acquiring.
+	apparatus->StopFilming();
+	apparatus->StopAcquisition();
+	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->HideStatus();
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
@@ -248,14 +269,14 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	// Check that we got a reasonable amount of movement.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
-	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, direction_vector, NULL );
+	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, NULL );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
 	// We expect as many as there are items in the sequence. 
 	// We accept if there are a few less.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for nubmer of movement ..." );
-	status = apparatus->CheckMovementCycles( delaySequenceN / 2 - 2, delaySequenceN, direction_vector, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
+	status = apparatus->CheckMovementCycles( delaySequenceN / 2, delaySequenceN + 5, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Did the subject anticipate the starting signal too often?

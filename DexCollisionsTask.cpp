@@ -25,10 +25,8 @@ int collisionInitialTarget = 6;
 int collisionUpTarget = 11;
 int collisionDownTarget = 1;
 
-#define UP		1
-#define DOWN	-1
-int collisionSequenceN = 6;
-int collisionSequence[] = { DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, UP };
+int collisionSequenceN = 10;
+int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, UP };
 double collisionTime = 1.5;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
@@ -67,9 +65,6 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->fWaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Cancel any force offsets.
-	RunTransducerOffsetCompensation( apparatus, params );
-
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
 	AddDirective( apparatus, "You should move to the center target\nwhenever it is blinking.", "MoveToBlinking.bmp" );
@@ -101,7 +96,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int tone, tgt;
 
 	// What is the target sequence? If not specified in the command line, use the default.
-	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( target_filename, collisionSequence, MAX_SEQUENCE_ENTRIES );
+	// Here we expect a sequence of +1 or -1 values, corresponding to an upward or downward tap.
+	// Note that we use the same mechanism as that used to define the target sequence for targeted,
+	//  movements, i.e. one can use a qualifier :# to specify which sequence in a file with multiple sequences.
+	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( collisionSequence, target_filename );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.

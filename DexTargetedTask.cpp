@@ -114,7 +114,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	else bar_position = TargetBarLeft;
 
 	// What is the target sequence? If not specified in the command line, use the default.
-	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( target_filename, targetSequence, MAX_SEQUENCE_ENTRIES );
+	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( targetSequence, target_filename );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
