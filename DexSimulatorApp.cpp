@@ -94,7 +94,7 @@ void AddDirective( DexApparatus *apparatus, const char *directive, const char *p
 void ShowDirectives( DexApparatus *apparatus ) {
 
 	for ( int i = 0; i < n_directives; i++ ) {
-		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK REMINDER (%d/%d):\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
+		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): %s%s", i + 1, n_directives, directive_text[i], OkToContinue );
 		if ( status == ABORT_EXIT ) exit( status );
 	}
 }
@@ -189,39 +189,226 @@ char *ParseForDelayFile ( const char *cmd ) {
 	return( ParseForFilename( cmd, "-delays" ) );
 }
 
+/************************************************************************************************************************************/
+
 // Load a sequence of integers, e.g. a list of target IDs.
-int LoadSequence( const char *filename, int *sequence, const int max_entries ) {
+// There may be more than one sequence in the file.
+// There may also be a different set of sequences for different size subjects.
+// The filename can contain a modifier that tells which of the sequences to use in the file. 
+
+int LoadSequence(  int *sequence, const char *filename ) {
 
 	FILE *fp;
 	char path[1024];
 	int	 count = 0;
+	char name[1024], *specifier, *ptr;
 
+	int index = 1;
+	int sequences = 1;
+	int sizes = 1;
+	int subject_size = 0;
+	char subject_size_string[64];
+
+	int value[N_SIZES][N_SEQUENCES];
+	int n = 0, c;
+
+	// Parse the filename for the subject size and sequence number qualifiers.
+	strcpy( name, filename );
+	if ( ptr = strstr( name, ":" ) ) {
+		*ptr = 0; // Terminate the name at the start of the specifier.
+		specifier = ptr + 1;
+		if ( 2 == sscanf( specifier, "%d%s", &index, subject_size_string ) ) {
+			sequences = N_SEQUENCES;
+			sizes = N_SIZES;
+		}
+		else if ( 2 == sscanf( specifier, "%s%d", subject_size_string, &index ) ) {
+			sequences = N_SEQUENCES;
+			sizes = N_SIZES;
+		}
+		else if ( 1 == sscanf( specifier, "%d", &index ) ) {
+			sizes = 1;
+			sequences = N_SEQUENCES; 
+			strcpy( subject_size_string, "S" );
+		}
+		else if ( 1 == sscanf( specifier, "%s", subject_size_string ) ) {
+			sequences = 1;
+			sizes = N_SIZES;
+			index = 1;
+		}
+		else {
+			sizes = 1;
+			sequences = 1; 
+			strcpy( subject_size_string, "S" );
+			index = 1;
+		}
+
+		switch ( subject_size_string[0] ) {
+		case 'L':
+		case 'l':
+			subject_size = LARGE;
+			break;
+		case 'M':
+		case 'm':
+			subject_size = MEDIUM;
+			break;
+		case 'S':
+		case 's':
+		default:
+			subject_size = SMALL;
+			break;
+		}
+
+	}
+				
 	strcpy( path, "..\\DexSequences\\" );
-	strcat( path, filename );
+	strcat( path, name );
 	if ( !( fp = fopen( path, "r" ) ) ) {
 		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
 		exit( -1 );
 	}
-	while ( 1 == fscanf( fp, "%d", &sequence[count] ) ) count++;	
+	// If there is supposed to be more than one subject size, skip that header line.
+	// I have to implement my own fgets() because of incompatibility between mac and PC text files.
+	if ( sizes > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
+	// If there is supposed to be more than one sequence, skip that header line.
+	if ( sequences > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
+
+	do {
+
+		for ( int sz = 0; sz < sizes; sz++ ) {
+			for ( int seq = 0; seq < sequences; seq++ ) {
+				n = fscanf( fp, "%d", &value[sz][seq] );
+			}
+		}
+		if ( n == 1 ) sequence[count++] = value[subject_size][index - 1];
+
+	} while ( n == 1 );
+
 	fclose( fp );
 	return( count );
 
 }
 
-// Load a sequence of floating point numbers, e.g. time delays in seconds.
-int LoadSequence( const char *filename, float *sequence, const int max_entries ) {
+// Load in a triplet of targets, defined as LOWER, MIDDLE and UPPER.
+// These are used in the discrete and oscillations protocols to define the amplitude of the movements.
+// The file may have a single line with three values, or it may have 3 lines of 3 values, corresponding to 
+//  a small, medium or large subject. A qualifier (:S, :M, :L) appended to the filename is used to select which.
+void LoadTargetRange( int limits[3], const char *filename ) {
 
 	FILE *fp;
 	char path[1024];
-	int	 count = 0;
+	char name[1024], *specifier, *ptr;
+	int repeat;
+
+	strcpy( name, filename );
+	if ( ptr = strstr( name, ":" ) ) {
+		*ptr = 0; // Terminate the name at the start of the specifier.
+		specifier = ptr + 1;
+	}
+	if ( toupper( *specifier ) == 'L' ) repeat = 3;
+	else if ( toupper( *specifier ) == 'M' ) repeat = 2;
+	else repeat = 1;
 
 	strcpy( path, "..\\DexSequences\\" );
-	strcat( path, filename );
+	strcat( path, name );
 	if ( !( fp = fopen( path, "r" ) ) ) {
 		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
 		exit( -1 );
 	}
-	while ( 1 == fscanf( fp, "%f", &sequence[count] ) ) count++;	
+
+	for ( int r = 0; r < repeat; r++ ) {
+		fscanf( fp, "%d %d %d", &limits[LOWER], &limits[MIDDLE], &limits[UPPER] );
+	}
+	fclose( fp );
+}
+
+
+int LoadSequence(  double *sequence, const char *filename ) {
+
+	FILE *fp;
+	char path[1024];
+	int	 count = 0;
+	char name[1024], *specifier, *ptr;
+
+	int index = 1;
+	int sequences = 1;
+	int sizes = 1;
+	int subject_size = 0;
+	char subject_size_string[64];
+
+	double value[N_SIZES][N_SEQUENCES];
+	int n = 0, c;
+
+	// Parse the filename for the subject size and sequence number qualifiers.
+	strcpy( name, filename );
+	if ( ptr = strstr( name, ":" ) ) {
+		*ptr = 0; // Terminate the name at the start of the specifier.
+		specifier = ptr + 1;
+		if ( 2 == sscanf( specifier, "%d%s", &index, subject_size_string ) ) {
+			sequences = N_SEQUENCES;
+			sizes = N_SIZES;
+		}
+		else if ( 2 == sscanf( specifier, "%s%d", subject_size_string, &index ) ) {
+			sequences = N_SEQUENCES;
+			sizes = N_SIZES;
+		}
+		else if ( 1 == sscanf( specifier, "%d", &index ) ) {
+			sizes = 1;
+			sequences = N_SEQUENCES; 
+			strcpy( subject_size_string, "S" );
+		}
+		else if ( 1 == sscanf( specifier, "%s", subject_size_string ) ) {
+			sequences = 1;
+			sizes = N_SIZES;
+			index = 1;
+		}
+		else {
+			sizes = 1;
+			sequences = 1; 
+			strcpy( subject_size_string, "S" );
+			index = 1;
+		}
+
+		switch ( subject_size_string[0] ) {
+		case 'L':
+		case 'l':
+			subject_size = LARGE;
+			break;
+		case 'M':
+		case 'm':
+			subject_size = MEDIUM;
+			break;
+		case 'S':
+		case 's':
+		default:
+			subject_size = SMALL;
+			break;
+		}
+
+	}
+				
+	strcpy( path, "..\\DexSequences\\" );
+	strcat( path, name );
+	if ( !( fp = fopen( path, "r" ) ) ) {
+		fIllustratedMessageBox( MB_OK, "alert.bmp", "DexSimulatorApp", "Error opening file %s for read.", path );
+		exit( -1 );
+	}
+	
+	// If there is supposed to be more than one subject size, skip that header line.
+	if ( sizes > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
+	// If there is supposed to be more than one sequence, skip that header line.
+	if ( sequences > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
+
+	do {
+
+		for ( int sz = 0; sz < sizes; sz++ ) {
+			for ( int seq = 0; seq < sequences; seq++ ) {
+				n = fscanf( fp, "%lf", &value[sz][seq] );
+			}
+		}
+		if ( n == 1 ) sequence[count++] = value[subject_size][index - 1];
+
+	} while ( n == 1 );
+
 	fclose( fp );
 	return( count );
 

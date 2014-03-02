@@ -24,7 +24,6 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 
 #define DEFAULT -1
 
-#define MAX_SEQUENCE_ENTRIES	1024
 
 // These are the user-defined markers. 
 enum { FORCE_OK = 0, SLIP };
@@ -76,8 +75,26 @@ double ParseForDuration ( DexApparatus *apparatus, const char *cmd );
 //int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );
 char *ParseForDelayFile ( const char *cmd );
-int LoadSequence( const char *filename, int   *sequence, const int max_entries );
-int LoadSequence( const char *filename, float *sequence, const int max_entries );
+
+#define MAX_SEQUENCE_ENTRIES	1024
+#define N_SEQUENCES	8
+#define N_SIZES 3
+
+#define SMALL 0
+#define MEDIUM 1	
+#define LARGE 2
+
+int LoadSequence( int   *sequence, const char *filename );
+int LoadSequence( float *sequence, const char *filename );
+
+#define LOWER	0
+#define MIDDLE	1
+#define UPPER	2
+void LoadTargetRange( int limits[3], const char *filename );
+
+#define UP		1
+#define DOWN	-1
+
 DexMass ParseForMass ( const char *cmd );
 DexSubjectPosture ParseForPosture( const char *cmd );
 bool ParseForPrep ( const char *cmd );
