@@ -55,6 +55,20 @@ double copWaitTime = 10.0;					// Gives time to achieve the centered grip.
 char inputScript[256] = "DexSampleScript.dex";
 char outputScript[256] = "DexSampleScript.dex";
 
+/*********************************************************************************/
+
+// Some common messages.
+
+char *MsgReadyToStart = "We are ready to start.\nPlace the manipulandum in any cradle.\nRemove hand and press <OK> to start.";
+char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
+char *MsgTooLongToReachTarget = "Too long to reach desired target.";
+char *MsgCheckGripCentered = "Make sure that the grip is centered.";
+char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
+char *MsgTrialOver = "Trial terminated.\nPlease place the maniplandum in the empty cradle.";
+char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
+char *MsgQueryReadySeated = "Seated?\nBelts attached?\nWristbox on wrist?%s";
+char *MsgQueryReadySupine = "Lying Down?\nBelts attached?\nWristbox on wrist?%s";
+char *InstructPickUpManipulandum = "You will first pick up the manipulandum with\nthumb and index finger centered.";
 char *OkToContinue ="";
 
 /*********************************************************************************/
@@ -560,9 +574,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 
-	// Resetting the offsets on the force sensors can be considered as a task in itself.
-	// Here we give the opportunity to execute it in addition to the specified task, making
-	//  it available to be run at the start of a simuation session.
+	// Resetting the offsets on the force sensors can be considered as a task in itself 
+	//  by specifying -offsets in the command line.
+	// Here we also give the opportunity to execute it in addition to another specified task, 
+	//  making it available to be run at the start of a simuation session.
 
 	if ( strstr( lpCmdLine, "-raz"  ) ) raz = true;
 
@@ -690,14 +705,14 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.
 	if ( !compile ) {
-
 		LoadGUIState();
 		return_code = apparatus->WaitSubjectReady( "Desktop-Computer.bmp", "DEX Desktop Simulator\nUse the GUI to set the initial configuration that you want to test." );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		SaveGUIState();
 	}
 
-	// If the command line flag was set to do the transducer offset cancellation, then do it.
+	// If the command line flag was set to do the transducer offset cancellation, then do it before running the specified task.
+	// Note, however, that the force offset cancellation can also be done as a separate task by specifying -offsets in the command line.
 	if ( raz ) {
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );

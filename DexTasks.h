@@ -65,7 +65,7 @@ void ReadyToGo( DexApparatus *apparatus );
 void BlinkAll ( DexApparatus *apparatus );
 void SignalEndOfRecording ( DexApparatus *apparatus );
 
-	int RunScript( DexApparatus *apparatus, const char *filename );
+int RunScript( DexApparatus *apparatus, const char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd );
@@ -109,3 +109,18 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL )
 int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params = NULL );
 int RunInstall( DexApparatus *apparatus, const char *params = NULL );
 int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration bar );
+
+// Some common messages.
+
+extern char *MsgReadyToStart;
+extern char *MsgAcquiringBaseline;
+extern char *MsgGripNotCentered;
+extern char *MsgMoveToBlinkingTarget;
+extern char *MsgCheckGripCentered;
+extern char *MsgTooLongToReachTarget;
+extern char *MsgTrialOver;
+extern char *MsgQueryReadySupine;
+extern char *MsgQueryReadySeated;
+extern char *OkToContinue;
+
+extern char *InstructPickUpManipulandum;

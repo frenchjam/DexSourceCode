@@ -620,7 +620,7 @@ HWND DexCreateMouseTrackerGUI( void ) {
 	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED, true );
 
 	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_UNALIGNED,       (LPARAM) "  <not aligned>  " );
-	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_UPRIGHT, (LPARAM) "Aligned Upright" );
+	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_UPRIGHT, (LPARAM) "Aligned Seated" );
 	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_SUPINE, (LPARAM) "Aligned Supine" );
 	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, 0, NULL );
 

@@ -35,14 +35,10 @@ double forceFilterConstant = 1.0;
 // Define the pull direction. This should be up.
 Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
 
-double slipThreshold = 1.0;
-double slipTimeout = 10.0;
+double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
+double slipTimeout = 10.0;		// How long should we wait for a slip?
 double slipWait = 0.25;
 int    slipMovements = 15;
-
-double copMinForce = 1.0;
-double copTimeout = 10.0;
-double copCheckTimeout = 1.0;
 
 /*********************************************************************************/
 
@@ -59,28 +55,33 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->adc->AllowPollingDuringAcquisition();
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
-	AddDirective( apparatus, "You will first grasp the manipulandum with\nthumb and index finger centered, while the\nmanipulandum remains in the retainer.", "pinch.bmp" );
-	AddDirective( apparatus, "Squeeze the manipulandum with the thumb and the\n index finger centered.\nAdjust pinch force according to LED's.", "pinch.bmp" );
-	AddDirective( apparatus, "Rub the manipulandum from center to periphery\n without releasing the grip.", "Coef_frict_osc.bmp" );
+	AddDirective( apparatus, "You will first pinch the manipulandum while it remains in the retainer.", "pinch.bmp" );
+	AddDirective( apparatus, "Pinch the manipulandum at the center with the thumb and the index finger.", "pinch.bmp" );
+	AddDirective( apparatus, "Adjust pinch force according to LED's until you here a beep.", "pinch.bmp" );
+	AddDirective( apparatus, "When you hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
 	ShowDirectives( apparatus );
-	
-	// Start acquiring.
-    apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	apparatus->WaitSubjectReady( "ready.bmp", "Press <OK> to start." );
 
 	// Collect some data with zero force.
-	apparatus->Wait( 2.0 );
+	apparatus->Wait( baselineDuration );
+
+	// Start acquiring.
+	apparatus->ShowStatus( "Pinch the manipulandum and use the LEDs to achieve the desired grip force level.", "pinch.bmp" );
+    apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
+	if ( status == ABORT_EXIT ) exit( status );
 
     status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-		forceFilterConstant, frictionHoldTime, frictionTimeout, "Use the LEDs to achieve the desired grip force level." );
+		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
+
 	// Mark when the desired force is achieved.
 	if ( status == ABORT_EXIT ) exit( status );
 	apparatus->MarkEvent( FORCE_OK );
 
-	status = apparatus->WaitCenteredGrip( copTolerance, copMinForce, copCheckTimeout, "Grip not centered." );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Beep to let the subject know that he or she can start rubbing.
+	apparatus->ShowStatus( "Rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
 	apparatus->Beep();
 
 	// Wait for the initial slip.
@@ -94,8 +95,12 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( SLIP );
 
 #if 0
+	// This is the old version, based on a fixed amount of time for the rubbing motions.
 	// Allow 15 more seconds for the rubbing motion.
 	apparatus->Wait( 15 );
+	// !JMc Not sure what sound would be on.
+	// !JMc Maybe this could be removed.
+	apparatus->SoundOff();
 #else
 
 	// In this version we wait for a certain number of slips to be detected. 
@@ -107,26 +112,16 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.", "alert.bmp"  );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 		apparatus->MarkEvent( SLIP );
-		apparatus->Wait( slipWait );
 	}
 #endif
 	
-	// !JMc Not sure what sound would be on.
-	// !JMc Maybe this could be removed.
-	apparatus->SoundOff();
-
-	// Beep to indicate the end of the recording.
-	apparatus->Beep();
-
-	// Let the subject know that they are done.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
-
-	apparatus->WaitSubjectReady( "ok.bmp", "Release the maniplandum and press <OK> to continue." );
+	SignalEndOfRecording( apparatus );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Release the maniplandum and press <OK> to continue." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Collect some data with zero force.
-	apparatus->Wait( 2.0 );
+	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
+	apparatus->Wait( baselineDuration );
 
 	// Terminate the acquisition. This will also close the data file.
 	apparatus->StopAcquisition();

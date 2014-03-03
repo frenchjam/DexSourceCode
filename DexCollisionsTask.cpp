@@ -54,10 +54,10 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	posture = ParseForPosture( params );
 	direction = ParseForDirection( apparatus, params );
 	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
 	}
 	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -66,9 +66,9 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
-	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	AddDirective( apparatus, "You should move to the center target\nwhenever it is blinking.", "MoveToBlinking.bmp" );
-	AddDirective( apparatus, "You will then make collisions with the manipulandum.\nTap up or down according to the beeps and lights.", "Collision.bmp" );
+	AddDirective( apparatus, "You should then tap up or down according to the beeps and lights.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -81,19 +81,28 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
 	
-	// Get the subject posture from the command line.
-	DexSubjectPosture posture = ParseForPosture( params );
-
-	// Collisions are always done with the mast on the right side.
-	DexTargetBarConfiguration bar_position = TargetBarRight;
-
-	// Collisions are done only in the vertical direction.
-	int	direction = VERTICAL;
-	Vector3 direction_vector = {0.0, 1.0, 0.0};
-	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
+	// These are static so that if the params string does not specify a value,
+	//  whatever was used the previous call will be used again.
+	static int	direction = VERTICAL;
+	static int	eyes = OPEN;
+	static DexMass mass = MassMedium;
+	static DexTargetBarConfiguration bar_position = TargetBarRight;
+	static DexSubjectPosture posture = PostureSeated;
+	static Vector3 direction_vector = {0.0, 1.0, 0.0};
+	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename = 0;
+	char tag[5] = "Co";			// Co is for Collisions.
+
 	int tone, tgt;
+
+	// Which mass should be used for this set of trials?
+	mass = ParseForMass( params );
+
+	// Seated or supine?
+	posture = ParseForPosture( params );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
 
 	// What is the target sequence? If not specified in the command line, use the default.
 	// Here we expect a sequence of +1 or -1 values, corresponding to an upward or downward tap.
@@ -110,32 +119,49 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepCollisions( apparatus, params );
 
+	// Indicate to the subject that we are ready to start and wait for their go signal.
+	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Start acquisition and acquire a baseline.
-	apparatus->SignalEvent( "Initiating set of collisions." );
-	apparatus->StartAcquisition( "COLL", collisionMaxTrialTime );
+	// Presumably the manipulandum is not in the hand. 
+	// It should have been left either in a cradle or the retainer at the end of the last action.
+	apparatus->SignalEvent( "Initiating set of discrete movements." );
+	apparatus->StartFilming();
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
+	apparatus->Wait( baselineDuration );
 	
-	// Acquire
-	Sleep( 1000 );
-
-	// Which mass should be used for this set of trials?
-	DexMass mass = ParseForMass( params );
-
 	// Instruct subject to take the specified mass.
 	// If the correct mass is already on the manipulandum and out of the cradle, 
 	//  this will move right on to the next step.
 	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
 
-    // Check that the grip is properly centered.
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand.\n               OR               \n Fingers not centered." );
+	// Check that the grip is properly centered.
+	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Now wait until the subject gets to the target before moving on.
-	status = apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation );
-	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
+	apparatus->ShowStatus( "Trial started ...", "working.bmp" );
+
+	// Wait until the subject gets to the target before moving on.
+	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
+	apparatus->TargetsOff();
+	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Collect some data while holding at the starting position.
+	apparatus->Wait( baselineDuration );
 	
+	apparatus->ShowStatus( "Tap upward or downward according to the beep and the target LEDs.", "working.bmp" );
+
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
+
+	// Wait a little to give the subject time to react, in case they were looking at the screen.
+	apparatus->Wait( baselineDuration );
+
 	for ( int target = 0; target < collisionSequenceN; target++ ) {
 		
 		// Ready to start, so light up starting point target.
@@ -187,18 +213,23 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ANALYSIS );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
-	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	SignalEndOfRecording( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgTrialOver );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->Wait( 1.0 );
 
 	// Stop acquiring.
+	apparatus->StopFilming();
 	apparatus->StopAcquisition();
-	// Signal to subject that the task is complete.
 	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->HideStatus();
+	
+	// Check the quality of the data.
+	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+	int n_post_hoc_steps = 4;
+	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );

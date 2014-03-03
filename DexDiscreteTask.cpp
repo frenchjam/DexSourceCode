@@ -55,10 +55,10 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?\nBelts attached?\nWristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
 	}
 	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?\nBelts attached?\nWristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -78,7 +78,7 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Describe how to do the task, according to the desired conditions.
-	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
 		dsc = "DiscreteV.bmp";
@@ -163,7 +163,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "cradles.bmp", "We are ready to start.\nPlace the maniplandum in any cradle.\nRemove hand and press <OK> to start." );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
@@ -172,7 +172,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->SignalEvent( "Initiating set of discrete movements." );
 	apparatus->StartFilming();
 	apparatus->StartAcquisition( tag, maxTrialDuration );
-	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 	
 	// Instruct subject to take the specified mass.
@@ -182,21 +182,20 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
-	apparatus->ShowStatus( "Make sure that the grip is centered.", "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered." );
+	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Trial started ...", "working.bmp" );
 
 	// Wait until the subject gets to the target before moving on.
-	apparatus->ShowStatus( "Trial started.\nMove to blinking target.", "working.bmp" );
+	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	char *wait_at_target_message = "Too long to reach desired target.";
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
-	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
+	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Collect one second of data while holding at the starting position.
+	// Collect some data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
 	// Light up the pair of targets.
@@ -241,14 +240,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	// We're done.
 	apparatus->TargetsOff();
-
-	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	SignalEndOfRecording( apparatus );
-	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
-	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
-	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 	
 	// Stop acquiring.
