@@ -121,7 +121,7 @@ void DexApparatus::Initialize( void ) {
 	InitForceTransducers();
  
 	// Initialize the list of events.
-	nEvents = 0;
+	ClearEventLog();
 
 	// Open a file to store the positions and orientations that were computed from
 	// the individual marker positions. This allows us
@@ -1473,16 +1473,36 @@ void DexApparatus::MapForceToLED( float min_grip, float max_grip, float min_load
 void DexApparatus::UpdateForceToLED( float grip, float load ) {
 
 	int cursor;
+	unsigned long bits = 0, first_bit = 0x01;
 
 	if ( DexTimerTimeout( blink_timer ) ) {
 		blink = !blink;
 		DexTimerSet( blink_timer, waitBlinkPeriod );
 	}
+
+	// Show the desired range of grip forces.
+	if ( min_grip_led >= 0 ) bits |= first_bit << min_grip_led;
+	if ( max_grip_led >= 0 ) bits |= first_bit << max_grip_led;
+
+	// Show the cursor.
+	cursor = floor( (grip - grip_offset) * grip_to_led );
+	if ( cursor < 0 ) cursor = 0;
+	if ( cursor >= nVerticalTargets ) cursor = nVerticalTargets - 1;
+	if ( blink ) bits |= first_bit << cursor;
+
+	SetTargetStateInternal( bits );
+	Update();
+
+#if 0
+
+	// Old Version
+
 	TargetsOff();
 
 	// Show the desired range of grip forces.
 	if ( min_grip_led >= 0 ) HorizontalTargetOn( min_grip_led );
 	if ( max_grip_led >= 0 ) HorizontalTargetOn( max_grip_led );
+
 
 	// Make a blinking target follow the measured grip force.
 	cursor = floor( (grip - grip_offset) * grip_to_led );
@@ -1502,6 +1522,8 @@ void DexApparatus::UpdateForceToLED( float grip, float load ) {
 	else  VerticalTargetOff( cursor );
 
 	Update();
+
+#endif
 
 }
 
