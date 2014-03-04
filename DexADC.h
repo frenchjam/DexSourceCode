@@ -31,7 +31,7 @@ class DexADC : public VectorsMixin {
 
 		double samplePeriod;
 
-		DexADC() : nChannels( 0 ), samplePeriod( ANALOG_SAMPLE_PERIOD ), allow_polling( false) {} ;
+		DexADC() : nChannels( 0 ), samplePeriod( ANALOG_SAMPLE_PERIOD ), allow_polling( false ) {} ;
 
 		virtual void Initialize( void ) = 0;
 		virtual int  Update( void ) = 0;

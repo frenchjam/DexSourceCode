@@ -52,7 +52,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// continuous data, but also monitor the COP in real time.
 	// The following routine does that, but it will have no effect on the real
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
-	apparatus->adc->AllowPollingDuringAcquisition();
+	if ( apparatus->adc ) apparatus->adc->AllowPollingDuringAcquisition();
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
 	AddDirective( apparatus, "You will first pinch the manipulandum while it remains in the retainer.", "pinch.bmp" );
