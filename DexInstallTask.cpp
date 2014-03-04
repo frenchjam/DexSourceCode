@@ -123,7 +123,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ..." );
-	status = apparatus->PerformTrackerAlignment( "Error performing the tracker alignment.\n - Is the target mast in the right-hand position?\n - Are the reference markers in view?" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target mast in the right position?\n- Reference markers in view?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
