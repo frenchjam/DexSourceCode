@@ -39,9 +39,6 @@
 // Doesn't actually do anything. Instead, it just writes out each essential
 // command to a script to be executed later by the interpreter.
 //
-
-//  !!!!!!!!!!!!!!!!!!!! THIS IS NOT UP TO DATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   It may not cover all the required commands.
 	
 DexCompiler::DexCompiler( char *filename ) {
 
@@ -259,7 +256,7 @@ int	DexCompiler::WaitDesiredForces( float min_grip, float max_grip,
 								 float hold_time, float timeout, const char *msg, const char *picture ) {
 
 	AddStepNumber();
-	fprintf( fp, "CMD_WAIT_MANIP_GRIPFORCE, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f, %s, \n",
+	fprintf( fp, "CMD_WAIT_MANIP_GRIPFORCE, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f, %s, %s\n",
 		min_grip, max_grip, min_load, max_load, direction[X], direction[Y], direction[Z], 
 		hold_time * 10.0, timeout, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 
@@ -604,15 +601,15 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		
 		sscanf( line, "%s", token );
 		
-		if ( !strcmp( token, "SelectAndCheckConfiguration" ) ) {
+		if ( !strcmp( token, "CMD_CHK_HW_CONFIG" ) ) {
 			
 			int posture, target_config, tapping_config;
-			sscanf( line, "%s %d %d %d", token, &posture, &target_config, &tapping_config );
-			
-			// Select which configuration of the hardware should be used.
-			// Verify that it is in the correct configuration, and if not, 
-			//  give instructions to the subject about what to do.
-//			status = apparatus->SelectAndCheckConfiguration( posture, target_config, tapping_config );
+			char message[1024], picture[1024];
+			sscanf( line, "%s, %s, %s, %d, %d, %d", token, &posture, &target_config, &tapping_config );
+			status = apparatus->SelectAndCheckConfiguration( picture, message, 
+				( posture == 0 ? PostureSeated : PostureSupine ),
+				( target_config == 0 ? TargetBarRight : TargetBarLeft ),
+				TappingIndifferent );
 			if ( status == ABORT_EXIT ) exit( status );
 			
 		}
