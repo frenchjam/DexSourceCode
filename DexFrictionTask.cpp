@@ -28,8 +28,8 @@ double frictionTimeout = 200.0;
 double gripTarget= 4.0; //0.5 or 1.0 or 2.0 or 4.0
 double frictionMinGrip = 0.75*gripTarget;
 double frictionMaxGrip = 1.25*gripTarget;
-double frictionMinLoad = -20.0;
-double frictionMaxLoad = 20.0;
+double frictionMinLoad = 0.0;
+double frictionMaxLoad = 0.0;
 double forceFilterConstant = 1.0;
 
 // Define the pull direction. This should be up.
@@ -72,6 +72,9 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// DEBUG
+	apparatus->WaitSubjectReady( "ok.bmp", "Centered grip achieved.\n\nPress <OK> to continue." );
+
     status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
@@ -109,7 +112,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	for ( int slip = 0; slip < slipMovements; slip++ ) {
 		status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
 				frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.", "alert.bmp"  );
+				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.\n(<Ignore> to keep trying.)", "alert.bmp"  );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 		apparatus->MarkEvent( SLIP );
 	}
