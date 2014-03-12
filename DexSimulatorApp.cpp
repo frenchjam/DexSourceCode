@@ -704,7 +704,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	apparatus->HideStatus();
 
 	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.
-	if ( !compile ) {
+	if ( !compile && task != RUN_SCRIPT ) {
 		LoadGUIState();
 		return_code = apparatus->WaitSubjectReady( "Desktop-Computer.bmp", "DEX Desktop Simulator\nUse the GUI to set the initial configuration that you want to test." );
 		if ( return_code == ABORT_EXIT ) exit( return_code );

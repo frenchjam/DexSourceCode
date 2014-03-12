@@ -1488,7 +1488,7 @@ void DexApparatus::UpdateForceToLED( float grip, float load ) {
 	cursor = floor( (grip - grip_offset) * grip_to_led );
 	if ( cursor < 0 ) cursor = 0;
 	if ( cursor >= nVerticalTargets ) cursor = nVerticalTargets - 1;
-	if ( blink ) bits |= first_bit << cursor;
+	if ( blink ) bits ^= first_bit << cursor;
 
 	SetTargetStateInternal( bits );
 	Update();
