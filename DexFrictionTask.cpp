@@ -72,9 +72,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// DEBUG
-	apparatus->WaitSubjectReady( "ok.bmp", "Centered grip achieved.\n\nPress <OK> to continue." );
-
     status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
 		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
@@ -110,15 +107,17 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// There is a small delay between each call to WaitSlip() with the hopes that
 	//  the same slip will not be detected twice, but even that should not be a problem.
 	for ( int slip = 0; slip < slipMovements; slip++ ) {
+		AnalysisProgress( apparatus, slip, slipMovements, "Keep rubbing. Need more slips." );
 		status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
 				frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
 				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.\n(<Ignore> to keep trying.)", "alert.bmp"  );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 		apparatus->MarkEvent( SLIP );
 	}
+	AnalysisProgress( apparatus, slipMovements, slipMovements, "Success!" );
 #endif
-	
 	SignalEndOfRecording( apparatus );
+
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Release the maniplandum and press <OK> to continue." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 

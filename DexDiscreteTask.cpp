@@ -22,9 +22,9 @@
 /*********************************************************************************/
 
 // Targeted trial parameters;
-int delaySequence[] = { 1, 1.5, 1, 2, 1.5, 3, 1, 2, 1 };	// Delays between the discrete movements.
-int delaySequenceN = sizeof( delaySequence ) / sizeof( *delaySequence );
-int discreteTargets[3] = {3, 5, 7};
+double	delaySequence[1024] = { 1, 1.5, 1, 2, 1.5, 3, 1, 2, 1 };	// Delays between the discrete movements.
+int		delaySequenceN = 9;
+int		discreteTargets[3] = {3, 5, 7};
 
 int discreteFalseStartTolerance = 5;
 double discreteFalseStartThreshold = 1.0;
@@ -121,31 +121,33 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	char *target_filename = 0;
 	char *delay_filename = 0;
-	char tag[5] = "D";			// D is for discrete.
+	char tag[8] = "Ds";			// D is for discrete.
 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 
 	// Seated or supine?
 	posture = ParseForPosture( params );
-	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
-	else strcat( tag, "S" ); // S is for supine.
+	if ( posture == PostureSeated ) strcat( tag, "Up" ); // Up is for upright (seated).
+	else strcat( tag, "Su" ); // Su is for supine.
 
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) {
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( discreteMovementDirection, apparatus->jVector );
+		strcat( tag, "Ve" );
 	}
 	else {
 		bar_position = TargetBarLeft;
 		apparatus->CopyVector( discreteMovementDirection, apparatus->kVector );
+		strcat( tag, "Ho" );
 	}
 
 	// Eyes open or closed?
 	eyes = ParseForEyeState( params );
-	if ( eyes == OPEN ) strcat( tag, "O" ); 
-	else strcat( tag, "C" ); 
+	if ( eyes == OPEN ) strcat( tag, "Op" ); 
+	else strcat( tag, "Cl" ); 
 
 	// What is the sequence of delays? If not specified in the command line, use the default.
 	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delaySequence, delay_filename );
@@ -170,7 +172,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Presumably the manipulandum is not in the hand. 
 	// It should have been left either in a cradle or the retainer at the end of the last action.
 	apparatus->SignalEvent( "Initiating set of discrete movements." );
-	apparatus->StartFilming();
+	apparatus->StartFilming( tag );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
@@ -269,7 +271,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Check that we got a reasonable number of movements. 
 	// We expect as many as there are items in the sequence. 
 	// We accept if there are a few less.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for nubmer of movement ..." );
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for number of movements ..." );
 	status = apparatus->CheckMovementCycles( delaySequenceN / 2, delaySequenceN + 5, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 

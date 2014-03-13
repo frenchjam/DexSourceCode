@@ -127,7 +127,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Presumably the manipulandum is not in the hand. 
 	// It should have been left either in a cradle or the retainer at the end of the last action.
 	apparatus->SignalEvent( "Initiating set of discrete movements." );
-	apparatus->StartFilming();
+	apparatus->StartFilming( tag );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );

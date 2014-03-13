@@ -98,8 +98,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for upright (seated) operation. Place the manipulandum in the holder as shown." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation.\nPlace the manipulandum in the holder as shown." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated (upright) operation." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	// Prompt the subject to place the manipulandum in the holder on the chair.
+	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the target bar in the right side position.
@@ -110,7 +114,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
-	apparatus->ShowStatus( "Checking field of view ..." );
+	apparatus->ShowStatus( "Checking field of view ...", "wait.bmp" );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
 		"Markers not centered for CODA Unit #1.\n - Is the unit properly boresighted?\n - Are the box and bar markers visible?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -122,12 +126,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Perform the alignment based on those markers.
-	apparatus->ShowStatus( "Performing alignment ..." );
+	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
 	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target mast in the right position?\n- Reference markers in view?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
-	apparatus->ShowStatus( "Check tracker placement ..." );
+	apparatus->ShowStatus( "Checking tracker placement ...", "wait.bmp" );
 	if ( desired_posture == PostureSeated ) {
 
 		status = apparatus->CheckTrackerPlacement( 0, 
@@ -164,7 +168,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
-		apparatus->ShowStatus( "Check tracker alignment ..." );
+		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers occluded?" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -172,7 +176,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	
 
 	// Perform a short acquisition to measure where the manipulandum is.
-	apparatus->ShowStatus( "Acquire data ..." );
+	apparatus->ShowStatus( "Acquiring baseline data. Please wait.", "wait.bmp" );
 	apparatus->StartAcquisition( "ALGN", maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
@@ -266,12 +270,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Apparatus in SUPINE configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Apparatus in SUPINE configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget mast in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget mast in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Apparatus in SEATED configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Hardware not configured as expected.\n - Apparatus in SEATED configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();
