@@ -896,6 +896,19 @@ void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
 	SignalEvent( message );
 }
 
+void DexApparatus::fShowStatus ( const char *picture, const char* format, ... ) {
+	
+	va_list args;
+	char message[10240];
+	
+	va_start(args, format);
+	vsprintf(message, format, args);
+	va_end(args);
+
+	ShowStatus( message, picture );
+
+}
+
 void DexApparatus::HideStatus ( void ) {
 	ShowStatus( "", NULL );
 }
@@ -1088,7 +1101,6 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 	do {
 
 		if ( mass == MassNone && ( IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) || IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ) ) {
-//			answer =  fMessageBox( MB_ABORTRETRYIGNORE, "DexApparatus", "Place manipulandum weight in empty cradle.\n" );
 			answer =  fIllustratedMessageBox( MB_ABORTRETRYIGNORE, NULL, "DexApparatus", "Place manipulandum in empty cradle.\n" );
 		}
 		else {
@@ -1118,6 +1130,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 
 			default:
 				cradle = "A";
+				break;
 
 			}
 
@@ -2003,7 +2016,7 @@ void DexApparatus::SnapPhoto( void ) {
 
 }
 
-void DexApparatus::StartFilming( void ) {
+void DexApparatus::StartFilming( const char *tag ) {
 	ShowWindow( camera_dlg, SW_SHOW );
 	Update();
 }

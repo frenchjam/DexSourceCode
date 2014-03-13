@@ -221,7 +221,7 @@ public:
 	virtual int  StopAcquisition( const char *msg = "Error - Maybe file overrun." );
 
 	virtual void SnapPhoto( void );
-	virtual void StartFilming( void );
+	virtual void StartFilming( const char *tag );
 	virtual void StopFilming( void );
 	
 	// Flow control
@@ -307,6 +307,7 @@ public:
 	// Show status to subject.
 	virtual void DexApparatus::ShowStatus (const char *message = "", const char *picture = "blank.bmp" );
 	virtual void DexApparatus::HideStatus ( void );
+	virtual void DexApparatus::fShowStatus ( const char *picture, const char* format, ... );
 
 	// Tracker installation and alignment.
 	virtual int CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
@@ -472,7 +473,7 @@ public:
 	void AddStepNumber( void );
 
 	void SnapPhoto( void );
-	void StartFilming( void );
+	void StartFilming( const char *tag );
 	void StopFilming( void );
 
 };
