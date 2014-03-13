@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -84,8 +84,8 @@ char *ParseForDelayFile ( const char *cmd );
 #define MEDIUM 1	
 #define LARGE 2
 
-int LoadSequence( int   *sequence, const char *filename );
-int LoadSequence( float *sequence, const char *filename );
+int LoadSequence( int    *sequence, const char *filename );
+int LoadSequence( double *sequence, const char *filename );
 
 #define LOWER	0
 #define MIDDLE	1
@@ -109,7 +109,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL )
 int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params = NULL );
 int RunInstall( DexApparatus *apparatus, const char *params = NULL );
 int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration bar );
-
+int ShowPictures( DexApparatus *apparatus, const char *params );
 // Some common messages.
 
 extern char *MsgReadyToStart;

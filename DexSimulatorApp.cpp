@@ -311,15 +311,17 @@ void LoadTargetRange( int limits[3], const char *filename ) {
 	FILE *fp;
 	char path[1024];
 	char name[1024], *specifier, *ptr;
+	char line[1024];
 	int repeat;
 
 	strcpy( name, filename );
 	if ( ptr = strstr( name, ":" ) ) {
 		*ptr = 0; // Terminate the name at the start of the specifier.
 		specifier = ptr + 1;
+		if ( toupper( *specifier ) == 'L' ) repeat = 3;
+		else if ( toupper( *specifier ) == 'M' ) repeat = 2;
+		else repeat = 1;
 	}
-	if ( toupper( *specifier ) == 'L' ) repeat = 3;
-	else if ( toupper( *specifier ) == 'M' ) repeat = 2;
 	else repeat = 1;
 
 	strcpy( path, "..\\DexSequences\\" );
@@ -329,6 +331,11 @@ void LoadTargetRange( int limits[3], const char *filename ) {
 		exit( -1 );
 	}
 
+	// First header line shows small, medium large.
+	fgets( line, sizeof( line ), fp );
+	// Second shows lower, middle, upper.
+	fgets( line, sizeof( line ), fp );
+	// Now come the triplets.
 	for ( int r = 0; r < repeat; r++ ) {
 		fscanf( fp, "%d %d %d", &limits[LOWER], &limits[MIDDLE], &limits[UPPER] );
 	}
@@ -573,6 +580,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
+	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
+
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.
@@ -759,6 +768,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = RunInstall( apparatus, lpCmdLine ) ) );
 		break;
 
+	case SHOW_PICTURES:
+		while ( RETRY_EXIT == ( return_code = ShowPictures( apparatus, lpCmdLine ) ) );
+		break;
 	}
 	if ( return_code != ABORT_EXIT && !compile ) DexPlotData( apparatus );
 	
