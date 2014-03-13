@@ -359,7 +359,8 @@ int DexApparatus::CheckMovementCycles(  int min_cycles, int max_cycles,
 	}
 	
 	// This is my means of signalling the event.
-	monitor->SendEvent( "Movement extent OK.\n Measured: %f\n Desired range: %f - %f\n Direction: < %.2f %.2f %.2f>", cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
+	monitor->SendEvent( "Number of movements OK.\n Measured: %d\n Desired range: %d - %d\n Direction: < %.2f %.2f %.2f>", 
+		cycles, min_cycles, max_cycles, dirX, dirY, dirZ );
 	return( NORMAL_EXIT );
 	
 }

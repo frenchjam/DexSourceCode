@@ -270,9 +270,11 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Check that we got a reasonable number of movements. 
 	// We expect as many as there are items in the sequence. 
-	// We accept if there are a few less.
+	// But this post hoc test was designed for the oscillations protocol. 
+	// So we will have half as many cycles as the number of expected movements.
+	int tolerance = 5;
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for number of movements ..." );
-	status = apparatus->CheckMovementCycles( delaySequenceN / 2, delaySequenceN + 5, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected.\nWould you like to try again?" );
+	status = apparatus->CheckMovementCycles( delaySequenceN / 2 - tolerance, delaySequenceN / 2 + tolerance, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Did the subject anticipate the starting signal too often?
