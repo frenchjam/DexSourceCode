@@ -378,6 +378,7 @@ private:
 	unsigned long nextStep;
 	// Show warnings or not.
 	bool verbose;
+	bool pause_on_warning;
 
 
 	void CloseScript( void );
@@ -392,6 +393,7 @@ private:
 	unsigned short horizontalTargetBit( int target_id);
 
 	char *quoteMessage( const char *message );
+	void fWarning( const char *format, ... );
 
 protected:
 

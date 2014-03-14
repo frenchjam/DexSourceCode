@@ -98,6 +98,8 @@ void DexCompiler::Initialize( void ) {
 
 	// Show warnings or not.
 	verbose = true;
+	pause_on_warning = false;
+
 	
 	// The base class sets the targets and sounds off at initialization.
 	// DEX does that automatically, so I removed those commands from the compiler.
@@ -142,6 +144,32 @@ unsigned short DexCompiler::horizontalTargetBit( int target_id) {
 
 /***************************************************************************/
 
+void DexCompiler::fWarning( const char *format, ... ) {
+	
+	va_list args;
+	char message[10240];
+	
+	va_start(args, format);
+	vsprintf(message, format, args);
+	va_end(args);
+
+	if ( pause_on_warning ) {
+		int response = MessageBox( NULL, message, "DexCompiler", MB_OKCANCEL | MB_ICONQUESTION );
+		if ( response != IDOK ) exit( -1 );
+	}
+	else {
+		char message2[10240];
+		strcpy( message2, "*** " );
+		strcat( message2, message );
+		fprintf( stderr, message2 );
+	}
+
+}
+
+
+
+/***************************************************************************/
+
 // Message strings have to be quoted by the DEX interpreter.
 // This puts quotes into the string itself.
 // Also, they have a limited length and for the moment commas have to be replaced.
@@ -180,10 +208,10 @@ char *DexCompiler::quoteMessage( const char *message ) {
 	result[j++] = 0;
 
 	if ( strlen( result ) > 128 ) {
-		fprintf( stderr, "WARNING: Message too long. Truncating.\n%s\n", result );
+		char original[10240];
+		strcpy( original, result );
 		result[127] = 0;
-		fprintf( stderr, "%s\n\n", result );
-		fOutputDebugString( "\nWARNING: Message too long. Truncating.\n%s\n", result );
+		fWarning( "WARNING: Message too long. Truncating.\n%s\n%s\n", original, result );
 	}
 
 	return( result );
@@ -234,11 +262,11 @@ int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float time
 	static bool once = false;
 	if ( timeout > DEX_MAX_TIMEOUT && !once ) {
 		once = true;
-		if ( verbose ) MessageBox( NULL, "Warning - Timeout exceeds limit.", "DexCompiler", MB_OK );
+		if ( verbose ) fWarning( "Warning - Timeout exceeds limit." );
 	}
 	if ( timeout < 0 && !once ) {
 		once = true;
-		if ( verbose ) MessageBox( NULL, "Warning - Timeout cannot be negative.", "DexCompiler", MB_OK );
+		if ( verbose ) fWarning( "Warning - Timeout cannot be negative." );
 	}
 	AddStepNumber();
 	fprintf( fp, "CMD_WAIT_MANIP_GRIP, %f, %.0f, %f, %s, \n", min_force, tolerance, timeout, quoteMessage( msg ), ( picture ? picture : "" ) );
@@ -371,11 +399,11 @@ void DexCompiler::SetTargetStateInternal( unsigned long target_state ) {
 void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
 	static bool once = false;
 	if ( volume != 0 && volume != 1 && !once ) {
-		if ( verbose ) MessageBox( NULL, "Warning - Sound volume on DEX is 0 or 1", "DexCompiler", MB_OK );
+		if ( verbose ) fWarning( "Warning - Sound volume on DEX is 0 or 1" );
 		once = true;
 	}
 	if ( ( tone < 0 || tone >= nTones ) && !once ) {
-		MessageBox( NULL, "Warning - Tone is out of range.", "DexCompiler", MB_OK );
+		fWarning( "Warning - Tone is out of range." );
 		once = true;
 	}
 	AddStepNumber();
@@ -412,7 +440,7 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 
 int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg, const char *picture ) {
 	AddStepNumber();
-	if (verbose ) MessageBox( NULL, "CheckEarlyStarts()\nWhat about the filter constant?!?!", "DexCompiler", MB_OK | MB_ICONQUESTION );
+	if (verbose ) fWarning( "CheckEarlyStarts()\nWhat about the filter constant?!?!" );
 	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %f, %f, %s, %s\n", n_false_starts, hold_time * 1000, threshold, filter_constant, quoteMessage( msg ) );
 	return( NORMAL_EXIT );
 }
