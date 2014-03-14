@@ -3,20 +3,20 @@
 #  the DexGenerateScripts.bat batch file to be executed.
 # The batch files that do the work are kept in DexSourceCode so that it gets distributed in Git.
 
-SCRIPTS		= DexScripts.mak ForceOffsets.dex FrictionTest.dex InstallUpright.dex InstallSupine.dex ShowPictures.dex 
-PROTOCOLS	= prot_joe.dex
-SESSIONS	= session_joe.dex
-
 COMPILER	= DexSimulatorApp.exe
+SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
+SCRIPTS		= $(SOURCE)\DexMakeScripts.mak ForceOffsets.dex FrictionTest.dex InstallUpright.dex InstallSupine.dex ShowPictures.dex 
+PROTOCOLS	= prot_joe.dex DexDynamicsSmall.dex
+SESSIONS	= session_joe.dex
+
 # The following the path to hand-edited scripts. 
-STATICSCRIPTS	= StaticScripts\
+STATICSCRIPTS	= ..\DexSourceCode
 
 all: DexSimulatorApp.exe $(SCRIPTS) $(PROTOCOLS) $(SESSIONS) users.dex
-	echo Executing DexSourceCode\DexMakeScripts.mak
-	copy /Y /V *.dex $(DESTINATION)
-
+	del /Q $(DESTINATION)\*.dex
+	copy /Y /V *.dex $(DESTINATION) 
 	echo "Last build: " %date% %time% > all
  
 # The makefile checks if a newer version of the simulator/compiler DexSimulatorApp.exe has been generated.
@@ -40,6 +40,9 @@ InstallSupine.dex:	DexSimulatorApp.exe
 
 ShowPictures.dex:	DexSimulatorApp.exe
 	$(COMPILER) -pictures -compile=ShowPictures.dex
+
+DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
+	$(SOURCE)\DexGenerateDynamics.bat Upright Sml > DexDynamicsSmall.dex
 
 # Get the scripts that are edited by hand.
 
