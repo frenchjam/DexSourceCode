@@ -295,6 +295,7 @@ public:
 	virtual void ClearEventLog( void );
 	virtual void MarkEvent( int event, unsigned long param = 0x00L );
 	virtual void Comment( const char *txt );
+	virtual void fComment( const char* format, ... );
 	
 	virtual void MarkTargetEvent( unsigned int bits );
 	virtual void MarkSoundEvent( int tone, int volume );
@@ -379,6 +380,7 @@ private:
 	// Show warnings or not.
 	bool verbose;
 	bool pause_on_warning;
+	char hold_film_tag[9];
 
 
 	void CloseScript( void );

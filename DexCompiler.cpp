@@ -161,6 +161,7 @@ void DexCompiler::fWarning( const char *format, ... ) {
 		char message2[10240];
 		strcpy( message2, "*** " );
 		strcat( message2, message );
+		strcat( message2, "\n" );
 		fprintf( stderr, message2 );
 	}
 
@@ -728,10 +729,12 @@ void DexCompiler::SnapPhoto( void ) {}
 void DexCompiler::StartFilming( const char *tag ) {
 	AddStepNumber();
 	// Log the message and show it on the DEX screen.
-	fprintf( fp, "CMD_CTRL_CAMERA, 1, %8s\n", tag );
+	strncpy( hold_film_tag, tag, 8 );
+	hold_film_tag[8] = 0;
+	fprintf( fp, "CMD_CTRL_CAMERA, 1, %8s\n", hold_film_tag );
 }
 void DexCompiler::StopFilming( void ) {
 	AddStepNumber();
 	// Log the message and show it on the DEX screen.
-	fprintf( fp, "CMD_CTRL_CAMERA, 0\n" );
+	fprintf( fp, "CMD_CTRL_CAMERA, 0, %8s\n", hold_film_tag );
 }
