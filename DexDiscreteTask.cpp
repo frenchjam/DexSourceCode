@@ -240,8 +240,10 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Collect one final bit of data.
 	apparatus->Wait( baselineDuration );
 	
-	// We're done.
-	apparatus->TargetsOff();
+	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	BlinkAll( apparatus );
+	BlinkAll( apparatus );
+	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );

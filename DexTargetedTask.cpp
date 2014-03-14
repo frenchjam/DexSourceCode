@@ -30,6 +30,8 @@ int targetSequenceN = 10;
 double targetedMovementTime = 1.0;			// Time to perform each movement.
 double targetedMinMovementExtent =  100.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 double targetedMaxMovementExtent = 1000.0;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+Vector3 targetedMovementDirection = {0.0, 1.0, 0.0};
+Quaternion targetedMovementOrientation = {0.0, 0.0, 0.0, 1.0};
 
 /*********************************************************************************/
 
@@ -42,10 +44,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	int	direction = ParseForDirection( apparatus, params );
 	int eyes = ParseForEyeState( params );
 	DexSubjectPosture posture = ParseForPosture( params );
-
 	DexTargetBarConfiguration bar_position;
-	Vector3 direction_vector = {0.0, 1.0, 0.0};
-	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
@@ -64,11 +63,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Cancel any force offsets.
-	RunTransducerOffsetCompensation( apparatus, params );
-
 	// Instruct the subject on the task to be done.
-	
 	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
@@ -95,23 +90,36 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// These are static so that if the params string does not specify a value,
 	//  whatever was used the previous call will be used again.
 	static int	direction = VERTICAL;
+	static int	eyes = OPEN;
+	static DexMass mass = MassMedium;
 	static DexTargetBarConfiguration bar_position = TargetBarRight;
 	static DexSubjectPosture posture = PostureSeated;
-	static Vector3 direction_vector = {0.0, 1.0, 0.0};
-	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename;
+	char tag[9] = "Tgtd";
 
-	// Get the subject posture from the command line.
-	posture = ParseForPosture( params );
-
+	fprintf( stderr, "RunTargeted: %s\n", params );
+	 
 	// Which mass should be used for this set of trials?
-	DexMass mass = ParseForMass( params );
+	mass = ParseForMass( params );
+
+	// Seated or supine?
+	posture = ParseForPosture( params );
+	if ( posture == PostureSeated ) strcat( tag, "Up" ); // Up is for upright (seated).
+	else strcat( tag, "Su" ); // Su is for supine.
 
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
-	if ( direction == VERTICAL ) bar_position = TargetBarRight;
-	else bar_position = TargetBarLeft;
+	if ( direction == VERTICAL ) {
+		bar_position = TargetBarRight;
+		apparatus->CopyVector( targetedMovementDirection, apparatus->jVector );
+		strcat( tag, "Ve" );
+	}
+	else {
+		bar_position = TargetBarLeft;
+		apparatus->CopyVector( targetedMovementDirection, apparatus->kVector );
+		strcat( tag, "Ho" );
+	}
 
 	// What is the target sequence? If not specified in the command line, use the default.
 	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( targetSequence, target_filename );
@@ -125,23 +133,39 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepTargeted( apparatus, params );
 
-	// Start acquisition and acquire a baseline.
-	apparatus->SignalEvent( "Initiating set of discrete movements." );
-	apparatus->StartAcquisition( "TRGT", maxTrialDuration );
-	
-	// Acquire
-	Sleep( 1000 );
+	// Indicate to the subject that we are ready to start and wait for their go signal.
+	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	if ( status == ABORT_EXIT ) exit( status );
 
+	// Start acquisition and acquire a baseline.
+	// Presumably the manipulandum is not in the hand. 
+	// It should have been left either in a cradle or the retainer at the end of the last action.
+	apparatus->SignalEvent( "Initiating set of discrete movements." );
+	apparatus->StartFilming( tag );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
+	apparatus->Wait( baselineDuration );
+	
 	// Instruct subject to take the specified mass.
-	//  and wait for confimation that he or she is ready.
+	// If the correct mass is already on the manipulandum and out of the cradle, 
+	//  this will move right on to the next step.
 	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Wait until the subject gets to the target before moving on.
-	char *wait_at_target_message = "Too long to reach desired target.";
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, wait_at_target_message ); 
+	// Check that the grip is properly centered.
+	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
+
+	// Wait until the subject gets to the target before moving on.
+	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
+	apparatus->TargetsOff();
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0] , targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget ); 
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Collect some data while holding at the starting position.
+	apparatus->Wait( baselineDuration );
 
 	// Make sure that the target is turned back on if a timeout occured.
 	// Normally this won't do anything.
@@ -152,10 +176,13 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Collect basline data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
+	apparatus->ShowStatus( "Move quickly to each lighted target. Wait for each beep. Stop at each target.", "working.bmp" );
+
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 
 	// Step through the list of targets.
+	apparatus->fComment( "Targets: %d", targetSequenceN );
 	for ( int target = 1; target < targetSequenceN; target++ ) {
 		
 		// Light up the next target, and mark the event for post hoc analysis.
@@ -172,38 +199,42 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );
 
-	// Collect one final second of data.
-	apparatus->Wait( baselineDuration );
-	
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	BlinkAll( apparatus );
 	BlinkAll( apparatus );
 	status = apparatus->WaitSubjectReady( "cradles.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
-
-	if ( status == ABORT_EXIT ) exit( status );
+	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
-	apparatus->Wait( 1.0 );
-
-	// Stop collecting data.
-	apparatus->ShowStatus( "Retrieving data ...", "working.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
+	apparatus->Wait( baselineDuration );
+	
+	// Stop acquiring.
+	apparatus->StopFilming();
 	apparatus->StopAcquisition();
+	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->HideStatus();
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+	int n_post_hoc_steps = 2;
+	int post_hoc_step = 0;
 	
+	
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, direction_vector, "Movement amplitude out of range." );
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
+	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// TODO: Are there more post hoc tests to be done here?
 
-	apparatus->HideStatus();
-	
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
+
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( "ok.bmp", "Block terminated normally." );
-	if ( status == ABORT_EXIT ) exit( status );
+	// The first NULL parameter says to use the default picture.
+	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
 	
 	return( NORMAL_EXIT );
 	

@@ -62,7 +62,7 @@ char outputScript[256] = "DexSampleScript.dex";
 char *MsgReadyToStart = "We are ready to start.\nPlace the manipulandum in any cradle.\nRemove hand and press <OK> to start.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
 char *MsgTooLongToReachTarget = "Too long to reach desired target.";
-char *MsgCheckGripCentered = "Make sure that the grip is centered.";
+char *MsgCheckGripCentered = "Pick up the manipulandum with mass attached. Adjust until the grip is centered.";
 char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
 char *MsgTrialOver = "Trial terminated.\nPlease place the maniplandum in the empty cradle.";
 char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
@@ -108,7 +108,7 @@ void AddDirective( DexApparatus *apparatus, const char *directive, const char *p
 void ShowDirectives( DexApparatus *apparatus ) {
 
 	for ( int i = 0; i < n_directives; i++ ) {
-		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): %s%s", i + 1, n_directives, directive_text[i], OkToContinue );
+		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): (Don't start yet)\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
 		if ( status == ABORT_EXIT ) exit( status );
 	}
 }
@@ -157,8 +157,12 @@ DexMass ParseForMass ( const char *cmd ) {
 
 DexSubjectPosture ParseForPosture ( const char *cmd ) {
 	if ( !cmd ) return( PostureIndifferent );
-	if ( strstr( cmd, "-sup" )) return( PostureSupine );
-	else if ( strstr( cmd, "-up" )) return( PostureSeated );
+	if ( strstr( cmd, "-supine" )) return( PostureSupine );
+	else if ( strstr( cmd, "-Supine" )) return( PostureSupine );
+	else if ( strstr( cmd, "-upright" )) return( PostureSeated );
+	else if ( strstr( cmd, "-Upright" )) return( PostureSeated );
+	else if ( strstr( cmd, "-seated" )) return( PostureSeated );
+	else if ( strstr( cmd, "-Seated" )) return( PostureSeated );
 	else return( PostureSeated );
 }
 
@@ -166,7 +170,9 @@ DexSubjectPosture ParseForPosture ( const char *cmd ) {
 int ParseForEyeState ( const char *cmd ) {
 	if ( !cmd ) return( OPEN );
 	if ( strstr( cmd, "-open" ) ) return( OPEN );
-	else if ( strstr( cmd, "-close" ) ) return( CLOSED );
+	else if ( strstr( cmd, "-Open" ) ) return( OPEN );
+	else if ( strstr( cmd, "-closed" ) ) return( CLOSED );
+	else if ( strstr( cmd, "-Closed" ) ) return( CLOSED );
 	else return( OPEN );
 }
 
@@ -232,10 +238,6 @@ int LoadSequence(  int *sequence, const char *filename ) {
 		*ptr = 0; // Terminate the name at the start of the specifier.
 		specifier = ptr + 1;
 		if ( 2 == sscanf( specifier, "%d%s", &index, subject_size_string ) ) {
-			sequences = N_SEQUENCES;
-			sizes = N_SIZES;
-		}
-		else if ( 2 == sscanf( specifier, "%s%d", subject_size_string, &index ) ) {
 			sequences = N_SEQUENCES;
 			sizes = N_SIZES;
 		}
@@ -365,10 +367,6 @@ int LoadSequence(  double *sequence, const char *filename ) {
 		*ptr = 0; // Terminate the name at the start of the specifier.
 		specifier = ptr + 1;
 		if ( 2 == sscanf( specifier, "%d%s", &index, subject_size_string ) ) {
-			sequences = N_SEQUENCES;
-			sizes = N_SIZES;
-		}
-		else if ( 2 == sscanf( specifier, "%s%d", subject_size_string, &index ) ) {
 			sequences = N_SEQUENCES;
 			sizes = N_SIZES;
 		}
