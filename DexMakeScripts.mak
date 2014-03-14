@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= $(SOURCE)\DexMakeScripts.mak ForceOffsets.dex FrictionTest.dex InstallUpright.dex InstallSupine.dex ShowPictures.dex 
+SCRIPTS		= $(SOURCE)\DexMakeScripts.mak ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex InstallUpright.dex InstallSupine.dex ShowPictures.dex 
 PROTOCOLS	= prot_joe.dex DexDynamicsSmall.dex
 SESSIONS	= session_joe.dex
 
@@ -29,8 +29,11 @@ $(COMPILER): ..\DexSimulatorApp\debug\DexSimulatorApp.exe
 ForceOffsets.dex:	DexSimulatorApp.exe
 	$(COMPILER) -offsets -compile=ForceOffsets.dex
 
-FrictionTest.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -compile=FrictionTest.dex
+FrictionTest0p5.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=0.5 -filter=10.0 -compile=FrictionTest0p5.dex
+
+FrictionTest1p5.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=1.5 -filter=10.0 -compile=FrictionTest1p5.dex
 
 InstallUpright.dex:	DexSimulatorApp.exe
 	$(COMPILER) -install -upright -compile=InstallUpright.dex

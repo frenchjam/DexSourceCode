@@ -6,6 +6,6 @@ CMD_USER,7,1234,sessionY.dex,User Y
 CMD_USER,8,1234,sessionX.dex,User X2
 CMD_USER,9,1234,sessionY.dex,User Y2
 CMD_USER,1,1,sessionCadmos.dex,CADMOS
-CMD_USER,2,1234,sessionScience.dex,SCIENCE
+CMD_USER,2,1234,session_joe.dex,SCIENCE
 CMD_USER,3,1703,session_joe.dex,Joe
 #end

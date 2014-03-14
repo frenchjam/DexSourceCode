@@ -71,6 +71,8 @@ int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd );
 double ParseForFrequency ( DexApparatus *apparatus, const char *cmd );
 double ParseForDuration ( DexApparatus *apparatus, const char *cmd );
+double ParseForPinchForce( DexApparatus *apparatus, const char *cmd );
+double ParseForFilterConstant( DexApparatus *apparatus, const char *cmd );
 
 //int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );

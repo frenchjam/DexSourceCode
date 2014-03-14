@@ -181,6 +181,8 @@ bool ParseForBool( const char *cmd, const char *flag ) {
 	if ( strstr( cmd, flag ) ) return( true );
 	else return( false );
 }
+
+
 bool ParseForPrep ( const char *cmd ) {
 	return( ParseForBool( cmd, "-prep" ) );
 }
@@ -468,6 +470,18 @@ double ParseForDuration ( DexApparatus *apparatus, const char *cmd ) {
 	double duration;
 	if ( !_isnan( duration = ParseForDouble( apparatus, cmd, "-duration" ) ) ) return( duration );
 	else return( 30.0 );
+}
+
+double ParseForPinchForce( DexApparatus *apparatus, const char *cmd ) {
+	double pinch;
+	if ( !_isnan( pinch = ParseForDouble( apparatus, cmd, "-pinch" ) ) ) return( pinch );
+	else return( 0.0 );
+}
+
+double ParseForFilterConstant( DexApparatus *apparatus, const char *cmd ) {
+	double filter;
+	if ( !_isnan( filter = ParseForDouble( apparatus, cmd, "-filter" ) ) ) return( filter );
+	else return( 1.0 );
 }
 
 #if 0

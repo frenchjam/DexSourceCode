@@ -19,10 +19,7 @@ set task=200
 ECHO "#DEX protocol file for Dynamics protocol."
 ECHO "#Format: "CMD_TASK", task id, task file, display name"
 
-REM Create a sequence of blocks for vertical targeted movements.
-set mass=400gm
-set params=-targeted -%mass% -%posture% -vertical
-
+REM Standard tasks at the start of a subsession.
 set /A "task=task+1"
 echo CMD_TASK,%task%,InstallUpright.dex,%task% Install
 
@@ -30,9 +27,14 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest.dex,%task% Friction Test
+echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+
+set /A "task=task+1"
+echo CMD_TASK,%task%,FrictionTest1p5.dex,%task% Friction 1.5
 
 REM Targeted movements in the vertical direction.
+set mass=400gm
+set params=-targeted -%mass% -%posture% -vertical
 set seq=0
 
 set /A "task=task+1"
@@ -47,7 +49,9 @@ set filename=Tg%pstr%Vert%mass%%size%%seq%.dex
 %COMPILER% %params% -targets=TargetedTargetsVertical.txt:%seq%%sz% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Targeted Vert %seq%
 
-REM Targeted movements in the horizontal direction.
+REM Targeted movements in the vertical direction.
+set mass=400gm
+set params=-targeted -%mass% -%posture% -horizontal
 set seq=0
 
 set /A "task=task+1"

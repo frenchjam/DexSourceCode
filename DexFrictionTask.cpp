@@ -26,14 +26,10 @@ double frictionTimeout = 200.0;
 
 // GF=0.5N 3x, 1N 2x, 2N 2x, 4N 1x
 double gripTarget= 4.0; //0.5 or 1.0 or 2.0 or 4.0
-double frictionMinGrip = 0.75*gripTarget;
-double frictionMaxGrip = 1.25*gripTarget;
-double frictionMinLoad = 0.0;
-double frictionMaxLoad = 0.0;
-double forceFilterConstant = 1.0;
 
 // Define the pull direction. This should be up.
 Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
+double forceFilterConstant = 5.0;
 
 double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
 double slipTimeout = 10.0;		// How long should we wait for a slip?
@@ -53,6 +49,22 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// The following routine does that, but it will have no effect on the real
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
 	if ( apparatus->adc ) apparatus->adc->AllowPollingDuringAcquisition();
+
+	gripTarget = ParseForPinchForce( apparatus, params );
+	double frictionMinGrip = 0.75 * gripTarget;
+	double frictionMaxGrip = 1.25 * gripTarget;
+	double frictionMinLoad = 0.0;
+	double frictionMaxLoad = 0.0;
+	forceFilterConstant = ParseForFilterConstant( apparatus, params );
+	double threshold = min( copForceThreshold, gripTarget * 0.9 );
+
+	fprintf( stderr, "Friction Measurement: Target grip force: %f\n", gripTarget );
+	fprintf( stderr, "Friction Measurement: Filter constant:   %f\n", forceFilterConstant );
+
+	if ( ParseForPrep( params ) ) {
+		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame." );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	}
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
 	AddDirective( apparatus, "You will first pinch the manipulandum while it remains in the retainer.", "pinch.bmp" );

@@ -49,6 +49,22 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
+	// Prompt the subject to put the target mast in the correct position.
+	if ( bar_position == TargetBarRight ) {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "SupineInUse.bmp" ), 
+			"Place the target mast in the right position.%s", OkToContinue );
+	}
+	else {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "SupineAside.bmp" ), 
+			"Place the target mast in the left position.%s", OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
@@ -60,8 +76,10 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Prompt the subject to stow the tapping surfaces.
-	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
-	if ( status == ABORT_EXIT ) exit( status );
+	if ( bar_position == TargetBarRight ) {
+		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+	}
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
@@ -124,14 +142,16 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// What is the target sequence? If not specified in the command line, use the default.
 	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( targetSequence, target_filename );
 
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
-
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepTargeted( apparatus, params );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	else {
+		status = CheckInstall( apparatus, posture, bar_position );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
@@ -176,7 +196,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Collect basline data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
-	apparatus->ShowStatus( "Move quickly to each lighted target. Wait for each beep. Stop at each target.", "working.bmp" );
+	apparatus->ShowStatus( "Move quickly to each lighted target. Don't start early. Stop at each target.", "working.bmp" );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
@@ -209,13 +229,13 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 	// Stop acquiring.
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition();
-	apparatus->SignalEvent( "Acquisition terminated." );
-	apparatus->HideStatus();
 	
 	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+	apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
 	int n_post_hoc_steps = 2;
 	int post_hoc_step = 0;
 	
