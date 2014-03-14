@@ -801,6 +801,18 @@ void DexApparatus::SignalEvent( const char *msg ) {
 // Does nothing in execution mode.
 // Will be replaced by the compiler to add comments in the script files.
 void DexApparatus::Comment( const char *txt ) {}
+void DexApparatus::fComment( const char* format, ... ) {
+
+	va_list args;
+	char message[10240];
+	
+	va_start(args, format);
+	vsprintf(message, format, args);
+	va_end(args);
+
+	Comment( message );
+
+}
 
 // Log events locally, for use by post hoc tests.
 
