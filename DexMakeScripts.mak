@@ -7,14 +7,14 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= $(SOURCE)\DexMakeScripts.mak ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex InstallUpright.dex InstallSupine.dex ShowPictures.dex 
-PROTOCOLS	= prot_joe.dex DexDynamicsSmall.dex
-SESSIONS	= session_joe.dex
+SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
+SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
 
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
 
-all: DexSimulatorApp.exe $(SCRIPTS) $(PROTOCOLS) $(SESSIONS) users.dex
+all: DexSimulatorApp.exe $(SCRIPTS) $(PROTOCOLS) $(SESSIONS) $(SOURCE)\DexMakeScripts.mak users.dex
 	del /Q $(DESTINATION)\*.dex
 	copy /Y /V *.dex $(DESTINATION) 
 	echo "Last build: " %date% %time% > all
@@ -35,10 +35,10 @@ FrictionTest0p5.dex:	DexSimulatorApp.exe
 FrictionTest1p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=1.5 -filter=10.0 -compile=FrictionTest1p5.dex
 
-InstallUpright.dex:	DexSimulatorApp.exe
+InstallUprightTask.dex:	DexSimulatorApp.exe
 	$(COMPILER) -install -upright -compile=InstallUpright.dex
 
-InstallSupine.dex:	DexSimulatorApp.exe
+InstallSupineTask.dex:	DexSimulatorApp.exe
 	$(COMPILER) -install -supine -compile=InstallSupine.dex
 
 ShowPictures.dex:	DexSimulatorApp.exe
@@ -47,16 +47,38 @@ ShowPictures.dex:	DexSimulatorApp.exe
 DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
 	$(SOURCE)\DexGenerateDynamics.bat Upright Sml > DexDynamicsSmall.dex
 
+DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
+	$(SOURCE)\DexGenerateDynamics.bat Upright Med > DexDynamicsMedium.dex
+
+DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
+	$(SOURCE)\DexGenerateDynamics.bat Upright Lrg > DexDynamicsLarge.dex
+
 # Get the scripts that are edited by hand.
 
-prot_joe.dex:	$(STATICSCRIPTS)\prot_joe.dex
-	copy /Y $(STATICSCRIPTS)\prot_joe.dex
+UtilitiesProtocol.dex: $(STATICSCRIPTS)\UtilitiesProtocol.dex
+	copy /Y $(STATICSCRIPTS)\UtilitiesProtocol.dex
 
-session_joe.dex:	$(STATICSCRIPTS)\session_joe.dex
-	copy /Y $(STATICSCRIPTS)\session_joe.dex
+InstallUprightProtocol.dex: $(STATICSCRIPTS)\InstallUprightProtocol.dex
+	copy /Y $(STATICSCRIPTS)\InstallUprightProtocol.dex
+
+InstallSupineProtocol.dex: $(STATICSCRIPTS)\InstallSupineProtocol.dex
+	copy /Y $(STATICSCRIPTS)\InstallSupineProtocol.dex
+
+SessionSmallSubject.dex:	$(STATICSCRIPTS)\SessionSmallSubject.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubject.dex .
+
+SessionMediumSubject.dex:	$(STATICSCRIPTS)\SessionMediumSubject.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubject.dex .
+
+SessionLargeSubject.dex:	$(STATICSCRIPTS)\SessionLargeSubject.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubject.dex .
+
+SessionUtilitiesOnly.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex
+	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .
+
 
 users.dex:	$(STATICSCRIPTS)\users.dex
-	copy /Y $(STATICSCRIPTS)\users.dex
+	copy /Y $(STATICSCRIPTS)\users.dex .
 
 clean:
 	echo nothing > __dummy.dex

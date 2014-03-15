@@ -1,11 +1,11 @@
 #DEX sample user file
 #Format: "CMD_USER", user id, pin code, session file, display name
-CMD_USER,10,1234,sessionDemo.dex,Demo
-CMD_USER,5,1234,sessionX.dex,User X
-CMD_USER,7,1234,sessionY.dex,User Y
-CMD_USER,8,1234,sessionX.dex,User X2
-CMD_USER,9,1234,sessionY.dex,User Y2
-CMD_USER,1,1,sessionCadmos.dex,CADMOS
-CMD_USER,2,1234,session_joe.dex,SCIENCE
-CMD_USER,3,1703,session_joe.dex,Joe
+CMD_USER,11,123,SessionSmall.dex,Small Subject
+CMD_USER,12,456,SessionMedium.dex,Medium Subject
+CMD_USER,13,789,SessionLarge.dex,Large Subject
+CMD_USER,99,987,SessionUtilitiesOnly.dex,Maintenance
+CMD_USER,50,1234,sessionDemo.dex,Demo
+CMD_USER,51,1,sessionCadmos.dex,CADMOS
+CMD_USER,52,1706,SessionMedium.dex,Joe
+
 #end

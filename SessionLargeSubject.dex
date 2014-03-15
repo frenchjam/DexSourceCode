@@ -1,0 +1,7 @@
+#DEX sample session file
+#Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+CMD_PROTOCOL,401,DexDynamicsLarge.dex,Dynamics
+CMD_PROTOCOL,101,InstallUprightProtocol.dex,Install for Seated
+CMD_PROTOCOL,102,InstallSupineProtocol.dex,Install for Supine
+CMD_PROTOCOL,100,UtilitiesProtocol.dex,Utilities
+#end
