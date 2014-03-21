@@ -91,12 +91,12 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( eyes == OPEN )	{
 		AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
 		AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
-		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", "needpic.bmp" );
+		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", "DiscreteV.bmp" );
 	}
 	else {
 		AddDirective( apparatus, "To start, you will move to the target that is blinking, then CLOSE your eyes.", mtb );
 		AddDirective( apparatus, "On each beep, move quickly and accurately to the other (remembered) target location.", dsc );
-		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", "needpic.bmp" );
+		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", "DiscreteH.bmp" );
 	}
 	ShowDirectives( apparatus );
 
@@ -165,7 +165,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

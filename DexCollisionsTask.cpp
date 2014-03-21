@@ -1,11 +1,11 @@
 /*********************************************************************************/
 /*                                                                               */
-/*                             DexOscillationsTask.cpp                           */
+/*                             DexCollisionsTask.cpp                           */
 /*                                                                               */
 /*********************************************************************************/
 
 /*
- * Performs a set of point-to-point target movements to a sequence of targets.
+ * Performs a set of collisions to the unfolded pad.
  */
 
 #include <windows.h>
@@ -67,7 +67,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
-	AddDirective( apparatus, "You should move to the center target whenever it is blinking.", "MoveToBlinking.bmp" );
+	AddDirective( apparatus, "You should move to the center target whenever it is blinking.", "MvToBlkV.bmp" );
 	AddDirective( apparatus, "You should then tap up or down according to the beeps and lights.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
@@ -120,7 +120,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForPrep( params ) ) PrepCollisions( apparatus, params );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "ReadytoStart.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

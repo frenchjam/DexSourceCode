@@ -1147,7 +1147,7 @@ int DexApparatus::SelectAndCheckMass( int mass ) {
 			}
 
 			// Cannot have a cradle-specific picture.
-			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"cradles.bmp" , "DexApparatus", "Take the mass with the manipulandum from cradle %s.\nPress RETRY when ready.", cradle );
+			answer = fIllustratedMessageBox( MB_ABORTRETRYIGNORE,"TakeMass.bmp" , "DexApparatus", "Take the mass with the manipulandum from cradle %s.\nPress RETRY when ready.", cradle );
 
 		}
 	} while ( answer == IDRETRY );

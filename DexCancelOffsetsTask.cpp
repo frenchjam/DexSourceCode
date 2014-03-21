@@ -38,12 +38,9 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	apparatus->ShowStatus( "Preparing for force offset acquisition ...", "wait.bmp" );
 
 	// Perhaps we could combine the next two instructions into a single one. Would need to change the picture.
-	status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "Place manipulandum in the retainer.%s", OkToContinue );
+	status = apparatus->fWaitSubjectReady( "OffsetMeasurement.bmp", "Place manipulandum in a cradle or in the retainer and remove hand during sensors offsets.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) return( status );
 	
-	status = apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand during sensor offset measurement.%s", OkToContinue );
-	if ( status == ABORT_EXIT ) return( status );
-
 	// Acquire some data.
 		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
 	apparatus->StartAcquisition( "OFFS", maxTrialDuration );

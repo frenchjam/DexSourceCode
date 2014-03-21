@@ -25,11 +25,21 @@ ECHO "#Generated: " %date% %time%
 
 REM Standard tasks at the start of a subsession.
 REM We assume that the scripts have already been constructed.
+
+REM Perform the install of the equipment in the upright (seated) position.
+REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
 echo CMD_TASK,%task%,InstallUpright.dex,%task% Install
 
+REM The force sensor offsets are also supressed at the start for each subject.
 set /A "task=task+1"
 echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets
+
+REM
+REM Coefficient of Friction tests.
+REM
+REM Need to define how many to be done and at what desired grip force.
+REM We also need to decide on the method.
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
