@@ -51,12 +51,12 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target mast in the correct position.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "SupineInUse.bmp" ), 
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "BarRight.bmp" ), 
 			"Place the target mast in the right position.%s", OkToContinue );
 	}
 	else {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "SupineAside.bmp" ), 
-			"Place the target mast in the left position.%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "BarLeft.bmp" ), 
+			"Place the target bar in the left position.%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -154,7 +154,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

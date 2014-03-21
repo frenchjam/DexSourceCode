@@ -177,7 +177,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForPrep( params ) ) PrepOscillations( apparatus, params );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
