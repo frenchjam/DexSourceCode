@@ -58,8 +58,9 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	forceFilterConstant = ParseForFilterConstant( apparatus, params );
 	double threshold = min( copForceThreshold, gripTarget * 0.9 );
 
-	fprintf( stderr, "Friction Measurement: Target grip force: %f\n", gripTarget );
-	fprintf( stderr, "Friction Measurement: Filter constant:   %f\n", forceFilterConstant );
+	fprintf( stderr, "     RunFrictionMeasurement: %s\n", params );
+	// fprintf( stderr, "Friction Measurement: Target grip force: %f\n", gripTarget );
+	// fprintf( stderr, "Friction Measurement: Filter constant:   %f\n", forceFilterConstant );
 
 	if ( ParseForPrep( params ) ) {
 		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame." );

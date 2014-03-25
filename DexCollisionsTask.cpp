@@ -96,6 +96,8 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	int tone, tgt;
 
+	fprintf( stderr, "     RunCollisions: %s\n", params );
+
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 

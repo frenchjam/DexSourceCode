@@ -116,7 +116,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	char *target_filename;
 	char tag[9] = "Tgtd";
 
-	fprintf( stderr, "RunTargeted: %s\n", params );
+	fprintf( stderr, "     RunTargeted: %s\n", params );
 	 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );

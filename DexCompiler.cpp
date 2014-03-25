@@ -97,7 +97,7 @@ void DexCompiler::Initialize( void ) {
 	nextStep = 1;
 
 	// Show warnings or not.
-	verbose = true;
+	verbose = false;
 	pause_on_warning = false;
 
 	

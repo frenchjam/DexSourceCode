@@ -136,6 +136,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	char *delay_filename = 0;
 	char tag[5] = "O";	// O is for oscillations.
 
+	fprintf( stderr, "     RunOscillations: %s\n", params );
+
 	// How quickly should it oscillate?
 	frequency = ParseForFrequency( apparatus, params );
 	oscillationPeriod = 1.0 / frequency;
@@ -167,14 +169,16 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		strcat( tag, "H" );
 	}
 
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status == ABORT_EXIT ) return( status );
-
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepOscillations( apparatus, params );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	else {
+		status = CheckInstall( apparatus, posture, bar_position );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );

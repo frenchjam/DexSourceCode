@@ -68,7 +68,7 @@ char *MsgTrialOver = "Trial terminated.\nPlease place the maniplandum in the emp
 char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
 char *MsgQueryReadySeated = "Seated?\nBelts attached?\nWristbox on wrist?%s";
 char *MsgQueryReadySupine = "Lying Down?\nBelts attached?\nWristbox on wrist?%s";
-char *InstructPickUpManipulandum = "You will first pick up the manipulandum with\nthumb and index finger centered.";
+char *InstructPickUpManipulandum = "You will first pick up the manipulandum with thumb and index finger centered.";
 char *OkToContinue ="";
 
 /*********************************************************************************/
@@ -594,7 +594,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
 
-
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.
 	// Here we also give the opportunity to execute it in addition to another specified task, 
@@ -625,9 +624,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	// Now we create the component devices. This need not be done if we are in compiler mode.
 
 	if ( !compile ) {
-
-		// Create a window for plotting the data.
-		DexInitPlots();
 
 		// Create a window to work in.
 		work_dlg = DexInitGUI( hInstance );
@@ -718,6 +714,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	else apparatus = new DexCompiler( outputScript );
 
+
+
 	// Run the initialization for the apparatus (or compiler).
 	apparatus->Initialize();
 
@@ -784,7 +782,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = ShowPictures( apparatus, lpCmdLine ) ) );
 		break;
 	}
-	if ( return_code != ABORT_EXIT && !compile ) DexPlotData( apparatus );
+	if ( return_code != ABORT_EXIT && !compile ) {
+		// Create a window for plotting the data.
+		DexInitPlots();		
+		DexPlotData( apparatus );
+	}
 	
 	SaveGUIState();
 	apparatus->Quit();

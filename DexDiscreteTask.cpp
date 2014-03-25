@@ -123,6 +123,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	char *delay_filename = 0;
 	char tag[8] = "Ds";			// D is for discrete.
 
+	fprintf( stderr, "     RunDiscrete: %s\n", params );
+
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 

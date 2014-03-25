@@ -77,6 +77,7 @@ char PictureFilenamePrefix[] = "..\\DexPictures\\";
 
 void DexInitPlots ( void ) {
 
+
 	display = DefaultDisplay();
 	DisplaySetSizePixels( display, plot_screen_width, plot_screen_height );
 	DisplaySetScreenPosition( display, plot_screen_left, plot_screen_top );
