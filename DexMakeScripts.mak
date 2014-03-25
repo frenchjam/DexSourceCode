@@ -50,21 +50,25 @@ InstallSupineTask.dex:	DexSimulatorApp.exe
 
 ### Dynamics Protocol
 DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Supine Sml > DexDynamicsSmall.dex
+	$(SOURCE)\DexGenerateDynamics.bat Upright Sml > DexDynamicsSmall.dex
 DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Supine Med > DexDynamicsMedium.dex
+	$(SOURCE)\DexGenerateDynamics.bat Upright Med > DexDynamicsMedium.dex
 DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Supine Lrg > DexDynamicsLarge.dex
+	$(SOURCE)\DexGenerateDynamics.bat Upright Lrg > DexDynamicsLarge.dex
 
 ### Seated Protocol
 DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Sml > DexSeatedSmall.dex
 DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Med > DexSeatedMedium.dex
+
+
+
 DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Lrg > DexSeatedLarge.dex
 
 ### Supine Protocol
+
 DexSupineSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Supine Sml > DexSupineSmall.dex
 DexSupineMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat

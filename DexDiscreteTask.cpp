@@ -54,11 +54,11 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target mast in the correct position.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "BarRight.bmp" ), 
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarRight.bmp" : "BarRight.bmp" ), 
 			"Place the target mast in the right position.%s", OkToContinue );
 	}
 	else {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "BarLeft.bmp" ), 
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
 			"Place the target bar in the left position.%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );

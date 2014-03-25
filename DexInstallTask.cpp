@@ -187,7 +187,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Visibility OK." );
 	apparatus->Wait( 1.0 );
 
-	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame." );
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Check that locker door is now well closed and move the manipulandum up to the retainer on the target frame." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 

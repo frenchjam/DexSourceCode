@@ -370,7 +370,7 @@ int DexCompiler::SelectAndCheckMass( int mass ) {
 	else mass_id = 1;
 
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass, cradles.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
+	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass, TakeMass.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
 	return( NORMAL_EXIT );
 }
 
