@@ -97,6 +97,12 @@ call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set range=OscillationRangesReducedVertical.txt:%sz%
+set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
+call :DO_ONE_OSCILLATION_TRIAL
+
+set mass=400gm
+set frequency=0.75
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
@@ -107,8 +113,8 @@ set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
-set frequency=0.75
-set range=OscillationRangesReducedVertical.txt:%sz%
+set frequency=1.5
+set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
@@ -166,6 +172,12 @@ call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set range=OscillationRangesReducedVertical.txt:%sz%
+set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
+call :DO_ONE_OSCILLATION_TRIAL
+
+set mass=400gm
+set frequency=0.75
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
@@ -176,8 +188,8 @@ set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
-set frequency=0.75
-set range=OscillationRangesReducedVertical.txt:%sz%
+set frequency=1.5
+set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
