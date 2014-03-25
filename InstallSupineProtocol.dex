@@ -1,7 +1,7 @@
 # DEX Protocol to be run once when changing to Supine configuration.
 # Format: "CMD_TASK", task id, task file, display name
 # Instruct how to arrange the seat, target bar, etc. and do the CODA alignment.
-CMD_TASK,102,InstallSupineScript.dex,Install - Supine Configuration
+CMD_TASK,102,InstallSupine.dex,Install - Supine Configuration
 # Cancel the force offsets.
 CMD_TASK,103,ForceOffsets.dex,Force Offset Cancellation
 #end

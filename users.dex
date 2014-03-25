@@ -1,8 +1,8 @@
 #DEX sample user file
 #Format: "CMD_USER", user id, pin code, session file, display name
-CMD_USER,11,123,SessionSmall.dex,Small Subject
-CMD_USER,12,456,SessionMedium.dex,Medium Subject
-CMD_USER,13,789,SessionLarge.dex,Large Subject
+CMD_USER,11,123,SessionSmallSubject.dex,Small Subject
+CMD_USER,12,456,SessionMediumSubject.dex,Medium Subject
+CMD_USER,13,789,SessionLargeSubject.dex,Large Subject
 CMD_USER,99,987,SessionUtilitiesOnly.dex,Maintenance
 CMD_USER,50,1234,sessionDemo.dex,Demo
 CMD_USER,51,1,sessionCadmos.dex,CADMOS
