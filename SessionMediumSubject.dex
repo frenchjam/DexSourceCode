@@ -1,6 +1,8 @@
 #DEX sample session file
 #Format: "CMD_PROTOCOL", protocol id, protocol file, display name
 CMD_PROTOCOL,301,DexDynamicsMedium.dex,Dynamics
+CMD_PROTOCOL,103,DexSeatedMedium.dex, Reference frame Seated
+CMD_PROTOCOL,104,DexSupineMedium.dex, Reference frame Supine
 CMD_PROTOCOL,101,InstallUprightProtocol.dex,Install for Seated
 CMD_PROTOCOL,102,InstallSupineProtocol.dex,Install for Supine
 CMD_PROTOCOL,100,UtilitiesProtocol.dex,Utilities

@@ -61,9 +61,6 @@ DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Sml > DexSeatedSmall.dex
 DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Med > DexSeatedMedium.dex
-
-
-
 DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
 	$(SOURCE)\DexGenerateReferentials.bat Upright Lrg > DexSeatedLarge.dex
 
