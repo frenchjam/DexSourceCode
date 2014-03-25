@@ -8,7 +8,7 @@ SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
 SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
-PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
+PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex DexSeatedSmall.dex DexSeatedMedium.dex DexSeatedLarge.dex DexSupineSmall.dex DexSupineMedium.dex DexSupineLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
 SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
 
 # The following the path to hand-edited scripts. 
@@ -56,6 +56,21 @@ DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
 DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
 	$(SOURCE)\DexGenerateDynamics.bat Supine Lrg > DexDynamicsLarge.dex
 
+### Seated Protocol
+DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Upright Sml > DexSeatedSmall.dex
+DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Upright Med > DexSeatedMedium.dex
+DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Upright Lrg > DexSeatedLarge.dex
+
+### Supine Protocol
+DexSupineSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Supine Sml > DexSupineSmall.dex
+DexSupineMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Supine Med > DexSupineMedium.dex
+DexSupineLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
+	$(SOURCE)\DexGenerateReferentials.bat Supine Lrg > DexSupineLarge.dex
 
 ### Utilities
 UtilitiesProtocol.dex: $(STATICSCRIPTS)\UtilitiesProtocol.dex
