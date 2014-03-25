@@ -77,6 +77,7 @@ double ParseForFilterConstant( DexApparatus *apparatus, const char *cmd );
 //int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPosture &posture, DexTargetBarConfiguration &bar_position, Vector3 &direction_vector, Quaternion &desired_orientation );
 char *ParseForTargetFile ( const char *cmd );
 char *ParseForDelayFile ( const char *cmd );
+char *ParseForRangeFile ( const char *cmd );
 
 #define MAX_SEQUENCE_ENTRIES	1024
 #define N_SEQUENCES	8

@@ -207,6 +207,10 @@ char *ParseForTargetFile ( const char *cmd ) {
 	return( ParseForFilename( cmd, "-targets" ) );
 }
 
+char *ParseForRangeFile ( const char *cmd ) {
+	return( ParseForFilename( cmd, "-range" ) );
+}
+
 char *ParseForDelayFile ( const char *cmd ) {
 	return( ParseForFilename( cmd, "-delays" ) );
 }
