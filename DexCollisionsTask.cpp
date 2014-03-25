@@ -49,6 +49,15 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 	char *target_filename = 0;
 
+	// Prompt the subject to put the target mast in the correct position.
+	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "BarRight.bmp" ), 
+		"Place the target mast in the right position.%s", OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Prompt the subject to deploy the tapping surfaces.
+	status = apparatus->fWaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.%s", OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	posture = ParseForPosture( params );
@@ -61,9 +70,6 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Prompt the subject to deploy the tapping surfaces.
-	status = apparatus->fWaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.%s", OkToContinue );
-	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
@@ -114,8 +120,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
+	else {
+		status = CheckInstall( apparatus, posture, bar_position );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.

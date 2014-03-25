@@ -52,6 +52,26 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
+	// Prompt the subject to put the target mast in the correct position.
+	if ( bar_position == TargetBarRight ) {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "BarRight.bmp" ), 
+			"Place the target mast in the right position.%s", OkToContinue );
+	}
+	else {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "BarLeft.bmp" ), 
+			"Place the target bar in the left position.%s", OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Prompt the subject to stow the tapping surfaces.
+	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
@@ -60,10 +80,6 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	else if ( posture == PostureSupine ) {
 		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
 	}
-	if ( status == ABORT_EXIT ) exit( status );
-
-	// Prompt the subject to stow the tapping surfaces.
-	status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Show them the targets that will be used.
@@ -155,16 +171,18 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delaySequence, delay_filename );
 
 	// What are the limits of each discrete movement?
-	if ( target_filename = ParseForTargetFile( params ) ) LoadTargetRange( discreteTargets, target_filename );
-
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status == ABORT_EXIT ) return( status );
+	if ( target_filename = ParseForRangeFile( params ) ) LoadTargetRange( discreteTargets, target_filename );
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	else {
+		status = CheckInstall( apparatus, posture, bar_position );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );

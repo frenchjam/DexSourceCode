@@ -60,6 +60,12 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// Prompt the subject to stow the tapping surfaces.
+	if ( bar_position == TargetBarRight ) {
+		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+	}
+
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	status = CheckInstall( apparatus, posture, bar_position );
@@ -74,12 +80,6 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
-
-	// Prompt the subject to stow the tapping surfaces.
-	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
-		if ( status == ABORT_EXIT ) exit( status );
-	}
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );

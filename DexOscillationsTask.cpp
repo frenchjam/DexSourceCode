@@ -59,6 +59,28 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
+	// Prompt the subject to put the target mast in the correct position.
+	if ( bar_position == TargetBarRight ) {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitInUse.bmp" : "BarRight.bmp" ), 
+			"Place the target mast in the right position.%s", OkToContinue );
+	}
+	else {
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "SitAside.bmp" : "BarLeft.bmp" ), 
+			"Place the target bar in the left position.%s", OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
+
+	// Prompt the subject to stow the tapping surfaces. Only necessary of doing vertical movement with the target bar on the right.
+	if ( bar_position == TargetBarRight )  {
+		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+	}
+
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
@@ -69,11 +91,6 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Prompt the subject to stow the tapping surfaces. Only necessary of doing vertical movement with the target bar on the right.
-	if ( bar_position == TargetBarRight )  {
-		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
-		if ( status == ABORT_EXIT ) exit( status );
-	}
 
 	// Instruct the subject on the task to be done.
 	
@@ -168,6 +185,9 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		apparatus->CopyVector( oscillationDirection, apparatus->kVector );
 		strcat( tag, "H" );
 	}
+
+	// What are the limits of each oscillatory movement?
+	if ( target_filename = ParseForRangeFile( params ) ) LoadTargetRange( oscillationTargets, target_filename );
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
