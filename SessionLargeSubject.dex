@@ -1,8 +1,10 @@
-#DEX sample session file
-#Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+# Protocols to be proposed to a LARGE subject.
+# Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+# Protocols general: 1XX
+# Protocols specific to large subjects: 3XX
 CMD_PROTOCOL,401,DexDynamicsLarge.dex,Dynamics
-CMD_PROTOCOL,103,DexSeatedLarge.dex, Reference frame Seated
-CMD_PROTOCOL,104,DexSupineLarge.dex, Reference frame Supine
+CMD_PROTOCOL,402,DexSeatedLarge.dex, Reference frame Seated
+CMD_PROTOCOL,403,DexSupineLarge.dex, Reference frame Supine
 CMD_PROTOCOL,101,InstallUprightProtocol.dex,Install for Seated
 CMD_PROTOCOL,102,InstallSupineProtocol.dex,Install for Supine
 CMD_PROTOCOL,100,UtilitiesProtocol.dex,Utilities
