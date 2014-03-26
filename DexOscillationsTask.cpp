@@ -286,10 +286,10 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 
 	// Stop acquiring.
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition();
-	apparatus->SignalEvent( "Acquisition terminated." );
-	apparatus->HideStatus();
 
 	// Check the quality of the data.
 	int n_post_hoc_steps = 3;
