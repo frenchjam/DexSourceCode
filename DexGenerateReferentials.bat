@@ -130,6 +130,8 @@ REM ****************************************************************************
 REM
 REM Collisions
 REM
+set nblocks=5
+call :DO_BLOCK_OF_COLLISIONS
 
 REM ****************************************************************************
 
@@ -236,4 +238,56 @@ REM  that direction, mass and range have been set.
 	set filename=Dsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
 	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -compile=%filename% -%eyes% 
 	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
+	goto :EOF
+
+REM ****************************************************************************
+
+REM Subroutines to generate a block of targeted movement trials.
+REM The first initializes parameters for multiple blocks of trials.
+REM It calls the second one which generates the commands for each block (task).
+
+:DO_BLOCK_OF_COLLISIONS
+
+	REM Provide instructions for first block.
+	REM Subroutine will disable it for subsequent blocks.
+	set prep=-prep
+
+	REM Initialize the block counter. 
+	REM It gets incremented by the subroutine.
+	set seq=0
+
+	REM Procuce the required number of blocks.
+	FOR /L %%s IN ( 1,1,%nblocks% ) DO CALL :DO_ONE_COLLISION
+
+	REM Return to caller.
+	goto :EOF
+
+:DO_ONE_COLLISION
+
+	REM Each repetition is a separate task.
+	set /A "task=task+1"
+
+	REM Each repetition uses a different target sequence.
+	set /A "seq=seq+1"
+
+	REM Shorten some labels so that the filenames are not to long.
+	set sz=%size:~0,1%
+	set pstr=%posture:~0,2%
+
+	REM Put all the paramters together for the compiler.
+	set params=-collisions -%mass% -%posture% -delays=CollisionsSequences.txt:%seq%
+
+	REM Generate a script filename based on the parameters.
+	set filename=Co%pstr%%mass%%size%%seq%.dex
+
+	REM Generate the script to do the task.
+	%COMPILER% %params%  -compile=%filename% %prep%
+
+	REM Record the task in the protocol definition, labelled appropriately.
+	echo CMD_TASK,%task%,%filename%,%task% Collisions %seq%
+
+	REM On subsequent calls within the same block, don't redo the prep.
+	set prep=
+
+	REM Return to caller.
 	goto :EOF
