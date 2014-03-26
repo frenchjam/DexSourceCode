@@ -76,7 +76,7 @@ set dir=%direction:~0,4%
 set duration = 30.0
 
 REM Start the trial counter for the oscillations.
-set seq=0
+set osc_seq=0
 
 set mass=400gm
 set frequency=1.00
@@ -149,9 +149,6 @@ REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
 set duration = 30.0
-
-REM Start the trial counter for the oscillations.
-set seq=0
 
 set mass=400gm
 set frequency=1.00
@@ -272,8 +269,10 @@ REM  that frequency, mass, range, duration and size have been set.
 :DO_ONE_OSCILLATION_TRIAL
 
 	set /A "task=task+1"
-	set /A "seq=seq+1"
-	set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
+	set /A "osc_seq=osc_seq+1"
+	REM Put a leading zero in single digit sequence numbers.
+	if 1%osc_seq% LSS 100 set osc_seq=0%osc_seq%
+	set filename=Osc%pstr%%dir%%mass%%size%%osc_seq%.dex
 	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename%
-	echo CMD_TASK,%task%,%filename%,%task% Oscillations %seq%
+	echo CMD_TASK,%task%,%filename%,%task% Oscillations %osc_seq%
 	goto :EOF
