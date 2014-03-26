@@ -51,7 +51,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	if ( apparatus->adc ) apparatus->adc->AllowPollingDuringAcquisition();
 
 	gripTarget = ParseForPinchForce( apparatus, params );
-	double frictionMinGrip = 0.75 * gripTarget;
+	double frictionMinGrip = 0.85 * gripTarget;
 	double frictionMaxGrip = 1.25 * gripTarget;
 	double frictionMinLoad = 0.0;
 	double frictionMaxLoad = 0.0;
@@ -107,28 +107,35 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// this signal will also occur.
 	apparatus->MarkEvent( SLIP );
 
-#if 0
-	// This is the old version, based on a fixed amount of time for the rubbing motions.
-	// Allow 15 more seconds for the rubbing motion.
-	apparatus->Wait( 15 );
-	// !JMc Not sure what sound would be on.
-	// !JMc Maybe this could be removed.
-	apparatus->SoundOff();
-#else
+	// Use the method of counting slips vs. a fixed number of seconds depending on the desired grip force.
+	// This is a function of the default threshold for the COP calculation, which will eventually be settable.
+	// In the end, though, we will probably choose one method or the other.
+	if ( frictionMinGrip < 2.0 ) {
 
-	// In this version we wait for a certain number of slips to be detected. 
-	// There is a small delay between each call to WaitSlip() with the hopes that
-	//  the same slip will not be detected twice, but even that should not be a problem.
-	for ( int slip = 0; slip < slipMovements; slip++ ) {
-		AnalysisProgress( apparatus, slip, slipMovements, "Keep rubbing. Need more slips." );
-		status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
-				frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-				forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.\n(<Ignore> to keep trying.)", "alert.bmp"  );
-		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-		apparatus->MarkEvent( SLIP );
+		// This is the old version, based on a fixed amount of time for the rubbing motions.
+		// Allow 15 more seconds for the rubbing motion.
+		apparatus->Wait( 15 );
+		// !JMc Not sure what sound would be on.
+		// !JMc Maybe this could be removed.
+		apparatus->SoundOff();
+
 	}
-	AnalysisProgress( apparatus, slipMovements, slipMovements, "Success!" );
-#endif
+	else {
+
+		// In this version we wait for a certain number of slips to be detected. 
+		// There is a small delay between each call to WaitSlip() with the hopes that
+		//  the same slip will not be detected twice, but even that should not be a problem.
+		for ( int slip = 0; slip < slipMovements; slip++ ) {
+			AnalysisProgress( apparatus, slip, slipMovements, "Keep rubbing. Need more slips." );
+			status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
+					frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+					forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.\n(<Ignore> to keep trying.)", "alert.bmp"  );
+			if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+			apparatus->MarkEvent( SLIP );
+		}
+		AnalysisProgress( apparatus, slipMovements, slipMovements, "Success!" );
+
+	}
 	SignalEndOfRecording( apparatus );
 
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Release the maniplandum and press <OK> to continue." );
