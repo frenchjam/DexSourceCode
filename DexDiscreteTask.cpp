@@ -295,8 +295,13 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// But this post hoc test was designed for the oscillations protocol. 
 	// So we will have half as many cycles as the number of expected movements.
 	int tolerance = 5;
+	int fewest = delaySequenceN / 2 - tolerance;
+	if (fewest < 1) fewest = 1;
+	int most = delaySequenceN / 2 + tolerance;
+	if ( most < 1 ) most = 1;
+
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for number of movements ..." );
-	status = apparatus->CheckMovementCycles( delaySequenceN / 2 - tolerance, delaySequenceN / 2 + tolerance, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?" );
+	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Did the subject anticipate the starting signal too often?
