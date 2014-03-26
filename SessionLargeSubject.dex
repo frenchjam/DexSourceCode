@@ -1,7 +1,7 @@
 # Protocols to be proposed to a LARGE subject.
 # Format: "CMD_PROTOCOL", protocol id, protocol file, display name
 # Protocols general: 1XX
-# Protocols specific to large subjects: 3XX
+# Protocols specific to large subjects: 4XX
 CMD_PROTOCOL,401,DexDynamicsLarge.dex,Dynamics
 CMD_PROTOCOL,402,DexSeatedLarge.dex, Reference frame Seated
 CMD_PROTOCOL,403,DexSupineLarge.dex, Reference frame Supine
