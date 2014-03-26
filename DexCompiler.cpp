@@ -282,7 +282,7 @@ int	DexCompiler::WaitDesiredForces( float min_grip, float max_grip,
 	AddStepNumber();
 	fprintf( fp, "CMD_WAIT_MANIP_GRIPFORCE, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f, %s, %s\n",
 		min_grip, max_grip, min_load, max_load, direction[X], direction[Y], direction[Z], 
-		hold_time * 10.0, timeout, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
+		hold_time * 1000.0, timeout, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 
 	return( NORMAL_EXIT );
 }
