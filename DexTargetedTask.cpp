@@ -74,15 +74,15 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Seated?   Belts attached?   Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
 	}
 	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lying Down?  Belts attached?  Wristbox on wrist?%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
-	AddDirective( apparatus, "You will first pick up the manipulandum with\nthumb and index finger centered.", "InHand.bmp" );
+	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
 		dsc = "TargetedV.bmp";
@@ -239,11 +239,12 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	int n_post_hoc_steps = 2;
 	int post_hoc_step = 0;
 	
-	
+	// Was the manipulandum obscured?	
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
+	// Check that we got a reasonable amount of movement.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
 	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
