@@ -21,7 +21,7 @@
 /*********************************************************************************/
 
 // Coefficient of friction test parameters.
-double frictionHoldTime = 2.0;
+double frictionHoldTime = 3.0; //en seconde
 double frictionTimeout = 200.0;
 
 // GF=0.5N 3x, 1N 2x, 2N 2x, 4N 1x
