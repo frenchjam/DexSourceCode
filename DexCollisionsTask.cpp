@@ -231,10 +231,10 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( 1.0 );
 
 	// Stop acquiring.
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition();
-	apparatus->SignalEvent( "Acquisition terminated." );
-	apparatus->HideStatus();
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
@@ -242,17 +242,17 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum occluded too often." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check if trial was completed as instructed.
 	apparatus->ShowStatus( "Checking movement directions ..." );
-	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold );
+	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction." );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
 	apparatus->ShowStatus( "Checking collision forces ..." );
-	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance );
+	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside acceptable range." );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.

@@ -270,24 +270,24 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 	// Stop acquiring.
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition();
-	apparatus->SignalEvent( "Acquisition terminated." );
-	apparatus->HideStatus();
 	
 	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+	apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
 	int n_post_hoc_steps = 4;
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, NULL );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
-	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, NULL );
+	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, "Movement amplitude out of range." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
