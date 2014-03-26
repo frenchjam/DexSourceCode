@@ -442,7 +442,13 @@ int LoadSequence(  double *sequence, const char *filename ) {
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd ) {
 
 	int direction = VERTICAL;
-	if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
+	if ( strstr( cmd, "-vertical" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-Vertical" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-vert" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-ver" ) ) direction = VERTICAL;
+	else if ( strstr( cmd, "-Horizontal" ) ) direction = HORIZONTAL;
+	else if ( strstr( cmd, "-horizontal" ) ) direction = HORIZONTAL;
+	else if ( strstr( cmd, "-hori" ) ) direction = HORIZONTAL;
 	else if ( strstr( cmd, "-hor" ) ) direction = HORIZONTAL;
 	return( direction );
 
