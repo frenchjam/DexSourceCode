@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
 PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex DexSeatedSmall.dex DexSeatedMedium.dex DexSeatedLarge.dex DexSupineSmall.dex DexSupineMedium.dex DexSupineLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
 SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
 
@@ -34,6 +34,8 @@ FrictionTest0p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=0.5 -filter=10.0 -compile=FrictionTest0p5.dex
 FrictionTest1p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=1.5 -filter=10.0 -compile=FrictionTest1p5.dex
+FrictionTest2p5.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=2.5 -filter=10.0 -compile=FrictionTest2p5.dex
 
 ### Configuration of DEX hardware.
 InstallUprightTask.dex:	DexSimulatorApp.exe
