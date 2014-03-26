@@ -64,6 +64,8 @@ echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p5.dex,%task% Friction 1.5
 
+set /A "task=task+1"
+echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
 
 REM ****************************************************************************
 
@@ -77,15 +79,17 @@ set frequency=1.00
 set duration = 30.0
 
 REM Start the trial counter for the oscillations.
-set seq=0
+set osc_seq=200
 
 set direction=Vertical
 set eyes=open
+set prep=-prep
 set range=OscillationRangesNominalVertical.txt:%sz% -prep
 call :DO_ONE_OSCILLATION_TRIAL
 
 set direction=Vertical
 set eyes=closed
+set prep
 set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
@@ -137,10 +141,13 @@ REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p5.dex,%task% Friction 1.5
+
+set /A "task=task+1"
+echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 
 ENDLOCAL
 goto :EOF
@@ -207,11 +214,11 @@ REM  that frequency, mass, range, duration and size have been set.
 :DO_ONE_OSCILLATION_TRIAL
 
 	set /A "task=task+1"
-	set /A "seq=seq+1"
+	set /A "osc_seq=osc_seq+1"
 	set dir=%direction:~0,4%
-	set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
-	%COMPILER% -oscillations -%eyes% -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename%
-	echo CMD_TASK,%task%,%filename%,%task% Oscillations %seq%
+	set filename=Osc%pstr%%dir%%mass%%size%%osc_seq%.dex
+	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename% -%eyes% 
+	echo CMD_TASK,%task%,%filename%,%task% Oscillations %osc_seq%
 	goto :EOF
 
 
@@ -224,9 +231,9 @@ REM  that direction, mass and range have been set.
 :DO_ONE_DISCRETE_TRIAL
 
 	set /A "task=task+1"
-	set /A "seq=seq+1"
+	set /A "dsc_seq=dsc_seq+1"
 	set dir=%direction:~0,4%
-	set filename=Dsc%pstr%%dir%%mass%%size%%seq%.dex
-	%COMPILER% -discrete -%eyes% -%mass% -%posture% -%direction% -range=%range% -compile=%filename%
-	echo CMD_TASK,%task%,%filename%,%task% Discrete %seq%
+	set filename=Dsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
+	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -compile=%filename% -%eyes% 
+	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
 	goto :EOF

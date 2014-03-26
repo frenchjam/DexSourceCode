@@ -59,6 +59,9 @@ echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p5.dex,%task% Friction 1.5
 
+set /A "task=task+1"
+echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
+
 REM ****************************************************************************
 
 REM Now we start generating the science task scripts specific to this protocol.
@@ -73,47 +76,54 @@ REM
 REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
-set duration = 30.0
+set duration=30.0
 
 REM Start the trial counter for the oscillations.
-set osc_seq=0
+set osc_seq=100
 
 set mass=400gm
 set frequency=1.00
+set prep=-prep
 set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=800gm
 set frequency=1.00
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set prep=
 set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=1.50
+set prep=
 set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
-set frequency=1.5
+set frequency=1.50
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%.dex
 call :DO_ONE_OSCILLATION_TRIAL
@@ -148,44 +158,51 @@ REM
 REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
-set duration = 30.0
+set duration=30.0
 
 set mass=400gm
 set frequency=1.00
+set prep=-prep
 set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=800gm
 set frequency=1.00
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set prep=
 set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=0.75
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=1.50
+set prep=
 set range=OscillationRangesReducedVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
-set frequency=1.5
+set frequency=1.50
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 set filename=Osc%pstr%%dir%%mass%%size%.dex
 call :DO_ONE_OSCILLATION_TRIAL
@@ -199,10 +216,13 @@ REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p5.dex,%task% Friction 1.5
+
+set /A "task=task+1"
+echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 
 ENDLOCAL
 goto :EOF
@@ -270,9 +290,7 @@ REM  that frequency, mass, range, duration and size have been set.
 
 	set /A "task=task+1"
 	set /A "osc_seq=osc_seq+1"
-	REM Put a leading zero in single digit sequence numbers.
-	if 1%osc_seq% LSS 100 set osc_seq=0%osc_seq%
 	set filename=Osc%pstr%%dir%%mass%%size%%osc_seq%.dex
-	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename%
+	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename% %prep%
 	echo CMD_TASK,%task%,%filename%,%task% Oscillations %osc_seq%
 	goto :EOF
