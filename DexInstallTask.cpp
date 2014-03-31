@@ -275,7 +275,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	}
 	else {
 		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Apparatus in SEATED configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();

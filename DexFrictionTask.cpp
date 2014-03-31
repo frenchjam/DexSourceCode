@@ -73,7 +73,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, "Adjust pinch force according to LED's until you here a beep.", "pinch.bmp" );
 	AddDirective( apparatus, "When you hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
 	ShowDirectives( apparatus );
-	apparatus->WaitSubjectReady( "ReadyToStart.bmp", "Press <OK> to start." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Press <OK> to start." );
 
 	// Collect some data with zero force.
 	apparatus->Wait( baselineDuration );

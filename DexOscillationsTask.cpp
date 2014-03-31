@@ -278,7 +278,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	SignalEndOfRecording( apparatus );
-	status = apparatus->WaitSubjectReady( "cradles.bmp", MsgTrialOver );
+	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", MsgTrialOver );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
