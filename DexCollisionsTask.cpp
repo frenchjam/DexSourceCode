@@ -50,13 +50,10 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	char *target_filename = 0;
 
 	// Prompt the subject to put the target mast in the correct position.
-	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarRight.bmp" : "BarRight.bmp" ), 
-		"Place the target mast in the right position.%s", OkToContinue );
+	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
+		"Place the target mast in the right position wiht tapping surfaces unfolded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Prompt the subject to deploy the tapping surfaces.
-	status = apparatus->fWaitSubjectReady( "Unfolded.bmp", "Check that tapping surfaces are unfolded.%s", OkToContinue );
-	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.

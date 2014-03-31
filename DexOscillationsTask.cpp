@@ -61,8 +61,8 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target mast in the correct position.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarRight.bmp" : "BarRight.bmp" ), 
-			"Place the target mast in the right position.%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
+			"Place the target mast in the right position with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
@@ -70,11 +70,6 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Prompt the subject to stow the tapping surfaces. Only necessary of doing vertical movement with the target bar on the right.
-	if ( bar_position == TargetBarRight )  {
-		status = apparatus->fWaitSubjectReady( "Folded.bmp", "Check that tapping surfaces are folded.%s", OkToContinue );
-		if ( status == ABORT_EXIT ) exit( status );
-	}
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
