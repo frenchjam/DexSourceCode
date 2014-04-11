@@ -127,7 +127,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target mast in the right position?\n- Reference markers in view?" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the right position?\n- Reference markers in view?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
@@ -270,12 +270,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget mast in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget mast in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget bar in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget bar in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target mast in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Apparatus in SEATED configuration?\n - Target mast in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target bar in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Apparatus in SEATED configuration?\n - Target bar in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();

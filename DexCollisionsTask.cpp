@@ -49,9 +49,9 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 	char *target_filename = 0;
 
-	// Prompt the subject to put the target mast in the correct position.
+	// Prompt the subject to put the target bar in the correct position.
 	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
-		"Place the target mast in the right position wiht tapping surfaces unfolded.%s", OkToContinue );
+		"Place the target bar in the right position wiht tapping surfaces unfolded.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
 

@@ -49,10 +49,10 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	if ( direction == VERTICAL ) bar_position = TargetBarRight;
 	else bar_position = TargetBarLeft;
 
-	// Prompt the subject to put the target mast in the correct position.
+	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target mast in the right position with tapping surfaces folded.%s", OkToContinue );
+			"Place the target bar in the right position with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
