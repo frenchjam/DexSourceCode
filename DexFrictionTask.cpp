@@ -69,17 +69,18 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
 	AddDirective( apparatus, "You will first pinch the manipulandum while it remains in the retainer.", "pinch.bmp" );
-	AddDirective( apparatus, "Pinch the manipulandum at the center with the thumb and the index finger.", "pinch.bmp" );
-	AddDirective( apparatus, "Adjust pinch force according to LED's until you hear a beep.", "pinch.bmp" );
-	AddDirective( apparatus, "When you hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
+	AddDirective( apparatus, "You will pinch the manipulandum at the center with the thumb and the index finger.", "pinch.bmp" );
+	AddDirective( apparatus, "You will adjust pinch force according to LED's until you hear a beep.", "pinch.bmp" );
+	AddDirective( apparatus, "When you will hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
 	ShowDirectives( apparatus );
+	// picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Press <OK> to start." );
 
 	// Collect some data with zero force.
 	apparatus->Wait( baselineDuration );
 
 	// Start acquiring.
-	apparatus->ShowStatus( "Adjust pinch force according to LED's.\n When you hear the beep, start to rub.", "pinch.bmp" );
+	apparatus->ShowStatus( "Adjust pinch force according to LED's.\n When you hear the beep, start to rub up and down.", "pinch.bmp" );
     apparatus->StartAcquisition( "FRIC", maxTrialDuration );
 
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
