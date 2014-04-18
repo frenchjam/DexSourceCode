@@ -51,7 +51,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target bar in the correct position.
 	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
-		"Place the target bar in the right position wiht tapping surfaces unfolded.%s", OkToContinue );
+		"Place the target bar in the right position and open the tapping surfaces.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
 
@@ -59,19 +59,19 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	//  and wait for confimation that he or she is ready.
 	posture = ParseForPosture( params );
 	direction = ParseForDirection( apparatus, params );
-	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-	}
-	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-	}
-	if ( status == ABORT_EXIT ) exit( status );
+//	if ( posture == PostureSeated ) {
+//		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+//	}
+//	else if ( posture == PostureSupine ) {
+//		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+//	}
+//	if ( status == ABORT_EXIT ) exit( status );
 
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
-	AddDirective( apparatus, "You should move to the center target whenever it is blinking.", "MvToBlkV.bmp" );
-	AddDirective( apparatus, "You should then tap up or down according to the beeps and lights.", "Collision.bmp" );
+	AddDirective( apparatus, "You will move the manipulandum to the blinking target.", "MvToBlkV.bmp" );
+	AddDirective( apparatus, "You will then tap up or down according to the beeps and lighted targets and return to the center.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -127,7 +127,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForPrep( params ) ) PrepCollisions( apparatus, params );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "ReadytoStart.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "OffsetMeasurement.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
@@ -161,7 +161,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Collect some data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
-	apparatus->ShowStatus( "Tap upward or downward according to the beep and the target LEDs.", "working.bmp" );
+	apparatus->ShowStatus( "Tap upward or downward according to the beep and the lighted targets.", "working.bmp" );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
