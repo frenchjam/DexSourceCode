@@ -52,7 +52,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right position with tapping surfaces folded.%s", OkToContinue );
+			"Place the target bar in the right position with tapping surfaces closed.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
@@ -68,13 +68,13 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-	}
-	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-	}
-	if ( status == ABORT_EXIT ) exit( status );
+	//if ( posture == PostureSeated ) {
+	//	status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+	//}
+	//else if ( posture == PostureSupine ) {
+	//	status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+	//}
+	//if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
@@ -87,8 +87,8 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 		dsc = "TargetedH.bmp";
 	}
 
-	AddDirective( apparatus, "To start, move to the target that is blinking.", mtb );
-	AddDirective( apparatus, "Move quickly and accurately to each lighted target.", dsc );
+	AddDirective( apparatus, "You will place the manipulandum next to the blinking target.", mtb );
+	AddDirective( apparatus, "You will move quickly and accurately to the lighted target (1 among 4 targets).", dsc );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -149,7 +149,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "OffsetMeasurement.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
@@ -217,7 +217,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	BlinkAll( apparatus );
 	BlinkAll( apparatus );
-	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", "Trial terminated.\nPlace the maniplandum in the empty cradle." );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
