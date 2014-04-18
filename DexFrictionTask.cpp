@@ -25,11 +25,11 @@ double frictionHoldTime = 3.0; //en seconde
 double frictionTimeout = 200.0;
 
 // GF=0.5N 3x, 1N 2x, 2N 2x, 4N 1x
-double gripTarget= 4.0; //0.5 or 1.0 or 2.0 or 4.0
+double gripTarget= 0.5; //0.5 or 1.0 or 2.0 or 4.0
 
 // Define the pull direction. This should be up.
 Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
-double forceFilterConstant = 5.0;
+double forceFilterConstant = 2.0;
 
 double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
 double slipTimeout = 10.0;		// How long should we wait for a slip?
@@ -62,40 +62,47 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// fprintf( stderr, "Friction Measurement: Target grip force: %f\n", gripTarget );
 	// fprintf( stderr, "Friction Measurement: Filter constant:   %f\n", forceFilterConstant );
 
+	
+	
 	if ( ParseForPrep( params ) ) {
+        status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Deploy the retainer." );
 		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame." );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
-	// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
-	AddDirective( apparatus, "You will first pinch the manipulandum while it remains in the retainer.", "pinch.bmp" );
-	AddDirective( apparatus, "You will pinch the manipulandum at the center with the thumb and the index finger.", "pinch.bmp" );
-	AddDirective( apparatus, "You will adjust pinch force according to LED's until you hear a beep.", "pinch.bmp" );
-	AddDirective( apparatus, "When you will hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
-	ShowDirectives( apparatus );
-	// picture Remove Hand with manipulandum in the retainer.
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Press <OK> to start." );
+    // picture Remove Hand with manipulandum in the retainer.
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to start." );
+    
+	
 
-	// Collect some data with zero force.
-	apparatus->Wait( baselineDuration );
-
+		// Instruct the subject to achieve the desired grip center and force, then wait until it is achieved.
+//	AddDirective( apparatus, "Pinch the manipulandum at the center.", "pinch.bmp" );
+//	AddDirective( apparatus, "Adjust pinch force according to LED's until you hear a beep.", "pinch.bmp" );
+//	AddDirective( apparatus, "When you hear the beep, rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
+//	ShowDirectives( apparatus );
+	
 	// Start acquiring.
-	apparatus->ShowStatus( "Adjust pinch force according to LED's.\n When you hear the beep, start to rub up and down.", "pinch.bmp" );
+    // Collect some data with zero force.
+	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+    apparatus->Wait( baselineDuration );
+	apparatus->ShowStatus( "Pinch the manipulandum at the center and adjust the grip force according to the LED's.", "pinch.bmp" );
     apparatus->StartAcquisition( "FRIC", maxTrialDuration );
 
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-    status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
-		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
+
+ //   status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
+//		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+//		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
+
 
 	// Mark when the desired force is achieved.
 	if ( status == ABORT_EXIT ) exit( status );
 	apparatus->MarkEvent( FORCE_OK );
 
 	// Beep to let the subject know that he or she can start rubbing.
-	apparatus->ShowStatus( "Rub the manipulandum up and down without releasing the grip.", "Coef_frict_osc.bmp" );
+	apparatus->ShowStatus( "Rub the manipulandum up and down during 15 sec without releasing the grip.", "Coef_frict_osc.bmp" );
 	apparatus->Beep();
 
 	// Wait for the initial slip.
@@ -139,7 +146,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	}
 	SignalEndOfRecording( apparatus );
 
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Release the maniplandum and press <OK> to continue." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to continue." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Collect some data with zero force.

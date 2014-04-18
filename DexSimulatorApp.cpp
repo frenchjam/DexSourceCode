@@ -108,7 +108,7 @@ void AddDirective( DexApparatus *apparatus, const char *directive, const char *p
 void ShowDirectives( DexApparatus *apparatus ) {
 
 	for ( int i = 0; i < n_directives; i++ ) {
-		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): (Don't start yet)\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
+		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): (Don't start)\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
 		if ( status == ABORT_EXIT ) exit( status );
 	}
 }
