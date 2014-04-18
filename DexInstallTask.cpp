@@ -98,7 +98,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated (upright) operation." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated operation." );
 	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -187,7 +187,11 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Visibility OK." );
 	apparatus->Wait( 1.0 );
 
-	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Check that locker door is now well closed and move the manipulandum up to the retainer on the target frame." );
+	//need to change picture
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Deploy the retainer." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and close the locker door." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 
