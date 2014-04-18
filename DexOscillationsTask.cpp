@@ -62,7 +62,7 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right position with tapping surfaces folded.%s", OkToContinue );
+			"Place the target bar in the right position with tapping surfaces closed.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
@@ -78,13 +78,13 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
-	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-	}
-	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-	}
-	if ( status == ABORT_EXIT ) exit( status );
+//	if ( posture == PostureSeated ) {
+//		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+//	}
+//	else if ( posture == PostureSupine ) {
+//		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+//	}
+//	if ( status == ABORT_EXIT ) exit( status );
 
 
 	// Instruct the subject on the task to be done.
@@ -112,14 +112,14 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		AddDirective( apparatus, "To start you will move\nto the blinking target.", mtb );
+		AddDirective( apparatus, "You will move to the blinking target.", mtb );
 		AddDirective( apparatus, "You will then oscillate between targets, one full cycle per beep.", dsc );
-		AddDirective( apparatus, "When the beeps stop, continue oscillating. Keep your eyes OPEN.", dsc );
+		AddDirective( apparatus, "When the beeps will stop, you will continue to oscillate.", dsc );
 	}
 	else {
-		AddDirective( apparatus, "To start you will move\nto the blinking target.", mtb );
+		AddDirective( apparatus, "You will move to the blinking target.", mtb );
 		AddDirective( apparatus, "You will then CLOSE your eyes and move between targets, one full cycle per beep.", dsc );
-		AddDirective( apparatus, "When the beeps stop, continue oscillating. Keep your eyes CLOSED.", dsc );
+		AddDirective( apparatus, "When the beeps will stop, you will continue to oscillate, keeping your eyes CLOSED.", dsc );
 	}
 
 	ShowDirectives( apparatus );
@@ -196,7 +196,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "OffsetMeasurement.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
