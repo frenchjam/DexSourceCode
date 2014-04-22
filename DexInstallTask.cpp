@@ -99,7 +99,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
 	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated operation." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine (lying down) operation." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine operation." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
@@ -188,11 +188,21 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( 1.0 );
 
 	//need to change picture
-	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Deploy the retainer." );
+	status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and close the locker door." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	if ( desired_posture == PostureSeated ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+	}
+	else if ( desired_posture == PostureSupine ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
 
 
 	apparatus->HideStatus();
@@ -282,7 +292,9 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Apparatus in SEATED configuration?\n - Target bar in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
+
 	apparatus->HideStatus();
+
 
 	return( status );
 }

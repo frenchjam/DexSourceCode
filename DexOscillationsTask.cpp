@@ -76,6 +76,9 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	status = CheckInstall( apparatus, posture, bar_position );
 	if ( status != NORMAL_EXIT ) return( status );
 
+
+	// The instruction below are not useful because at this step the subjcet is already attached.
+
 	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 //	if ( posture == PostureSeated ) {
@@ -111,11 +114,14 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 		dsc = "OscillateH.bmp";
 	}
 
+
+
 	if ( eyes == OPEN )	{
 		AddDirective( apparatus, "You will move to the blinking target.", mtb );
 		AddDirective( apparatus, "You will then oscillate between targets, one full cycle per beep.", dsc );
 		AddDirective( apparatus, "When the beeps will stop, you will continue to oscillate.", dsc );
 	}
+		// If we delete oscillation in discrete, then we don't need this condition here below any more.
 	else {
 		AddDirective( apparatus, "You will move to the blinking target.", mtb );
 		AddDirective( apparatus, "You will then CLOSE your eyes and move between targets, one full cycle per beep.", dsc );

@@ -66,8 +66,8 @@ char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust unt
 char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
 char *MsgTrialOver = "Trial terminated.\nPlace the maniplandum in the empty cradle.";
 char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
-char *MsgQueryReadySeated = "Seated?\nBelts attached?\nWristbox on wrist?%s";
-char *MsgQueryReadySupine = "Lying Down?\nBelts attached?\nWristbox on wrist?%s";
+char *MsgQueryReadySeated = "Attach belts and wrisbox for seated position!%s";
+char *MsgQueryReadySupine = "Attach belts and wristbox for supine position!%s";
 char *InstructPickUpManipulandum = "You will first pick up the manipulandum with thumb and index finger centered.";
 char *OkToContinue ="";
 

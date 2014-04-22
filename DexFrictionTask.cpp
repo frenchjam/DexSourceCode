@@ -22,7 +22,7 @@
 
 // Coefficient of friction test parameters.
 double frictionHoldTime = 3.0; //en seconde
-double frictionTimeout = 200.0;
+double frictionTimeout = 10.0;
 
 // GF=0.5N 3x, 1N 2x, 2N 2x, 4N 1x
 double gripTarget= 0.5; //0.5 or 1.0 or 2.0 or 4.0
@@ -65,8 +65,8 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	
 	
 	if ( ParseForPrep( params ) ) {
-        status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Deploy the retainer." );
-		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame." );
+        status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
+		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Lock the manipulandum into the retainer." );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
@@ -74,17 +74,18 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to start." );
 	apparatus->Wait( baselineDuration );
 	// Start acquiring.
-	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	
+    apparatus->ShowStatus( "Grip the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
     
-	apparatus->ShowStatus( "Pinch the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
-   
+	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 
-  // status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
-  //		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-  //		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
+   status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
+  		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
+  		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
 
 
 	// Mark when the desired force is achieved.
@@ -92,7 +93,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( FORCE_OK );
 
 	// Rub the manipulandum
-	apparatus->ShowStatus( "Rub the manipulandum up and down during 15 sec without releasing the grip.", "Coef_frict_osc.bmp" );
+	apparatus->ShowStatus( "Grip adjusted! Rub the manipulandum up and down during 15 sec without releasing the grip.", "rub.bmp" );
 
 	// Wait for the initial slip.
     status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
