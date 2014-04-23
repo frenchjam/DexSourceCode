@@ -202,6 +202,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 		// Then turn off the targets after the sound finishes.
         apparatus->Wait( 0.25 );
 		apparatus->TargetsOff();
+		apparatus->TargetOn(collisionInitialTarget);
 	
 		// Wait a fixed time to finish the movement.
 		// The 0.74 compensates for the two Wait() calls above.
