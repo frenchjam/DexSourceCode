@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p5.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
 PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex DexSeatedSmall.dex DexSeatedMedium.dex DexSeatedLarge.dex DexSupineSmall.dex DexSupineMedium.dex DexSupineLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
 SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
 
@@ -32,8 +32,8 @@ ForceOffsets.dex:	DexSimulatorApp.exe
 ### Coefficeiont of Friction.
 FrictionTest0p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex
-FrictionTest1p5.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -pinch=1.5 -filter=2.0 -compile=FrictionTest1p5.dex
+FrictionTest1p0.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex
 FrictionTest2p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5.dex
 
@@ -50,21 +50,21 @@ InstallSupineTask.dex:	DexSimulatorApp.exe
 # Protocols
 #
 
-### Dynamics Protocol
-DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Upright Sml > DexDynamicsSmall.dex
-DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Upright Med > DexDynamicsMedium.dex
-DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamics.bat
-	$(SOURCE)\DexGenerateDynamics.bat Upright Lrg > DexDynamicsLarge.dex
+### Dynamics Flight Protocol
+DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > DexDynamicsSmall.dex
+DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > DexDynamicsMedium.dex
+DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > DexDynamicsLarge.dex
 
-### Seated Protocol
-DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Upright Sml > DexSeatedSmall.dex
-DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Upright Med > DexSeatedMedium.dex
-DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Upright Lrg > DexSeatedLarge.dex
+### Reference Frame Seated Flight Protocol
+DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > DexSeatedSmall.dex
+DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > DexSeatedMedium.dex
+DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > DexSeatedLarge.dex
 
 ### Supine Protocol
 
