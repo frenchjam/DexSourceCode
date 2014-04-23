@@ -8,7 +8,7 @@ SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
 SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
-PROTOCOLS	= DexDynamicsSmall.dex DexDynamicsMedium.dex DexDynamicsLarge.dex DexSeatedSmall.dex DexSeatedMedium.dex DexSeatedLarge.dex DexSupineSmall.dex DexSupineMedium.dex DexSupineLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
+PROTOCOLS	= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
 SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
 
 # The following the path to hand-edited scripts. 
@@ -46,34 +46,86 @@ InstallSupineTask.dex:	DexSimulatorApp.exe
 
 ######################################################################################################################################
 
-#
-# Protocols
-#
+# -----------------------------------------------------------------------------------------------------------
+# -- Protocols Flight (Dynamics Flight; Reference Seated Flight; Reference Supine Flight ; Flight Reduced) --
+# -----------------------------------------------------------------------------------------------------------
 
 ### Dynamics Flight Protocol
-DexDynamicsSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > DexDynamicsSmall.dex
-DexDynamicsMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > DexDynamicsMedium.dex
-DexDynamicsLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > DexDynamicsLarge.dex
 
-### Reference Frame Seated Flight Protocol
-DexSeatedSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > DexSeatedSmall.dex
-DexSeatedMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > DexSeatedMedium.dex
-DexSeatedLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > DexSeatedLarge.dex
+DexDynamicsFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > DexDynamicsFlightSmall.dex
+DexDynamicsFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > DexDynamicsFlightMedium.dex
+DexDynamicsFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > DexDynamicsFlightLarge.dex
 
-### Supine Protocol
+### Reference Seated Flight Protocol
 
-DexSupineSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Supine Sml > DexSupineSmall.dex
-DexSupineMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Supine Med > DexSupineMedium.dex
-DexSupineLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentials.bat
-	$(SOURCE)\DexGenerateReferentials.bat Supine Lrg > DexSupineLarge.dex
+DexSeatedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > DexSeatedFlightSmall.dex
+DexSeatedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > DexSeatedFlightMedium.dex
+DexSeatedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > DexSeatedFlightLarge.dex
+
+### Reference Supine Flight Protocol
+
+DexSupineFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Sml > DexSupineFlightSmall.dex
+DexSupineFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Med > DexSupineFlightMedium.dex
+DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Lrg > DexSupineFlightLarge.dex
+
+### Reduced Flight
+
+DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Sml > DexReducedFlightSmall.dex
+DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Med > DexReducedFlightMedium.dex
+DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Lrg > DexReducedFlightLarge.dex
+
+
+# ------------------------------------------------------------------------------------------------
+# -- Protocols BDC (Dynamics BDC; Reference Seated BDC; Reference Supine BDC ; Return Reduced) --
+# ------------------------------------------------------------------------------------------------
+
+### Dynamics BDC Protocol
+
+DexDynamicsBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Sml > DexDynamicsBDCSmall.dex
+DexDynamicsBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Med > DexDynamicsBDCMedium.dex
+DexDynamicsBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Lrg > DexDynamicsBDCLarge.dex
+
+### Reference Seated BDC Protocol
+
+DexSeatedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Sml > DexSeatedBDCSmall.dex
+DexSeatedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Med > DexSeatedBDCMedium.dex
+DexSeatedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Lrg > DexSeatedBDCLarge.dex
+
+### Reference Supine BDC Protocol
+
+DexSupineBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Sml > DexSupineBDCSmall.dex
+DexSupineBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Med > DexSupineBDCMedium.dex
+DexSupineBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Lrg > DexSupineBDCLarge.dex
+
+### Return Reduced
+
+DexReducedReturnSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Sml > DexReducedReturnSmall.dex
+DexReducedReturnMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Med > DexReducedReturnMedium.dex
+DexReducedReturnLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Lrg > DexReducedReturnLarge.dex
 
 ### Utilities
 UtilitiesProtocol.dex: $(STATICSCRIPTS)\UtilitiesProtocol.dex
@@ -82,6 +134,8 @@ InstallUprightProtocol.dex: $(STATICSCRIPTS)\InstallUprightProtocol.dex
 	copy /Y $(STATICSCRIPTS)\InstallUprightProtocol.dex
 InstallSupineProtocol.dex: $(STATICSCRIPTS)\InstallSupineProtocol.dex
 	copy /Y $(STATICSCRIPTS)\InstallSupineProtocol.dex
+
+
 
 ######################################################################################################################################
 
