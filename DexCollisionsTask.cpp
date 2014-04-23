@@ -25,8 +25,8 @@ int collisionInitialTarget = 6;
 int collisionUpTarget = 11;
 int collisionDownTarget = 1;
 
-int collisionSequenceN = 10;
-int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, UP };
+int collisionSequenceN = 20;
+int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, DOWN, DOWN, UP, DOWN, UP, DOWN, UP, UP,DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, DOWN };
 double collisionTime = 1.5;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
@@ -71,7 +71,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	AddDirective( apparatus, "You will move the manipulandum to the blinking target.", "MvToBlkV.bmp" );
-	AddDirective( apparatus, "You will then tap up or down according to the beeps and lighted targets and return to the center.", "Collision.bmp" );
+	AddDirective( apparatus, "You will then tap up or down according to the beeps and targets and return to the center.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
