@@ -224,7 +224,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set pstr=%posture:~0,2%
 
 	REM Put all the paramters together for the compiler.
-	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%.txt:%seq%%sz%  
+	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%20.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
 	set filename=Tg%pstr%%dir%%mass%%size%%seq%.dex
@@ -268,7 +268,7 @@ REM  that direction, mass and range have been set.
 	set /A "dsc_seq=dsc_seq+1"
 	set dir=%direction:~0,4%
 	set filename=Dsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
-	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences.txt:1 -compile=%filename% -%eyes% 
+	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences20.txt:1 -compile=%filename% -%eyes% 
 	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
 	goto :EOF
 
@@ -307,7 +307,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set pstr=%posture:~0,2%
 
 	REM Put all the paramters together for the compiler.
-	set params=-collisions -%mass% -%posture% -delays=CollisionsSequences.txt:%seq%
+	set params=-collisions -%mass% -%posture% -delays=CollisionsSequences20.txt:%seq%
 
 	REM Generate a script filename based on the parameters.
 	set filename=Co%pstr%%mass%%size%%seq%.dex
