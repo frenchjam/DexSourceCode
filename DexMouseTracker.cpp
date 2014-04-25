@@ -290,6 +290,13 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	
 	y =  (double) ( mouse_position.y - rect.top ) / (double) ( rect.bottom - rect.top );
 	z =  (double) (mouse_position.x - rect.right) / (double) ( rect.left - rect.right );
+	x = 0.0;
+
+	// By default, the orientation of the manipulandum is the nominal orientation.
+
+	CopyQuaternion( Q, nominalQ );
+
+	// Simulate wobbly movements of the manipulandum. This has not really been tested.
 
 	if ( IsDlgButtonChecked( dlg, IDC_CODA_WOBBLY ) ) {
 		// We will make the manipulandum rotate in a strange way as a function of the distance from 0.
@@ -303,16 +310,11 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 		// Make the movement a little bit in X as well so that we test the routines in 3D.
 		x = 0.0 + 5.0 * sin( y / 80.0);
 	}
-	else {
-		CopyQuaternion( Q, nominalQ );
-		x = 0.0;
-	}
-
 
 	// Map screen position of the mouse pointer to 3D position of the wrist and manipulandum.
 	// Top of the screen corresponds to the bottom of the bar and vice versa. It's inverted to protect the right hand rule.
 	// Right of the screen correponds to the nearest horizontal target and left corresponds to the farthest.
-	// The X position is set to be just to the right of the target bar, wherever it is.
+	// The X position is set to be just to the right of the box.
 
 	SubtractVectors( y_span, frame.marker[DEX_POSITIVE_BAR_MARKER].position, frame.marker[DEX_NEGATIVE_BAR_MARKER].position );
 	SubtractVectors( x_dir, frame.marker[DEX_POSITIVE_BOX_MARKER].position, frame.marker[DEX_NEGATIVE_BOX_MARKER].position );
@@ -323,7 +325,13 @@ bool DexMouseTracker::GetCurrentMarkerFrame( CodaFrame &frame ) {
 	ScaleVector( z_displacement, z_span, z );
 	ScaleVector( x_displacement, x_dir, x );
 
-	AddVectors( position, frame.marker[DEX_NEGATIVE_BAR_MARKER].position, x_displacement );
+	// Reference position is the bottom target on the vertical target bar.
+	CopyVector( position, frame.marker[DEX_NEGATIVE_BAR_MARKER].position );
+	// Place the manipulandum to the right of the box, even if the target bar is in the left position.
+	position[X] = frame.marker[DEX_NEGATIVE_BOX_MARKER].position[X];
+	// Shift the position in X if the is any wobble to it.
+	AddVectors( position, position, x_displacement );
+	// Shift the position in Y and Z according to the displacements computed from the mouse position.
 	AddVectors( position, position, y_displacement );
 	AddVectors( position, position, z_displacement );
 
