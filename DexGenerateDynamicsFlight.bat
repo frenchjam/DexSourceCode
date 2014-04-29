@@ -39,7 +39,7 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
-echo CMD_TASK,%task%,InstallUpright.dex,%task% Install
+echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Install
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
@@ -91,63 +91,54 @@ set mass=800gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=400gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.33
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.33
 set prep=
 set range=OscillationRangesReducedVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=0.66
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=0.66
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 
@@ -227,7 +218,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%60.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
-	set filename=Tg%pstr%%dir%%mass%%size%%seq%.dex
+	set filename=FltTg%pstr%%dir%%mass%%size%%seq%.dex
 
 	REM Generate the script to do the task.
 	%COMPILER% %params%  -compile=%filename% %prep%
@@ -251,7 +242,7 @@ REM  that frequency, mass, range, duration and size have been set.
 
 	set /A "task=task+1"
 	set /A "osc_seq=osc_seq+1"
-	set filename=Osc%pstr%%dir%%mass%%size%%osc_seq%.dex
+	set filename=FltOsc%pstr%%dir%%mass%%size%%osc_seq%.dex
 	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename% %prep%
 	echo CMD_TASK,%task%,%filename%,%task% Oscillations %osc_seq%
 	goto :EOF

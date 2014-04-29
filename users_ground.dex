@@ -1,0 +1,8 @@
+# DEX user file
+# Format: "CMD_USER", user id, pin code, session file, display name
+# Subject IDs:  10-19 small subjects; 20-29 medium subjects; 30-39 large subjects.
+CMD_USER,10,123,SessionSmallSubjectBDC.dex,Small Subject
+CMD_USER,20,456,SessionMediumSubjectBDC.dex,Medium Subject
+CMD_USER,30,789,SessionLargeSubjectBDC.dex,Large Subject
+CMD_USER,99,987,SessionUtilitiesOnly.dex,Maintenance
+#end

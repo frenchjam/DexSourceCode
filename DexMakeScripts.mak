@@ -8,16 +8,29 @@ SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
 SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
-PROTOCOLS	= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex
-SESSIONS	= SessionSmallSubject.dex SessionMediumSubject.dex SessionLargeSubject.dex SessionUtilitiesOnly.dex
+FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex  SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionUtilitiesOnly.dex
+GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex  SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionUtilitiesOnly.dex
 
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
 
-all: DexSimulatorApp.exe $(SCRIPTS) $(PROTOCOLS) $(SESSIONS) $(SOURCE)\DexMakeScripts.mak users.dex
-	del /Q $(DESTINATION)\*.dex
-	copy /Y /V *.dex $(DESTINATION) 
-	echo "Last build: " %date% %time% > all
+TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
+MD5TREE	=	..\bin\MD5Tree.exe
+
+all: DexFlightScripts.tar DexGroundScripts.tar
+
+DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(SOURCE)\DexMakeScripts.mak users_flight.dex
+	copy /Y /V users_flight.dex users.dex
+	$(MD5TREE) $(SCRIPTS) $(FLIGHT) Flt*.dex users.dex > DexFlightScripts.md5
+	$(TAR) --create --verbose --file=DexFlightScripts.tar $(SCRIPTS) $(FLIGHT) Flt*.dex users.dex DexFlightScripts.md5
+	copy /Y /V DexFlightScripts.tar $(DESTINATION)
+
+DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(SOURCE)\DexMakeScripts.mak users_ground.dex
+	copy /Y /V users_ground.dex users.dex
+	$(MD5TREE) $(SCRIPTS) $(GROUND) Gnd*.dex users.dex > DexGroundScripts.md5
+	$(TAR) --create --verbose --file=DexGroundScripts.tar $(SCRIPTS) $(GROUND) Gnd*.dex users.dex DexGroundScripts.md5
+	copy /Y /V DexGroundScripts.tar $(DESTINATION)
+
  
 ######################################################################################################################################
 
@@ -39,9 +52,9 @@ FrictionTest2p5.dex:	DexSimulatorApp.exe
 
 ### Configuration of DEX hardware.
 InstallUprightTask.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -upright -compile=InstallUpright.dex
+	$(COMPILER) -install -upright -compile=InstallUprightTask.dex
 InstallSupineTask.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -supine -compile=InstallSupine.dex
+	$(COMPILER) -install -supine -compile=InstallSupineTask.dex
 
 
 ######################################################################################################################################
@@ -143,21 +156,33 @@ InstallSupineProtocol.dex: $(STATICSCRIPTS)\InstallSupineProtocol.dex
 # Sessions
 #
 
-SessionSmallSubject.dex:	$(STATICSCRIPTS)\SessionSmallSubject.dex
-	copy /Y $(STATICSCRIPTS)\SessionSmallSubject.dex .
+SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .
 
-SessionMediumSubject.dex:	$(STATICSCRIPTS)\SessionMediumSubject.dex
-	copy /Y $(STATICSCRIPTS)\SessionMediumSubject.dex .
+SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .
 
-SessionLargeSubject.dex:	$(STATICSCRIPTS)\SessionLargeSubject.dex
-	copy /Y $(STATICSCRIPTS)\SessionLargeSubject.dex .
+SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .
+
+SessionSmallSubjectBDC.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .
+
+SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .
+
+SessionLargeSubjectBDC.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .
 
 SessionUtilitiesOnly.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex
 	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .
 
 
-users.dex:	$(STATICSCRIPTS)\users.dex
-	copy /Y $(STATICSCRIPTS)\users.dex .
+users_flight.dex:	$(STATICSCRIPTS)\users_flight.dex
+	copy /Y $(STATICSCRIPTS)\users_flight.dex .
+
+users_ground.dex:	$(STATICSCRIPTS)\users_ground.dex
+	copy /Y $(STATICSCRIPTS)\users_ground.dex .
 
 
 # I created this task to make an easy way to flip through the different pictures.
@@ -168,8 +193,11 @@ ShowPictures.dex:	DexSimulatorApp.exe
 # The makefile checks if a newer version of the simulator/compiler DexSimulatorApp.exe has been generated.
 # If so, it copies it here. That makes the batch files simpler, since they therefore do not
 #  have to specify the path to DexSimulatorApp.exe.
+# If the compiler changed, we delete all the existing .dex files so that they all get rebuilt, just in case.
 
 $(COMPILER): ..\DexSimulatorApp\debug\DexSimulatorApp.exe
+	echo nothing > __dummy.dex
+	del /Q *.dex
 	copy ..\DexSimulatorApp\debug\DexSimulatorApp.exe .
 
 clean:

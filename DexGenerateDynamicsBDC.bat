@@ -19,8 +19,8 @@ set COMPILER=DexSimulatorApp.exe
 REM Task Counter
 REM Here I am adopting a strategy by which all the protocols of the same type but for different size subjects
 REM  (small, medium and large) will use the same ID number for each task, but that the different protocols will 
-REM  start numbering from different values, i.e. Dynamics = 200, Upright = 300, Supine = 400.
-set task=200
+REM  start numbering from different values, i.e. Flight Dynamics = 200, Upright = 300, Supine = 400, Reduced = 500 and BDC Dynamics = 600, Upright = 700, Supine = 800 and Reduced = 900.
+set task=600
 
 REM Write a header into the file.
 ECHO #DEX protocol file for Dynamics BDC protocol.
@@ -39,7 +39,7 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
-echo CMD_TASK,%task%,InstallUpright.dex,%task% Install
+echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Install
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
@@ -91,21 +91,18 @@ set mass=400gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
 set frequency=1.00
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
-set filename=Osc%pstr%%dir%%mass%%size%%seq%.dex
 call :DO_ONE_OSCILLATION_TRIAL
 
 
@@ -184,7 +181,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%60.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
-	set filename=Tg%pstr%%dir%%mass%%size%%seq%.dex
+	set filename=GndTg%pstr%%dir%%mass%%size%%seq%.dex
 
 	REM Generate the script to do the task.
 	%COMPILER% %params%  -compile=%filename% %prep%
@@ -208,7 +205,7 @@ REM  that frequency, mass, range, duration and size have been set.
 
 	set /A "task=task+1"
 	set /A "osc_seq=osc_seq+1"
-	set filename=Osc%pstr%%dir%%mass%%size%%osc_seq%.dex
+	set filename=GndOsc%pstr%%dir%%mass%%size%%osc_seq%.dex
 	%COMPILER% -oscillations -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -compile=%filename% %prep%
 	echo CMD_TASK,%task%,%filename%,%task% Oscillations %osc_seq%
 	goto :EOF

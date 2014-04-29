@@ -44,7 +44,12 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
-echo CMD_TASK,%task%,InstallUpright.dex,%task% Install
+if /I %posture% EQU supine GOTO :SUPINE 
+echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Install
+GOTO :NEXT
+:SUPINE
+echo CMD_TASK,%task%,InstallSupineTask.dex,%task% Install
+:NEXT
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
@@ -75,7 +80,7 @@ REM Discrete Movements
 REM
 
 REM All the oscillations have the same range, frequency, duration and mass.
-set mass=600gm
+set mass=400gm
 
 REM Start the trial counter for the oscillations.
 set seq=0
@@ -164,7 +169,7 @@ REM  that direction, mass and range have been set.
 	set /A "task=task+1"
 	set /A "dsc_seq=dsc_seq+1"
 	set dir=%direction:~0,4%
-	set filename=Dsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
+	set filename=FltDsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
 	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences30.txt:1 -compile=%filename% -%eyes% 
 	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
 	goto :EOF
@@ -198,6 +203,8 @@ REM It calls the second one which generates the commands for each block (task).
 
 	REM Each repetition uses a different target sequence.
 	set /A "seq=seq+1"
+	set /A "sseq=seq+100"
+	set sq=%sseq:~1,2%
 
 	REM Shorten some labels so that the filenames are not to long.
 	set sz=%size:~0,1%
@@ -207,7 +214,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set params=-collisions -%mass% -%posture% -delays=CollisionsSequences30.txt:%seq%
 
 	REM Generate a script filename based on the parameters.
-	set filename=Co%pstr%%mass%%size%%seq%.dex
+	set filename=FltCo%pstr%%mass%%size%%sq%.dex
 
 	REM Generate the script to do the task.
 	%COMPILER% %params%  -compile=%filename% %prep%
