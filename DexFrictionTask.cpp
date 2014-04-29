@@ -61,19 +61,22 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	fprintf( stderr, "     RunFrictionMeasurement: %s\n", params );
 	
 	if ( ParseForPrep( params ) ) {
+
         status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Lock the manipulandum into the retainer." );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
     // picture Remove Hand with manipulandum in the retainer.
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to start." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand from the manipulandum and press <OK> to start." );
 
 	// Start acquiring.
 	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
 	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 	
+
     apparatus->ShowStatus( "Grip the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
     
 	
@@ -132,7 +135,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 		AnalysisProgress( apparatus, slipMovements, slipMovements, "Success!" );
 
 	}
-	SignalEndOfRecording( apparatus );
 
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to continue." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -143,6 +145,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	// Terminate the acquisition. This will also close the data file.
 	apparatus->StopAcquisition();
+	SignalEndOfRecording( apparatus );
 
 	// Erase any lingering message.
 	apparatus->HideStatus();

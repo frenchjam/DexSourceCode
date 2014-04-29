@@ -66,8 +66,8 @@ char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust unt
 char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
 char *MsgTrialOver = "Trial terminated.\nPlace the maniplandum in the empty cradle.";
 char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
-char *MsgQueryReadySeated = "Attach belts and wrisbox for seated position!%s";
-char *MsgQueryReadySupine = "Attach belts and wristbox for supine position!%s";
+char *MsgQueryReadySeated = "Preparing to start a new task.\nVerify that you are seated with your seat belts fastened.%s";
+char *MsgQueryReadySupine = "Preparing to start a new task.\nVerify that you are lying down with your seat belts fastened.%s";
 char *InstructPickUpManipulandum = "You will first pick up the manipulandum with thumb and index finger centered.";
 char *OkToContinue ="";
 
@@ -536,6 +536,8 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPost
 	return( direction );
 }
 #endif
+
+
 /**************************************************************************************/
 
 int APIENTRY WinMain(HINSTANCE hInstance,
@@ -560,6 +562,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	int task = TARGETED_TASK;
 	bool compile = false;
 	bool raz = false;
+	bool instruct_to_sit = false;
+	bool preconfigure = false;
 
 	int return_code;
 
@@ -610,6 +614,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	//  making it available to be run at the start of a simuation session.
 
 	if ( strstr( lpCmdLine, "-raz"  ) ) raz = true;
+	if ( strstr( lpCmdLine, "-sit"  ) ) instruct_to_sit = true;
+	if ( strstr( lpCmdLine, "-preconfig"  ) ) preconfigure = true;
 
 	// This should invoke the command interpreter on the specified script.
 	// For the moment, the interpreter is not working.
@@ -720,6 +726,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Now put all the pieces together to create a simulator of the DEX hardware.
 		apparatus = new DexApparatus( tracker, targets, sounds, adc, monitor, work_dlg, mass_dlg, camera_dlg );
 
+		// How did we last leave the simulator?
+		LoadGUIState();
 	}
 
 	else apparatus = new DexCompiler( outputScript );
@@ -733,8 +741,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	apparatus->HideStatus();
 
 	// If we are running the task on the simulator, give the operator a chance to set the initial hardware configutation.
-	if ( !compile && task != RUN_SCRIPT ) {
-		LoadGUIState();
+	if ( preconfigure ) {
 		return_code = apparatus->WaitSubjectReady( "Desktop-Computer.bmp", "DEX Desktop Simulator\nUse the GUI to set the initial configuration that you want to test." );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		SaveGUIState();
@@ -746,6 +753,23 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = RunTransducerOffsetCompensation( apparatus, lpCmdLine ) ) );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 	}
+
+	if ( instruct_to_sit ) {
+
+		DexSubjectPosture desired_posture = ParseForPosture( lpCmdLine );
+
+		// Instruct subject to take the appropriate position in the apparatus
+		//  and wait for confimation that he or she is ready.
+		if ( desired_posture == PostureSeated ) {
+			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat, attach the waist and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
+		}
+		else if ( desired_posture == PostureSupine ) {
+			return_code = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lie down on the supine box, attach the waist, thigh and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
+		}
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+
+	}
+
 
 	// Run one of the protocols.
 	switch ( task ) {
@@ -792,13 +816,17 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = ShowPictures( apparatus, lpCmdLine ) ) );
 		break;
 	}
+
+	// Record the simulated state of the apparatus, so that the next trial starts from here.
+	SaveGUIState();
+
+	// Display the results.
 	if ( return_code != ABORT_EXIT && !compile ) {
 		// Create a window for plotting the data.
 		DexInitPlots();		
 		DexPlotData( apparatus );
 	}
 	
-	SaveGUIState();
 	apparatus->Quit();
 	return 0;
 }

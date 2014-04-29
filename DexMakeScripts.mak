@@ -45,7 +45,7 @@ ForceOffsets.dex:	DexSimulatorApp.exe
 
 ### Coefficeiont of Friction.
 FrictionTest0p5.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex
+	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex -prep
 FrictionTest1p0.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex
 FrictionTest2p5.dex:	DexSimulatorApp.exe

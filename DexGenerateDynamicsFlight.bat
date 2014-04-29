@@ -53,8 +53,13 @@ REM
 REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
+REM Here I specify the "-sit" parameter, so that the subject receives the instructions
+REM  to take a seat (or lie down) and attach the belts.
+REM I do not put "-prep" because the manipulandum was placed in the retainer
+REM  as part of the installation procedure.
+
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5 -sit
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0

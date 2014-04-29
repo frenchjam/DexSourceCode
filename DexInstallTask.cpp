@@ -181,28 +181,18 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
 
-	apparatus->ShowStatus( "Check visibility ..." );
+	apparatus->ShowStatus( "Check visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum obscured from view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	apparatus->ShowStatus( "Visibility OK." );
+	apparatus->ShowStatus( "Visibility OK.", "ok.bmp" );
 	apparatus->Wait( 1.0 );
 
 	//need to change picture
 	status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and close the locker door." );
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and lock in place. Close the locker door on the chair." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	if ( desired_posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-	}
-	else if ( desired_posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-	}
-	if ( status == ABORT_EXIT ) exit( status );
 
 
 	apparatus->HideStatus();
@@ -267,7 +257,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 		// Check that the trackers are still aligned with each other.
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Coda misalignment detected!\n - Are the markers in the line-of-sight?\n - Did a CODA unit get bumped?", "alert.bmp" );
+			"Coda misalignment detected!\n - Are any markers occluded?\n - Did a CODA unit get bumped?", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}

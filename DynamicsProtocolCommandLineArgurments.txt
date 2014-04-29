@@ -1,0 +1,6 @@
+-install -upright
+-offsets
+-friction -pinch=0.5 -filter=2.0 -sit
+-friction -pinch=1.0 -filter=2.0 
+-friction -pinch=2.0 -filter=2.0 
+-oscillations -800gm -upright -vertical -range=OscillationRangesNominalVertical.txt:M -frequency=1.0 -duration=30.0 -prep

@@ -37,10 +37,11 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	apparatus->SignalEvent( "Preparing for force offset acquisition ..." );
 	apparatus->ShowStatus( "Preparing for force offset acquisition ...", "wait.bmp" );
 
-	// <<Perhaps we could combine the next two instructions into a single one. Would need to change the picture.>>
 	// Actually, the manipulandum is in the retainer only for friction test. So, as JL and PL suggested it, we could insert only one picture 
 	// with the manipulandum in a cradle for the offsetMeasurement and another for friction.
-	status = apparatus->fWaitSubjectReady( "OffsetMeasurement.bmp", "Place manipulandum in a cradle and remove hand during sensors offsets.%s", OkToContinue );
+	// The offsets are cancelled only once, just after installation and just before the friction test. 
+	// So it makes more sense to have the manipulandum in the retainer.
+	status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "Ensure that manipulandum is locked in the retainer. Remove hand during sensors offsets.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) return( status );
 	
 	// Acquire some data.
