@@ -8,8 +8,9 @@ SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
 SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
-FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex  SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionUtilitiesOnly.dex
-GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex InstallUprightProtocol.dex InstallSupineProtocol.dex UtilitiesProtocol.dex  SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionUtilitiesOnly.dex
+FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
+GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex          SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex 
+COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex SessionUtilitiesOnly.dex
 
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
@@ -19,16 +20,16 @@ MD5TREE	=	..\bin\MD5Tree.exe
 
 all: DexFlightScripts.tar DexGroundScripts.tar
 
-DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(SOURCE)\DexMakeScripts.mak users_flight.dex
+DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_flight.dex
 	copy /Y /V users_flight.dex users.dex
-	$(MD5TREE) $(SCRIPTS) $(FLIGHT) Flt*.dex users.dex > DexFlightScripts.md5
-	$(TAR) --create --verbose --file=DexFlightScripts.tar $(SCRIPTS) $(FLIGHT) Flt*.dex users.dex DexFlightScripts.md5
+	$(MD5TREE) $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex > DexFlightScripts.md5
+	$(TAR) --create --verbose --file=DexFlightScripts.tar $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex DexFlightScripts.md5
 	copy /Y /V DexFlightScripts.tar $(DESTINATION)
 
-DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(SOURCE)\DexMakeScripts.mak users_ground.dex
+DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_ground.dex
 	copy /Y /V users_ground.dex users.dex
-	$(MD5TREE) $(SCRIPTS) $(GROUND) Gnd*.dex users.dex > DexGroundScripts.md5
-	$(TAR) --create --verbose --file=DexGroundScripts.tar $(SCRIPTS) $(GROUND) Gnd*.dex users.dex DexGroundScripts.md5
+	$(MD5TREE) $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex > DexGroundScripts.md5
+	$(TAR) --create --verbose --file=DexGroundScripts.tar $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex DexGroundScripts.md5
 	copy /Y /V DexGroundScripts.tar $(DESTINATION)
 
  
@@ -141,14 +142,13 @@ DexReducedReturnLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat
 	$(SOURCE)\DexGenerateReturnReduced.bat Upright Lrg > DexReducedReturnLarge.dex
 
 ### Utilities
-UtilitiesProtocol.dex: $(STATICSCRIPTS)\UtilitiesProtocol.dex
-	copy /Y $(STATICSCRIPTS)\UtilitiesProtocol.dex
-InstallUprightProtocol.dex: $(STATICSCRIPTS)\InstallUprightProtocol.dex
-	copy /Y $(STATICSCRIPTS)\InstallUprightProtocol.dex
-InstallSupineProtocol.dex: $(STATICSCRIPTS)\InstallSupineProtocol.dex
-	copy /Y $(STATICSCRIPTS)\InstallSupineProtocol.dex
 
-
+ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex
+ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex
+ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolInstallSupine.dex
 
 ######################################################################################################################################
 
@@ -178,6 +178,12 @@ SessionUtilitiesOnly.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex
 	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .
 
 
+######################################################################################################################################
+
+#
+# Users
+#
+
 users_flight.dex:	$(STATICSCRIPTS)\users_flight.dex
 	copy /Y $(STATICSCRIPTS)\users_flight.dex .
 
@@ -185,10 +191,22 @@ users_ground.dex:	$(STATICSCRIPTS)\users_ground.dex
 	copy /Y $(STATICSCRIPTS)\users_ground.dex .
 
 
+######################################################################################################################################
+
+#
+# Pictures Utility
+#
+
 # I created this task to make an easy way to flip through the different pictures.
 
 ShowPictures.dex:	DexSimulatorApp.exe
 	$(COMPILER) -pictures -compile=ShowPictures.dex
+
+######################################################################################################################################
+
+#
+# Compiler / Simulator
+#
 
 # The makefile checks if a newer version of the simulator/compiler DexSimulatorApp.exe has been generated.
 # If so, it copies it here. That makes the batch files simpler, since they therefore do not
