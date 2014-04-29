@@ -96,7 +96,7 @@ call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRangesVertical.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
@@ -116,7 +116,7 @@ call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=open
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRangesHorizontal.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
