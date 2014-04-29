@@ -24,13 +24,13 @@ DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) $(SOURC
 	copy /Y /V users_flight.dex users.dex
 	$(MD5TREE) $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex > DexFlightScripts.md5
 	$(TAR) --create --verbose --file=DexFlightScripts.tar $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex DexFlightScripts.md5
-	copy /Y /V DexFlightScripts.tar $(DESTINATION)
+	copy /Y /V DexFlightScripts.tar "$(DESTINATION)\DexFlightScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
 
 DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_ground.dex
 	copy /Y /V users_ground.dex users.dex
 	$(MD5TREE) $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex > DexGroundScripts.md5
 	$(TAR) --create --verbose --file=DexGroundScripts.tar $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex DexGroundScripts.md5
-	copy /Y /V DexGroundScripts.tar $(DESTINATION)
+	copy /Y /V DexGroundScripts.tar "$(DESTINATION)\DexGroundScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
 
  
 ######################################################################################################################################
