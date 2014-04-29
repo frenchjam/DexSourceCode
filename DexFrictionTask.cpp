@@ -59,10 +59,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	double threshold = min( copForceThreshold, gripTarget * 0.9 );
 
 	fprintf( stderr, "     RunFrictionMeasurement: %s\n", params );
-	// fprintf( stderr, "Friction Measurement: Target grip force: %f\n", gripTarget );
-	// fprintf( stderr, "Friction Measurement: Filter constant:   %f\n", forceFilterConstant );
-
-	
 	
 	if ( ParseForPrep( params ) ) {
         status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
@@ -72,12 +68,14 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
     // picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to start." );
-	apparatus->Wait( baselineDuration );
+
 	// Start acquiring.
+	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
+	apparatus->Wait( baselineDuration );
 	
     apparatus->ShowStatus( "Grip the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
     
-	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
 	
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
