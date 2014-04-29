@@ -103,7 +103,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
-	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open." );
+	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open and that manipulandum is in view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the target bar in the right side position.
@@ -188,13 +188,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( 1.0 );
 
 	//need to change picture
-	status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
+	status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and close the locker door." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-// Instruct subject to take the appropriate position in the apparatus
+	// Instruct subject to take the appropriate position in the apparatus
 	//  and wait for confimation that he or she is ready.
 	if ( desired_posture == PostureSeated ) {
 		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
