@@ -78,8 +78,20 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	}
 
 	AddDirective( apparatus, "You will place the manipulandum next to the blinking target.", mtb );
-	AddDirective( apparatus, "You will move quickly and accurately to the lighted target (1 among 4 targets).", dsc );
+	AddDirective( apparatus, "You will move quickly and accurately to the lighted target (1 of the 4 currently lit).", dsc );
+
+	// Show the possible targets.
+	// For the moment, I just take 4 arbitrary targets.
+	// Eventually, we will read the target file and extract the possible targets.
+	apparatus->TargetsOff();
+	int lowest = 2;
+	int highest = 8;
+	for ( int tgt = lowest; tgt <= highest; tgt += 2 ) {
+		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( tgt );
+		else apparatus->HorizontalTargetOn( tgt );
+	}
 	ShowDirectives( apparatus );
+	apparatus->TargetsOff();
 
 	return( NORMAL_EXIT );
 }
