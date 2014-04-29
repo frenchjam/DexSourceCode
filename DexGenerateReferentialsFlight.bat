@@ -1,7 +1,6 @@
 @echo off
 SETLOCAL
 
-
 REM Generate the Referential Flight protocol.
 
 REM This script allows one to select -upright or -supine with the first parameter.
@@ -79,28 +78,18 @@ REM
 REM Discrete Movements
 REM
 
-REM All the oscillations have the same range, frequency, duration and mass.
+REM All the trials have the same range, frequency, duration and mass.
 set mass=400gm
 
-REM Start the trial counter for the oscillations.
-set seq=0
+REM Start the trial counter for the discrete movements.
+set dsc_seq=0
 
-set direction=Horizontal
+set direction=Vertical
 set eyes=open
 set range=DiscreteRangesVertical.txt:%sz% -prep
 call :DO_ONE_DISCRETE_TRIAL
 
-set direction=Horizontal
-set eyes=open
-set range=DiscreteRangesVertical.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
+set direction=Vertical
 set eyes=closed
 set range=DiscreteRangesVertical.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
@@ -111,16 +100,26 @@ set range=DiscreteRangesHorizontal.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
-set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz%
+set eyes=closed
+set range=DiscreteRangesVertical.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
-set direction=Vertical
+set direction=Horizontal
+set eyes=open
+set range=DiscreteRangesHorizontal.txt:%sz% -prep
+call :DO_ONE_DISCRETE_TRIAL
+
+set direction=Horizontal
 set eyes=closed
 set range=DiscreteRangesHorizontal.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
-set direction=Vertical
+set direction=Horizontal
+set eyes=open
+set range=DiscreteRangesVertical.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
+
+set direction=Horizontal
 set eyes=closed
 set range=DiscreteRangesHorizontal.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
