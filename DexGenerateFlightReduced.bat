@@ -54,7 +54,7 @@ REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest0p5sit.dex,%task% Friction 0.5
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0
@@ -162,7 +162,7 @@ REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0
+echo CMD_TASK,%task%,FrictionTest1p0prep.dex,%task% Friction 1.0
 
 ENDLOCAL
 goto :EOF

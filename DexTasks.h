@@ -116,6 +116,8 @@ int ShowPictures( DexApparatus *apparatus, const char *params );
 // Some common messages.
 
 extern char *MsgReadyToStart;
+extern char *MsgReadyToStartOpen;
+extern char *MsgReadyToStartClosed;
 extern char *MsgAcquiringBaseline;
 extern char *MsgGripNotCentered;
 extern char *MsgMoveToBlinkingTarget;

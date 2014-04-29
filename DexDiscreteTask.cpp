@@ -69,16 +69,6 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = CheckInstall( apparatus, posture, bar_position );
 	if ( status != NORMAL_EXIT ) return( status );
 
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	if ( posture == PostureSeated ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-	}
-	else if ( posture == PostureSupine ) {
-		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-	}
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Show them the targets that will be used.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
@@ -173,7 +163,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
-
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	else {
@@ -181,8 +170,18 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		if ( status != NORMAL_EXIT ) return( status );
 	}
 
+	// Verify that the subject is ready, in case they did something unexpected.
+	if ( posture == PostureSeated ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+	}
+	else if ( posture == PostureSupine ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStart );
+	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStartOpen );
+	else status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStartClosed );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

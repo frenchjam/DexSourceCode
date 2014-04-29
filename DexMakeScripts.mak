@@ -45,11 +45,15 @@ ForceOffsets.dex:	DexSimulatorApp.exe
 
 ### Coefficeiont of Friction.
 FrictionTest0p5.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex -prep
+	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex 
 FrictionTest1p0.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex
 FrictionTest2p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5.dex
+FrictionTest0p5sit.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex -sit
+FrictionTest1p0prep.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex -prep
 
 ### Configuration of DEX hardware.
 InstallUprightTask.dex:	DexSimulatorApp.exe

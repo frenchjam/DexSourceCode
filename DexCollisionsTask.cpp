@@ -115,6 +115,9 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	//  movements, i.e. one can use a qualifier :# to specify which sequence in a file with multiple sequences.
 	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( collisionSequence, target_filename );
 
+	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
+	// If this is the first block, we should do this. If not, it can be skipped.
+	if ( ParseForPrep( params ) ) PrepCollisions( apparatus, params );
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	else {
@@ -122,9 +125,14 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 		if ( status != NORMAL_EXIT ) return( status );
 	}
 
-	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
-	// If this is the first block, we should do this. If not, it can be skipped.
-	if ( ParseForPrep( params ) ) PrepCollisions( apparatus, params );
+	// Verify that the subject is ready, in case they did something unexpected.
+	if ( posture == PostureSeated ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
+	}
+	else if ( posture == PostureSupine ) {
+		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
+	}
+	if ( status == ABORT_EXIT ) exit( status );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "OffsetMeasurement.bmp", MsgReadyToStart );
