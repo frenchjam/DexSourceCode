@@ -40,10 +40,10 @@ REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
 if /I %posture% EQU supine GOTO :SUPINE 
-echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Install
+echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Configure
 GOTO :NEXT
 :SUPINE
-echo CMD_TASK,%task%,InstallSupineTask.dex,%task% Install
+echo CMD_TASK,%task%,InstallSupineTask.dex,%task% Configure
 :NEXT
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
