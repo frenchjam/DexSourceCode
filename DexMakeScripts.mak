@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
 FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
 GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex          SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex 
 COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex SessionUtilitiesOnly.dex
@@ -50,10 +50,20 @@ FrictionTest1p0.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex
 FrictionTest2p5.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5.dex
-FrictionTest0p5sit.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5.dex -sit
+
+FrictionTest0p5prep.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5prep.dex -prep
 FrictionTest1p0prep.dex:	DexSimulatorApp.exe
-	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0.dex -prep
+	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0prep.dex -prep
+FrictionTest2p5prep.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5prep.dex -prep
+
+FrictionTest0p5sit.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=0.5 -filter=2.0 -compile=FrictionTest0p5sit.dex -sit
+FrictionTest1p0sit.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=1.0 -filter=2.0 -compile=FrictionTest1p0sit.dex -sit
+FrictionTest2p5sit.dex:	DexSimulatorApp.exe
+	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5sit.dex -sit
 
 ### Configuration of DEX hardware.
 InstallUprightTask.dex:	DexSimulatorApp.exe
