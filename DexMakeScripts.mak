@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+SCRIPTS		= calibrate.dex ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
 FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
 GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex          SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex 
 COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex SessionUtilitiesOnly.dex
@@ -204,6 +204,14 @@ users_flight.dex:	$(STATICSCRIPTS)\users_flight.dex
 users_ground.dex:	$(STATICSCRIPTS)\users_ground.dex
 	copy /Y $(STATICSCRIPTS)\users_ground.dex .
 
+######################################################################################################################################
+
+#
+# Utilities
+#
+
+calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
+	copy /Y $(STATICSCRIPTS)\calibrate.dex .
 
 ######################################################################################################################################
 
