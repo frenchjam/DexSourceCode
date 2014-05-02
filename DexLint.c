@@ -32,6 +32,8 @@ int process_task_file ( char *filename, int verbose ) {
 
 	int errors = 0;
 
+	HBITMAP bmp;
+
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
 		printf( "Error opening %s for read.", filename );
@@ -59,16 +61,17 @@ int process_task_file ( char *filename, int verbose ) {
 					if ( !strcmp( local_picture_file[j], token[i] ) ) break;
 				}
 				// If we haven't seen it already in this file, signal if it does not exist.
-				// If we've already seen it in this file, don't signal the error again.
+				// If we've already seen it in this file (j != local_pictures ), don't signal the error again.
 				if ( j == local_pictures ) {
 					strcpy( local_picture_file[j], token[i] );
+					local_pictures++;
+
 					strcpy( path, picture_path );
 					strcat( path, token[i] );
 					if ( _access( path, 0x00 ) ) {
 						printf( "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
 						errors++;
 					}
-					local_pictures++;
 				}
 
 				// If we haven't seen it already in any file, add it to the list of pictures.
@@ -352,6 +355,7 @@ int main ( int argc, char *argv[] ) {
 		char from[1024];
 		char to[1024];
 
+		// Generate a batch file to copy just the pictures that we need.
 		fp = fopen( "DexLint.bat", "w" );
 		fprintf( fp, "del /F /Q pictures\\*\n" );
 		for ( j = 0; j < global_pictures; j++ ) {
