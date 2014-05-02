@@ -27,7 +27,7 @@ int		delaySequenceN = 9;
 int		discreteTargets[3] = {3, 5, 7};
 
 int discreteFalseStartTolerance = 5;
-double discreteFalseStartThreshold = 1.0;
+double discreteFalseStartThreshold = 2.0;
 double discreteFalseStartHoldTime = 0.250;
 double discreteFalseStartFilterConstant = 1.0;
 

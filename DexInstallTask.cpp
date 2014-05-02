@@ -103,14 +103,14 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
-	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open and that manipulandum is in view (Visble Status Green)." );
+	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open and that manipulandum is in view ('Visble' Indicator Green)." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the target bar in the right side position.
 	// Actually, this is not really necessary. The origin is the marker on the box and 
 	//  whether the bar is to the right or to the left, it points in the positive Y direction.
 	// So we could skip this step if we wanted to.
-	status = apparatus->WaitSubjectReady("BarRight.bmp", "Make sure that the target bar\nis in the right side position." );
+	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the target bar\nis in the LEFT side position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
@@ -225,13 +225,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Is setup in SEATED configuration?\nWas CODA alignment performed?", "CalibrateSeated.bmp" );
+											"Unexpected Configuration\n- Configured for Seated?\n- Was CODA alignment performed?", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Is setup in SUPINE configuration?\nWas CODA alignment performed?", "CalibrateSupine.bmp" );
+											"Unexpected Configuration\n- Configured for SUPINE?\n- Was CODA alignment performed?", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -274,12 +274,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget bar in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SUPINE configuration?\nTarget bar in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\nTarget bar in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\nTarget bar in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Apparatus in SEATED configuration?\n - Target bar in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Apparatus in SEATED configuration?\n - Target bar in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n - Target bar in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n - Target bar in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 
@@ -287,4 +287,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 
 	return( status );
+}
+
+int FinishProtocol( DexApparatus *apparatus, const char *params ) {
+
+	int status;
+
+	status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK>, then <Back>, then <Logout>." );
+	return( status );
+
 }

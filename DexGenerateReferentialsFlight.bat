@@ -153,6 +153,17 @@ echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
 
+REM ****************************************************************************
+
+REM
+REM Show that protocol is finished.
+REM
+set /A "task=task+1"
+echo CMD_TASK,%task%,TaskFinishProtocol.dex,Finished - press Back
+
+
+
+
 ENDLOCAL
 goto :EOF
 

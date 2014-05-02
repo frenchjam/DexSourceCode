@@ -110,7 +110,7 @@ void AddDirective( DexApparatus *apparatus, const char *directive, const char *p
 void ShowDirectives( DexApparatus *apparatus ) {
 
 	for ( int i = 0; i < n_directives; i++ ) {
-		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK OVERVIEW (%d/%d): (Don't start)\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
+		int status = apparatus->fWaitSubjectReady( directive_picture[i], "TASK PREVIEW (%d/%d): (Don't start!)\n%s%s", i + 1, n_directives, directive_text[i], OkToContinue );
 		if ( status == ABORT_EXIT ) exit( status );
 	}
 }
@@ -133,7 +133,7 @@ void BlinkAll ( DexApparatus *apparatus ) {
 
 void SignalEndOfRecording ( DexApparatus *apparatus ) {
 
-	for ( int i = 0; i < 3; i++ ) {
+	for ( int i = 0; i < 1; i++ ) {
 		apparatus->SetTargetState( ~0 );
 		apparatus->Beep();
 		apparatus->Wait( flashDuration );
@@ -612,6 +612,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
+	if ( strstr( lpCmdLine, "-finish"  ) ) task = FINISH_PROTOCOL;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.
@@ -815,6 +816,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	case INSTALL_PROCEDURE:
 		while ( RETRY_EXIT == ( return_code = RunInstall( apparatus, lpCmdLine ) ) );
+		break;
+
+	case FINISH_PROTOCOL:
+		while ( RETRY_EXIT == ( return_code = FinishProtocol( apparatus, lpCmdLine ) ) );
 		break;
 
 	case SHOW_PICTURES:
