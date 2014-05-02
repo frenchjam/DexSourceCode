@@ -39,7 +39,7 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 set /A "task=task+1"
-echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Configure
+echo CMD_TASK,%task%,TaskInstallUpright.dex,%task% Configure
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"

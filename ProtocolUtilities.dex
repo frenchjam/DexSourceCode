@@ -5,4 +5,3 @@ CMD_TASK,120,task_nullify.dex,Nullify Forces
 CMD_TASK,130,task_shutdown.dex,Shutdown System
 CMD_TASK,140,calibrate.dex,Calibrate Touchscreen
 #end
-

@@ -1,6 +1,6 @@
 # DEX Utilities Only
 #Format: "CMD_PROTOCOL", protocol id, protocol file, display name
-CMD_PROTOCOL,101,InstallUprightProtocol.dex,Configure for Seated
-CMD_PROTOCOL,102,InstallSupineProtocol.dex,Configure for Supine
-CMD_PROTOCOL,100,UtilitiesProtocol.dex,Utilities
+CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
+CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
+CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end
