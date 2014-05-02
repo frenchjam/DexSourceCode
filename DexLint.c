@@ -34,7 +34,7 @@ int process_task_file ( char *filename, int verbose ) {
 
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
-		printf( "Error opening %s for read.", filename );
+		printf( "Error opening task file %s for read.\n", filename );
 		return( 1 );
 	}
 
@@ -87,6 +87,8 @@ int process_task_file ( char *filename, int verbose ) {
 
 	}
 
+	fclose( fp );
+
 	return( errors );
 
 }
@@ -111,7 +113,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
-		printf( "Error opening %s for read.", filename );
+		printf( "Error opening %s for read.\n", filename );
 		return( 1 );
 	}
 
@@ -162,6 +164,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 
 	}
 
+	fclose( fp );
 	return( errors );
 
 }
@@ -186,7 +189,7 @@ int process_session_file ( char *filename, int verbose ) {
 
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
-		printf( "Error opening %s for read.", filename );
+		printf( "Error opening %s for read.\n", filename );
 		return( 1 );
 	}
 
@@ -236,6 +239,7 @@ int process_session_file ( char *filename, int verbose ) {
 		}				
 	}
 
+	fclose( fp );
 	return( errors );
 
 }
