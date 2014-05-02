@@ -185,6 +185,12 @@ int main ( int argc, char *argv[] ) {
 	int passcode[256];
 	int subjects = 0;
 
+	int arg;
+
+	for ( arg = 1; arg < argc; arg++ ) {
+		if ( !strcmp( argv[arg], "-noquery" ) ) popups = FALSE;
+	}
+
 	printf( "User Root File: %s\n", user_file );
 	fp = fopen( user_file, "r" );
 	if ( !fp ) {
