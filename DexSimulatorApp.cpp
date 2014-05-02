@@ -295,7 +295,8 @@ int LoadSequence(  int *sequence, const char *filename ) {
 	if ( sizes > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
 	// If there is supposed to be more than one sequence, skip that header line.
 	if ( sequences > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
-
+	// If we ask for too many sequeces, wrap around.
+	index = index % sequences;
 	do {
 
 		for ( int sz = 0; sz < sizes; sz++ ) {
@@ -424,6 +425,8 @@ int LoadSequence(  double *sequence, const char *filename ) {
 	if ( sizes > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
 	// If there is supposed to be more than one sequence, skip that header line.
 	if ( sequences > 1 ) do c = fgetc( fp ); while ( c != '\n' && c != '\r' );
+	// If we ask for too many sequeces, wrap around.
+	index = index % sequences;
 
 	do {
 
