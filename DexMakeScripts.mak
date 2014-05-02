@@ -7,7 +7,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\DexInstall
 
-SCRIPTS		= calibrate.dex ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex InstallUprightTask.dex InstallSupineTask.dex ShowPictures.dex 
+SCRIPTS		= calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex TaskInstallUpright.dex TaskInstallSupine.dex ShowPictures.dex
 FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
 GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex          SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex 
 COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex SessionUtilitiesOnly.dex
@@ -15,19 +15,26 @@ COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
 
+LINT	= ..\..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-all: DexFlightScripts.tar DexGroundScripts.tar
+all: DexFlightScripts.tar 
 
 DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_flight.dex
 	copy /Y /V users_flight.dex users.dex
 	$(MD5TREE) $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex > DexFlightScripts.md5
 	$(TAR) --create --verbose --file=DexFlightScripts.tar $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex DexFlightScripts.md5
+	cd TEST
+	del /F /Q *.*
+	$(TAR) --extract --verbose --file=..\DexFlightScripts.tar
+	$(LINT) -noquery > DexLint.log
+	cd ..
 	copy /Y /V DexFlightScripts.tar "$(DESTINATION)\DexFlightScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
 
 DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_ground.dex
 	copy /Y /V users_ground.dex users.dex
+	$(LINT) -noquery > DexLint.log
 	$(MD5TREE) $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex > DexGroundScripts.md5
 	$(TAR) --create --verbose --file=DexGroundScripts.tar $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex DexGroundScripts.md5
 	copy /Y /V DexGroundScripts.tar "$(DESTINATION)\DexGroundScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
@@ -66,10 +73,10 @@ FrictionTest2p5sit.dex:	DexSimulatorApp.exe
 	$(COMPILER) -friction -pinch=2.5 -filter=2.0 -compile=FrictionTest2p5sit.dex -sit
 
 ### Configuration of DEX hardware.
-InstallUprightTask.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -upright -compile=InstallUprightTask.dex
-InstallSupineTask.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -supine -compile=InstallSupineTask.dex
+TaskInstallUpright.dex:	DexSimulatorApp.exe
+	$(COMPILER) -install -upright -compile=TaskInstallUpright.dex
+TaskInstallSupine.dex:	DexSimulatorApp.exe
+	$(COMPILER) -install -supine -compile=TaskInstallSupine.dex
 
 
 ######################################################################################################################################
@@ -212,6 +219,16 @@ users_ground.dex:	$(STATICSCRIPTS)\users_ground.dex
 
 calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
 	copy /Y $(STATICSCRIPTS)\calibrate.dex .
+
+task_align.dex: $(STATICSCRIPTS)\task_align.dex
+	copy /Y $(STATICSCRIPTS)\task_align.dex .
+
+task_nullify.dex: $(STATICSCRIPTS)\task_nullify.dex
+	copy /Y $(STATICSCRIPTS)\task_nullify.dex .
+
+task_shutdown.dex: $(STATICSCRIPTS)\task_shutdown.dex
+	copy /Y $(STATICSCRIPTS)\task_shutdown.dex .
+
 
 ######################################################################################################################################
 
