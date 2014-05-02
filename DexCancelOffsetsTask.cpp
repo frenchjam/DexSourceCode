@@ -45,10 +45,10 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	if ( status == ABORT_EXIT ) return( status );
 	
 	// Acquire some data.
-		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+	apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
 	apparatus->StartAcquisition( "OFFS", maxTrialDuration );
 	apparatus->Wait( offsetAcquireTime );
-	apparatus->ShowStatus( "Saving data ..." );
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	apparatus->StopAcquisition();
 
 	apparatus->ShowStatus( "Processing data ...", "wait.bmp" );

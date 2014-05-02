@@ -28,7 +28,7 @@ int targetSequence[MAX_SEQUENCE_ENTRIES] = { 5, 2, 11, 5, 11, 2, 5, 8, 5, 11 };	
 int targetSequenceN = 10;
 
 double targetedMovementTime = 1.0;			// Time to perform each movement.
-double targetedMinMovementExtent =  100.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
+double targetedMinMovementExtent =  20.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 double targetedMaxMovementExtent = 1000.0;	// Maximum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
 Vector3 targetedMovementDirection = {0.0, 1.0, 0.0};
 Quaternion targetedMovementOrientation = {0.0, 0.0, 0.0, 1.0};
@@ -225,9 +225,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ANALYSIS );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
-	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", "Trial terminated.\nPlace the maniplandum in the empty cradle." );
+	SignalEndOfRecording( apparatus );
+	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", MsgTrialOver );
+	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
