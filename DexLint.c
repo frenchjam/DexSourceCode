@@ -11,6 +11,84 @@
 
 enum { NORMAL_EXIT = 0, NO_USER_FILE, ERROR_EXIT };
 
+char global_picture_file[2560][256];
+int	 global_pictures = 0;
+char picture_path[1024] = "pictures\\";
+
+int process_task_file ( char *filename, int verbose ) {
+
+	FILE *fp;
+
+	int tokens;
+	char *token[MAX_TOKENS];
+	char line[2048];
+	int line_n = 0;
+	int	i, j;
+
+	char local_picture_file[2560][256];
+	char path[1024];
+
+	int local_pictures = 0;
+
+	int errors = 0;
+
+	fp = fopen( filename, "r" );
+	if ( !fp ) {
+		printf( "Error opening %s for read.", filename );
+		return( 1 );
+	}
+
+	if ( verbose ) fprintf( stderr, "\n  File: %s", filename );
+	while ( fgets( line, sizeof( line ), fp ) ) {
+
+		line_n++;
+		tokens = ParseCommaDelimittedLine( token, line );
+		if ( verbose ) {
+			fprintf( stderr, "\n  Line:   %s", line );
+			fprintf( stderr, "Tokens: %d\n", tokens );
+			for ( i = 0; i < tokens; i++ ) fprintf( stderr, "%2d %s\n", i, token[i] );
+		}
+
+		for ( i = 1; i < tokens; i++ ) {
+			// Look for picture files. They are all .bmp.
+			if ( strstr( token[i], ".bmp" ) ) {
+				if ( verbose ) fprintf( stderr, "     %d Line %03d Picture File: %s\n", filename, line_n, token[i] );
+
+				// Look to see if we've seen this one before in this file.
+				for ( j = 0; j < local_pictures; j++ ) {
+					if ( !strcmp( local_picture_file[j], token[i] ) ) break;
+				}
+				// If we haven't seen it already in this file, signal if it does not exist.
+				// If we've already seen it in this file, don't signal the error again.
+				if ( j == local_pictures ) {
+					strcpy( local_picture_file[j], token[i] );
+					strcpy( path, picture_path );
+					strcat( path, token[i] );
+					if ( _access( path, 0x00 ) ) {
+						printf( "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
+						errors++;
+					}
+					local_pictures++;
+				}
+
+				// If we haven't seen it already in any file, add it to the list of pictures.
+				for ( j = 0; j < global_pictures; j++ ) {
+					if ( !strcmp( global_picture_file[j], token[i] ) ) break;
+				}
+				if ( j == global_pictures ) {
+					strcpy( global_picture_file[j], token[i] );
+					global_pictures++;
+				}
+
+			}	
+		}
+
+	}
+
+	return( errors );
+
+}
+
 int process_protocol_file ( char *filename, int verbose ) {
 
 	FILE *fp;
@@ -21,7 +99,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 	int line_n = 0;
 	int	i;
 
-	int taskID[2560];
+	int taskID[256];
 	int tasks = 0;
 
 
@@ -72,7 +150,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 				printf( "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
 				errors++;
 			}	
-//			else errors += process_task_file( task_file, verbose );
+			else errors += process_task_file( task_file, verbose );
 			tasks++;
 		}
 		else if ( tokens != 0 ) {
@@ -189,6 +267,10 @@ int main ( int argc, char *argv[] ) {
 
 	for ( arg = 1; arg < argc; arg++ ) {
 		if ( !strcmp( argv[arg], "-noquery" ) ) popups = FALSE;
+		if ( !strncmp( argv[arg], "-pictures=", strlen( "-pictures=" ) ) ) {
+			strcpy( picture_path, argv[arg] + strlen( "-pictures=" ) );
+			if ( picture_path[ strlen( picture_path ) - 1 ] != '\\' ) strcat( picture_path, "\\" );
+		}
 	}
 
 	printf( "User Root File: %s\n", user_file );
@@ -263,7 +345,27 @@ int main ( int argc, char *argv[] ) {
 
 	fclose( fp );
 
+
 	if ( errors == 0 ) {
+
+		int j;
+		char from[1024];
+		char to[1024];
+
+		fp = fopen( "DexLint.bat", "w" );
+		fprintf( fp, "del /F /Q pictures\\*\n" );
+		for ( j = 0; j < global_pictures; j++ ) {
+
+			strcpy( from, picture_path );
+			strcat( from, global_picture_file[j] );
+
+			strcpy( to, "pictures\\" );
+			strcat( to, global_picture_file[j] );
+
+			fprintf( fp, "copy /Y /V %s %s\n", from, to );
+		}
+		fclose( fp );
+			
 		if ( popups ) MessageBox( NULL, "DexLint terminated successfully.", argv[0], MB_OK | MB_ICONINFORMATION );
 		return( NORMAL_EXIT );
 	}
