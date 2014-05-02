@@ -29,7 +29,7 @@ double gripTarget= 0.5; //0.5 or 1.0 or 2.0 or 4.0
 
 // Define the pull direction. This should be up.
 Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
-double forceFilterConstant = 2.0;
+double forceFilterConstant = 4.0;
 
 double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
 double slipTimeout = 10.0;		// How long should we wait for a slip?
@@ -79,7 +79,14 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
     apparatus->ShowStatus( "Grip the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
     
-	
+	// Light the targets that will be used to adjust the grip force.
+	// At first they will be on statically, until we detect a grip.
+
+	apparatus->TargetsOff();
+	apparatus->TargetOn( 6 );
+	apparatus->TargetOn( 10 );
+	apparatus->TargetOn( 0 );
+
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -109,11 +116,15 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// Use the method of counting slips vs. a fixed number of seconds depending on the desired grip force.
 	// This is a function of the default threshold for the COP calculation, which will eventually be settable.
 	// In the end, though, we will probably choose one method or the other.
-	if ( frictionMinGrip < 2.0 ) {
+	if ( frictionMinGrip < 0.75 ) {
 
 		// This is the old version, based on a fixed amount of time for the rubbing motions.
 		// Allow 15 more seconds for the rubbing motion.
-		apparatus->Wait( 15 );
+
+		for ( int i = 0; i <= 10; i++ ) {
+			AnalysisProgress( apparatus, i, 10, "Keep rubbing." );
+			apparatus->Wait( 1.5 );
+		}
 		// !JMc Not sure what sound would be on.
 		// !JMc Maybe this could be removed.
 		apparatus->SoundOff();
@@ -136,6 +147,8 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	}
 
+	apparatus->Beep();
+	BlinkAll( apparatus );
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to continue." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
