@@ -180,8 +180,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStartOpen );
-	else status = apparatus->WaitSubjectReady( "ReadyToStart.bmp", MsgReadyToStartClosed );
+	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStartOpen );
+	else status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStartClosed );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

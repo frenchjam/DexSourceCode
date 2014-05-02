@@ -135,7 +135,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "OffsetMeasurement.bmp", MsgReadyToStart );
+	status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.

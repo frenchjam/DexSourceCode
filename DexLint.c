@@ -32,8 +32,6 @@ int process_task_file ( char *filename, int verbose ) {
 
 	int errors = 0;
 
-	HBITMAP bmp;
-
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
 		printf( "Error opening %s for read.", filename );
@@ -72,6 +70,7 @@ int process_task_file ( char *filename, int verbose ) {
 						printf( "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
 						errors++;
 					}
+
 				}
 
 				// If we haven't seen it already in any file, add it to the list of pictures.

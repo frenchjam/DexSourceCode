@@ -59,7 +59,7 @@ char outputScript[256] = "DexSampleScript.dex";
 
 // Some common messages.
 
-char *MsgReadyToStart = "Place the manipulandum in any cradle.\nRemove hand and press <OK> to start.";
+char *MsgReadyToStart = "Place the manipulandum in any cradle and lock in place.\nRemove hand and press <OK> to start.";
 char *MsgReadyToStartOpen = "Place the manipulandum in any cradle.\nRemove hand and press <OK> to start.\nKeep your eyes OPEN.";
 char *MsgReadyToStartClosed = "Place the manipulandum in any cradle.\nRemove hand and press <OK> to start.\nKeep your eyes CLOSED.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
