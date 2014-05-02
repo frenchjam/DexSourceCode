@@ -137,13 +137,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionTolerance, 
 											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "SetupSeated.bmp" );
+											"Placement error - Coda Unit 1.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionTolerance, 
 											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "SetupSupine.bmp" );
+											"Placement error - Coda Unit 1.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -156,13 +156,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "SetupSeated.bmp" );
+												"Placement error - Coda Unit 2.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionTolerance, 
 												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "SetupSupine.bmp" );
+												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -225,13 +225,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Is setup in SEATED configuration?\nWas CODA alignment performed?", "SetupSeated.bmp" );
+											"Is setup in SEATED configuration?\nWas CODA alignment performed?", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Is setup in SUPINE configuration?\nWas CODA alignment performed?", "SetupSupine.bmp" );
+											"Is setup in SUPINE configuration?\nWas CODA alignment performed?", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -244,13 +244,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "SetupSeated.bmp" );
+												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "SetupSupine.bmp" );
+												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
