@@ -5,7 +5,7 @@
 
 COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
-DESTINATION	= ..\DexInstall
+DESTINATION	= ..\GripReleases
 
 SCRIPTS		= TaskFinishProtocol.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex ForceOffsets.dex FrictionTest0p5.dex FrictionTest1p0.dex FrictionTest2p5.dex FrictionTest0p5prep.dex FrictionTest1p0prep.dex FrictionTest2p5prep.dex FrictionTest0p5sit.dex FrictionTest1p0sit.dex FrictionTest2p5sit.dex TaskInstallUpright.dex TaskInstallSupine.dex ShowPictures.dex
 FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
@@ -14,29 +14,36 @@ COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities
 
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
+# The following the path to picture files. 
+PICTURES		= ..\DexPictures
 
 LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-all: DexFlightScripts.tar 
+ALL_FLIGHT	= $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex
+ALL_GROUND	= $(SCRIPTS) $(GROUND) $(COMMON) Flt*.dex users.dex
 
-DexFlightScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_flight.dex
+all: GripFlightScripts.tar 
+
+GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) users_flight.dex
 	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=..\DexPictures\ > DexLint1.log
-	$(MD5TREE) $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex pictures\* users.dex > DexScripts.md5
-	$(TAR) --create --verbose --file=DexTempScripts.tar $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex DexScripts.md5
-	copy /Y /V DexTempScripts.tar "$(DESTINATION)\DexFlightScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
-	copy /Y /V DexScripts.md5 "$(DESTINATION)\DexFlightScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).md5"
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLint.log
+	CreateFlightScriptsTar.bat GripFlightScripts.tar
 
-DexGroundScripts.tar: DexSimulatorApp.exe $(SCRIPTS) $(GROUND) $(COMMON) $(SOURCE)\DexMakeScripts.mak users_ground.dex
-	copy /Y /V users_ground.dex users.dex
-	$(LINT) -noquery > DexLint.log
-	$(MD5TREE) $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex > DexGroundScripts.md5
-	$(TAR) --create --verbose --file=DexTempScripts.tar $(SCRIPTS) $(GROUND) $(COMMON) Gnd*.dex users.dex DexScripts.md5
-	copy /Y /V DexTempScripts.tar "$(DESTINATION)\DexGroundScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).tar"
-	copy /Y /V DexScripts.md5 "$(DESTINATION)\DexGroundScripts (%date:~10,4%.%date:~7,2%.%date:~4,2% %time:~0,2%H%time:~3,2%).md5"
+# The following would be a better way, but I can't get tar to work like it should.
+#	$(TAR) --create --verbose --files-from=DexLintScripts.log --file=DexFlightScripts.tar 
+#	$(TAR) --create --verbose --directory=$(PICTURES) --files-from=DexLintPictures.log --file=DexFlightScripts.tar 
 
+GripFlightPictures.tar: GripFlightScripts.tar
+	CreateFlightPicturesTar.bat GripFlightPictures.tar
+
+GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
+	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
+
+release: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5
+	$(SOURCE)\DexReleaseScripts.bat GripFlight
+	 
  
 ######################################################################################################################################
 
