@@ -11,7 +11,7 @@
 static char return_tokens[BUFFERS][1024];
 static int circular = 0;
 
-int ParseCommaDelimittedLine ( char *tokens[MAX_TOKENS], const char *line ) {
+int ParseCommaDelimitedLine ( char *tokens[MAX_TOKENS], const char *line ) {
 
 
 	char *tkn, *chr;

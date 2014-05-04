@@ -99,7 +99,7 @@ int process_task_file ( char *filename, int verbose ) {
 	while ( fgets( line, sizeof( line ), fp ) ) {
 
 		line_n++;
-		tokens = ParseCommaDelimittedLine( token, line );
+		tokens = ParseCommaDelimitedLine( token, line );
 		if ( verbose ) {
 			fprintf( stderr, "\n  Line:   %s", line );
 			fprintf( stderr, "Tokens: %d\n", tokens );
@@ -177,7 +177,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 	while ( fgets( line, sizeof( line ), fp ) ) {
 
 		line_n++;
-		tokens = ParseCommaDelimittedLine( token, line );
+		tokens = ParseCommaDelimitedLine( token, line );
 		if ( verbose ) {
 			fprintf( stderr, "\n  Line:   %s", line );
 			fprintf( stderr, "Tokens: %d\n", tokens );
@@ -276,7 +276,7 @@ int process_session_file ( char *filename, int verbose ) {
 	while ( fgets( line, sizeof( line ), fp ) ) {
 
 		line_n++;
-		tokens = ParseCommaDelimittedLine( token, line );
+		tokens = ParseCommaDelimitedLine( token, line );
 		if ( verbose ) {
 			fprintf( stderr, "\nLine:   %s", line );
 			fprintf( stderr, "Tokens: %d\n", tokens );
@@ -436,7 +436,7 @@ int main ( int argc, char *argv[] ) {
 		line_n++;
 
 		// Break the line into pieces as defined by the DEX/GRIP ICD.
-		tokens = ParseCommaDelimittedLine( token, line );
+		tokens = ParseCommaDelimitedLine( token, line );
 		if ( verbose ) {
 			fprintf( stderr, "\nLine:   %s", line );
 			fprintf( stderr, "Tokens: %d\n", tokens );

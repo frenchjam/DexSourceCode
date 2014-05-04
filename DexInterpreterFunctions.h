@@ -4,4 +4,12 @@
 
 #define MAX_TOKENS	32
 
-extern int ParseCommaDelimittedLine ( char *tokens[MAX_TOKENS], const char *line );
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int ParseCommaDelimitedLine ( char *tokens[MAX_TOKENS], const char *line );
+
+#ifdef __cplusplus
+}
+#endif
