@@ -29,7 +29,14 @@ double gripTarget= 0.5; //0.5 or 1.0 or 2.0 or 4.0
 
 // Define the pull direction. This should be up.
 Vector3 frictionLoadDirection = { 0.0, 1.0, 0.0 };
+// Define the filter constant for the visual force feedback.
+// A larger value reduces the jitter but also makes the 
+//  response sluggish.
 double forceFilterConstant = 4.0;
+// Use the method of counting slips vs. a fixed number of seconds depending on the desired grip force.
+// This is a function of the default threshold for the COP calculation, which is settable in ASW.ini.
+// In the end, though, we will probably choose one method or the other.
+double frictionMethodThreshold = 0.45;
 
 double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
 double slipTimeout = 10.0;		// How long should we wait for a slip?
@@ -113,10 +120,8 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// this signal will also occur.
 	apparatus->MarkEvent( SLIP );
 
-	// Use the method of counting slips vs. a fixed number of seconds depending on the desired grip force.
-	// This is a function of the default threshold for the COP calculation, which will eventually be settable.
-	// In the end, though, we will probably choose one method or the other.
-	if ( frictionMinGrip < 0.75 ) {
+	// Choose the method depending on the desired grip force.
+	if ( frictionMinGrip < frictionMethodThreshold ) {
 
 		// This is the old version, based on a fixed amount of time for the rubbing motions.
 		// Allow 15 more seconds for the rubbing motion.
