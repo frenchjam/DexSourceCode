@@ -51,6 +51,10 @@ GOTO :NEXT
 echo CMD_TASK,%task%,InstallSupineTask.dex,%task% Configure
 :NEXT
 
+REM Make sure that the audio is set loud enough. Also tells subject to strap in.
+set /A "task=task+1"
+echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
+
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
 echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets

@@ -613,6 +613,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
 	if ( strstr( lpCmdLine, "-finish"  ) ) task = FINISH_PROTOCOL;
+	if ( strstr( lpCmdLine, "-audio"  ) ) task = AUDIO_CHECK;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.
@@ -816,6 +817,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	case INSTALL_PROCEDURE:
 		while ( RETRY_EXIT == ( return_code = RunInstall( apparatus, lpCmdLine ) ) );
+		break;
+
+	case AUDIO_CHECK:
+		while ( RETRY_EXIT == ( return_code = CheckAudio( apparatus, lpCmdLine ) ) );
 		break;
 
 	case FINISH_PROTOCOL:

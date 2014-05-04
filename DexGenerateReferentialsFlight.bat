@@ -50,6 +50,10 @@ GOTO :NEXT
 echo CMD_TASK,%task%,TaskInstallSupine.dex,%task% Configure
 :NEXT
 
+REM Make sure that the audio is set loud enough. Also tells subject to strap in.
+set /A "task=task+1"
+echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
+
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
 echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets
@@ -63,7 +67,7 @@ REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5sit.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0

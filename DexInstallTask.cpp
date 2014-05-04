@@ -74,6 +74,7 @@ double codaUnitOrientationTolerance = 90.0;		// Allowable rotation wrt expected 
 double codaUnitPositionRelaxed =  1000.0;		// Use this if all you really care about is upright vs. supine..
 double codaUnitOrientationIgnore = 179.9;		// Use this if you don't care what the orientation is.
 
+double audioCheckDuration = 10.0;
 
 /*********************************************************************************/
 
@@ -289,11 +290,43 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	return( status );
 }
 
+/************************************************************************************************************************************/
+
+// This is a dummy task. It is placed at the end of a protocol to let the subject know that he or she is finished.
+
 int FinishProtocol( DexApparatus *apparatus, const char *params ) {
 
 	int status;
 
 	status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK>, then <Back>, then <Logout>." );
 	return( status );
+
+}
+
+/************************************************************************************************************************************/
+
+// Instruct the subject to adjust the audio volume so they are sure to hear the tones.
+
+int CheckAudio( DexApparatus *apparatus, const char *params ) {
+
+	int status;
+
+	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware." );
+	if ( status == ABORT_EXIT ) return( status );
+
+	status = apparatus->fWaitSubjectReady("headphones.bmp", "A series of beeps will be played once per second for %.0f seconds. Adjust the volume until you hear them clearly.", audioCheckDuration );
+	if ( status == ABORT_EXIT ) return( status );
+
+	apparatus->ShowStatus( "Beeps are playing. Adjust volume.", "working.bmp" );
+	for ( int i = 0; i < audioCheckDuration; i++ ) {
+		apparatus->Beep();
+		apparatus->Wait( 0.9 );
+	}
+
+	status = apparatus->WaitSubjectReady("headphones.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
+	if ( status == ABORT_EXIT ) return( status );
+
+
+	return( NORMAL_EXIT );
 
 }

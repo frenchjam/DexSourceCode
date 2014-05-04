@@ -41,6 +41,10 @@ REM Each subject should do this, even the configuration has changed, to be sure 
 set /A "task=task+1"
 echo CMD_TASK,%task%,InstallUprightTask.dex,%task% Configure
 
+REM Make sure that the audio is set loud enough. Also tells subject to strap in.
+set /A "task=task+1"
+echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
+
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 set /A "task=task+1"
 echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets
