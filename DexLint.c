@@ -124,7 +124,7 @@ int process_task_file ( char *filename, int verbose ) {
 					strcpy( path, picture_path );
 					strcat( path, token[i] );
 					if ( _access( path, 0x00 ) ) {
-						printf( "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
+						fprintf( log, "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
 						errors++;
 					}
 
@@ -188,12 +188,14 @@ int process_protocol_file ( char *filename, int verbose ) {
 		if ( tokens == 4 ) {
 			// First parameter must be CMD_TASK.
 			if ( strcmp( token[0], "CMD_TASK" ) ) {
+				fprintf( log, "   %s Line %03d Command not CMD_TASK: %s\n", filename, line_n, token[0] );
 				printf( "   %s Line %03d Command not CMD_TASK: %s\n", filename, line_n, token[0] );
 				errors++;
 			}
 			// Second parameter is a task ID. Should be an integer value.
 			if ( 1 != sscanf( token[1], "%d", &taskID[tasks] ) ) {
 				printf( "  %s Line %03d Error reading task ID: %s\n", filename, line_n, token[1] );
+				fprintf( log, "  %s Line %03d Error reading task ID: %s\n", filename, line_n, token[1] );
 				errors++;
 			}
 			else {
@@ -201,6 +203,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 				for ( i = 0; i < tasks; i++ ) {
 					if ( taskID[tasks] == taskID[i] ) {
 						printf( "  %s Line %03d Duplicate task ID: %s\n", filename, line_n, token[1] );
+						fprintf( log, "  %s Line %03d Duplicate task ID: %s\n", filename, line_n, token[1] );
 						errors++;
 					}
 				}
@@ -210,6 +213,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 			// Check if it exists and is readable.
 			if ( _access( task_file, 0x00 ) ) {
 				printf( "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
+				fprintf( log, "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
 				errors++;
 			}	
 			else {
@@ -226,6 +230,7 @@ int process_protocol_file ( char *filename, int verbose ) {
 		}
 		else if ( tokens != 0 ) {
 			printf( "  %s Line %03d Wrong number of parameters: %s\n", filename, line_n, line );
+			fprintf( log, "  %s Line %03d Wrong number of parameters: %s\n", filename, line_n, line );
 			errors++;
 		}
 
@@ -259,6 +264,7 @@ int process_session_file ( char *filename, int verbose ) {
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
 		// Signal the error.
+		printf( "  Error opening session file %s for read.\n", filename );
 		fprintf( log, "  Error opening session file %s for read.\n", filename );
 		// Tell the caller that we had just the one error.
 		return( 1 );
@@ -282,11 +288,13 @@ int process_session_file ( char *filename, int verbose ) {
 			// First parameter must be CMD_PROTOCOL.
 			if ( strcmp( token[0], "CMD_PROTOCOL" ) ) {
 				printf( "  %s Line %03d Command not CMD_PROTOCOL: %s\n", filename, line_n, token[0] );
+				fprintf( log, "  %s Line %03d Command not CMD_PROTOCOL: %s\n", filename, line_n, token[0] );
 				errors++;
 			}
 			// Second parameter is a protocol ID. Should be an integer value.
 			if ( 1 != sscanf( token[1], "%d", &protocolID[protocols] ) ) {
 				printf( " %s Line %03d Error reading protocol ID: %s\n", filename, line_n, token[1] );
+				fprintf( log, " %s Line %03d Error reading protocol ID: %s\n", filename, line_n, token[1] );
 				errors++;
 			}
 			else {
@@ -294,6 +302,7 @@ int process_session_file ( char *filename, int verbose ) {
 				for ( i = 0; i < protocols; i++ ) {
 					if ( protocolID[protocols] == protocolID[i] ) {
 						printf( " %s Line %03d Duplicate protocol ID: %s\n", filename, line_n, token[1] );
+						fprintf( log, " %s Line %03d Duplicate protocol ID: %s\n", filename, line_n, token[1] );
 						errors++;
 					}
 				}
@@ -303,6 +312,7 @@ int process_session_file ( char *filename, int verbose ) {
 			// Check if it is present and readable.
 			if ( _access( protocol_file, 0x00 ) ) {
 				printf( " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
+				fprintf( log, " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
 				errors++;
 			}	
 			else {
@@ -319,6 +329,7 @@ int process_session_file ( char *filename, int verbose ) {
 		}
 		else if ( tokens != 0 ) {
 			printf( " %s Line %03d Wrong number of parameters: %s\n", filename, line_n, line );
+			fprintf( log, " %s Line %03d Wrong number of parameters: %s\n", filename, line_n, line );
 			errors++;
 		}				
 	}
@@ -404,6 +415,7 @@ int main ( int argc, char *argv[] ) {
 		exit( NO_LOG_FILE );
 	}
 	fprintf( log, "%s\nRoot file: %s\n", argv[0], user_file );
+	printf( "%s\nRoot file: %s\n", argv[0], user_file );
 
 	// Open the root file, if we can.
 	fp = fopen( user_file, "r" );
@@ -412,6 +424,7 @@ int main ( int argc, char *argv[] ) {
 		char msg[1024];
 		sprintf( msg, "Error opening %s for read.", user_file );
 		printf( "%s\n", msg );
+		fprintf( log, "%s\n", msg );
 		if ( popups ) MessageBox( NULL, msg, argv[0], MB_OK | MB_ICONERROR );
 		exit( NO_USER_FILE );
 	}
@@ -436,6 +449,7 @@ int main ( int argc, char *argv[] ) {
 			// First parameter must be CMD_USER.
 			if ( strcmp( token[0], "CMD_USER" ) ) {
 				printf( "Line %03d Command not CMD_USER: %s\n", line_n, token[0] );
+				fprintf( log, "Line %03d Command not CMD_USER: %s\n", line_n, token[0] );
 				errors++;
 			}
 			// Second parameter is a subject ID. Should be an integer value.
@@ -443,6 +457,7 @@ int main ( int argc, char *argv[] ) {
 			if ( 1 != sscanf( token[1], "%d", &subjectID[subjects] ) ) {
 				// Report error for invalid subject ID field.
 				printf( "Line %03d Error reading subject ID: %s\n", line_n, token[1] );
+				fprintf( log, "Line %03d Error reading subject ID: %s\n", line_n, token[1] );
 				errors++;
 			}
 			else {
@@ -450,6 +465,7 @@ int main ( int argc, char *argv[] ) {
 				for ( i = 0; i < subjects; i++ ) {
 					if ( subjectID[subjects] == subjectID[i] ) {
 						printf( "Line %03d Duplicate subject ID: %s\n", line_n, token[1] );
+						fprintf( log, "Line %03d Duplicate subject ID: %s\n", line_n, token[1] );
 						errors++;
 					}
 				}
@@ -459,6 +475,7 @@ int main ( int argc, char *argv[] ) {
 			if ( 1 != sscanf( token[2], "%d", &passcode[subjects] ) ) {
 				// Report error reading an integer value for the pin number.
 				printf( "Line %03d Error reading passcode: %s\n", line_n, token[2] );
+				fprintf( log, "Line %03d Error reading passcode: %s\n", line_n, token[2] );
 				errors++;
 			}
 			else {
@@ -466,6 +483,7 @@ int main ( int argc, char *argv[] ) {
 				for ( i = 0; i < subjects; i++ ) {
 					if ( passcode[subjects] == passcode[i] ) {
 						printf( "Line %03d Duplicate passcode: %s\n", line_n, token[2] );
+						fprintf( log, "Line %03d Duplicate passcode: %s\n", line_n, token[2] );
 						errors++;
 					}
 				}
@@ -477,6 +495,7 @@ int main ( int argc, char *argv[] ) {
 				// The file must not only be present, it also has to be readable.
 				// I had a funny problem with this at one point. Maybe MAC OS had created links.
 				printf( "Line %03d Cannot access session file: %s\n", line_n, session_file );
+				fprintf( log, "Line %03d Cannot access session file: %s\n", line_n, session_file );
 				errors++;
 			}	
 			else {
@@ -492,6 +511,7 @@ int main ( int argc, char *argv[] ) {
 			subjects++;
 		}
 		else if ( tokens != 0 ) {
+			printf( "%s Line %03d Wrong number of parameters: %s\n", user_file, line_n, line );
 			fprintf( log, "%s Line %03d Wrong number of parameters: %s\n", user_file, line_n, line );
 			errors++;
 		}				
@@ -546,6 +566,7 @@ int main ( int argc, char *argv[] ) {
 		char msg[1024];
 		sprintf( msg, "DexLint terminated with %d errors.\nSee %s for details.", errors, log_file );
 		printf( "%s\n", msg );
+		fprintf( log, "%s\n", msg );
 		MessageBox( NULL, msg, argv[0], MB_OK | MB_ICONERROR );
 		return( ERROR_EXIT );
 	}

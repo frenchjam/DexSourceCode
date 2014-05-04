@@ -24,6 +24,8 @@ MD5TREE	=	..\bin\MD5Tree.exe
 ALL_FLIGHT	= $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex
 ALL_GROUND	= $(SCRIPTS) $(GROUND) $(COMMON) Flt*.dex users.dex
 
+default: release
+
 all: GripFlightScripts.tar 
 
 GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) users_flight.dex
@@ -41,7 +43,7 @@ GripFlightPictures.tar: GripFlightScripts.tar
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
 
-release: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5
+release: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
 	 
  
