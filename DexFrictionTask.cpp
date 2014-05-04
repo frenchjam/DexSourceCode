@@ -80,6 +80,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	// Start acquiring.
 	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
+	apparatus->StartFilming( "FRIC" );
 	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 	
@@ -162,11 +163,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 
 	// Terminate the acquisition. This will also close the data file.
-	apparatus->StopAcquisition();
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	SignalEndOfRecording( apparatus );
-
-	// Erase any lingering message.
-	apparatus->HideStatus();
+	apparatus->StopFilming();
+	apparatus->StopAcquisition();
 
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
