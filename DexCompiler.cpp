@@ -28,6 +28,7 @@
 #include "DexTracker.h"
 #include "DexApparatus.h"
 
+#include "DexInterpreterFunctions.h"
 
 /***************************************************************************/
 /*                                                                         */
@@ -592,13 +593,27 @@ int DexCompiler::CheckAccelerationPeaks( float min_amplitude, float max_amplitud
 	return( NORMAL_EXIT ); 
 }
 
+void DexCompiler::SnapPhoto( void ) {}
+void DexCompiler::StartFilming( const char *tag ) {
+	AddStepNumber();
+	// Log the message and show it on the DEX screen.
+	strncpy( hold_film_tag, tag, 8 );
+	hold_film_tag[8] = 0;
+	fprintf( fp, "CMD_CTRL_CAMERA, 1, %8s\n", hold_film_tag );
+}
+void DexCompiler::StopFilming( void ) {
+	AddStepNumber();
+	// Log the message and show it on the DEX screen.
+	fprintf( fp, "CMD_CTRL_CAMERA, 0, %8s\n", hold_film_tag );
+}
+
 /*********************************************************************************/
 
 /* 
-* The DexCompiler apparatus generates a script of the top-level commands.
-* Here we run the set of steps defined by such a script, instead of running 
-* a protocol defined by a C subroutine (as above).
-*/
+ * The DexCompiler apparatus generates a script of the top-level commands.
+ * Here we run the set of steps defined by such a script, instead of running 
+ * a protocol defined by a C subroutine (as above).
+ */
 
 //  !!!!!!!!!!!!!!!!!!!! THIS IS NOT UP TO DATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //   It may not cover all the required commands.
@@ -610,7 +625,13 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 	FILE *fp;
 	int status = 0;
 	char line[1024];
-	
+	int	 line_n = 0;
+
+	int tokens;
+	char *token[MAX_TOKENS];
+
+	int i;
+
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
 		char message[1024];
@@ -621,10 +642,41 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 	
 	while ( fgets( line, sizeof( line ), fp ) ) {
 		
-		char token[1024];
-		
-		sscanf( line, "%s", token );
-		
+		// Count the lines.
+		line_n++;
+
+		// Break the line into pieces as defined by the DEX/GRIP ICD.
+		tokens = ParseCommaDelimitedLine( token, line );
+		fOutputDebugString( "\n\n" );
+		fOutputDebugString( "Line:   %s", line );
+		fOutputDebugString( "Tokens: %d\n", tokens );
+		for ( i = 0; i < tokens; i++ ) fOutputDebugString( "%2d %s\n", i, token[i] );
+
+		if ( tokens < 1 ) {}
+		else if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) {
+			apparatus->WaitSubjectReady( token[2], token[1] );
+		}
+		else if ( !strcmp( token[0], "CMD_WAIT" ) ) {
+			double duration = atof( token[1] ) / 1000.0;
+			apparatus->Wait( duration );
+		}
+		else if ( !strcmp( token[0], "CMD_CTRL_TONE" ) ) {
+			int volume = atoi( token[1] ) * 7;
+			int tone = atoi( token[2] );
+			apparatus->SetSoundStateInternal( tone, volume );
+		}
+		else if ( !strcmp( token[0], "CMD_CTRL_TARGETS" ) ) {
+			unsigned int h;
+			unsigned int v;
+			unsigned long bits;
+			sscanf( token[1], "%x", &h );
+			sscanf( token[2], "%x", &v );
+			bits = (h << apparatus->nVerticalTargets) | v;
+			apparatus->SetTargetStateInternal( bits );
+		}
+
+
+#if 0		
 		if ( !strcmp( token, "CMD_CHK_HW_CONFIG" ) ) {
 			
 			int posture, target_config, tapping_config;
@@ -638,18 +690,6 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			
 		}
 		
-		if ( !strcmp( token, "WaitSubjectReady" ) ) {
-			
-			char *prompt = strpbrk( line, " \t" );
-			if ( !prompt ) prompt = "Ready?";
-			else prompt++;
-			
-			// Instruct subject to take the appropriate position in the apparatus
-			//  and wait for confimation that he or she is ready.
-			status = apparatus->WaitSubjectReady( prompt );
-			if ( status == ABORT_EXIT ) exit( status );
-			
-		}
 		
 		if ( !strcmp( token, "WaitUntilAtTarget" ) ) {
 			
@@ -719,22 +759,11 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			if ( status == ABORT_EXIT ) exit( status );
 			
 		}
+#endif
+
 	}
 	
 	return( NORMAL_EXIT );
 	
 }
 
-void DexCompiler::SnapPhoto( void ) {}
-void DexCompiler::StartFilming( const char *tag ) {
-	AddStepNumber();
-	// Log the message and show it on the DEX screen.
-	strncpy( hold_film_tag, tag, 8 );
-	hold_film_tag[8] = 0;
-	fprintf( fp, "CMD_CTRL_CAMERA, 1, %8s\n", hold_film_tag );
-}
-void DexCompiler::StopFilming( void ) {
-	AddStepNumber();
-	// Log the message and show it on the DEX screen.
-	fprintf( fp, "CMD_CTRL_CAMERA, 0, %8s\n", hold_film_tag );
-}
