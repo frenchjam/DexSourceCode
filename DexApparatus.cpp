@@ -236,6 +236,12 @@ void DexApparatus::LoadTargetPositions( char *filename ) {
 
 	// Retrieve the expected positions of the targets in tracker coordinates.
 	fp = fopen( filename, "r" );
+	if ( !fp ) {
+		char msg[1024];
+		sprintf( msg, "Error opening %s for read.", filename );
+		MessageBox( NULL, msg, "DexApparatus", MB_OK );
+		exit( -1 );
+	}
 	if ( fp ) {
 		for ( int trg = 0; trg < nTargets; trg++ ) {
 			items = fscanf( fp, "%lf, %lf, %lf\n", 

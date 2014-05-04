@@ -615,10 +615,7 @@ void DexCompiler::StopFilming( void ) {
  * a protocol defined by a C subroutine (as above).
  */
 
-//  !!!!!!!!!!!!!!!!!!!! THIS IS NOT UP TO DATE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//   It may not cover all the required commands.
-
-// This could instead be a method in DexApparatus.
+// Post Hoc tests not yet implemented.
 
 int RunScript( DexApparatus *apparatus, const char *filename ) {
 	
@@ -629,6 +626,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 
 	int tokens;
 	char *token[MAX_TOKENS];
+	char hold_status_message[1024];
 
 	int i;
 
@@ -654,7 +652,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 
 		if ( tokens < 1 ) {}
 		else if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) {
-			apparatus->WaitSubjectReady( token[2], token[1] );
+			status = apparatus->WaitSubjectReady( token[2], token[1] );
 		}
 		else if ( !strcmp( token[0], "CMD_WAIT" ) ) {
 			double duration = atof( token[1] ) / 1000.0;
@@ -674,96 +672,194 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			bits = (h << apparatus->nVerticalTargets) | v;
 			apparatus->SetTargetStateInternal( bits );
 		}
+		else if ( !strcmp( token[0], "CMD_WAIT_MANIP_ATTARGET" ) ) {
 
+			int target_id;
+			Vector3 position_tolerance;
+			Quaternion desired_orientation;
+			double orientation_tolerance;
+			double hold_time;
+			double timeout;
 
-#if 0		
-		if ( !strcmp( token, "CMD_CHK_HW_CONFIG" ) ) {
+			unsigned long h, v;
 			
-			int posture, target_config, tapping_config;
-			char message[1024], picture[1024];
-			sscanf( line, "%s, %s, %s, %d, %d, %d", token, &posture, &target_config, &tapping_config );
-			status = apparatus->SelectAndCheckConfiguration( picture, message, 
-				( posture == 0 ? PostureSeated : PostureSupine ),
-				( target_config == 0 ? TargetBarRight : TargetBarLeft ),
-				TappingIndifferent );
-			if ( status == ABORT_EXIT ) exit( status );
-			
-		}
-		
-		
-		if ( !strcmp( token, "WaitUntilAtTarget" ) ) {
-			
-			int target = 0;
-			sscanf( line, "%s %d", token, &target );
-			
-			// Wait until the subject gets to the target before moving on.
-			status = apparatus->WaitUntilAtVerticalTarget( target );
-			if ( status == ABORT_EXIT ) exit( status );
-		}
-		
-		if ( !strcmp( token, "StartAcquisition" ) ) {
-			float max_duration = 120.0;
-			char tag[256];
+			sscanf( token[2], "%lx", &v );
+			sscanf( token[1], "%lx", &h );
 
-			sscanf( line, "%s %s %f", token, tag, &max_duration );
-			// Start acquiring data.
-			apparatus->StartAcquisition( tag, max_duration );
+			unsigned long target_bits  = (h << apparatus->nVerticalTargets) | v;
+			for ( target_id = 0; target_id < apparatus->nTargets; target_id++ ) {
+				if ( target_bits & 0x01 ) break;
+				target_bits = target_bits >> 1;
+			}
+
+			desired_orientation[X] = atof( token[3] );
+			desired_orientation[Y] = atof( token[4] );
+			desired_orientation[Z] = atof( token[5] );
+			desired_orientation[M] = atof( token[6] );
+
+			position_tolerance[X] = atof( token[7] );
+			position_tolerance[Y] = atof( token[8] );
+			position_tolerance[Z] = atof( token[9] );
+
+			orientation_tolerance = atof( token[10] );
+
+			hold_time = atof( token[11] ) / 1000.0;
+			timeout = atof( token[12] );
+
+			status = apparatus->WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, token[12], token[13] );
+
 		}
-		
-		if ( !strcmp( token, "Wait" ) ) {
-			
-			double duration = 0.0;
-			sscanf( line, "%s %lf", token, &duration );
-			
-			// Collect one second of data while holding at the starting position.
-			apparatus->Wait( duration );
+		else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) {
+			status = apparatus->WaitCenteredGrip( 
+				atof( token[2] ), // min_force
+				atof( token[1] ), // tolerance
+				atof( token[3] ), // timeout
+				token[4], // message
+				token[5] ); // picture
 		}
-		
-		if ( !strcmp( token, "TargetsOff" ) ) {
-			apparatus->TargetsOff();
+		else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIPFORCE" ) ) {
+
+			Vector3 direction;
+
+			direction[X] = atof( token[5] );
+			direction[Y] = atof( token[6] );
+			direction[Z] = atof( token[7] );
+
+			status = apparatus->WaitDesiredForces( 
+				atof( token[1] ), // min_grip
+				atof( token[2] ), // max_grip
+				atof( token[3] ), // min_load
+				atof( token[4] ), // max_load
+				direction,
+				atof( token[8] ) / 1000.0, // hold_time
+				atof( token[9] ), // timeout
+				atof( token[10] ), // filter_constant
+				token[4], // message
+				token[5]  // picture
+			); 
 		}
-		
-		if ( !strcmp( token, "TargetOn" ) ) {
-			
-			int target = 0;
-			sscanf( line, "%s %d", token, &target );
-			// Light up the next target.
-			apparatus->TargetOn( target );
-			
+
+		else if ( !strcmp( token[0], "CMD_WAIT_MANIP_SLIP" ) ) {
+
+			Vector3 direction;
+
+			direction[X] = atof( token[5] );
+			direction[Y] = atof( token[6] );
+			direction[Z] = atof( token[7] );
+
+			status = apparatus->WaitSlip( 
+				atof( token[1] ), // min_grip
+				atof( token[2] ), // max_grip
+				atof( token[3] ), // min_load
+				atof( token[4] ), // max_load
+				direction,
+				atof( token[10] ), // filter_constant
+				atof( token[8] ), // slip_threshold
+				atof( token[9] ), // timeout
+				token[4], // message
+				token[5]  // picture
+			); 
 		}
-		
-		if ( !strcmp( token, "StopAcquisition" ) ) {
-			// Stop collecting data.
-			apparatus->StopAcquisition();
+		else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) {
+			status = apparatus->SelectAndCheckConfiguration( 
+				token[2], // picture
+				token[1], // message
+				( atoi( token[3] ) ? PostureSupine : PostureSeated ), // posture
+				( atoi( token[4] ) ? TargetBarLeft : TargetBarRight ), // bar_position
+				TappingIndifferent
+			);
 		}
-				
-		if ( !strcmp( token, "CheckVisibility" ) ) {
-			
-			double cumulative, continuous;
-			sscanf( line, "%s %lf %lf", token, &cumulative, &continuous );
-			
-			// Check the quality of the data.
-			status = apparatus->CheckVisibility( cumulative, continuous, NULL );
-			if ( status == ABORT_EXIT ) exit( status );
-			if ( status == RETRY_EXIT ) return( status );
+		else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) {
+			DexMass mass_id[] = { MassSmall, MassMedium, MassLarge };
+			status = apparatus->SelectAndCheckMass( mass_id[ atoi( token[3] ) ] );
 		}
-		
-		if ( !strcmp( token, "SignalNormalCompletion" ) ) {
-			
-			// Need to read in the picture filename as well.
-			char *prompt = strpbrk( line, " \t" );
-			if ( !prompt ) prompt = "Terminated normally.";
-			
-			// Indicate to the subject that they are done.
-			status = apparatus->SignalNormalCompletion( NULL, prompt );
-			if ( status == ABORT_EXIT ) exit( status );
-			
+		else if ( !strcmp( token[0], "CMD_NULLIFY_FORCES" ) ) {
+			apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		}
-#endif
+		else if ( !strcmp( token[0], "CMD_ACQ_START" ) ) {
+			apparatus->StartAcquisition( token[1] );
+		}
+		else if ( !strcmp( token[0], "CMD_ACQ_STOP" ) ) {
+			status = apparatus->StopAcquisition( token[1] );
+		}
+		else if ( !strcmp( token[0], "CMD_ALIGN_CODA" ) ) {
+			status = apparatus->PerformTrackerAlignment( 
+				token[1], // message
+				token[2] // picture
+			);
+		}
+		else if ( !strcmp( token[0], "CMD_CHK_CODA_ALIGNMENT" ) ) {
+			unsigned long marker_mask;
+			sscanf( token[1], "%lx", &marker_mask );
+			status = apparatus->CheckTrackerAlignment( 
+				marker_mask,
+				atof( token[2] ), // tolerance
+				atoi( token[3] ), // n_good
+				token[4], // message
+				token[5] // picture
+			);
+		}
+		else if ( !strcmp( token[0], "CMD_CHK_CODA_FIELDOFVIEW" ) ) {
+			unsigned long marker_mask;
+			sscanf( token[2], "%lx", &marker_mask );
+			status = apparatus->CheckTrackerFieldOfView( 
+				atoi( token[1] ) - 1,
+				marker_mask,
+				atof( token[3] ), // min_x
+				atof( token[4] ), // max_x
+				atof( token[5] ), // min_y
+				atof( token[6] ), // max_y
+				atof( token[7] ), // min_z
+				atof( token[8] ), // max_z
+				token[9], // message
+				token[10] // picture
+			);
+		}
+		else if ( !strcmp( token[0], "CMD_CHK_CODA_PLACEMENT" ) ) {
+			int unit = atoi( token[1] ) - 1;
+			Vector3 expected_pos;
+			float p_tolerance = atof( token[9] );
+			Quaternion expected_ori;
+			float o_tolerance = atof( token[10] );
+
+			expected_pos[X] = atof( token[2] );
+			expected_pos[Y] = atof( token[3] );
+			expected_pos[Z] = atof( token[4] );
+
+			expected_ori[X] = atof( token[5] );
+			expected_ori[Y] = atof( token[6] );
+			expected_ori[Z] = atof( token[7] );
+			expected_ori[M] = atof( token[8] );
+
+			status = apparatus->CheckTrackerPlacement( 
+				unit,
+				expected_pos,
+				p_tolerance,
+				expected_ori,
+				o_tolerance,
+				token[11], // message
+				token[12] // picture
+			);
+		}
+		else if ( !strcmp( token[0], "CMD_LOG_EVENT" ) ) {
+			apparatus->MarkEvent( atoi( token[1] ) );
+		}
+		else if ( !strcmp( token[0], "CMD_LOG_MESSAGE" ) ) {
+			if ( atoi( token[1] ) == 0 ) apparatus->SignalEvent( token[2] );
+			else {
+				if ( token[2] ) strcpy( hold_status_message, token[2] );
+				else strcpy( hold_status_message, "" );
+			}
+		}
+		else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {
+			apparatus->ShowStatus( hold_status_message,token[1] );
+		}
+
+		if ( status == RETRY_EXIT || status == ABORT_EXIT ) break;
 
 	}
 	
-	return( NORMAL_EXIT );
+	return( status );
 	
 }
 
