@@ -1,0 +1,19 @@
+Version 1.0 Beta 2
+	Delivered to CADMOS 2014.05.04
+
+	First version after creation of DexLint.
+	Shift bar to left side for most tasks, including friction tests.
+
+
+	Known problems
+		Expect problems with Friction Measurements
+		Need instruction (preview) for Friction measurements.
+
+Version 1.0 Beta 1
+	Delivered to CADMOS 2014.04.29
+
+	First full release.
+	Known problems
+		Problem with Friction Measurements
+		Various other things that were incomplete.
+
