@@ -1,0 +1,13 @@
+# Protocols to be proposed to a MEDIUM subject.
+# Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+# Protocols general: 1XX
+# Protocols specific to medium subjects in Flight: 30X
+# Protocols specific to medium subjects in BDC: 31X
+CMD_PROTOCOL,301,DexDynamicsFlightMedium.dex,Dynamics
+CMD_PROTOCOL,302,DexSeatedFlightMedium.dex,Reference Seated
+CMD_PROTOCOL,303,DexSupineFlightMedium.dex,Reference Supine
+CMD_PROTOCOL,304,DexReducedFlightMedium.dex,Reduced
+CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
+CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
+CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
+#end

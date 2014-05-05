@@ -1,0 +1,15 @@
+# DEX user file for GROUND models.
+# Format: "CMD_USER", user id, pin code, session file, display name
+# Subject IDs:  10-19 small subjects; 20-29 medium subjects; 30-39 large subjects.
+# Subject codes should be the same between Flight and Ground. 
+# It's the session files that change between models.
+CMD_USER,11,138,SessionSmallSubjectGround.dex,Subject 1
+CMD_USER,12,467,SessionSmallSubjectGround.dex,Subject 2
+CMD_USER,23,941,SessionMediumSubjectGround.dex,Subject 3
+CMD_USER,24,510,SessionMediumSubjectGround.dex,Subject 4
+CMD_USER,25,301,SessionMediumSubjectGround.dex,Subject 5
+CMD_USER,36,931,SessionLargeSubjectGround.dex,Subject 6
+CMD_USER,37,036,SessionLargeSubjectGround.dex,Subject 7
+CMD_USER,38,483,SessionLargeSubjectGround.dex,Subject 8
+CMD_USER,99,987,SessionUtilitiesOnly.dex,Maintenance
+#end

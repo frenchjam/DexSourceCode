@@ -1,0 +1,14 @@
+#Nullify forces - utility
+
+#Constant definitions
+DECL_CONST,logmsg,0
+DECL_CONST,usermsg,1
+
+#Command sequence
+CMD_WAIT_SUBJ_READY,Position manipulandum in retainer and release it,retainer.bmp,200
+CMD_LOG_MESSAGE, usermsg, Nullifying force offsets. Please wait.
+CMD_ACQ_START,nullify
+CMD_WAIT,2000
+CMD_ACQ_STOP,Acquisition error
+CMD_NULLIFY_FORCES,Error nullifying force offsets
+CMD_WAIT_SUBJ_READY,Force/torque baselining done.,info.bmp,200

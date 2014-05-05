@@ -1,0 +1,4 @@
+#Go into checkout mode
+CMD_EPM_CHMODE_CO
+CMD_LOG_MESSAGE,1,Configuration error
+CMD_WAIT,300000

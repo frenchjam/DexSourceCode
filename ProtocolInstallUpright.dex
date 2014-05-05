@@ -1,0 +1,7 @@
+# DEX Protocol to be run once when changing to Seated configuration.
+# Format: "CMD_TASK", task id, task file, display name
+# Instruct how to arrange the seat, target bar, etc. and do the CODA alignment.
+CMD_TASK,101,TaskInstallUpright.dex,Configure - Seated Configuration
+# Cancel the force offsets.
+CMD_TASK,103,ForceOffsets.dex,Force Offset Cancellation
+#end

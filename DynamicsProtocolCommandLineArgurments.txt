@@ -1,0 +1,15 @@
+-install -upright
+-offsets
+-friction -pinch=0.5 -filter=2.0 -sit
+-friction -pinch=1.0 -filter=2.0 
+-friction -pinch=2.0 -filter=2.0 
+-oscillations -800gm -upright -vertical -range=OscillationRangesNominalVertical.txt:M -frequency=1.0 -duration=30.0 -prep
+-oscillations -800gm -upright -vertical -range=OscillationRangesNominalVertical.txt:M -frequency=1.0 -duration=30.0
+
+-targeted -800gm -upright -vertical -targets=TargetedTargetsVertical60.txt:1M -prep
+-targeted -800gm -upright -vertical -targets=TargetedTargetsVertical60.txt:1M 
+
+-friction -pinch=1.0 -filter=2.0 -prep
+
+
+-discrete -800gm -upright -vertical -range=DiscreteRangesVertical.txt:M -delays=DiscreteDelaySequences30.txt:1 -open -prep

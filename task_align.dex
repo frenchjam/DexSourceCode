@@ -1,0 +1,33 @@
+#Align the CODA units and verify the alignment precision
+
+#Constant definitions
+DECL_CONST,logmsg,0
+DECL_CONST,usermsg,1
+DECL_CONST,refframemask,0xF00
+DECL_CONST,manipmask,0xFF
+DECL_CONST,manipminvisible,4
+
+CMD_LOG_MESSAGE, usermsg, Aligning CODA units
+CMD_ALIGN_CODA, CODA alignment failed,
+
+CMD_WAIT_SUBJ_READY,Alignment done. Will check 20\,10\,5\,3\,2\,1mm sequence,info.bmp,200
+
+#Check whether reference frame markers are properly aligned now
+CMD_LOG_MESSAGE, usermsg, Running alignment check
+CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Alignment of ref frame markers >20mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Alignment of ref frame markers >10mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Alignment of ref frame markers >5mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Alignment of ref frame markers >3mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Alignment of ref frame markers >2mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Alignment of ref frame markers >1mm fail,
+
+CMD_WAIT_SUBJ_READY,Place manipulandum visibly and confirm,black.bmp,200
+
+# Check whether manipulandum markers are properly aligned
+CMD_LOG_MESSAGE, usermsg, Running alignment check
+CMD_CHK_CODA_ALIGNMENT,manipmask,20,manipminvisible,Alignment of manipulandum markers >20mm fail,
+CMD_CHK_CODA_ALIGNMENT,manipmask,10,manipminvisible,Alignment of manipulandum markers >10mm fail,
+CMD_CHK_CODA_ALIGNMENT,manipmask,5,manipminvisible,Alignment of manipulandum markers >5mm fail,
+CMD_CHK_CODA_ALIGNMENT,manipmask,3,manipminvisible,Alignment of manipulandum markers >3mm fail,
+CMD_CHK_CODA_ALIGNMENT,manipmask,2,manipminvisible,Alignment of manipulandum markers >2mm fail,
+CMD_CHK_CODA_ALIGNMENT,manipmask,1,manipminvisible,Alignment of manipulandum markers >1mm fail,
