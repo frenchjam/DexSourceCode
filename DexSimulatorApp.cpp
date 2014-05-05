@@ -52,8 +52,11 @@ double copForceThreshold = 0.25;			// Threshold of grip force to test if the man
 double copWaitTime = 10.0;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
 
-char inputScript[256] = "DexSampleScript.dex";
 char outputScript[256] = "DexSampleScript.dex";
+char inputScript[256] = "DexSampleScript.dex";
+char inputProtocol[256] = "DexSampleProtocol.dex";
+char inputSession[256] = "DexSampleSession.dex";
+char inputSubject[256] = "users.dex";
 
 /*********************************************************************************/
 
@@ -633,7 +636,27 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		task = RUN_SCRIPT;	
 	}
-
+	if ( strstr( lpCmdLine, "-protocol" ) ) {
+		char *ptr;
+		if ( ( ptr = strstr( lpCmdLine, "-protocol=" ) ) ) {
+			sscanf( ptr + strlen( "-protocol=" ), "%s", inputProtocol );
+		}
+		task = RUN_PROTOCOL;	
+	}
+	if ( strstr( lpCmdLine, "-session" ) ) {
+		char *ptr;
+		if ( ( ptr = strstr( lpCmdLine, "-session=" ) ) ) {
+			sscanf( ptr + strlen( "-session=" ), "%s", inputSession );
+		}
+		task = RUN_SESSION;	
+	}
+	if ( strstr( lpCmdLine, "-subject" ) ) {
+		char *ptr;
+		if ( ( ptr = strstr( lpCmdLine, "-subject=" ) ) ) {
+			sscanf( ptr + strlen( "-subject=" ), "%s", inputSession );
+		}
+		task = RUN_SUBJECT;	
+	}
 	// This says to compile the C++ code into a DEX script, instead of executing it.
 	// You can specify the name of the output script.
 	if ( strstr( lpCmdLine, "-compile" ) ) {
@@ -789,6 +812,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case RUN_SCRIPT:
 		while ( RETRY_EXIT == ( return_code = RunScript( apparatus, inputScript ) ) );
+		break;
+		
+	case RUN_PROTOCOL:
+		while ( RETRY_EXIT == ( return_code = RunProtocol( apparatus, inputProtocol ) ) );
+		break;
+		
+	case RUN_SESSION:
+		while ( RETRY_EXIT == ( return_code = RunSession( apparatus, inputSession ) ) );
+		break;
+		
+	case RUN_SUBJECT:
+		while ( RETRY_EXIT == ( return_code = RunSubject( apparatus, inputSubject ) ) );
 		break;
 		
 	case OFFSETS_TASK:

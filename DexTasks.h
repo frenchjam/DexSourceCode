@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { AUDIO_CHECK, FINISH_PROTOCOL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { AUDIO_CHECK, FINISH_PROTOCOL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -66,6 +66,9 @@ void BlinkAll ( DexApparatus *apparatus );
 void SignalEndOfRecording ( DexApparatus *apparatus );
 
 int RunScript( DexApparatus *apparatus, const char *filename );
+int RunProtocol ( DexApparatus *apparatus, char *filename );
+int RunSession ( DexApparatus *apparatus, char *filename );
+int RunSubject ( DexApparatus *apparatus, char *filename );
 int RunTargetCalibration( DexApparatus *apparatus, const char *params = NULL );
 int ParseForEyeState( const char *cmd );
 int ParseForDirection ( DexApparatus *apparatus, const char *cmd );

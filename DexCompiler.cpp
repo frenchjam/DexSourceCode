@@ -10,6 +10,7 @@
 #include "..\DexSimulatorApp\resource.h"
 
 #include <stdio.h>
+#include <io.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h> 
@@ -20,6 +21,7 @@
 
 #include <VectorsMixin.h> 
 #include <fOutputDebugString.h>
+#include <fMessageBox.h>
 
 #include "Dexterous.h"
 #include "DexMonitorServer.h"
@@ -29,6 +31,11 @@
 #include "DexApparatus.h"
 
 #include "DexInterpreterFunctions.h"
+
+extern HINSTANCE app_instance;
+extern HWND	workspace_dlg;
+extern BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+extern BOOL CALLBACK _dexPopupCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 /***************************************************************************/
 /*                                                                         */
@@ -863,3 +870,360 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 	
 }
 
+/*********************************************************************************************************************************/
+
+char _dex_task_menu_list[32][64];
+char _dex_task_menu_data[32][64];
+int  _dex_task_menu_list_items;
+int  _dex_task_menu_selected_item;
+
+// This callback is used for 'popups'. When they close, the APP keeps on going.
+BOOL CALLBACK _dexTaskListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+	int i;
+	HFONT hFont;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+
+		SetDlgItemText( hDlg, IDC_MESSAGE, "Select task and press OK." );
+		hFont = CreateFont (36, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
+		SendDlgItemMessage( hDlg, IDC_LIST, WM_SETFONT, WPARAM (hFont), TRUE);
+		for ( i = 0; i < _dex_task_menu_list_items; i++ ) {
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_INSERTSTRING, i, (LPARAM) TEXT(_dex_task_menu_list[i]) );
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_SETITEMDATA, i, (LPARAM) TEXT(_dex_task_menu_data[i]) );		
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_SETCURSEL, _dex_task_menu_selected_item, (LPARAM) 0  );		
+		}
+
+   		return TRUE;
+		break;
+		
+	case WM_PAINT:
+		// The following is a hack. DialogBox() disables the parent, but I want 
+		//  the other controls to stay active. So I re-enable the parent.
+		// Why is it in WM_PAINT? Because WM_INITDIALOG is too early.
+		EnableWindow( GetParent( hDlg ), true );
+   		return TRUE;
+		break;
+
+    case WM_CLOSE:
+		EndDialog(hDlg, NULL );
+		return TRUE;
+		break;
+		
+ 
+	case WM_COMMAND:
+
+		switch ( LOWORD( wParam ) ) {
+		case IDCANCEL:
+			EndDialog(hDlg, NULL);
+			return TRUE;
+			break;
+		case IDOK:
+			_dex_task_menu_selected_item = (int) SendDlgItemMessage(hDlg, IDC_LIST, LB_GETCURSEL, 0, 0); 
+			EndDialog(hDlg, SendDlgItemMessage( hDlg, IDC_LIST, LB_GETITEMDATA, _dex_task_menu_selected_item, 0 ));
+			return TRUE;
+			break;
+		}
+	}
+    return FALSE;
+}
+
+void fill_task_menu( char labels[32][64], char paths[32][1024], int items ) {
+
+	int i;
+	for ( i = 0; i < items && i < 32; i++ ) {
+		strcpy( _dex_task_menu_list[i], labels[i] );
+		strcpy( _dex_task_menu_data[i], paths[i] );
+	}
+	_dex_task_menu_list_items = items;
+	_dex_task_menu_selected_item = 0;
+}
+
+char *select_task_from_menu( void ) {
+
+	char *value = (char *) DialogBox( app_instance, (LPCSTR) IDD_SELECT, workspace_dlg, _dexTaskListCallback );
+	if ( value ) _dex_task_menu_selected_item = (_dex_task_menu_selected_item + 1) % _dex_task_menu_list_items;
+	return( value );
+
+}
+
+/*********************************************************************************************************************************/
+
+int RunProtocol ( DexApparatus *apparatus, char *filename ) {
+
+	FILE *fp;
+
+	int tokens;
+	char *token[MAX_TOKENS];
+	char line[2048];
+	int line_n = 0;
+	int	i;
+
+	char TaskFilePath[32][1024];
+	char TaskLabel[32][64];
+	int  tasks = 0;
+
+	int errors = 0;
+
+	char task_file[1024], *tsk;
+
+	fp = fopen( filename, "r" );
+	if ( !fp ) {
+		// Signal the error.
+		fMessageBox( MB_OK, "RunProtocol", "    Error opening protocol file %s for read.\n", filename );
+		// Tell the caller that we had just the one error.
+		exit( -1 );
+	}
+
+	fOutputDebugString( "\n  File: %s", filename );
+
+	tasks = 0;
+
+	// Fill the menu line-by-line.
+	while ( fgets( line, sizeof( line ), fp ) ) {
+
+		line_n++;
+		tokens = ParseCommaDelimitedLine( token, line );
+		fOutputDebugString( "\n  Line:   %s", line );
+		fOutputDebugString( "Tokens: %d\n", tokens );
+		for ( i = 0; i < tokens; i++ ) fOutputDebugString( "%2d %s\n", i, token[i] );
+
+		if ( tokens >= 4 ) {
+			// This parameter is the name of the task file.
+			strcpy( task_file, token[2] );
+			// Check if it exists and is readable.
+			if ( _access( task_file, 0x00 ) ) {
+				fMessageBox( MB_OK, "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
+			}	
+			else {
+				strcpy( TaskFilePath[tasks], token[2] );
+				strcpy( TaskLabel[tasks], token[3] );
+				tasks++;
+			}
+		}
+	}
+
+	fill_task_menu( TaskLabel, TaskFilePath, tasks );
+	while ( tsk = select_task_from_menu() ) {
+		fOutputDebugString( "Selected task path: %s\n", tsk );
+		RunScript( apparatus, tsk );
+	}
+	fclose( fp );
+	return( errors );
+
+}
+
+/*********************************************************************************************************************************/
+
+char _dex_protocol_menu_list[32][64];
+char _dex_protocol_menu_data[32][64];
+char _dex_protocol_menu_prompt[1024];
+int  _dex_protocol_menu_list_items;
+int  _dex_protocol_menu_selected_item;
+
+// This callback is used for 'popups'. When they close, the APP keeps on going.
+BOOL CALLBACK _dexProtocolListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+	int i;
+	HFONT hFont;
+
+	switch (message)
+	{
+	case WM_INITDIALOG:
+
+		SetDlgItemText( hDlg, IDC_MESSAGE, _dex_protocol_menu_prompt );
+		hFont = CreateFont (36, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
+		SendDlgItemMessage( hDlg, IDC_LIST, WM_SETFONT, WPARAM (hFont), TRUE);
+		for ( i = 0; i < _dex_protocol_menu_list_items; i++ ) {
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_INSERTSTRING, i, (LPARAM) TEXT(_dex_protocol_menu_list[i]) );
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_SETITEMDATA, i, (LPARAM) TEXT(_dex_protocol_menu_data[i]) );		
+			SendDlgItemMessage( hDlg, IDC_LIST, LB_SETCURSEL, _dex_protocol_menu_selected_item, (LPARAM) 0  );		
+		}
+
+   		return TRUE;
+		break;
+		
+	case WM_PAINT:
+		// The following is a hack. DialogBox() disables the parent, but I want 
+		//  the other controls to stay active. So I re-enable the parent.
+		// Why is it in WM_PAINT? Because WM_INITDIALOG is too early.
+		EnableWindow( GetParent( hDlg ), true );
+   		return TRUE;
+		break;
+
+    case WM_CLOSE:
+		EndDialog(hDlg, NULL );
+		return TRUE;
+		break;
+		
+ 
+	case WM_COMMAND:
+
+		switch ( LOWORD( wParam ) ) {
+		case IDCANCEL:
+			EndDialog(hDlg, NULL);
+			return TRUE;
+			break;
+		case IDOK:
+			_dex_protocol_menu_selected_item = (int) SendDlgItemMessage(hDlg, IDC_LIST, LB_GETCURSEL, 0, 0); 
+			EndDialog(hDlg, SendDlgItemMessage( hDlg, IDC_LIST, LB_GETITEMDATA, _dex_protocol_menu_selected_item, 0 ));
+			return TRUE;
+			break;
+		}
+	}
+    return FALSE;
+}
+
+void fill_protocol_menu( char labels[32][64], char paths[32][1024], const char *prompt, int items ) {
+
+	int i;
+	for ( i = 0; i < items && i < 32; i++ ) {
+		strcpy( _dex_protocol_menu_list[i], labels[i] );
+		strcpy( _dex_protocol_menu_data[i], paths[i] );
+	}
+	_dex_protocol_menu_list_items = items;
+	_dex_protocol_menu_selected_item = 0;
+	strcpy( _dex_protocol_menu_prompt, prompt );
+}
+
+char *select_protocol_from_menu( void ) {
+
+	char *value = (char *) DialogBox( app_instance, (LPCSTR) IDD_SELECT, workspace_dlg, _dexProtocolListCallback );
+	if ( value ) _dex_protocol_menu_selected_item = (_dex_protocol_menu_selected_item + 1) % _dex_protocol_menu_list_items;
+	return( value );
+
+}
+
+/*********************************************************************************************************************************/
+
+int RunSession ( DexApparatus *apparatus, char *filename ) {
+
+	FILE *fp;
+
+	int tokens;
+	char *token[MAX_TOKENS];
+	char line[2048];
+	int line_n = 0;
+	int	i;
+
+	char ProtocolFilePath[32][1024];
+	char ProtocolLabel[32][64];
+	int  protocols = 0;
+
+	int errors = 0;
+
+	char protocol_file[1024], *protocol;
+
+	fp = fopen( filename, "r" );
+	if ( !fp ) {
+		// Signal the error.
+		fMessageBox( MB_OK, "RunSession", "    Error opening session file %s for read.\n", filename );
+		// Tell the caller that we had just the one error.
+		exit( -1 );
+	}
+
+	fOutputDebugString( "\n  File: %s", filename );
+
+	protocols = 0;
+
+	// Fill the menu line-by-line.
+	while ( fgets( line, sizeof( line ), fp ) ) {
+
+		line_n++;
+		tokens = ParseCommaDelimitedLine( token, line );
+		fOutputDebugString( "\n  Line:   %s", line );
+		fOutputDebugString( "Tokens: %d\n", tokens );
+		for ( i = 0; i < tokens; i++ ) fOutputDebugString( "%2d %s\n", i, token[i] );
+
+		if ( tokens >= 4 ) {
+			// This parameter is the name of the protocole file.
+			strcpy( protocol_file, token[2] );
+			// Check if it exists and is readable.
+			if ( _access( protocol_file, 0x00 ) ) {
+				fMessageBox( MB_OK, "  %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
+			}	
+			else {
+				strcpy( ProtocolFilePath[protocols], token[2] );
+				strcpy( ProtocolLabel[protocols], token[3] );
+				protocols++;
+			}
+		}
+	}
+
+	fill_protocol_menu( ProtocolLabel, ProtocolFilePath, "Select protocol and press OK.", protocols );
+	protocol = select_protocol_from_menu();
+	fOutputDebugString( "Selected protocol path: %s\n", protocol );
+	RunProtocol( apparatus, protocol );
+	fclose( fp );
+	return( errors );
+
+}
+
+/*********************************************************************************************************************************/
+
+int RunSubject ( DexApparatus *apparatus, char *filename ) {
+
+	FILE *fp;
+
+	int tokens;
+	char *token[MAX_TOKENS];
+	char line[2048];
+	int line_n = 0;
+	int	i;
+
+	char SubjectFilePath[32][1024];
+	char SubjectLabel[32][64];
+	int  subjects = 0;
+
+	int errors = 0;
+
+	char session_file[1024], *session;
+
+	fp = fopen( filename, "r" );
+	if ( !fp ) {
+		// Signal the error.
+		fMessageBox( MB_OK, "RunSubject", "    Error opening session file %s for read.\n", filename );
+		// Tell the caller that we had just the one error.
+		exit( -1 );
+	}
+
+	fOutputDebugString( "\n  File: %s", filename );
+
+	subjects = 0;
+
+	// Fill the menu line-by-line.
+	while ( fgets( line, sizeof( line ), fp ) ) {
+
+		line_n++;
+		tokens = ParseCommaDelimitedLine( token, line );
+		fOutputDebugString( "\n  Line:   %s", line );
+		fOutputDebugString( "Tokens: %d\n", tokens );
+		for ( i = 0; i < tokens; i++ ) fOutputDebugString( "%2d %s\n", i, token[i] );
+
+		if ( tokens >= 5 ) {
+			// This parameter is the name of the session file.
+			strcpy( session_file, token[3] );
+			// Check if it exists and is readable.
+			if ( _access( session_file, 0x00 ) ) {
+				fMessageBox( MB_OK, "  %s Line %03d Cannot access session file: %s\n", filename, line_n, session_file );
+			}	
+			else {
+				strcpy( SubjectFilePath[subjects], token[3] );
+				strcpy( SubjectLabel[subjects], token[4] );
+				subjects++;
+			}
+		}
+	}
+
+	fill_protocol_menu( SubjectLabel, SubjectFilePath, "Select subject ID and press OK.", subjects );
+	session = select_protocol_from_menu();
+	fOutputDebugString( "Selected protocol path: %s\n", session );
+	RunSession( apparatus, session );
+	fclose( fp );
+	return( errors );
+
+}
