@@ -24,7 +24,7 @@ MD5TREE	=	..\bin\MD5Tree.exe
 ALL_FLIGHT	= $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex
 ALL_GROUND	= $(SCRIPTS) $(GROUND) $(COMMON) Flt*.dex users.dex
 
-default: release
+default: all
 
 all: GripFlightScripts.tar 
 
