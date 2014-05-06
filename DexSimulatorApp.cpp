@@ -615,7 +615,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
 	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
-	if ( strstr( lpCmdLine, "-finish"  ) ) task = FINISH_PROTOCOL;
+	if ( strstr( lpCmdLine, "-finish"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-checkID"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-audio"  ) ) task = AUDIO_CHECK;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
@@ -650,10 +651,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		task = RUN_SESSION;	
 	}
-	if ( strstr( lpCmdLine, "-subject" ) ) {
+	if ( strstr( lpCmdLine, "-subjects" ) ) {
 		char *ptr;
-		if ( ( ptr = strstr( lpCmdLine, "-subject=" ) ) ) {
-			sscanf( ptr + strlen( "-subject=" ), "%s", inputSession );
+		if ( ( ptr = strstr( lpCmdLine, "-subjects=" ) ) ) {
+			sscanf( ptr + strlen( "-subjects=" ), "%s", inputSubject );
 		}
 		task = RUN_SUBJECT;	
 	}
@@ -858,8 +859,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		while ( RETRY_EXIT == ( return_code = CheckAudio( apparatus, lpCmdLine ) ) );
 		break;
 
-	case FINISH_PROTOCOL:
-		while ( RETRY_EXIT == ( return_code = FinishProtocol( apparatus, lpCmdLine ) ) );
+	case MISC_INSTALL:
+		while ( RETRY_EXIT == ( return_code = MiscInstall( apparatus, lpCmdLine ) ) );
 		break;
 
 	case SHOW_PICTURES:

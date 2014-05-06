@@ -24,9 +24,20 @@ MD5TREE	=	..\bin\MD5Tree.exe
 ALL_FLIGHT	= $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex
 ALL_GROUND	= $(SCRIPTS) $(GROUND) $(COMMON) Flt*.dex users.dex
 
-default: all
+default: release
 
-all: GripFlightScripts.tar 
+all: GripFlightScripts.tar
+
+######################################################################################################################################
+
+#
+# Users
+#
+
+users_flight.dex:	$(SOURCE)\DexCreateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex 
+	$(SOURCE)\DexCreateSubjects.bat Flight users_flight.dex
+
+######################################################################################################################################
 
 GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) users_flight.dex
 	copy /Y /V users_flight.dex users.dex
@@ -208,18 +219,6 @@ SessionLargeSubjectBDC.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex
 SessionUtilitiesOnly.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex
 	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .
 
-
-######################################################################################################################################
-
-#
-# Users
-#
-
-users_flight.dex:	$(STATICSCRIPTS)\users_flight.dex
-	copy /Y $(STATICSCRIPTS)\users_flight.dex .
-
-users_ground.dex:	$(STATICSCRIPTS)\users_ground.dex
-	copy /Y $(STATICSCRIPTS)\users_ground.dex .
 
 ######################################################################################################################################
 

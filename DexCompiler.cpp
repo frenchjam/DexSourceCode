@@ -1143,8 +1143,8 @@ int RunSession ( DexApparatus *apparatus, char *filename ) {
 			// This parameter is the name of the protocole file.
 			strcpy( protocol_file, token[2] );
 			// Check if it exists and is readable.
-			if ( _access( protocol_file, 0x00 ) ) {
-				fMessageBox( MB_OK, "  %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
+			if ( strcmp( protocol_file, "ignore" ) && _access( protocol_file, 0x00 ) ) {
+				fMessageBox( MB_OK, "RunSession", "  %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
 			}	
 			else {
 				strcpy( ProtocolFilePath[protocols], token[2] );
@@ -1155,9 +1155,11 @@ int RunSession ( DexApparatus *apparatus, char *filename ) {
 	}
 
 	fill_protocol_menu( ProtocolLabel, ProtocolFilePath, "Select protocol and press OK.", protocols );
-	protocol = select_protocol_from_menu();
+	do {
+		protocol = select_protocol_from_menu();
+	} while ( !strcmp( protocol, "ignore" ));
 	fOutputDebugString( "Selected protocol path: %s\n", protocol );
-	RunProtocol( apparatus, protocol );
+	if ( protocol && strcmp( protocol, "ignore" ) ) RunProtocol( apparatus, protocol );
 	fclose( fp );
 	return( errors );
 
@@ -1191,7 +1193,7 @@ int RunSubject ( DexApparatus *apparatus, char *filename ) {
 		exit( -1 );
 	}
 
-	fOutputDebugString( "\n  File: %s", filename );
+	fOutputDebugString( "File: %s/n", filename );
 
 	subjects = 0;
 
@@ -1209,7 +1211,7 @@ int RunSubject ( DexApparatus *apparatus, char *filename ) {
 			strcpy( session_file, token[3] );
 			// Check if it exists and is readable.
 			if ( _access( session_file, 0x00 ) ) {
-				fMessageBox( MB_OK, "  %s Line %03d Cannot access session file: %s\n", filename, line_n, session_file );
+				fMessageBox( MB_OK, "RunSubject", "  %s Line %03d Cannot access session file: %s\n", filename, line_n, session_file );
 			}	
 			else {
 				strcpy( SubjectFilePath[subjects], token[3] );
@@ -1221,8 +1223,8 @@ int RunSubject ( DexApparatus *apparatus, char *filename ) {
 
 	fill_protocol_menu( SubjectLabel, SubjectFilePath, "Select subject ID and press OK.", subjects );
 	session = select_protocol_from_menu();
-	fOutputDebugString( "Selected protocol path: %s\n", session );
-	RunSession( apparatus, session );
+	fOutputDebugString( "Selected session path: %s\n", session );
+	if ( session ) RunSession( apparatus, session );
 	fclose( fp );
 	return( errors );
 

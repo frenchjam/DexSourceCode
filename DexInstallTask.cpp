@@ -15,6 +15,7 @@
 
 #include <stdio.h> 
 #include <stdlib.h>
+#include <string.h>
 
 #include "DexApparatus.h"
 #include "Dexterous.h"
@@ -292,19 +293,6 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 /************************************************************************************************************************************/
 
-// This is a dummy task. It is placed at the end of a protocol to let the subject know that he or she is finished.
-
-int FinishProtocol( DexApparatus *apparatus, const char *params ) {
-
-	int status;
-
-	status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK>, then <Back>, then <Logout>." );
-	return( status );
-
-}
-
-/************************************************************************************************************************************/
-
 // Instruct the subject to adjust the audio volume so they are sure to hear the tones.
 
 int CheckAudio( DexApparatus *apparatus, const char *params ) {
@@ -330,3 +318,39 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 	return( NORMAL_EXIT );
 
 }
+
+/************************************************************************************************************************************/
+
+int MiscInstall ( DexApparatus *apparatus, const char *params ) {
+
+	int status = NORMAL_EXIT;
+
+	// Place this at the beginning of a protocol to verify the subject ID.
+	if( char *ptr = strstr( params, "-checkID"  ) ) {
+		char id[256];
+		int i = 0;
+		ptr = ptr + strlen( "-checkID" ) + 1;
+		if ( *ptr == '"' ) {
+			ptr++;
+			while ( (*ptr != '"') && *ptr && (i < sizeof( id ) - 1) ) id[i++] = *ptr++;
+			id[i] = 0;
+		}
+		else {
+			while ( *ptr != ' ' && *ptr != '\t' && *ptr && (i < sizeof( id ) - 1) ) id[i++] = *ptr++;
+			id[i] = 0;
+		}
+
+		status = apparatus->fWaitSubjectReady("confirm.bmp", "Confirm Subject ID: %s\n\nIf not correct, press <OK>, then <Back>, then <Logout>.", id );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
+
+	// Place this at the end of a protocol to let the subject know that he or she is finished.
+	if( strstr( params, "-finished"  ) ) {
+		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK> | <Back> | <Logout>." );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
+
+	return( status );
+
+}
+

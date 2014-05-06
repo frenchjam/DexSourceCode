@@ -309,17 +309,19 @@ int process_session_file ( char *filename, int verbose ) {
 			}
 			// The third item is the name of the protocol file.
 			strcpy( protocol_file, token[2] );
-			// Check if it is present and readable.
-			if ( _access( protocol_file, 0x00 ) ) {
-				printf( " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
-				fprintf( log, " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
-				errors++;
-			}	
-			else {
-				// Add the filename to the master list, if it is not there already.
-				add_to_global_script_list( protocol_file );
-				// Process it and count any errors that occur while doing so.
-				errors += process_protocol_file( protocol_file, verbose );
+			// Check if it is present and readable, unless told to ignore it.
+			if ( strcmp( protocol_file, "ignore" ) ) {
+				if ( _access( protocol_file, 0x00 ) ) {
+					printf( " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
+					fprintf( log, " %s Line %03d Cannot access protocol file: %s\n", filename, line_n, protocol_file );
+					errors++;
+				}	
+				else {
+					// Add the filename to the master list, if it is not there already.
+					add_to_global_script_list( protocol_file );
+					// Process it and count any errors that occur while doing so.
+					errors += process_protocol_file( protocol_file, verbose );
+				}
 			}
 			// There is a fourth field to the line, which is text describing the protocol in the menu.
 			// For the moment I don't do any error checking on that parameter.

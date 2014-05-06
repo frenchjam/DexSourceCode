@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { AUDIO_CHECK, FINISH_PROTOCOL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -117,7 +117,7 @@ int RunInstall( DexApparatus *apparatus, const char *params = NULL );
 int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration bar );
 int ShowPictures( DexApparatus *apparatus, const char *params );
 int CheckAudio( DexApparatus *apparatus, const char *params );
-int FinishProtocol( DexApparatus *apparatus, const char *params );
+int MiscInstall ( DexApparatus *apparatus, const char *params );
 
 // Some common messages.
 

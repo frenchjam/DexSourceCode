@@ -1,4 +1,4 @@
-@echo off
+@echo ON
 SETLOCAL
 
 REM
@@ -21,5 +21,5 @@ REM It also contains the installation instructions.
 copy /Y /V %ROOT%Scripts.tar  "%DESTINATION%\%TIMESTAMP% %ROOT%Scripts.tar"
 copy /Y /V %ROOT%Pictures.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Pictures.tar"
 copy /Y /V %ROOT%.md5         "%DESTINATION%\%TIMESTAMP% %ROOT%.md5" 
-copy /Y /V ..\DexSourceCode\DexInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
+copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
  
