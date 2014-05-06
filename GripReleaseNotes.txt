@@ -1,4 +1,7 @@
-Version 1.0 Beta 3
+Version 1.0 Beta 4
+
+Version 1.0 Beta 3 [GRIP Release (2014.06.05 13.59.57) GripFlight] Delivered to CADMOS 2014.05.06
+	Added subject name to session menu.
 	
 Version 1.0 Beta 2 [GRIP Release (2014.04.05  3.09.29) GripFlight] Delivered to CADMOS 2014.05.04
 
