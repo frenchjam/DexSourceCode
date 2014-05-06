@@ -567,7 +567,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	DexADC		*adc;	
 	DexMonitorServer *monitor;
 	
-	int task = TARGETED_TASK;
+	int task = RUN_SUBJECT;
 	bool compile = false;
 	bool raz = false;
 	bool instruct_to_sit = false;

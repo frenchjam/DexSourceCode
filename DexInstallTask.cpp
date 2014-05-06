@@ -345,7 +345,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Place this at the end of a protocol to let the subject know that he or she is finished.
-	if( strstr( params, "-finished"  ) ) {
+	if( strstr( params, "-finish"  ) ) {
 		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK> | <Back> | <Logout>." );
 		if ( status != NORMAL_EXIT ) return( status );
 	}
