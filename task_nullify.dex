@@ -5,7 +5,7 @@ DECL_CONST,logmsg,0
 DECL_CONST,usermsg,1
 
 #Command sequence
-CMD_WAIT_SUBJ_READY,Position manipulandum in retainer and release it,retainer.bmp,200
+CMD_WAIT_SUBJ_READY,Position manipulandum in retainer and release it,RetainerManip.bmp,200
 CMD_LOG_MESSAGE, usermsg, Nullifying force offsets. Please wait.
 CMD_ACQ_START,nullify
 CMD_WAIT,2000
