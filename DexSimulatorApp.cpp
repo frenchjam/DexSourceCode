@@ -539,7 +539,7 @@ int ParseForDirection ( DexApparatus *apparatus, const char *cmd, DexSubjectPost
 		if ( direction == VERTICAL ) {
 			bar_position = TargetBarRight;
 			apparatus->CopyVector( direction_vector, apparatus->jVector );
-		}
+		}	
 	}
 	return( direction );
 }

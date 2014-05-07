@@ -872,8 +872,12 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 
 /*********************************************************************************************************************************/
 
-char _dex_task_menu_list[32][64];
-char _dex_task_menu_data[32][64];
+#define MAX_MENU_ITEMS			256
+#define	MAX_MENU_LABEL_LENGTH	64
+#define	MAX_MENU_DATA_LENGTH	1024
+
+char _dex_task_menu_list[MAX_MENU_ITEMS][MAX_MENU_LABEL_LENGTH];
+char _dex_task_menu_data[MAX_MENU_ITEMS][MAX_MENU_DATA_LENGTH];
 int  _dex_task_menu_list_items;
 int  _dex_task_menu_selected_item;
 
@@ -931,10 +935,10 @@ BOOL CALLBACK _dexTaskListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
     return FALSE;
 }
 
-void fill_task_menu( char labels[32][64], char paths[32][1024], int items ) {
+void fill_task_menu( char labels[MAX_MENU_ITEMS][MAX_MENU_LABEL_LENGTH], char paths[MAX_MENU_ITEMS][MAX_MENU_DATA_LENGTH], int items ) {
 
 	int i;
-	for ( i = 0; i < items && i < 32; i++ ) {
+	for ( i = 0; i < items && i < MAX_MENU_ITEMS; i++ ) {
 		strcpy( _dex_task_menu_list[i], labels[i] );
 		strcpy( _dex_task_menu_data[i], paths[i] );
 	}
@@ -962,13 +966,13 @@ int RunProtocol ( DexApparatus *apparatus, char *filename ) {
 	int line_n = 0;
 	int	i;
 
-	char TaskFilePath[32][1024];
-	char TaskLabel[32][64];
+	char TaskFilePath[MAX_MENU_ITEMS][MAX_MENU_DATA_LENGTH];
+	char TaskLabel[MAX_MENU_ITEMS][MAX_MENU_LABEL_LENGTH];
 	int  tasks = 0;
 
 	int errors = 0;
 
-	char task_file[1024], *tsk;
+	char task_file[MAX_MENU_DATA_LENGTH], *tsk;
 
 	fp = fopen( filename, "r" );
 	if ( !fp ) {
@@ -1018,9 +1022,9 @@ int RunProtocol ( DexApparatus *apparatus, char *filename ) {
 
 /*********************************************************************************************************************************/
 
-char _dex_protocol_menu_list[32][64];
-char _dex_protocol_menu_data[32][64];
-char _dex_protocol_menu_prompt[1024];
+char _dex_protocol_menu_list[MAX_MENU_ITEMS][MAX_MENU_LABEL_LENGTH];
+char _dex_protocol_menu_data[MAX_MENU_ITEMS][MAX_MENU_DATA_LENGTH];
+char _dex_protocol_menu_prompt[MAX_MENU_DATA_LENGTH];
 int  _dex_protocol_menu_list_items;
 int  _dex_protocol_menu_selected_item;
 
@@ -1078,10 +1082,10 @@ BOOL CALLBACK _dexProtocolListCallback(HWND hDlg, UINT message, WPARAM wParam, L
     return FALSE;
 }
 
-void fill_protocol_menu( char labels[32][64], char paths[32][1024], const char *prompt, int items ) {
+void fill_protocol_menu( char labels[MAX_MENU_ITEMS][MAX_MENU_LABEL_LENGTH], char paths[MAX_MENU_ITEMS][MAX_MENU_DATA_LENGTH], const char *prompt, int items ) {
 
 	int i;
-	for ( i = 0; i < items && i < 32; i++ ) {
+	for ( i = 0; i < items && i < MAX_MENU_ITEMS; i++ ) {
 		strcpy( _dex_protocol_menu_list[i], labels[i] );
 		strcpy( _dex_protocol_menu_data[i], paths[i] );
 	}
@@ -1177,8 +1181,8 @@ int RunSubject ( DexApparatus *apparatus, char *filename ) {
 	int line_n = 0;
 	int	i;
 
-	char SubjectFilePath[32][1024];
-	char SubjectLabel[32][64];
+	char SubjectFilePath[MAX_MENU_ITEMS][1024];
+	char SubjectLabel[MAX_MENU_ITEMS][64];
 	int  subjects = 0;
 
 	int errors = 0;
