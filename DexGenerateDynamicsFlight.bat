@@ -135,7 +135,7 @@ call :DO_ONE_OSCILLATION_TRIAL
 set mass=600gm
 set frequency=1.33
 set prep=
-set range=OscillationRangesReducedVertical.txt:%sz%
+set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
 set mass=600gm
