@@ -105,7 +105,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
-	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open and that manipulandum is in view ('Visble' Indicator Green)." );
+	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open and that the 'Visble' indicator is green." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the target bar in the right side position.
@@ -129,7 +129,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the right position?\n- Reference markers in view?" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the LEFT position?\n- Reference markers in view?" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
