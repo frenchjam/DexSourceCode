@@ -520,6 +520,13 @@ int IllustratedMessageBox( const char *picture, const char *message, const char 
 	if ( message ) {
 		strncpy( _illustrated_message_text, message, sizeof( _illustrated_message_text ) );
 		_illustrated_message_text[sizeof( _illustrated_message_text ) - 1] = 0;
+		// Strings coming from scripts have end of lines marked with "\n". Need to convert to a real newline.
+		for ( char *ptr = _illustrated_message_text; *ptr; *ptr++ ) {
+			if ( *ptr == '\\' && *(ptr+1) == 'n' ) {
+				*ptr = '\r';
+				*(ptr+1) = '\n';
+			}
+		}
 	}
 	else _illustrated_message_text[0] = 0;
 
