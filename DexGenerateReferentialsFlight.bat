@@ -165,9 +165,6 @@ REM
 set /A "task=task+1"
 echo CMD_TASK,%task%,TaskFinishProtocol.dex,Finished - press Back
 
-
-
-
 ENDLOCAL
 goto :EOF
 
@@ -184,7 +181,7 @@ REM  that direction, mass and range have been set.
 	set /A "dsc_seq=dsc_seq+1"
 	set dir=%direction:~0,4%
 	set filename=FltDsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
-	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences30.txt:1 -compile=%filename% -%eyes% 
+	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences30.txt:%dsc_seq% -compile=%filename% -%eyes% 
 	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
 	goto :EOF
 
