@@ -713,7 +713,9 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			hold_time = atof( token[11] ) / 1000.0;
 			timeout = atof( token[12] );
 
-			status = apparatus->WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, token[12], token[13] );
+			do {
+				status = apparatus->WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, token[12], token[13] );
+			} while ( status == RETRY_EXIT );
 
 		}
 		else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) {
@@ -754,18 +756,20 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			direction[Y] = atof( token[6] );
 			direction[Z] = atof( token[7] );
 
-			status = apparatus->WaitSlip( 
-				atof( token[1] ), // min_grip
-				atof( token[2] ), // max_grip
-				atof( token[3] ), // min_load
-				atof( token[4] ), // max_load
-				direction,
-				atof( token[10] ), // filter_constant
-				atof( token[8] ), // slip_threshold
-				atof( token[9] ), // timeout
-				token[4], // message
-				token[5]  // picture
-			); 
+			do {
+				status = apparatus->WaitSlip( 
+					atof( token[1] ), // min_grip
+					atof( token[2] ), // max_grip
+					atof( token[3] ), // min_load
+					atof( token[4] ), // max_load
+					direction,
+					atof( token[10] ), // filter_constant
+					atof( token[8] ), // slip_threshold
+					atof( token[9] ), // timeout
+					token[4], // message
+					token[5]  // picture
+				); 
+			} while ( status == RETRY_EXIT );
 		}
 		else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) {
 			status = apparatus->SelectAndCheckConfiguration( 
@@ -778,7 +782,9 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		}
 		else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) {
 			DexMass mass_id[] = { MassSmall, MassMedium, MassLarge };
-			status = apparatus->SelectAndCheckMass( mass_id[ atoi( token[3] ) ] );
+			do {
+				status = apparatus->SelectAndCheckMass( mass_id[ atoi( token[3] ) ] );
+			} while ( status == RETRY_EXIT );
 		}
 		else if ( !strcmp( token[0], "CMD_NULLIFY_FORCES" ) ) {
 			apparatus->ComputeAndNullifyStrainGaugeOffsets();
@@ -865,7 +871,11 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		if ( status == RETRY_EXIT || status == ABORT_EXIT ) break;
 
 	}
+	fclose( fp );
 	
+	// If we exit the script with a retry, run the script again recursively.
+	if ( status == RETRY_EXIT ) status = RunScript( apparatus, filename );
+
 	return( status );
 	
 }
