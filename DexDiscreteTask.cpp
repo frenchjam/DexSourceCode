@@ -94,12 +94,12 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( eyes == OPEN )	{
 		AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
 		AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
-		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", "DiscreteV.bmp" );
+		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", dsc );
 	}
 	else {
 		AddDirective( apparatus, "To start, you will move to the target that is blinking, then CLOSE your eyes.", mtb );
 		AddDirective( apparatus, "On each beep, move quickly and accurately to the other (remembered) target location.", dsc );
-		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", "DiscreteH.bmp" );
+		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", dsc );
 	}
 	ShowDirectives( apparatus );
 
