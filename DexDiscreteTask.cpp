@@ -72,12 +72,12 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Show them the targets that will be used.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
-		apparatus->VerticalTargetOn( discreteTargets[0] );
-		apparatus->VerticalTargetOn( discreteTargets[1] );
+		apparatus->VerticalTargetOn( discreteTargets[LOWER] );
+		apparatus->VerticalTargetOn( discreteTargets[UPPER] );
 	}
 	else {
-		apparatus->HorizontalTargetOn( discreteTargets[0] );
-		apparatus->HorizontalTargetOn( discreteTargets[1] );
+		apparatus->HorizontalTargetOn( discreteTargets[LOWER] );
+		apparatus->HorizontalTargetOn( discreteTargets[UPPER] );
 	}
 
 	// Describe how to do the task, according to the desired conditions.

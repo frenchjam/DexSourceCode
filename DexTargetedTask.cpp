@@ -33,6 +33,8 @@ double targetedMaxMovementExtent = 1000.0;	// Maximum amplitude along the moveme
 Vector3 targetedMovementDirection = {0.0, 1.0, 0.0};
 Quaternion targetedMovementOrientation = {0.0, 0.0, 0.0, 1.0};
 
+int lit_targets[DEX_MAX_TARGETS];
+
 /*********************************************************************************/
 
 int PrepTargeted( DexApparatus *apparatus, const char *params ) {
@@ -66,6 +68,17 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	status = CheckInstall( apparatus, posture, bar_position );
 	if ( status != NORMAL_EXIT ) return( status );
 
+	// Show the possible targets.
+	for ( int tgt = 0; tgt < DEX_MAX_TARGETS; tgt++ ) lit_targets[tgt] = 0;
+	apparatus->TargetsOff();
+	for ( tgt = 0; tgt < targetSequenceN; tgt++ ) {
+		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( targetSequence[tgt] );
+		else apparatus->HorizontalTargetOn( tgt );
+		lit_targets[targetSequence[tgt]] = 1;
+	}
+	int lit_target_count = 0;
+	for ( tgt = 0; tgt < DEX_MAX_TARGETS; tgt++ ) if ( lit_targets[tgt] ) lit_target_count++;
+
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	if ( direction == VERTICAL ) {
@@ -77,19 +90,13 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 		dsc = "TargetedH.bmp";
 	}
 
-	AddDirective( apparatus, "You will place the manipulandum next to the blinking target.", mtb );
-	AddDirective( apparatus, "You will move quickly and accurately to the lighted target (1 of the 4 currently lit).", dsc );
+	AddDirective( apparatus, "You will place the manipulandum to the right of the blinking target.", mtb );
+	AddDirective( apparatus, "You will move quickly and accurately to the right of each lighted target.", dsc );
+	char msg[512];
+	sprintf( msg, "Targets will be one of the %d currently lit targets.", lit_target_count );
+	AddDirective( apparatus, msg, dsc );
+	AddDirective( apparatus, "Be sure to hold the manipuladum upright and to the right of each target.", mtb );
 
-	// Show the possible targets.
-	// For the moment, I just take 4 arbitrary targets.
-	// Eventually, we will read the target file and extract the possible targets.
-	apparatus->TargetsOff();
-	int lowest = 2;
-	int highest = 8;
-	for ( int tgt = lowest; tgt <= highest; tgt += 2 ) {
-		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( tgt );
-		else apparatus->HorizontalTargetOn( tgt );
-	}
 	ShowDirectives( apparatus );
 	apparatus->TargetsOff();
 
