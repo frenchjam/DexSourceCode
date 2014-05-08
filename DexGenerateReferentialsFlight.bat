@@ -90,42 +90,42 @@ set dsc_seq=0
 
 set direction=Vertical
 set eyes=open
-set range=DiscreteRangesVertical.txt:%sz% -prep
+set range=DiscreteRanges%direction%.txt:%sz% -prep
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=open
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz% -prep
+set range=DiscreteRanges%direction%.txt:%sz% -prep
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 REM ****************************************************************************

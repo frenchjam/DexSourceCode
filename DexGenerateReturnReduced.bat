@@ -126,48 +126,49 @@ REM Discrete Movements
 REM
 REM we need to create a new list of sound target with a duration of 20 sec
 
+REM Start the trial counter for the discrete movements.
+set disc_seq=0
+
 set mass=400gm
 set direction=Vertical
 set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz% -prep
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Vertical
 set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
-REM Start the trial counter for the oscillations.
-set seq=0
 
 set direction=Horizontal
 set eyes=open
-set range=DiscreteRangesVertical.txt:%sz% -prep
+set range=DiscreteRanges%direction%.txt:%sz% -prep
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=open
-set range=DiscreteRangesVertical.txt:%sz% -prep
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 set direction=Horizontal
 set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRanges%direction%.txt:%sz%
 call :DO_ONE_DISCRETE_TRIAL
 
 REM ****************************************************************************
