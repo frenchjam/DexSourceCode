@@ -52,13 +52,15 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	else bar_position = TargetBarLeft;
 
 	// Prompt the subject to put the target bar in the correct position.
+	// This is no longer able to handle the supine position, but since we are 
+	//  not currently planning to do this task in supine, it's OK.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right position with tapping surfaces closed.%s", OkToContinue );
+			"Place the target bar in the right-hand position (Socket 'J') with tapping surfaces closed.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
-			"Place the target bar in the left position.%s", OkToContinue );
+			"Place the target bar in the left-hand position with tapping surfaces closed.%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
