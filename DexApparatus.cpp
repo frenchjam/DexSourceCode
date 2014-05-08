@@ -895,7 +895,20 @@ void DexApparatus::FindAnalysisFrameRange( int &first, int &last ) {
 
 void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
 	char picture_filename[1024];
-	SetDlgItemText( workspace_dlg, IDC_STATUS_TEXT, message );
+	char message_text[1024];
+
+	// Show the message in the text window.
+	strcpy( message_text, message );
+			// Strings coming from scripts have end of lines marked with "\n". Need to convert to a real newline.
+	for ( char *ptr = message_text; *ptr; *ptr++ ) {
+		if ( *ptr == '\\' && *(ptr+1) == 'n' ) {
+			*ptr = '\r';
+			*(ptr+1) = '\n';
+		}
+	}
+	SetDlgItemText( workspace_dlg, IDC_STATUS_TEXT, message_text );
+
+	// And show the picture. Blank by default.
 	strcpy( picture_filename, PictureFilenamePrefix );
 	strcat( picture_filename, "blank.bmp" );
 	HBITMAP bitmap = (HBITMAP) LoadImage( NULL, picture_filename, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
@@ -906,10 +919,14 @@ void DexApparatus::ShowStatus ( const char *message, const char *picture ) {
 		bitmap = (HBITMAP) LoadImage( NULL, picture_filename, IMAGE_BITMAP, 595 * .6, 421 * .6, LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
 		if ( bitmap ) SendDlgItemMessage( workspace_dlg, IDC_PICTURE, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) bitmap );
 	}
+
+	// Doing an update here is helpful (I think) to update the menus and target states in the simulator.
 	Update();
+
 	// If we are updating the status, it is usually an interesting break point in the procedure.
 	// So we automatically insert a comment in the script file to make it easy to find.
 	Comment( message );
+
 	// Tell the ground the same information.
 	SignalEvent( message );
 }
