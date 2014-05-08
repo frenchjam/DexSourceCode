@@ -55,11 +55,11 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right position with tapping surfaces folded.%s", OkToContinue );
+			"Place the target bar in the right-side position, socket 'N', with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
-			"Place the target bar in the left position.%s", OkToContinue );
+			"Place the target bar in the left-side position with tapping surfaces folded.%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -91,16 +91,17 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 		dsc = "DiscreteH.bmp";
 	}
 
-	if ( eyes == OPEN )	{
-		AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
-		AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
-		AddDirective( apparatus, "Wait for each beep. Stop at each target. Keep your eyes OPEN.", dsc );
-	}
-	else {
-		AddDirective( apparatus, "To start, you will move to the target that is blinking, then CLOSE your eyes.", mtb );
-		AddDirective( apparatus, "On each beep, move quickly and accurately to the other (remembered) target location.", dsc );
-		AddDirective( apparatus, "Remember to WAIT for each beep, STOP at each target and keep your eyes CLOSED.", dsc );
-	}
+	AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
+	// It would be good to have here pictures of the manipulandum properly aligned to the target.
+	if ( direction == VERTICAL ) AddDirective( apparatus, "Place the manipulandum to the right of the target mast and align the thumb with each target.", mtb );
+	else AddDirective( apparatus, "Place the manipulandum to the right of the target box and align the thumb with each target.", mtb );
+	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
+	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
+	// It would be good to have a picture about eyes being open or closed.
+	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "info.bmp" );
+
+	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each target.", "alert.bmp" );
+
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -179,9 +180,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
-	// Indicate to the subject that we are ready to start and wait for their go signal.
-	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStartOpen );
-	else status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStartClosed );
+	status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Start acquisition and acquire a baseline.
@@ -199,6 +198,11 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SelectAndCheckMass( mass );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// Indicate to the subject that we are ready to start and wait for their go signal.
+	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "info.bmp", "You will perform the next set of discrete movements with eyes OPEN." );
+	else status = apparatus->WaitSubjectReady( "info.bmp", "You will perform the next set of discrete movements with eyes CLOSED. (But don't close them yet!)." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
@@ -209,6 +213,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
+	// Light up the pair of targets.
+	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
 	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget ); 
 	if ( status == ABORT_EXIT ) exit( status );
@@ -216,7 +222,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Collect some data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
-	// Light up the pair of targets.
+	// Need to light the pair of targets again.
 	apparatus->TargetsOff();
 	if ( direction == VERTICAL ) {
 		apparatus->VerticalTargetOn( discreteTargets[LOWER] );
@@ -226,14 +232,17 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( discreteTargets[LOWER] );
 		apparatus->HorizontalTargetOn( discreteTargets[UPPER] );
 	}
-			
+	
 	// Indicate what to do next.
-	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements. Wait for each beep. Stop at each target. Keep your eyes OPEN.", "working.bmp" ); 
-	else apparatus->ShowStatus( "Start point-to-point movements. Wait for each beep. Stop at each target. Keep your eyes CLOSED.", "working.bmp" ); 
+	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements with eyes OPEN.", "working.bmp" ); 
+	else apparatus->ShowStatus( "CLOSE your eyes and start point-to-point movements.", "working.bmp" ); 
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 
+	// Give some time to read the message.
+	apparatus->Wait( 5.0 );
+		
 	// Wait a little to give the subject time to react, in case they were looking at the screen.
 	apparatus->Wait( baselineDuration );
 
@@ -257,9 +266,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	BlinkAll( apparatus );
-	BlinkAll( apparatus );
-	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", "Trial terminated.\nPlease place the maniplandum in the empty cradle." );
+	SignalEndOfRecording( apparatus );
+	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", MsgTrialOver );
+	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );

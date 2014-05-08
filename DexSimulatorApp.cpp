@@ -62,16 +62,16 @@ char inputSubject[256] = "users.dex";
 
 // Some common messages.
 
-char *MsgReadyToStart = "Place the manipulandum in any cradle and lock in place.\nRemove hand and press <OK> to start.";
-char *MsgReadyToStartOpen = "Place the manipulandum in any cradle.\nRemove hand and press <OK> to start.\nKeep your eyes OPEN.";
-char *MsgReadyToStartClosed = "Place the manipulandum in any cradle.\nRemove hand and press <OK> to start.\nKeep your eyes CLOSED.";
+char *MsgReadyToStart = "Place the manipulandum in any cradle and lock in place. Remove hand and press <OK> to start.";
+char *MsgReadyToStartOpen = "Place the manipulandum in any cradle.";
+char *MsgReadyToStartClosed = "Place the manipulandum in any cradle.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
 char *MsgTooLongToReachTarget = "Too long to reach desired target.";
 char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust until the grip is centered.";
 char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
-char *MsgTrialOver = "Trial terminated.\nPlace the maniplandum in the empty cradle.";
+char *MsgTrialOver = "          TRIAL TERMINATED\nPlace the maniplandum in the empty cradle.";
 char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
-char *MsgQueryReadySeated = "Preparing to start the task.\nVerify that you are seated with your seat belts fastened.%s";
+char *MsgQueryReadySeated = "     PREPARING TO START THE TASK  \nVerify that you are seated with your seat belts fastened.%s";
 char *MsgQueryReadySupine = "Preparing to start the task.\nVerify that you are lying down with your seat belts fastened.%s";
 char *InstructPickUpManipulandum = "You will first pick up the manipulandum with thumb and index finger centered.";
 char *OkToContinue ="";
