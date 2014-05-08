@@ -715,68 +715,94 @@ void LoadGUIState( void ) {
 	int		items;
 
 	fp = fopen( "DexSimulatorApp.cfg", "r" );
-	if ( !fp ) {
-		MessageBox( NULL, "loadInitialState() failed.", "DexSimulatorApp", IDOK );
-	}
+	if ( !fp ) MessageBox( NULL, "loadInitialState() failed.", "DexSimulatorApp", IDOK );
 	else {
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_SUPINE, value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_SUPINE, false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_SEATED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_SEATED , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_BOX_OCCLUDED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_BOX_OCCLUDED , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_RIGHT , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_RIGHT , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_LEFT , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_LEFT , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_BAR_OCCLUDED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_BAR_OCCLUDED , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_HORIZ , value );
+		else  CheckDlgButton( mouse_tracker_dlg, IDC_HORIZ , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_VERT , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_VERT , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_FOLDED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_FOLDED , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_EXTENDED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_EXTENDED , false );
 
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, value, NULL );
+		else SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, 2, NULL );
 
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_NOISY , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_NOISY , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_WOBBLY , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_WOBBLY , value );
 
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS1A , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS1A , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS1B , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS1B , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS1C , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS1C , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS1M , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS1M , false );
 
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS2A , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS2A , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS2B , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS2B , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS2C , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS2C , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS2M , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS2M , false );
 
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS3A , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS3A , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS3B , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS3B , false );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS3C , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS3C , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mass_dlg, IDC_MASS3M , value );
+		else CheckDlgButton( mass_dlg, IDC_MASS3M , false );
 
 		fclose( fp );
 	}
+
+	SaveGUIState();
 }

@@ -869,7 +869,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	// Record the simulated state of the apparatus, so that the next trial starts from here.
-	SaveGUIState();
+	if ( !compile ) SaveGUIState();
 
 	// Display the results.
 	if ( return_code != ABORT_EXIT && !compile ) {
