@@ -45,7 +45,26 @@ int    slipMovements = 15;
 
 /*********************************************************************************/
 
+int PrepFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
+	int status;
+
+	status = apparatus->fWaitSubjectReady(  "BarLeft.bmp", "Place the target bar in the left-hand position.%s", OkToContinue );
+	if ( status == ABORT_EXIT ) exit( status );
+    status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
+	if ( status == ABORT_EXIT ) exit( status );
+	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Lock the manipulandum into the retainer." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	AddDirective( apparatus, "You will first pinch the manipulandum at the center between thumb and forefinger.", "coef_frict.bmp" );
+	AddDirective( apparatus, "You will then adjust the grip force such that the flashing cursor LED is between the two limits.", "coef_frict.bmp" );
+	AddDirective( apparatus, "When you hear the beep, rub the fingers up and down on the manipulandum. ", "coef_frict_osc.bmp");
+	AddDirective( apparatus, "You will rub for 15 seconds. Move from center to edge and back. Try to maintain pinch force.", "rub.bmp"  );
+	ShowDirectives( apparatus );
+
+	return( NORMAL_EXIT );
+
+}
 
 int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	
@@ -67,16 +86,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	fprintf( stderr, "     RunFrictionMeasurement: %s\n", params );
 	
-	if ( ParseForPrep( params ) ) {
-
-        status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer." );
-		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Lock the manipulandum into the retainer." );
-		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	}
+	if ( ParseForPrep( params ) ) status = PrepFrictionMeasurement( apparatus, params );
 
     // picture Remove Hand with manipulandum in the retainer.
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand from the manipulandum and press <OK> to start." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "          PREPARING TO START\nRemove hand from the manipulandum and press <OK> to start." );
 
 	// Start acquiring.
 	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
@@ -85,7 +98,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 
-    apparatus->ShowStatus( "Grip the manipulandum at the center, (1) adjust the grip force according to the LED's and then (2) rub up and down.", "pinch.bmp" );
     
 	// Light the targets that will be used to adjust the grip force.
 	// At first they will be on statically, until we detect a grip.
@@ -95,9 +107,12 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetOn( 10 );
 	apparatus->TargetOn( 0 );
 
+    apparatus->ShowStatus( "Grip the manipulandum at the center.", "pinch.bmp" );
+
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
+    apparatus->ShowStatus( "Adjust the grip force according to the LED's.", "pinch.bmp" );
 
    status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
   		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
@@ -109,7 +124,8 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( FORCE_OK );
 
 	// Rub the manipulandum
-	apparatus->ShowStatus( "Grip adjusted! Rub the manipulandum up and down during 15 sec without releasing the grip.", "rub.bmp" );
+	apparatus->Beep();
+	apparatus->ShowStatus( "Rub the manipulandum up and down.", "rub.bmp" );
 
 	// Wait for the initial slip.
     status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
