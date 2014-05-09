@@ -98,7 +98,7 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
 	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
 	// It would be good to have a picture about eyes being open or closed.
-	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "info.bmp" );
+	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "EyesOpen&Closed.bmp" );
 
 	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each target.", "alert.bmp" );
 
@@ -203,8 +203,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "info.bmp", "You will perform the next set of discrete movements with eyes OPEN." );
-	else status = apparatus->WaitSubjectReady( "info.bmp", "You will perform the next set of discrete movements with eyes CLOSED. (But don't close them yet!)." );
+	if ( eyes == OPEN ) status = apparatus->WaitSubjectReady( "Eyesopen.bmp", "You will perform the next set of discrete movements with eyes OPEN." );
+	else status = apparatus->WaitSubjectReady( "EyesClosed.bmp", "You will perform the next set of discrete movements with eyes CLOSED. (But don't close them yet!)." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Check that the grip is properly centered.
@@ -238,8 +238,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 	
 	// Indicate what to do next.
-	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements with eyes OPEN.", "working.bmp" ); 
-	else apparatus->ShowStatus( "CLOSE your eyes and start point-to-point movements.", "working.bmp" ); 
+	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements with eyes OPEN.", "Eyesopen.bmp" ); 
+	else apparatus->ShowStatus( "CLOSE your eyes and start point-to-point movements.", "EyesClosed.bmp" ); 
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
