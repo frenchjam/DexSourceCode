@@ -743,8 +743,8 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 				atof( token[8] ) / 1000.0, // hold_time
 				atof( token[9] ), // timeout
 				atof( token[10] ), // filter_constant
-				token[4], // message
-				token[5]  // picture
+				token[11], // message
+				token[12]  // picture
 			); 
 		}
 
@@ -766,8 +766,8 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 					atof( token[10] ), // filter_constant
 					atof( token[8] ), // slip_threshold
 					atof( token[9] ), // timeout
-					token[4], // message
-					token[5]  // picture
+					token[11], // message
+					token[12]  // picture
 				); 
 			} while ( status == RETRY_EXIT );
 		}
