@@ -233,7 +233,7 @@ REM It calls the second one which generates the commands for each block (task).
 	set pstr=%posture:~0,2%
 
 	REM Put all the paramters together for the compiler.
-	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%60.txt:%seq%%sz%  
+	set params=-targeted -%mass% -%posture% -%direction% -targets=TargetedTargets%direction%30.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
 	set filename=FltTg%pstr%%dir%%mass%%size%%seq%.dex

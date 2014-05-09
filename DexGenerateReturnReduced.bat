@@ -79,18 +79,33 @@ REM Here we build the scripts as we go and we create the entries in the protocol
 REM ****************************************************************************
 
 REM
-REM Targeted Movements
+REM Discrete Movements
 REM
-REM We need to create a new list of target with a duration of 20 sec!!!
+REM we need to create a new list of sound target with a duration of 20 sec
+
+REM Start the trial counter for the discrete movements.
+set disc_seq=0
 
 set mass=400gm
-set nblocks=5
+set direction=Horizontal
+set eyes=open
+set range=DiscreteRanges%direction%.txt:%sz% -prep
+call :DO_ONE_DISCRETE_TRIAL
 
-REM
-REM Vertical Direction
-REM
+set direction=Horizontal
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
+
 set direction=Vertical
-call :DO_BLOCK_OF_TGTD
+set eyes=open
+set range=DiscreteRanges%direction%.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
+
+set direction=Vertical
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
 
 
 REM ****************************************************************************
@@ -120,59 +135,6 @@ set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
 REM ****************************************************************************
-
-REM
-REM Discrete Movements
-REM
-REM we need to create a new list of sound target with a duration of 20 sec
-
-REM Start the trial counter for the discrete movements.
-set disc_seq=0
-
-set mass=400gm
-set direction=Vertical
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Vertical
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-
-set direction=Horizontal
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-REM ****************************************************************************
-
 REM
 REM Collisions
 REM
@@ -185,6 +147,22 @@ call :DO_BLOCK_OF_COLLISIONS
 
 REM ***************************************************************************
 
+REM
+REM Targeted Movements
+REM
+REM We need to create a new list of target with a duration of 20 sec!!!
+
+set mass=400gm
+set nblocks=5
+
+REM
+REM Vertical Direction
+REM
+set direction=Vertical
+call :DO_BLOCK_OF_TGTD
+
+
+REM ****************************************************************************
 REM
 REM Coefficient of Friction tests.
 REM

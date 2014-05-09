@@ -71,21 +71,38 @@ REM ****************************************************************************
 REM Now we start generating the science task scripts specific to this protocol.
 REM Here we build the scripts as we go and we create the entries in the protocol file.
 
+
 REM ****************************************************************************
 
 REM
-REM Targeted Movements
+REM Discrete Movements
 REM
 
-set mass=800gm
-set nblocks=5
+REM All the trials mass.
+set mass=600gm
 
-REM
-REM Vertical Direction
-REM
+REM Start the trial counter for the oscillations.
+set dsc_seq=0
+
+set direction=Horizontal
+set eyes=open
+set range=DiscreteRangesHorizontal.txt:%sz% -prep
+call :DO_ONE_DISCRETE_TRIAL
+
+set direction=Horizontal
+set eyes=closed
+set range=DiscreteRangesHorizontal.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
+
 set direction=Vertical
-call :DO_BLOCK_OF_TGTD
+set eyes=open
+set range=DiscreteRangesVertical.txt:%sz% -prep
+call :DO_ONE_DISCRETE_TRIAL
 
+set direction=Vertical
+set eyes=closed
+set range=DiscreteRangesVertical.txt:%sz%
+call :DO_ONE_DISCRETE_TRIAL
 
 REM ****************************************************************************
 
@@ -114,39 +131,9 @@ set range=OscillationRangesNominalVertical.txt:%sz%
 call :DO_ONE_OSCILLATION_TRIAL
 
 
-REM ****************************************************************************
-
-REM
-REM Discrete Movements
-REM
-
-REM All the trials mass.
-set mass=400gm
-
-REM Start the trial counter for the oscillations.
-set dsc_seq=0
-
-set direction=Vertical
-set eyes=open
-set range=DiscreteRangesVertical.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=open
-set range=DiscreteRangesHorizontal.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
 
 REM ****************************************************************************
+
 
 REM
 REM Collisions
@@ -157,7 +144,24 @@ set nblocks=5
 call :DO_BLOCK_OF_COLLISIONS
 
 
+REM ****************************************************************************
+
+REM
+REM Targeted Movements
+REM
+
+set mass=800gm
+set nblocks=5
+
+REM
+REM Vertical Direction
+REM
+set direction=Vertical
+call :DO_BLOCK_OF_TGTD
+
 REM ***************************************************************************
+
+
 
 REM
 REM Coefficient of Friction tests.
