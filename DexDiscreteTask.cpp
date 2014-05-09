@@ -238,7 +238,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	}
 	
 	// Indicate what to do next.
-	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements with eyes OPEN.", "Eyesopen .bmp" ); 
+	if ( eyes == OPEN ) apparatus->ShowStatus( "Start point-to-point movements with eyes OPEN.", "Eyesopen.bmp" ); 
 	else apparatus->ShowStatus( "CLOSE your eyes and start point-to-point movements.", "EyesClosed.bmp" ); 
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
