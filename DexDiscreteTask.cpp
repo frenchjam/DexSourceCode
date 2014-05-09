@@ -98,7 +98,7 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
 	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
 	// It would be good to have a picture about eyes being open or closed.
-	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "EyesOpen&Closed.bmp" );
+	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "EyesOpenClosed.bmp" );
 
 	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each target.", "alert.bmp" );
 
@@ -167,13 +167,11 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
-	if ( ParseForPrep( params ) ) PrepDiscrete( apparatus, params );
+	if ( ParseForPrep( params ) ) status = PrepDiscrete( apparatus, params );
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	else {
-		status = CheckInstall( apparatus, posture, bar_position );
-		if ( status != NORMAL_EXIT ) return( status );
-	}
+	else status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
 
 	// Verify that the subject is ready, in case they did something unexpected.
 	if ( posture == PostureSeated ) {
