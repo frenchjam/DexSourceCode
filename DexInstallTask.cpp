@@ -302,16 +302,15 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware." );
 	if ( status == ABORT_EXIT ) return( status );
 
-	status = apparatus->fWaitSubjectReady("headphones.bmp", "A series of beeps will be played once per second for %.0f seconds. Adjust the volume until you hear them clearly.", audioCheckDuration );
-	if ( status == ABORT_EXIT ) return( status );
-
-	apparatus->ShowStatus( "Beeps are playing. Adjust volume.", "working.bmp" );
+	char msg[1024];
+	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the volume until you hear them clearly.", audioCheckDuration );
+	apparatus->ShowStatus( msg, "volume.bmp" );
 	for ( int i = 0; i < audioCheckDuration; i++ ) {
 		apparatus->Beep();
 		apparatus->Wait( 0.9 );
 	}
 
-	status = apparatus->WaitSubjectReady("headphones.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
+	status = apparatus->WaitSubjectReady("info.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
 	if ( status == ABORT_EXIT ) return( status );
 
 
