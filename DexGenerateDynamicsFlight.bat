@@ -63,7 +63,7 @@ REM I do not put "-prep" because the manipulandum was placed in the retainer
 REM  as part of the installation procedure.
 
 set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
+echo CMD_TASK,%task%,FrictionTest0p5prep.dex,%task% Friction 0.5
 
 set /A "task=task+1"
 echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0
