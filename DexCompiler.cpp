@@ -740,9 +740,9 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 				atof( token[3] ), // min_load
 				atof( token[4] ), // max_load
 				direction,
+				atof( token[10] ), // filter_constant
 				atof( token[8] ) / 1000.0, // hold_time
 				atof( token[9] ), // timeout
-				atof( token[10] ), // filter_constant
 				token[11], // message
 				token[12]  // picture
 			); 
