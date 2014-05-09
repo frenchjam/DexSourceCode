@@ -120,30 +120,38 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	static DexSubjectPosture posture = PostureSeated;
 
 	char *target_filename;
-	char tag[9] = "Tgtd";
 
 	fprintf( stderr, "     RunTargeted: %s\n", params );
 	 
-	// Which mass should be used for this set of trials?
-	mass = ParseForMass( params );
-
-	// Seated or supine?
-	posture = ParseForPosture( params );
-	if ( posture == PostureSeated ) strcat( tag, "Up" ); // Up is for upright (seated).
-	else strcat( tag, "Su" ); // Su is for supine.
-
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) {
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( targetedMovementDirection, apparatus->jVector );
-		strcat( tag, "Ve" );
 	}
 	else {
 		bar_position = TargetBarLeft;
 		apparatus->CopyVector( targetedMovementDirection, apparatus->kVector );
-		strcat( tag, "Ho" );
 	}
+
+	// Seated or supine?
+	posture = ParseForPosture( params );
+
+	// Which mass should be used for this set of trials?
+	mass = ParseForMass( params );
+
+	// Construct the results filename tag.
+	char tag[32] = "T"; // T for targeted.
+	if ( direction == VERTICAL ) strcat( tag, "V" );
+	else strcat( tag, "H" );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
+	if ( mass == MassSmall ) strcat( tag, "4" );
+	else if ( mass == MassMedium ) strcat( tag, "6" );
+	else if ( mass == MassLarge ) strcat( tag, "8" );
+	else strcat( tag, "u" ); // for 'unspecified'
+	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
+	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What is the target sequence? If not specified in the command line, use the default.
 	if ( target_filename = ParseForTargetFile( params ) ) targetSequenceN = LoadSequence( targetSequence, target_filename );

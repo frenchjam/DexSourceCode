@@ -192,32 +192,36 @@ bool ParseForPrep ( const char *cmd ) {
 	return( ParseForBool( cmd, "-prep" ) );
 }
 
-#define BUFFER_N	10
-char *ParseForFilename ( const char *cmd, const char *key ) {
+#define BUFFER_N	64
+char *ParseForString ( const char *cmd, const char *key ) {
 
-	static char filename[BUFFER_N][1024];
+	static char string[BUFFER_N][1024];
 	static call = 0;
 	char *ptr;
 
 	call = (call++) % BUFFER_N;
 	if ( !cmd ) return( NULL );
 	else if ( ptr = strstr( cmd, key ) ) {
-		sscanf( ptr + strlen( key ) + 1, "%s", filename[call] ); // The '+1' takes care of the = sign, if there is one, or a space.
-		return( filename[call] );
+		sscanf( ptr + strlen( key ) + 1, "%s", string[call] ); // The '+1' takes care of the = sign, if there is one, or a space.
+		return( string[call] );
 	}
 	else return( NULL );
 }
 
 char *ParseForTargetFile ( const char *cmd ) {
-	return( ParseForFilename( cmd, "-targets" ) );
+	return( ParseForString( cmd, "-targets" ) );
 }
 
 char *ParseForRangeFile ( const char *cmd ) {
-	return( ParseForFilename( cmd, "-range" ) );
+	return( ParseForString( cmd, "-range" ) );
 }
 
 char *ParseForDelayFile ( const char *cmd ) {
-	return( ParseForFilename( cmd, "-delays" ) );
+	return( ParseForString( cmd, "-delays" ) );
+}
+
+char *ParseForTag( const char *cmd ) {
+	return( ParseForString( cmd, "-tag" ) );
 }
 
 /************************************************************************************************************************************/

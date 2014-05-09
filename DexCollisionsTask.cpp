@@ -95,7 +95,6 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
 	char *target_filename = 0;
-	char tag[5] = "Co";			// Co is for Collisions.
 
 	int tone, tgt;
 
@@ -106,8 +105,18 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Seated or supine?
 	posture = ParseForPosture( params );
+
+	// Construct the results filename tag.
+	char tag[32] = "C"; // C for Collisions.
+	strcat( tag, "V" );	// Collisions are always vertical.
 	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
 	else strcat( tag, "S" ); // S is for supine.
+	if ( mass == MassSmall ) strcat( tag, "4" );
+	else if ( mass == MassMedium ) strcat( tag, "6" );
+	else if ( mass == MassLarge ) strcat( tag, "8" );
+	else strcat( tag, "u" ); // for 'unspecified'
+	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
+	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What is the target sequence? If not specified in the command line, use the default.
 	// Here we expect a sequence of +1 or -1 values, corresponding to an upward or downward tap.

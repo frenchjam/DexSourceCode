@@ -125,7 +125,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	char *target_filename = 0;
 	char *delay_filename = 0;
-	char tag[8] = "Ds";			// D is for discrete.
 
 	fprintf( stderr, "     RunDiscrete: %s\n", params );
 
@@ -134,26 +133,31 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Seated or supine?
 	posture = ParseForPosture( params );
-	if ( posture == PostureSeated ) strcat( tag, "Up" ); // Up is for upright (seated).
-	else strcat( tag, "Su" ); // Su is for supine.
 
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) {
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( discreteMovementDirection, apparatus->jVector );
-		strcat( tag, "Ve" );
 	}
 	else {
 		bar_position = TargetBarLeft;
 		apparatus->CopyVector( discreteMovementDirection, apparatus->kVector );
-		strcat( tag, "Ho" );
 	}
 
 	// Eyes open or closed?
 	eyes = ParseForEyeState( params );
-	if ( eyes == OPEN ) strcat( tag, "Op" ); 
-	else strcat( tag, "Cl" ); 
+
+	// Construct the results filename tag.
+	char tag[32] = "D"; // C for Discrete.
+	if ( direction == VERTICAL ) strcat( tag, "V" );
+	else strcat( tag, "H" );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
+	if ( eyes == OPEN ) strcat( tag, "o" ); // o for open
+	else strcat( tag, "c" ); // c for closed
+	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
+	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What is the sequence of delays? If not specified in the command line, use the default.
 	if ( delay_filename = ParseForDelayFile( params ) ) delaySequenceN = LoadSequence( delaySequence, delay_filename );

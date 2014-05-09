@@ -136,7 +136,6 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	char *target_filename = 0;
 	char *delay_filename = 0;
-	char tag[5] = "O";	// O is for oscillations.
 
 	fprintf( stderr, "     RunOscillations: %s\n", params );
 
@@ -147,29 +146,36 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Seated or supine?
 	posture = ParseForPosture( params );
-	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
-	else strcat( tag, "S" ); // S is for supine.
 
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 
 	// Eyes open or closed?
 	eyes = ParseForEyeState( params );
-	if ( eyes == OPEN ) strcat( tag, "O" ); 
-	else strcat( tag, "C" ); 
 
 	// Horizontal or vertical movements?
 	direction = ParseForDirection( apparatus, params );
 	if ( direction == VERTICAL ) {
 		bar_position = TargetBarRight;
 		apparatus->CopyVector( oscillationDirection, apparatus->jVector );
-		strcat( tag, "V" );
 	}
 	else {
 		bar_position = TargetBarLeft;
 		apparatus->CopyVector( oscillationDirection, apparatus->kVector );
-		strcat( tag, "H" );
 	}
+
+	// Construct the results filename tag.
+	char tag[32] = "O"; // O for Oscillations.
+	if ( direction == VERTICAL ) strcat( tag, "V" );
+	else strcat( tag, "H" );
+	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+	else strcat( tag, "S" ); // S is for supine.
+	if ( mass == MassSmall ) strcat( tag, "4" );
+	else if ( mass == MassMedium ) strcat( tag, "6" );
+	else if ( mass == MassLarge ) strcat( tag, "8" );
+	else strcat( tag, "u" ); // for 'unspecified'
+	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
+	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What are the limits of each oscillatory movement?
 	if ( target_filename = ParseForRangeFile( params ) ) LoadTargetRange( oscillationTargets, target_filename );

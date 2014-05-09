@@ -67,6 +67,8 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	//  DEX apparatus, which in theory can poll and sample continuously at the same time.
 	if ( apparatus->adc ) apparatus->adc->AllowPollingDuringAcquisition();
 
+	char tag[32];
+
 	gripTarget = ParseForPinchForce( apparatus, params );
 	double frictionMinGrip = 0.85 * gripTarget;
 	double frictionMaxGrip = 1.25 * gripTarget;
@@ -79,12 +81,17 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	
 	if ( ParseForPrep( params ) ) status = PrepFrictionMeasurement( apparatus, params );
 
+	// Construct the file tag.
+	sprintf( tag, "F%.0fp%.0f", floor( gripTarget ), (gripTarget - floor( gripTarget )) * 10.0 );
+	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
+	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
+
     // picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum and press <OK> to start." );
 
 	// Start acquiring.
-	apparatus->StartAcquisition( "FRIC", maxTrialDuration );
-	apparatus->StartFilming( "FRIC" );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+	apparatus->StartFilming( tag );
 	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 	
