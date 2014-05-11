@@ -487,9 +487,15 @@ void DexCompiler::ComputeAndNullifyStrainGaugeOffsets( void ) {
 
 void DexCompiler::StartAcquisition( const char *tag, float max_duration ) {
 	// DEX ignores the max duration parameter.
-//	fprintf( fp, "CMD_ACQ_START, \"%s\"\n", tag ); 
+	char truncated[256];
+	strcpy( truncated, tag );
+	if ( strlen( truncated ) > 8 ) {
+		truncated[8] = 0;
+		fWarning( "WARNING: File tag too long. Truncating.\n%s\n%s\n", tag, truncated );
+	}
+
 	AddStepNumber();
-	fprintf( fp, "CMD_ACQ_START, %s\n", tag );  // Need to confirm if the tag should be quoted or not.
+	fprintf( fp, "CMD_ACQ_START, %s\n", truncated );  // Need to confirm if the tag should be quoted or not.
 	// Note the time of the acqisition start.
 	MarkEvent( ACQUISITION_START );
 }

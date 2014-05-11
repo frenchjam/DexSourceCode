@@ -5,7 +5,6 @@ REM Create a set of Targeted tasks for DEX.
 REM
 
 REM Assumes that task, mass, posture, direction,etc. are set already.
-set dir=%direction:~0,4%
 
 REM Provide instructions for first block.
 REM Subroutine will disable it for subsequent blocks.
@@ -30,13 +29,17 @@ goto :EOF
 	set /A "seq=seq+1"
 
 	REM Construct a file tag.
-	set tag=%sz%%task%
+	set dir=%direction:~0,1%
+	set post=%posture:~0,1%
+	set ms=%mass:~0,1%
+	set tag=%sz%%task%T%post%%dir%%ms%
 
 	REM Put all the paramters together for the compiler.
 	set params=-targeted -%mass% -%posture% -%direction% -tag=%tag% -targets=TargetedTargets%direction%30.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
-	set filename=%tag%Tgt%dir%%mass%%seq%.dex
+	REM set filename=%tag%Tgt%dir%%mass%%seq%.dex
+	set filename=%tag%0%seq%.dex
 
 	REM Generate the script to do the task.
 	%COMPILER% %params%  -compile=%filename% %prep% %*

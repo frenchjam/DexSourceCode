@@ -166,17 +166,19 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Construct the results filename tag.
 	char tag[32];
-	strcpy( tag, ParseForTag( params ) );
-	strcat( tag, "O" ); // O for Oscillations.
-	if ( direction == VERTICAL ) strcat( tag, "V" );
-	else strcat( tag, "H" );
-	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
-	else strcat( tag, "S" ); // S is for supine.
-	if ( mass == MassSmall ) strcat( tag, "4" );
-	else if ( mass == MassMedium ) strcat( tag, "6" );
-	else if ( mass == MassLarge ) strcat( tag, "8" );
-	else strcat( tag, "u" ); // for 'unspecified'
-	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else {
+		strcpy( tag, "Grip" );
+		strcat( tag, "O" ); // O for Oscillations.
+		if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+		else strcat( tag, "S" ); // S is for supine.
+		if ( direction == VERTICAL ) strcat( tag, "V" );
+		else strcat( tag, "H" );
+		if ( mass == MassSmall ) strcat( tag, "4" );
+		else if ( mass == MassMedium ) strcat( tag, "6" );
+		else if ( mass == MassLarge ) strcat( tag, "8" );
+		else strcat( tag, "u" ); // for 'unspecified'
+	}
 
 	// What are the limits of each oscillatory movement?
 	if ( target_filename = ParseForRangeFile( params ) ) LoadTargetRange( oscillationTargets, target_filename );

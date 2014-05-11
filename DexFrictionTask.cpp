@@ -81,8 +81,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	// Construct the file tag.
 	char tag[32];
-	sprintf( tag, "%sF%.0fp%.0f", ParseForTag( params ), floor( gripTarget ), (gripTarget - floor( gripTarget )) * 10.0 );
-	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else {
+		sprintf( tag, "GripF%.0fp%.0f", floor( gripTarget ), (gripTarget - floor( gripTarget )) * 10.0 );
+	}
 
     // picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum and press <OK> to start." );

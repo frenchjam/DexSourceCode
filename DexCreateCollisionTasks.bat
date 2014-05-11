@@ -32,13 +32,17 @@ goto :EOF
 	set sq=%sseq:~1,2%
 
 	REM Construct a file tag.
-	set tag=%sz%%task%
+	set dir=%direction:~0,1%
+	set post=%posture:~0,1%
+	set ms=%mass:~0,1%
+	set tag=%sz%%task%C%post%%dir%%ms%
 
 	REM Put all the paramters together for the compiler.
 	set params=-collisions -%mass% -%posture% -tag=%tag% -delays=CollisionsSequences30.txt:%seq%
 
 	REM Generate a script filename based on the parameters.
-	set filename=%tag%Col%mass%%sq%.dex
+	REM set filename=%tag%Col%mass%%sq%.dex
+	set filename=%tag%%sq%.dex
 
 	REM Generate the script to do the task.
 	%COMPILER% %params%  -compile=%filename% %prep% %*

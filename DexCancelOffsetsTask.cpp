@@ -33,9 +33,10 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	fprintf( stderr, "     RunTransducerOffsetCompensation: %s\n", params );
 
+	// Construct the file tag.
 	char tag[32];
-	strcpy( tag, ParseForTag( params ) );
-	strcat( tag, "OFFS" );
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else strcpy( tag, "GripOFFS" );
 
 	// Clearly demark this operation in the script file. 
 	apparatus->Comment( "################################################################################" );

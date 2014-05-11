@@ -179,12 +179,16 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 	
 	char tag[32];
-	strcpy( tag, ParseForTag( params ) );
-	strcat( tag, "OFFS" );
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else {
+		strcpy( tag, "GripCfg" );
+		if ( desired_posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+		else strcat( tag, "S" ); // S is for supine.
+	}
 
 	// Perform a short acquisition to measure where the manipulandum is.
 	apparatus->ShowStatus( "Acquiring baseline data. Please wait.", "wait.bmp" );
-	apparatus->StartAcquisition( "ALGN", maxTrialDuration );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition();
 

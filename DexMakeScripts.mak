@@ -7,10 +7,8 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= ForceOffsets.dex TaskCheckAudio.dex TaskFinishProtocol.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex TaskInstallUpright.dex TaskInstallSupine.dex ShowPictures.dex
-FLIGHT		= DexDynamicsFlightSmall.dex DexDynamicsFlightMedium.dex DexDynamicsFlightLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedFlightSmall.dex DexReducedFlightMedium.dex DexReducedFlightLarge.dex SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex  
-GROUND		= DexDynamicsBDCSmall.dex DexDynamicsBDCMedium.dex DexDynamicsBDCLarge.dex DexSeatedFlightSmall.dex DexSeatedFlightMedium.dex DexSeatedFlightLarge.dex DexSupineFlightSmall.dex DexSupineFlightMedium.dex DexSupineFlightLarge.dex DexReducedReturnSmall.dex DexReducedReturnMedium.dex DexReducedReturnLarge.dex          SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex 
-COMMON		= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex SessionUtilitiesOnly.dex
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex
+PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
 
@@ -23,28 +21,13 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-ALL_FLIGHT	= $(SCRIPTS) $(FLIGHT) $(COMMON) Flt*.dex users.dex
-ALL_GROUND	= $(SCRIPTS) $(GROUND) $(COMMON) Flt*.dex users.dex
-
 default: all
-
-joe: $(SOURCE)\DexCreateFrictionTask.bat
-	$(SOURCE)\DexCreateFrictionTask.bat L 301 2.3 -prep -sit
 
 all: GripFlightScripts.tar
 
 ######################################################################################################################################
 
-#
-# Users
-#
-
-users_flight.dex:	$(SOURCE)\DexCreateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex 
-	$(SOURCE)\DexCreateSubjects.bat Flight users_flight.dex
-
-######################################################################################################################################
-
-GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(SCRIPTS) $(FLIGHT) $(COMMON) users_flight.dex
+GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
 	copy /Y /V users_flight.dex users.dex
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLint.log
 	CreateFlightScriptsTar.bat GripFlightScripts.tar
@@ -62,23 +45,42 @@ GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 release: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
 	 
- 
 ######################################################################################################################################
 
 #
-# Tasks 
+# Users
 #
-### Configuration of DEX hardware.
-TaskInstallUpright.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -upright -compile=TaskInstallUpright.dex
-TaskInstallSupine.dex:	DexSimulatorApp.exe
-	$(COMPILER) -install -supine -compile=TaskInstallSupine.dex
-TaskFinishProtocol.dex: DexSimulatorApp.exe
-	$(COMPILER) -finish -compile=TaskFinishProtocol.dex
-TaskCheckAudio.dex: DexSimulatorApp.exe
-	$(COMPILER) -audio -sit -compile=TaskCheckAudio.dex
-ForceOffsets.dex: DexSimulatorApp.exe
-	$(COMPILER) -offsets -compile=ForceOffsets.dex
+
+users_flight.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionU.dex
+	$(SOURCE)\DexGenerateSubjects.bat Flight users_flight.dex
+
+######################################################################################################################################
+
+#
+# Sessions
+#
+
+SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .\$@
+
+SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .\$@
+
+SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .\$@
+
+SessionSmallSubjectBDC.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .\$@
+
+SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .\$@
+
+SessionLargeSubjectBDC.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .\$@
+
+SessionU.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex $(PROTOCOLS) 
+	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .\$@
+
 
 ######################################################################################################################################
 
@@ -88,39 +90,39 @@ ForceOffsets.dex: DexSimulatorApp.exe
 
 ### Dynamics Flight Protocol
 
-DexDynamicsFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > DexDynamicsFlightSmall.dex
-DexDynamicsFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > DexDynamicsFlightMedium.dex
-DexDynamicsFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > DexDynamicsFlightLarge.dex
+DexDynamicsFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > $@
+DexDynamicsFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > $@
+DexDynamicsFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > $@
 
 ### Reference Seated Flight Protocol
 
-DexSeatedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > DexSeatedFlightSmall.dex
-DexSeatedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > DexSeatedFlightMedium.dex
-DexSeatedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > DexSeatedFlightLarge.dex
+DexSeatedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > $@
+DexSeatedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > $@
+DexSeatedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > $@
 
 ### Reference Supine Flight Protocol
 
-DexSupineFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Sml > DexSupineFlightSmall.dex
-DexSupineFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Med > DexSupineFlightMedium.dex
-DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Lrg > DexSupineFlightLarge.dex
+DexSupineFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Sml > $@
+DexSupineFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Med > $@
+DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Lrg > $@
 
 ### Reduced Flight
 
-DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Sml > DexReducedFlightSmall.dex
-DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Med > DexReducedFlightMedium.dex
-DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Lrg > DexReducedFlightLarge.dex
+DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Sml > $@
+DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Med > $@
+DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateFlightReduced.bat Upright Lrg > $@
 
 
 # ------------------------------------------------------------------------------------------------
@@ -129,92 +131,76 @@ DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(H
 
 ### Dynamics BDC Protocol
 
-DexDynamicsBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Sml > DexDynamicsBDCSmall.dex
-DexDynamicsBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Med > DexDynamicsBDCMedium.dex
-DexDynamicsBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Lrg > DexDynamicsBDCLarge.dex
+DexDynamicsBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Sml > $@
+DexDynamicsBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Med > $@
+DexDynamicsBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Lrg > $@
 
 ### Reference Seated BDC Protocol
 
-DexSeatedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Sml > DexSeatedBDCSmall.dex
-DexSeatedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Med > DexSeatedBDCMedium.dex
-DexSeatedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Lrg > DexSeatedBDCLarge.dex
+DexSeatedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Sml > $@
+DexSeatedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Med > $@
+DexSeatedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Lrg > $@
 
 ### Reference Supine BDC Protocol
 
-DexSupineBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Sml > DexSupineBDCSmall.dex
-DexSupineBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Med > DexSupineBDCMedium.dex
-DexSupineBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Lrg > DexSupineBDCLarge.dex
+DexSupineBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Sml > $@
+DexSupineBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Med > $@
+DexSupineBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Lrg > $@
 
 ### Return Reduced
 
-DexReducedReturnSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Sml > DexReducedReturnSmall.dex
-DexReducedReturnMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Med > DexReducedReturnMedium.dex
-DexReducedReturnLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReturnReduced.bat $(HELPERS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Lrg > DexReducedReturnLarge.dex
+DexReducedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Sml > $@
+DexReducedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Med > $@
+DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReturnReduced.bat Upright Lrg > $@
 
 ### Utilities
 
-ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex
+ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex
 	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex
-ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex
+ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOffsets.dex TaskInstallUpright.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex
-ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex
+ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex ForceOffsets.dex TaskInstallSupine.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolInstallSupine.dex
 
 ######################################################################################################################################
 
 #
-# Sessions
+# Tasks 
 #
 
-SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex
-	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .
+### Configuration of DEX hardware.
 
-SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex
-	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .
+TaskInstallUpright.dex:	DexSimulatorApp.exe
+	$(COMPILER) -install -upright -compile=$@
+TaskInstallSupine.dex:	DexSimulatorApp.exe
+	$(COMPILER) -install -supine -compile=$@
+TaskFinishProtocol.dex: DexSimulatorApp.exe
+	$(COMPILER) -finish -compile=$@
+TaskCheckAudio.dex: DexSimulatorApp.exe
+	$(COMPILER) -audio -sit -compile=$@
+ForceOffsets.dex: DexSimulatorApp.exe
+	$(COMPILER) -offsets -compile=$@
 
-SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex
-	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .
-
-SessionSmallSubjectBDC.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex
-	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .
-
-SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex
-	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .
-
-SessionLargeSubjectBDC.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex
-	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .
-
-SessionUtilitiesOnly.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex
-	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .
-
-
-######################################################################################################################################
-
-#
-# Utilities
-#
+### Utilities
 
 calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
 	copy /Y $(STATICSCRIPTS)\calibrate.dex .
-
 task_align.dex: $(STATICSCRIPTS)\task_align.dex
 	copy /Y $(STATICSCRIPTS)\task_align.dex .
-
 task_nullify.dex: $(STATICSCRIPTS)\task_nullify.dex
 	copy /Y $(STATICSCRIPTS)\task_nullify.dex .
-
 task_shutdown.dex: $(STATICSCRIPTS)\task_shutdown.dex
 	copy /Y $(STATICSCRIPTS)\task_shutdown.dex .
 
@@ -227,7 +213,7 @@ task_shutdown.dex: $(STATICSCRIPTS)\task_shutdown.dex
 
 # I created this task to make an easy way to flip through the different pictures.
 
-ShowPictures.dex:	DexSimulatorApp.exe
+ShowPictures.dex:	DexSimulatorApp.exe 
 	$(COMPILER) -pictures -compile=ShowPictures.dex
 
 ######################################################################################################################################

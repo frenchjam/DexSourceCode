@@ -798,7 +798,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Instruct subject to take the appropriate position in the apparatus
 		//  and wait for confimation that he or she is ready.
 		if ( desired_posture == PostureSeated ) {
-			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat, attach the waist and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
+			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat. Attach the waist and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
 		}
 		else if ( desired_posture == PostureSupine ) {
 			return_code = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lie down on the supine box, attach the waist, thigh and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
