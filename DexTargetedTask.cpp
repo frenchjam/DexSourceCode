@@ -141,7 +141,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	mass = ParseForMass( params );
 
 	// Construct the results filename tag.
-	char tag[32] = "T"; // T for targeted.
+	char tag[32];
+	strcpy( tag, ParseForTag( params ) );
+	strcat( tag, "T" ); // T for targeted.
 	if ( direction == VERTICAL ) strcat( tag, "V" );
 	else strcat( tag, "H" );
 	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
@@ -150,7 +152,6 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	else if ( mass == MassMedium ) strcat( tag, "6" );
 	else if ( mass == MassLarge ) strcat( tag, "8" );
 	else strcat( tag, "u" ); // for 'unspecified'
-	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
 	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What is the target sequence? If not specified in the command line, use the default.

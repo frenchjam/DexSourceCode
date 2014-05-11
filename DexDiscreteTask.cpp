@@ -149,14 +149,15 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	eyes = ParseForEyeState( params );
 
 	// Construct the results filename tag.
-	char tag[32] = "D"; // C for Discrete.
+	char tag[32];
+	strcpy( tag, ParseForTag( params ) );
+	strcat( tag, "D" ); // C for Discrete.
 	if ( direction == VERTICAL ) strcat( tag, "V" );
 	else strcat( tag, "H" );
 	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
 	else strcat( tag, "S" ); // S is for supine.
 	if ( eyes == OPEN ) strcat( tag, "o" ); // o for open
 	else strcat( tag, "c" ); // c for closed
-	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
 	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What is the sequence of delays? If not specified in the command line, use the default.

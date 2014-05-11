@@ -31,6 +31,12 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 
 	int status;
 
+	fprintf( stderr, "     RunTransducerOffsetCompensation: %s\n", params );
+
+	char tag[32];
+	strcpy( tag, ParseForTag( params ) );
+	strcat( tag, "OFFS" );
+
 	// Clearly demark this operation in the script file. 
 	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operation to cancel force sensor offsets." );
@@ -46,7 +52,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	
 	// Acquire some data.
 	apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
-	apparatus->StartAcquisition( "OFFS", maxTrialDuration );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( offsetAcquireTime );
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	apparatus->StopAcquisition();

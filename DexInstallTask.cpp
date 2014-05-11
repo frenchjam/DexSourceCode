@@ -98,6 +98,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
 
+	fprintf( stderr, "     RunInstall: %s\n", params );
+
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
 	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated operation." );
@@ -176,6 +178,9 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	}
 	
+	char tag[32];
+	strcpy( tag, ParseForTag( params ) );
+	strcat( tag, "OFFS" );
 
 	// Perform a short acquisition to measure where the manipulandum is.
 	apparatus->ShowStatus( "Acquiring baseline data. Please wait.", "wait.bmp" );

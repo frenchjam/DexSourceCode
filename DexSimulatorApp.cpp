@@ -221,7 +221,8 @@ char *ParseForDelayFile ( const char *cmd ) {
 }
 
 char *ParseForTag( const char *cmd ) {
-	return( ParseForString( cmd, "-tag" ) );
+	if ( char *tag = ParseForString( cmd, "-tag" ) ) return( tag );
+	else return( "GRIP" );
 }
 
 /************************************************************************************************************************************/

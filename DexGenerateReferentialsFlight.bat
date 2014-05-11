@@ -14,6 +14,7 @@ set sz=%size:~0,1%
 
 REM Alias to the compiler.
 set COMPILER=DexSimulatorApp.exe
+set SOURCE=..\DexSourceCode
 
 REM Task Counter
 REM Here I am adopting a strategy by which all the protocols of the same type but for different size subjects
@@ -42,12 +43,11 @@ REM Standard tasks at the start of a subsession.
 
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
-set /A "task=task+1"
 if /I %posture% EQU supine GOTO :SUPINE 
-echo CMD_TASK,%task%,TaskInstallUpright.dex,%task% Configure
+call %SOURCE%\DexCreateInstallTask.bat Upright
 GOTO :NEXT
 :SUPINE
-echo CMD_TASK,%task%,TaskInstallSupine.dex,%task% Configure
+call %SOURCE%\DexCreateInstallTask.bat Supine
 :NEXT
 
 REM Make sure that the audio is set loud enough. Also tells subject to strap in.
@@ -55,26 +55,17 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-set /A "task=task+1"
-echo CMD_TASK,%task%,ForceOffsets.dex,%task% Cancel Offsets
+call %SOURCE%\DexCreateOffsetTask.bat
 
 REM ****************************************************************************
 
 REM
 REM Coefficient of Friction tests.
 REM
-REM !!! Need to define how many to be done and at what desired grip force.
-REM !!! We also need to decide on the method.
 
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
-
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest1p0.dex,%task% Friction 1.0
-
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
-
+call %SOURCE%\DexCreateFrictionTask.bat 0.5 -prep
+call %SOURCE%\DexCreateFrictionTask.bat 1.0
+call %SOURCE%\DexCreateFrictionTask.bat 2.5
 
 REM ****************************************************************************
 
@@ -89,44 +80,44 @@ REM Start the trial counter for the discrete movements.
 set dsc_seq=0
 
 set direction=Horizontal
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat -prep
 
 set direction=Horizontal
-set eyes=open
+set eyes=open  
 set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Horizontal
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
-set direction=Vertical
-set eyes=open
-set range=DiscreteRanges%direction%.txt:%sz% -prep
-call :DO_ONE_DISCRETE_TRIAL
-
-set direction=Vertical
-set eyes=open
+set direction=Horizontal
+set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
+call %SOURCE%\DexCreateDiscreteTask.bat 
+
+set direction=Vertical
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat -prep
+
+set direction=Vertical
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Vertical
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Vertical
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call :DO_ONE_DISCRETE_TRIAL
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 REM ****************************************************************************
 
@@ -135,27 +126,21 @@ REM Collisions
 REM
 set mass=600gm
 set nblocks=10
-call :DO_BLOCK_OF_COLLISIONS
+call %SOURCE%\DexCreateCollisionTasks.bat
 
 set mass=400gm
 set nblocks=10
-call :DO_BLOCK_OF_COLLISIONS
+call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
-
 
 REM
 REM Coefficient of Friction tests.
 REM
 
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest1p0prep.dex,%task% Friction 1.0
-
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest0p5.dex,%task% Friction 0.5
-
-set /A "task=task+1"
-echo CMD_TASK,%task%,FrictionTest2p5.dex,%task% Friction 2.5
+call %SOURCE%\DexCreateFrictionTask.bat 0.5 -prep
+call %SOURCE%\DexCreateFrictionTask.bat 1.0
+call %SOURCE%\DexCreateFrictionTask.bat 2.5
 
 REM ****************************************************************************
 
@@ -168,73 +153,3 @@ echo CMD_TASK,%task%,TaskFinishProtocol.dex,Finished - press Back
 ENDLOCAL
 goto :EOF
 
-
-REM ****************************************************************************
-
-REM A subroutine to construct a trial of discrete movements (task).
-REM It assumes that the task and seq counters were initialized and
-REM  that direction, mass and range have been set.
-
-:DO_ONE_DISCRETE_TRIAL
-
-	set /A "task=task+1"
-	set /A "dsc_seq=dsc_seq+1"
-	set dir=%direction:~0,4%
-	set filename=FltDsc%pstr%%dir%%mass%%size%%dsc_seq%.dex
-	%COMPILER% -discrete -%mass% -%posture% -%direction% -range=%range% -delays=DiscreteDelaySequences30.txt:%dsc_seq% -compile=%filename% -%eyes% 
-	echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq%
-	goto :EOF
-
-REM ****************************************************************************
-
-REM Subroutines to generate a block of targeted movement trials.
-REM The first initializes parameters for multiple blocks of trials.
-REM It calls the second one which generates the commands for each block (task).
-
-:DO_BLOCK_OF_COLLISIONS
-
-	REM Provide instructions for first block.
-	REM Subroutine will disable it for subsequent blocks.
-	set prep=-prep
-
-	REM Initialize the block counter. 
-	REM It gets incremented by the subroutine.
-	set seq=0
-
-	REM Procuce the required number of blocks.
-	FOR /L %%s IN ( 1,1,%nblocks% ) DO CALL :DO_ONE_COLLISION
-
-	REM Return to caller.
-	goto :EOF
-
-:DO_ONE_COLLISION
-
-	REM Each repetition is a separate task.
-	set /A "task=task+1"
-
-	REM Each repetition uses a different target sequence.
-	set /A "seq=seq+1"
-	set /A "sseq=seq+100"
-	set sq=%sseq:~1,2%
-
-	REM Shorten some labels so that the filenames are not to long.
-	set sz=%size:~0,1%
-	set pstr=%posture:~0,2%
-
-	REM Put all the paramters together for the compiler.
-	set params=-collisions -%mass% -%posture% -delays=CollisionsSequences30.txt:%seq%
-
-	REM Generate a script filename based on the parameters.
-	set filename=FltCo%pstr%%mass%%size%%sq%.dex
-
-	REM Generate the script to do the task.
-	%COMPILER% %params%  -compile=%filename% %prep%
-
-	REM Record the task in the protocol definition, labelled appropriately.
-	echo CMD_TASK,%task%,%filename%,%task% Collisions %seq%
-
-	REM On subsequent calls within the same block, don't redo the prep.
-	set prep=
-
-	REM Return to caller.
-	goto :EOF

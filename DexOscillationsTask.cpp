@@ -165,7 +165,9 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Construct the results filename tag.
-	char tag[32] = "O"; // O for Oscillations.
+	char tag[32];
+	strcpy( tag, ParseForTag( params ) );
+	strcat( tag, "O" ); // O for Oscillations.
 	if ( direction == VERTICAL ) strcat( tag, "V" );
 	else strcat( tag, "H" );
 	if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
@@ -174,7 +176,6 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	else if ( mass == MassMedium ) strcat( tag, "6" );
 	else if ( mass == MassLarge ) strcat( tag, "8" );
 	else strcat( tag, "u" ); // for 'unspecified'
-	if ( char *tg = ParseForTag( params ) ) strcat( tag, tg );
 	tag[8] = 0;	// Make sure that the tag is no more than 8 characters long.
 
 	// What are the limits of each oscillatory movement?
