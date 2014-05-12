@@ -231,6 +231,12 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation );
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
+	// Double check that the subject has the specified mass.
+	// If the correct mass is already on the manipulandum and out of the cradle, 
+	//  this will move right on to the next step.
+	status = apparatus->SelectAndCheckMass( mass );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	

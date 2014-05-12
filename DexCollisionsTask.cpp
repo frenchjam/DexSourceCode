@@ -177,6 +177,12 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	// Double check that the subject has the specified mass.
+	// If the correct mass is already on the manipulandum and out of the cradle, 
+	//  this will move right on to the next step.
+	status = apparatus->SelectAndCheckMass( mass );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Collect some data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
