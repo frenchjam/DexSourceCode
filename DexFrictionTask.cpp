@@ -186,6 +186,15 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	if ( ParseForString( params, "-stow" ) ) {
+		status = apparatus->fWaitSubjectReady( "InHand.bmp", "Remove manipulandum from retainer.", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+		status = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Place in mass any cradle. Leave manipulandum and mass in cradle.", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+		status = apparatus->fWaitSubjectReady( "CloseRetainer.bmp", "Fold down the retainer and lock in place.", OkToContinue );
+		if ( status == ABORT_EXIT ) exit( status );
+	}
+
 	// Apparently we were successful.
 	return( NORMAL_EXIT );
 

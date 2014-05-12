@@ -76,6 +76,7 @@ double ParseForFrequency ( DexApparatus *apparatus, const char *cmd );
 double ParseForDuration ( DexApparatus *apparatus, const char *cmd );
 double ParseForPinchForce( DexApparatus *apparatus, const char *cmd );
 double ParseForFilterConstant( DexApparatus *apparatus, const char *cmd );
+char *ParseForString ( const char *cmd, const char *key );
 
 char *ParseForTargetFile ( const char *cmd );
 char *ParseForDelayFile ( const char *cmd );
