@@ -1,4 +1,8 @@
 Version 1.0 Beta 4
+	Reworked filenaming strategies so that task scripts and results files can be easily linked.
+	DexGenerate*.bat files now share subroutines, to avoid error when changes are made.
+	Responded to some of CADMOS remarks concerning messages.
+	Various bug fixes.
 
 Version 1.0 Beta 3 [GRIP Release (2014.06.05 13.59.57) GripFlight] Delivered to CADMOS 2014.05.06
 	Added subject name to session menu.
