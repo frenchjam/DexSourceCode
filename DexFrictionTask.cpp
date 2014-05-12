@@ -36,7 +36,7 @@ double forceFilterConstant = 4.0;
 // Use the method of counting slips vs. a fixed number of seconds depending on the desired grip force.
 // This is a function of the default threshold for the COP calculation, which is settable in ASW.ini.
 // In the end, though, we will probably choose one method or the other.
-double frictionMethodThreshold = 0.45;
+double frictionMethodThreshold = 0.25;
 
 double slipThreshold = 5.0;		// How far the COP must move to be considered a slip.
 double slipTimeout = 10.0;		// How long should we wait for a slip?
@@ -68,8 +68,10 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	if ( apparatus->adc ) apparatus->adc->AllowPollingDuringAcquisition();
 
 	gripTarget = ParseForPinchForce( apparatus, params );
-	double frictionMinGrip = 0.85 * gripTarget;
-	double frictionMaxGrip = 1.25 * gripTarget;
+	double frictionMinGrip = gripTarget - 0.25;
+	if ( frictionMinGrip < 0.1 ) frictionMinGrip = 0.1;
+	double frictionMaxGrip = gripTarget + 2.0;
+	if ( frictionMinGrip > 10.0 ) frictionMinGrip = 10.0;
 	double frictionMinLoad = 0.0;
 	double frictionMaxLoad = 0.0;
 	forceFilterConstant = ParseForFilterConstant( apparatus, params );
@@ -142,7 +144,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 		// Allow 15 more seconds for the rubbing motion.
 
 		for ( int i = 0; i <= 10; i++ ) {
-			AnalysisProgress( apparatus, i, 10, "Keep rubbing." );
+			AnalysisProgress( apparatus, i, 10, "Time is not up yet. Keep rubbing." );
 			apparatus->Wait( 1.5 );
 		}
 		// !JMc Not sure what sound would be on.
