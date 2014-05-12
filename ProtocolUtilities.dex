@@ -2,6 +2,12 @@
 #Format: "CMD_TASK", task id, task file, display name
 CMD_TASK,110,task_align.dex,Align CODAs
 CMD_TASK,120,task_nullify.dex,Nullify Forces
-CMD_TASK,130,task_shutdown.dex,Shutdown System
+CMD_TASK,130,TaskAcquire5s.dex,Acquire 5s
+CMD_TASK,131,TaskAcquire30s.dex,Acquire 30s
 CMD_TASK,140,calibrate.dex,Calibrate Touchscreen
+CMD_TASK,150,TaskCheckMASS.dex,Test Mass Selection
+CMD_TASK,160,TaskCheckFT.dex,Test F/T Sensors
+CMD_TASK,170,TaskCheckLEDs.dex,Test Targets
+CMD_TASK,180,TaskCheckWaitAtTarget.dex,Test Wait@Targets
+CMD_TASK,199,task_shutdown.dex,Shutdown System
 #end

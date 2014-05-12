@@ -358,6 +358,143 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		if ( status != NORMAL_EXIT ) return( status );
 	}
 
+	////// Hardware Tests ////////
+
+	// Check Force/Torque routines.
+	if( strstr( params, "-ft"  ) ) {
+		double dir[3] = { 0.0, 1.0, 0.0};
+
+		apparatus->fWaitSubjectReady( "Offset.bmp", "*** Centered Grip Test ***\nRelease manipulandum." );
+		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
+		apparatus->Wait( 0.5 );
+		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+		apparatus->StopAcquisition();
+
+		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
+		// Compute the offsets and insert them into force calculations.
+		apparatus->ComputeAndNullifyStrainGaugeOffsets();
+		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
+
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch OFF center." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5).\nPress <IGNORE> to continue." );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+
+		apparatus->fWaitSubjectReady( "Offset.bmp", "Release manipulandum." );
+		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
+		apparatus->Wait( 0.5 );
+		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+		apparatus->StopAcquisition();
+
+		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
+		// Compute the offsets and insert them into force calculations.
+		apparatus->ComputeAndNullifyStrainGaugeOffsets();
+		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
+
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5).\nPress <IGNORE> to continue." );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
+
+	// Check WaitUntilAtTarget().
+	if( strstr( params, "-waits"  ) ) {
+		int tgt;
+		Vector3 v_tolerance = { 100.0, 10.0, 25.0 };
+		Vector3 h_tolerance = { 100.0, 25.0, 10.0 };
+		apparatus->ShowStatus( "", "MvToBlkV.bmp" );
+		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
+			apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt );
+			status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, 5.0, "Time out waiting to reach target." );
+			if ( status != NORMAL_EXIT ) return( status );
+		}
+		apparatus->ShowStatus( "", "MvToBlkH.bmp" );
+		for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
+			apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt );
+			status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, 5.0, "Time out waiting to reach target." );
+			if ( status != NORMAL_EXIT ) return( status );
+		}
+	}
+
+	// Check All Targets.
+	if( strstr( params, "-LEDs"  ) ) {
+		int tgt;
+		apparatus->TargetsOff();
+		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Verify that all targets are OFF." );
+		if ( status != NORMAL_EXIT ) return( status );
+		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
+			apparatus->VerticalTargetOn( tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is ON.\n(Vertical Target %d)", tgt );
+			if ( status != NORMAL_EXIT ) return( status );
+			apparatus->VerticalTargetOff( tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is OFF again.\n(Vertical Target %d)", tgt );
+			if ( status != NORMAL_EXIT ) return( status );
+		}
+		for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
+			apparatus->HorizontalTargetOn( tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is ON.\n(Horizontal Target %d)", tgt );
+			if ( status != NORMAL_EXIT ) return( status );
+			apparatus->HorizontalTargetOff( tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is OFF again.\n(Horizontal Target %d)", tgt );
+			if ( status != NORMAL_EXIT ) return( status );
+		}
+		apparatus->SetTargetState( 0xFFFFFFFF );
+		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Verify that all targets are ON." );
+		if ( status != NORMAL_EXIT ) return( status );
+
+		apparatus->TargetsOff();
+
+	}
+
+	if( strstr( params, "-gm"  ) ) {
+		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Mass selection tests." );
+		if ( status != NORMAL_EXIT ) return( status );
+		apparatus->SelectAndCheckMass( MassSmall );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand." );
+		apparatus->SelectAndCheckMass( MassMedium );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand." );
+		apparatus->SelectAndCheckMass( MassLarge );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand." );
+		apparatus->SelectAndCheckMass( MassSmall );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand." );
+		apparatus->SelectAndCheckMass( MassMedium );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand." );
+		apparatus->SelectAndCheckMass( MassLarge );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test ended." );
+	}
+
+
+	// Record some data.
+	if( strstr( params, "-rec"  ) ) {
+
+		char *tag = "FREEDATA";
+
+		double duration = ParseForDuration( apparatus, params );
+		apparatus->fWaitSubjectReady( "confirm.bmp", "Ready to record for %.2f seconds. Press <OK> to start.", duration );
+		apparatus->ShowStatus( "Acquiring.", "working.bmp" );
+		apparatus->StartFilming( tag );
+		apparatus->StartAcquisition( tag, duration );
+		apparatus->Wait( duration );
+		apparatus->StopAcquisition();
+		apparatus->StopFilming();
+		SignalEndOfRecording( apparatus );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "Acquisition ended." );
+
+	}
+
 	return( status );
 
 }

@@ -620,10 +620,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
 	if ( strstr( lpCmdLine, "-offsets"  ) ) task = OFFSETS_TASK;
+	if ( strstr( lpCmdLine, "-audio"  ) ) task = AUDIO_CHECK;
 	if ( strstr( lpCmdLine, "-pictures"  ) ) task = SHOW_PICTURES;
 	if ( strstr( lpCmdLine, "-finish"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-checkID"  ) ) task = MISC_INSTALL;
-	if ( strstr( lpCmdLine, "-audio"  ) ) task = AUDIO_CHECK;
+	if ( strstr( lpCmdLine, "-waits"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-LEDs"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-rec"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-ft"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-gm"  ) ) task = MISC_INSTALL;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.

@@ -167,7 +167,7 @@ DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS
 
 ### Utilities
 
-ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex
+ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckMASS.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex TaskCheckLEDs.dex TaskCheckWaitAtTarget.dex
 	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex
 ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOffsets.dex TaskInstallUpright.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex
@@ -192,8 +192,20 @@ TaskCheckAudio.dex: DexSimulatorApp.exe
 	$(COMPILER) -audio -sit -compile=$@
 ForceOffsets.dex: DexSimulatorApp.exe
 	$(COMPILER) -offsets -compile=$@
-
+TaskCheckMASS.dex: DexSimulatorApp.exe
+	$(COMPILER) -gm -compile=$@
 ### Utilities
+
+TaskCheckFT.dex: DexSimulatorApp.exe
+	$(COMPILER) -ft -compile=$@
+TaskCheckLEDs.dex: DexSimulatorApp.exe
+	$(COMPILER) -LEDs -compile=$@
+TaskCheckWaitAtTarget.dex: DexSimulatorApp.exe
+	$(COMPILER) -waits -compile=$@
+TaskAcquire30s.dex: DexSimulatorApp.exe
+	$(COMPILER) -rec -duration=30 -compile=$@
+TaskAcquire5s.dex: DexSimulatorApp.exe
+	$(COMPILER) -rec -duration=5 -compile=$@
 
 calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
 	copy /Y $(STATICSCRIPTS)\calibrate.dex .
