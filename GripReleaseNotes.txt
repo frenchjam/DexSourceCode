@@ -1,4 +1,6 @@
-Version 1.0 Beta 4
+Version 1.0 Beta 5
+
+Version 1.0 Beta 4 [GRIP Release (2014.12.05  2.45.48) Grip Flight] Delivered to CADMOS 2014.05.12
 	Reworked filenaming strategies so that task scripts and results files can be easily linked.
 	DexGenerate*.bat files now share subroutines, to avoid error when changes are made.
 	Responded to some of CADMOS remarks concerning messages.
