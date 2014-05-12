@@ -54,9 +54,9 @@ REM
 REM Coefficient of Friction tests.
 REM
 
-call %SOURCE%\DexCreateFrictionTask.bat 0.5 -prep
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep
 call %SOURCE%\DexCreateFrictionTask.bat 1.0
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -stow
+call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
 
 REM ****************************************************************************
 
