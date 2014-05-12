@@ -639,7 +639,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 
 	int tokens;
 	char *token[MAX_TOKENS];
-	char hold_status_message[1024];
+	char hold_status_message[1024]="";
 
 	int i;
 
@@ -720,7 +720,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			timeout = atof( token[12] );
 
 			do {
-				status = apparatus->WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, token[12], token[13] );
+				status = apparatus->WaitUntilAtTarget( target_id, desired_orientation, position_tolerance, orientation_tolerance, hold_time, timeout, token[13], token[14] );
 			} while ( status == RETRY_EXIT );
 
 		}
@@ -864,10 +864,18 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			apparatus->MarkEvent( atoi( token[1] ) );
 		}
 		else if ( !strcmp( token[0], "CMD_LOG_MESSAGE" ) ) {
-			if ( atoi( token[1] ) == 0 ) apparatus->SignalEvent( token[2] );
+			int value, items;
+			if ( !strcmp( token[1], "logmsg" ) ) value = 0;
+			else if ( !strcmp( token[1], "usermsg" ) ) value = 1;
+			else {
+				items = sscanf( token[1], "%d", &value );
+				value = items && value;
+			}
+			if ( value == 0 ) apparatus->SignalEvent( token[2] );
 			else {
 				if ( token[2] ) strcpy( hold_status_message, token[2] );
 				else strcpy( hold_status_message, "" );
+				apparatus->ShowStatus( hold_status_message, "blank.bmp" );
 			}
 		}
 		else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {

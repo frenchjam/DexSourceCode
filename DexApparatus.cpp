@@ -36,6 +36,8 @@
 
 #include "DexSimulatorGUI.h"
 
+// Setting this to zero seems to help with screen targets that are not always 
+// updated as required. But I'm not sure what are the consequences of having this at zero.
 #define DEX_SIMULATOR_UPDATE_PERIOD 0.1
 
 /***************************************************************************/
@@ -628,6 +630,12 @@ void DexApparatus::Update( void ) {
 
 }
 
+void DexApparatus::ForceUpdate( void ) {
+	DexTimerSet( update_timer, -0.1 );
+	Update();
+}
+
+
 /***************************************************************************/
 /*                                                                         */
 /*                             Subject Communication                       */
@@ -736,16 +744,17 @@ int DexApparatus::fSignalNormalCompletion( const char *picture, const char* form
 
 int DexApparatus::WaitSubjectReady( const char *picture, const char *message ) {
 	
-	Update();
+	ForceUpdate();
 	monitor->SendEvent( "WaitSubjectReady - %s", message );
 
 	// There is a problem here. Update should be called while waiting for the subject's
-	// response. Update() could perhaps be run in a thread.
+	// response but MessageBox doesn't do that. 
+	// Update() could perhaps be run in a thread.
 	// But in the real system, the subsystems will presumably run in background 
 	// threads, so this is not an issue.
 //	int response = MessageBox( NULL, message, "DEX", MB_OKCANCEL | MB_ICONQUESTION );
 	int response = IllustratedMessageBox( picture, message, "DEX", MB_OKCANCEL );
-	Update();
+	ForceUpdate();
 	if ( response == IDCANCEL ) {
 		monitor->SendEvent( "Manual Abort from WaitSubjectReady." );
 		return( ABORT_EXIT );

@@ -178,6 +178,10 @@ public:
 	// Called inside loops to update current state.
 	// This is strictly local to my simulator.
 	virtual void Update( void );
+	// Update has a timer that keeps it from getting called too often.
+	// But sometimes we need it to be run right away.
+	// This method forces it to run.
+	virtual void ForceUpdate( void );
 
 	// Undo whatever needs to be done once the apparatus has been initialized.
 	virtual void Quit();
