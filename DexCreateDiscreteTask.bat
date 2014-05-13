@@ -13,7 +13,7 @@ set dir=%direction:~0,1%
 set post=%posture:~0,1%
 set ms=%mass:~0,1%
 set ey=%eyes:~0,2%
-set tag=%sz%%task%O%post%%dir%%ms%
+set tag=%sz%%task%D%post%%dir%%ms%
 
 REM Create a filename.
 set filename=%tag%%ey%.dex
