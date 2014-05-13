@@ -74,7 +74,7 @@ REM Discrete Movements
 REM
 
 REM All the trials have the same range, frequency, duration and mass.
-set mass=600gm
+set mass=400gm
 
 REM Start the trial counter for the discrete movements.
 set dsc_seq=0

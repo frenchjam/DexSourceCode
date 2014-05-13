@@ -71,7 +71,7 @@ REM Discrete Movements
 REM
 
 REM All the trials mass.
-set mass=600gm
+set mass=400gm
 
 REM Start the trial counter for the oscillations.
 set dsc_seq=0
