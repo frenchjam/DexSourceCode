@@ -20,6 +20,6 @@ set tag=%sz%%task%Cfg%post%
 REM Create the script filename.
 set filename=%tag%.dex
 DexSimulatorApp -install -%posture% -tag=%tag% -compile=%filename% %params% 
-echo CMD_TASK,%task%,%filename%,%task% Configure %posture%
+echo CMD_TASK,%task%,%filename%,%task% Configure
 
 

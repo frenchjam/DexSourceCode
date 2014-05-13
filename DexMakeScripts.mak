@@ -189,7 +189,7 @@ TaskInstallSupine.dex:	DexSimulatorApp.exe
 TaskFinishProtocol.dex: DexSimulatorApp.exe
 	$(COMPILER) -finish -compile=$@
 TaskCheckAudio.dex: DexSimulatorApp.exe
-	$(COMPILER) -audio -sit -compile=$@
+	$(COMPILER) -audio -compile=$@
 ForceOffsets.dex: DexSimulatorApp.exe
 	$(COMPILER) -offsets -compile=$@
 TaskCheckMASS.dex: DexSimulatorApp.exe

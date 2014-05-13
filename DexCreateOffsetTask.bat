@@ -15,7 +15,7 @@ set params=%1 %2 %3 %4 %5 %6 %7 %8 %9
 
 REM Create the script filename.
 set filename=%tag%.dex
-DexSimulatorApp -offsets -tag=%tag% -compile=%filename% %params% 
+DexSimulatorApp -sit -offsets -tag=%tag% -compile=%filename% %params% 
 echo CMD_TASK,%task%,%filename%,%task% Cancel Offsets
 
 
