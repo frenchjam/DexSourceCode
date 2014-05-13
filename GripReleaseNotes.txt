@@ -1,4 +1,8 @@
-Version 1.0 Beta 6
+
+GRIP Release (2014.13.05 12.07.58) Second SVT delivered to CADMOS for second part of SVT.
+
+From this point upward we will no longer name releases. Here we will rely only on the timestamp.
+
 	Target bar and posture specification in Test@Target.
 	Improved slip test, as a separate test.
 
