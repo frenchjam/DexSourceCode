@@ -356,7 +356,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-ft"  ) ) {
 		double dir[3] = { 0.0, 1.0, 0.0};
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "*** Centered Grip Test ***\nRelease manipulandum." );
+		apparatus->fWaitSubjectReady( "Offset.bmp", "*** Centered Grip Test ***\nRelease manipulandum and press OK." );
 		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
@@ -368,17 +368,19 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch OFF center." );
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch OFF center to desired force (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip( 20.0, 0.5, 1.0, "Off-center grip detected (20 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip(  1.0, 0.5, 1.0, "Off-center grip detected (1 mm).\nPress <IGNORE> to continue." );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "Release manipulandum." );
+		apparatus->fWaitSubjectReady( "Offset.bmp", "Release manipulandum and press OK." );
 		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
@@ -390,17 +392,25 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center." );
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		apparatus->fShowStatus( "working.bmp", "Maintian grip." );
 		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10).\nPress <IGNORE> to continue." );
-		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nPMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>." );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nPress <IGNORE> to continue." );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
+			
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "Slip Test - Release manipulandum." );
+	}
+
+	if( strstr( params, "-slip"  ) ) {
+		double dir[3] = { 0.0, 1.0, 0.0};
+
+		apparatus->fWaitSubjectReady( "Offset.bmp", "Slip Test - Release manipulandum and press OK." );
 		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
@@ -412,13 +422,15 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center." );
-		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
-		if ( status != NORMAL_EXIT ) return( status );
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
-		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 5.0, "No slip detected." );
-		if ( status != NORMAL_EXIT ) return( status );
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected in 15 sec." );
+		for ( int i = 1; i <= 5; i++ ) {
+			if ( status != NORMAL_EXIT ) return( status );
+			apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
+			if ( status != NORMAL_EXIT ) return( status );
+			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 10.0, "No slip detected in 5 sec." );
+			if ( status != NORMAL_EXIT ) return( status );
+		}
 		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
 			
 
@@ -427,20 +439,42 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	// Check WaitUntilAtTarget().
 	if( strstr( params, "-waits"  ) ) {
 		int tgt;
-		Vector3 v_tolerance = { 100.0, 10.0, 25.0 };
-		Vector3 h_tolerance = { 100.0, 25.0, 10.0 };
-		apparatus->ShowStatus( "", "MvToBlkV.bmp" );
-		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
-			apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt );
-			status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, 5.0, "Time out waiting to reach target." );
-			if ( status != NORMAL_EXIT ) return( status );
+		Vector3 v_tolerance = { 150.0, 12.0, 50.0 };
+		Vector3 h_tolerance = { 150.0, 50.0, 12.0 };
+		float timeout = 25.0;
+
+		static int	direction = VERTICAL;
+		static DexTargetBarConfiguration bar_position = TargetBarRight;
+		static DexSubjectPosture posture = PostureSeated;
+		
+		// Seated or supine?
+		posture = ParseForPosture( params );
+
+		// Horizontal or vertical movements?
+		direction = ParseForDirection( apparatus, params );
+		if ( direction == VERTICAL ) bar_position = TargetBarRight;
+		else bar_position = TargetBarLeft;
+
+		status = CheckInstall( apparatus, posture, bar_position );		
+		if ( status != NORMAL_EXIT ) return( status );
+		
+		if ( direction == VERTICAL ) {
+			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
+			for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
+				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt );
+				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target." );
+				if ( status != NORMAL_EXIT ) return( status );
+			}
 		}
-		apparatus->ShowStatus( "", "MvToBlkH.bmp" );
-		for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
-			apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt );
-			status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, 5.0, "Time out waiting to reach target." );
-			if ( status != NORMAL_EXIT ) return( status );
+		else {
+			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
+			for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
+				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt );
+				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target." );
+				if ( status != NORMAL_EXIT ) return( status );
+			}
 		}
+		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
 	}
 
 	// Check All Targets.
@@ -451,18 +485,18 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		if ( status != NORMAL_EXIT ) return( status );
 		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 			apparatus->VerticalTargetOn( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is ON.\n(Vertical Target %d)", tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is ON.\n(Vertical Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->VerticalTargetOff( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is OFF again.\n(Vertical Target %d)", tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is OFF again.\n(Vertical Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 		}
 		for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
 			apparatus->HorizontalTargetOn( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is ON.\n(Horizontal Target %d)", tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is ON.\n(Horizontal Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->HorizontalTargetOff( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is OFF again.\n(Horizontal Target %d)", tgt );
+			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is OFF again.\n(Horizontal Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 		}
 		apparatus->SetTargetState( 0xFFFFFFFF );

@@ -21,7 +21,7 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: release
+default: all
 
 all: GripFlightScripts.tar
 
@@ -167,7 +167,7 @@ DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS
 
 ### Utilities
 
-ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckMASS.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex TaskCheckLEDs.dex TaskCheckWaitAtTarget.dex
+ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckLEDs.dex TaskCheckWaitAtTargetSuHo.dex TaskCheckWaitAtTargetSuVe.dex TaskCheckWaitAtTargetUpVe.dex TaskCheckWaitAtTargetUpHo.dex TaskCheckSlip.dex TaskCheckMASS.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex
 ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOffsets.dex TaskInstallUpright.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex
@@ -194,14 +194,23 @@ ForceOffsets.dex: DexSimulatorApp.exe
 	$(COMPILER) -offsets -compile=$@
 TaskCheckMASS.dex: DexSimulatorApp.exe
 	$(COMPILER) -gm -compile=$@
+
 ### Utilities
 
 TaskCheckFT.dex: DexSimulatorApp.exe
-	$(COMPILER) -ft -compile=$@
+	$(COMPILER) -deploy -ft -compile=$@
+TaskCheckSlip.dex: DexSimulatorApp.exe
+	$(COMPILER) -deploy -slip -compile=$@
 TaskCheckLEDs.dex: DexSimulatorApp.exe
 	$(COMPILER) -LEDs -compile=$@
-TaskCheckWaitAtTarget.dex: DexSimulatorApp.exe
-	$(COMPILER) -waits -compile=$@
+TaskCheckWaitAtTargetUpVe.dex: DexSimulatorApp.exe
+	$(COMPILER) -upright -vertical -waits -compile=$@
+TaskCheckWaitAtTargetUpHo.dex: DexSimulatorApp.exe
+	$(COMPILER) -upright -horizontal -waits -compile=$@
+TaskCheckWaitAtTargetSuVe.dex: DexSimulatorApp.exe
+	$(COMPILER) -supine -vertical -waits -compile=$@
+TaskCheckWaitAtTargetSuHo.dex: DexSimulatorApp.exe
+	$(COMPILER) -supine -horizontal -waits -compile=$@
 TaskAcquire30s.dex: DexSimulatorApp.exe
 	$(COMPILER) -rec -duration=30 -compile=$@
 TaskAcquire5s.dex: DexSimulatorApp.exe

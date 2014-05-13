@@ -7,7 +7,11 @@ CMD_TASK,131,TaskAcquire30s.dex,Acquire 30s
 CMD_TASK,140,calibrate.dex,Calibrate Touchscreen
 CMD_TASK,150,TaskCheckMASS.dex,Test Mass Selection
 CMD_TASK,160,TaskCheckFT.dex,Test F/T Sensors
+CMD_TASK,165,TaskCheckSlip.dex,Test Slip
 CMD_TASK,170,TaskCheckLEDs.dex,Test Targets
-CMD_TASK,180,TaskCheckWaitAtTarget.dex,Test Wait@Targets
+CMD_TASK,180,TaskCheckWaitAtTargetUpVe.dex,Wait@Targets UpVe
+CMD_TASK,181,TaskCheckWaitAtTargetUpHo.dex,Wait@Targets UpHo
+CMD_TASK,182,TaskCheckWaitAtTargetSuVe.dex,Wait@Targets SuVe
+CMD_TASK,183,TaskCheckWaitAtTargetSuHo.dex,Wait@Targets	SuHo
 CMD_TASK,199,task_shutdown.dex,Shutdown System
-#end
+#end 
