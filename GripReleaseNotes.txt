@@ -1,4 +1,7 @@
 Version 1.0 Beta 6
+	Target bar and posture specification in Test@Target.
+	Improved slip test, as a separate test.
+
 
 Version 1.0 Beta 5 [GRIP Release (2014.13.05  8.42.27) Grip Flight] Delivered to CADMOS 2014.05.13 for SVT.
 	Created scripts to test hardware for SVT and maintenance.
