@@ -47,10 +47,15 @@ int    slipMovements = 15;
 
 int PrepFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
+	double duration = 15.0;
+	duration = ParseForDuration( apparatus, params );
+	char msg[1024];
+
 	AddDirective( apparatus, "You will first pinch the manipulandum at the center between thumb and forefinger.", "coef_frict.bmp" );
-	AddDirective( apparatus, "Then adjust the grip force such that the flashing LED is between the two limits.", "coef_frict.bmp" );
+	AddDirective( apparatus, "Squeeze according to the instructions that you will receive (lightly, moderate, firmly).", "coef_frict.bmp" );
 	AddDirective( apparatus, "When you hear the beep, rub the fingers up and down on the manipulandum. ", "coef_frict_osc.bmp");
-	AddDirective( apparatus, "You will rub for 15 seconds. Move from center to edge and back. Try to maintain pinch force.", "rub.bmp"  );
+	sprintf( msg, "You will rub for %.0f seconds. Move from center to edge and back. Try to maintain pinch force.", duration );
+	AddDirective( apparatus, msg, "rub.bmp"  );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -77,6 +82,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	forceFilterConstant = ParseForFilterConstant( apparatus, params );
 	double threshold = min( copForceThreshold, gripTarget * 0.9 );
 
+
 	fprintf( stderr, "     RunFrictionMeasurement: %s\n", params );
 	
 	if ( ParseForPrep( params ) ) status = PrepFrictionMeasurement( apparatus, params );
@@ -88,6 +94,9 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 		sprintf( tag, "GripF%.0fp%.0f", floor( gripTarget ), (gripTarget - floor( gripTarget )) * 10.0 );
 	}
 
+	double duration = 15.0;
+	duration = ParseForDuration( apparatus, params );
+
     // picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum and press <OK> to start." );
 
@@ -96,79 +105,20 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->StartFilming( tag );
 	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
-	
 
-    
-	// Light the targets that will be used to adjust the grip force.
-	// At first they will be on statically, until we detect a grip.
-
-	apparatus->TargetsOff();
-	apparatus->TargetOn( 6 );
-	apparatus->TargetOn( 10 );
-	apparatus->TargetOn( 0 );
-
-    apparatus->ShowStatus( "Grip the manipulandum at the center.", "pinch.bmp" );
-
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
-	if ( status == ABORT_EXIT ) exit( status );
-
-    apparatus->ShowStatus( "Adjust the grip force according to the LED's.", "pinch.bmp" );
-
-   status = apparatus->WaitDesiredForces( frictionMinGrip, frictionMaxGrip, 
-  		frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-  		forceFilterConstant, frictionHoldTime, frictionTimeout, "Desired grip force was not achieved.", "alert.bmp" );
-
-
-	// Mark when the desired force is achieved.
-	if ( status == ABORT_EXIT ) exit( status );
-	apparatus->MarkEvent( FORCE_OK );
-
-	// Rub the manipulandum
+    apparatus->ShowStatus( "Pinch the manipulandum at the center between thumb and index finger.", "Coef_frict.bmp" );
 	apparatus->Beep();
-	apparatus->ShowStatus( "Rub the manipulandum up and down.", "rub.bmp" );
 
-	// Wait for the initial slip.
-    status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
-			frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-			forceFilterConstant, slipThreshold, slipTimeout, "Slip not achieved."  );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
+	if ( status == ABORT_EXIT ) exit( status );
 
-	// Mark when slip has occured. Note that if the subject hit <IGNORE> 
-	// this signal will also occur.
-	apparatus->MarkEvent( SLIP );
+	if ( gripTarget < 1.0 ) apparatus->fShowStatus( "rub.bmp", "Squeeze as lightly as possible and slide up and down for %.0f seconds.", duration );
+	else if ( gripTarget > 3.0 ) apparatus->fShowStatus( "rub.bmp", "Squeeze firmly and rub up and down for %.0f seconds..", duration );
+	else apparatus->fShowStatus( "rub.bmp", "Squeeze moderately and rub up and down for %.0f seconds." , duration );
 
-	// Choose the method depending on the desired grip force.
-	if ( frictionMinGrip < frictionMethodThreshold ) {
+	apparatus->Wait( duration );
 
-		// This is the old version, based on a fixed amount of time for the rubbing motions.
-		// Allow 15 more seconds for the rubbing motion.
-
-		for ( int i = 0; i <= 10; i++ ) {
-			AnalysisProgress( apparatus, i, 10, "Time is not up yet. Keep rubbing." );
-			apparatus->Wait( 1.5 );
-		}
-		// !JMc Not sure what sound would be on.
-		// !JMc Maybe this could be removed.
-		apparatus->SoundOff();
-
-	}
-	else {
-
-		// In this version we wait for a certain number of slips to be detected. 
-		// There is a small delay between each call to WaitSlip() with the hopes that
-		//  the same slip will not be detected twice, but even that should not be a problem.
-		for ( int slip = 0; slip < slipMovements; slip++ ) {
-			AnalysisProgress( apparatus, slip, slipMovements, "Keep rubbing. Need more slips." );
-			status = apparatus->WaitSlip( frictionMinGrip, frictionMaxGrip, 
-					frictionMinLoad, frictionMaxLoad, frictionLoadDirection, 
-					forceFilterConstant, slipThreshold, slipTimeout, "Not enough slips achieved.\n(<Ignore> to keep trying.)", "alert.bmp"  );
-			if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-			apparatus->MarkEvent( SLIP );
-		}
-		AnalysisProgress( apparatus, slipMovements, slipMovements, "Success!" );
-
-	}
-
+	apparatus->Beep();
 	apparatus->Beep();
 	BlinkAll( apparatus );
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to continue." );
