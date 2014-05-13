@@ -21,9 +21,9 @@
 /*********************************************************************************/
 
 // Collision trial parameters;
-int collisionInitialTarget = 6;
-int collisionUpTarget = 11;
-int collisionDownTarget = 1;
+int collisionInitialTarget = 5;
+int collisionUpTarget = 10;
+int collisionDownTarget = 0;
 
 int collisionSequenceN = 20;
 int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, DOWN, DOWN, UP, DOWN, UP, DOWN, UP, UP,DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, DOWN };
