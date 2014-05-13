@@ -18,7 +18,7 @@ set params=%2 %3 %4 %5 %6 %7 %8 %9
 
 REM Create the script filename.
 set filename=%tag%.dex
-DexSimulatorApp -friction -filter=2.0 -tag=%tag% -pinch=%force% -compile=%filename% %params% 
+DexSimulatorApp -friction -filter=2.0 -duration=15.0 -tag=%tag% -pinch=%force% -compile=%filename% %params% 
 echo CMD_TASK,%task%,%filename%,%task% Friction %force%
 
 
