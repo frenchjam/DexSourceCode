@@ -252,7 +252,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 
 	// Give some time to read the message.
-	apparatus->Wait( 5.0 );
+	apparatus->Wait( 2.0 );
 		
 	// Wait a little to give the subject time to react, in case they were looking at the screen.
 	apparatus->Wait( baselineDuration );
@@ -277,6 +277,10 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
+	apparatus->Beep();
+	apparatus->Beep();
+	apparatus->Beep();
+	
 	SignalEndOfRecording( apparatus );
 	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", MsgTrialOver );
 	if ( status == ABORT_EXIT ) exit( status );

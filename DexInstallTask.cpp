@@ -193,18 +193,10 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition();
 
 	apparatus->ShowStatus( "Check visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum obscured from view." );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	apparatus->ShowStatus( "Visibility OK.", "ok.bmp" );
 	apparatus->Wait( 1.0 );
-
-	//need to change picture
-	status = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and lock in place. Close the locker door on the chair." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
 
 	apparatus->HideStatus();
 
@@ -407,6 +399,29 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5).\nPress <IGNORE> to continue." );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
+
+		apparatus->fWaitSubjectReady( "Offset.bmp", "Slip Test - Release manipulandum." );
+		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
+		apparatus->Wait( 0.5 );
+		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+		apparatus->StopAcquisition();
+
+		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
+		// Compute the offsets and insert them into force calculations.
+		apparatus->ComputeAndNullifyStrainGaugeOffsets();
+		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
+
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
+		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 5.0, "No slip detected." );
+		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
+			
+
 	}
 
 	// Check WaitUntilAtTarget().
