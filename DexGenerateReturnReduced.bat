@@ -79,6 +79,17 @@ REM Start the trial counter for the discrete movements.
 set disc_seq=0
 
 set mass=400gm
+
+set direction=Vertical
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
+set direction=Vertical
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
 set direction=Horizontal
 set eyes=open  
 set range=DiscreteRanges%direction%.txt:%sz%
@@ -89,15 +100,6 @@ set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat
 
-set direction=Vertical
-set eyes=open  
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
 
 
 REM ****************************************************************************

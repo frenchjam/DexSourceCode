@@ -76,24 +76,24 @@ set mass=400gm
 REM Start the trial counter for the oscillations.
 set dsc_seq=0
 
-set direction=Horizontal
+set direction=Vertical
 set eyes=open  
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRangesVertical.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat -prep
 
-set direction=Horizontal
+set direction=Vertical
 set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
+set range=DiscreteRangesVertical.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat
 
-set direction=Vertical
+set direction=Horizontal
 set eyes=open  
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRangesHorizontal.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat -prep
 
-set direction=Vertical
+set direction=Horizontal
 set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
+set range=DiscreteRangesHorizontal.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat
 
 REM ****************************************************************************
