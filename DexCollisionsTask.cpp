@@ -265,7 +265,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Maniplandum occluded too often." );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check if trial was completed as instructed.
