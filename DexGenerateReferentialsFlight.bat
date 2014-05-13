@@ -55,7 +55,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat
+call %SOURCE%\DexCreateOffsetTask.bat -deploy
 
 REM ****************************************************************************
 
@@ -138,9 +138,9 @@ REM
 REM Coefficient of Friction tests.
 REM
 
-call %SOURCE%\DexCreateFrictionTask.bat 0.5 -prep
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -deploy
 call %SOURCE%\DexCreateFrictionTask.bat 1.0
-call %SOURCE%\DexCreateFrictionTask.bat 2.5
+call %SOURCE%\DexCreateFrictionTask.bat 0.5
 
 REM ****************************************************************************
 

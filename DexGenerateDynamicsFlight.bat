@@ -46,7 +46,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat
+call %SOURCE%\DexCreateOffsetTask.bat -deploy
 
 REM ****************************************************************************
 
@@ -167,7 +167,7 @@ REM
 REM !!! Need to define how many to be done and at what desired grip force.
 REM !!! We also need to decide on the method.
 
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -prep
+call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep
 
 REM ****************************************************************************
 

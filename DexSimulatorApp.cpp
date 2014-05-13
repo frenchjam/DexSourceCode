@@ -812,6 +812,17 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	}
 
+	if ( ParseForString( lpCmdLine, "-deploy" ) ) {
+		//need to change picture
+		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
+		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
+
+		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and lock in place. Close the locker door on the chair." );
+		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
+	}
+
+
+
 
 	// Run one of the protocols.
 	switch ( task ) {
@@ -877,6 +888,17 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	case SHOW_PICTURES:
 		while ( RETRY_EXIT == ( return_code = ShowPictures( apparatus, lpCmdLine ) ) );
 		break;
+	}
+
+	if ( ParseForString( lpCmdLine, "-stow" ) ) {
+
+		return_code = apparatus->fWaitSubjectReady( "InHand.bmp", "Remove manipulandum from retainer.", OkToContinue );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Place in mass any cradle. Leave manipulandum and mass in cradle.", OkToContinue );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+		return_code = apparatus->fWaitSubjectReady( "CloseRetainer.bmp", "Fold down the retainer and lock in place.", OkToContinue );
+		if ( return_code == ABORT_EXIT ) exit( return_code );
+
 	}
 
 	// Record the simulated state of the apparatus, so that the next trial starts from here.
