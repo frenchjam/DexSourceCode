@@ -27,7 +27,7 @@ int		delaySequenceN = 9;
 int		discreteTargets[3] = {3, 5, 7};
 
 int discreteFalseStartTolerance = 5;
-double discreteFalseStartThreshold = 10.0;
+double discreteFalseStartThreshold = 0.50;
 double discreteFalseStartHoldTime = 0.010;
 double discreteFalseStartFilterConstant = 1.0;
 
@@ -302,12 +302,12 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Was the manipulandum obscured?
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance." );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
-	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, "Movement amplitude out of range." );
+	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
@@ -321,16 +321,18 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( most < 1 ) most = 1;
 
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for number of movements ..." );
-	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?" );
+	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
+#if 1
 	// Did the subject anticipate the starting signal too often?
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for early starts ..." );
 	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
-		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?" );
+		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
+#endif
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
