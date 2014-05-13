@@ -1,4 +1,8 @@
 Version 1.0 Beta 5
+	Created scripts to test hardware for SVT and maintenance.
+	Adjusted parameters for friction tests.
+	Responded to a few remarks from CADMOS and Qinetiq.
+	Added functionality to deploy and stow retainer.
 
 Version 1.0 Beta 4 [GRIP Release (2014.12.05  2.45.48) Grip Flight] Delivered to CADMOS 2014.05.12
 	Reworked filenaming strategies so that task scripts and results files can be easily linked.
