@@ -450,7 +450,11 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg, const char *picture ) {
 	AddStepNumber();
 	if (verbose ) fWarning( "CheckEarlyStarts()\nWhat about the filter constant?!?!" );
-	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %f, %f, %s, %s\n", n_false_starts, hold_time * 1000, threshold, filter_constant, quoteMessage( msg ) );
+	if ( threshold >= 2.0 ) {
+		fWarning( "CheckEarlyStarts()\nVelocity threshold %f exceeds limit.", threshold );
+		threshold = 1.999;
+	}
+	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %.0f, %f, %s, %s\n", n_false_starts, hold_time * 1000, threshold * 1000, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg, const char *picture ) {
@@ -466,14 +470,14 @@ int DexCompiler::CheckCorrectStartPosition( int target_id, float tolX, float tol
 }
 int DexCompiler::CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MOVEMENTS_DIR, %d, %f, %f, %f, %.1f, %s, \n", 
-		n_false_directions, dirX, dirY, dirZ, threshold, quoteMessage( msg ) );
+	fprintf( fp, "CMD_CHK_MOVEMENTS_DIR, %d, %f, %f, %f, %.1f, %s, %s \n", 
+		n_false_directions, dirX, dirY, dirZ, threshold, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_COLLISIONFORCE, %f, %f, %d, %s, \n", 
-		min_force, max_force, max_bad_peaks, quoteMessage( msg ) );
+	fprintf( fp, "CMD_CHK_COLLISIONFORCE, %f, %f, %d, %s, %s \n", 
+		min_force, max_force, max_bad_peaks, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 };
 
