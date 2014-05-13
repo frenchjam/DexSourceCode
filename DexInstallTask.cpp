@@ -424,13 +424,18 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 
 		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected in 15 sec." );
+		apparatus->Beep();
 		for ( int i = 1; i <= 5; i++ ) {
+			AnalysisProgress( apparatus, i, 5, "Keep rubbing. Need more slips." );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
 			if ( status != NORMAL_EXIT ) return( status );
-			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 10.0, "No slip detected in 5 sec." );
+			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected in 5 sec." );
+			apparatus->Beep();
 			if ( status != NORMAL_EXIT ) return( status );
+ 			apparatus->Wait( 1.0 );
 		}
+		AnalysisProgress( apparatus, i, 5, "Success!" );
 		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
 			
 
