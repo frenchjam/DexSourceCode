@@ -27,8 +27,8 @@ int		delaySequenceN = 9;
 int		discreteTargets[3] = {3, 5, 7};
 
 int discreteFalseStartTolerance = 5;
-double discreteFalseStartThreshold = 2.0;
-double discreteFalseStartHoldTime = 0.250;
+double discreteFalseStartThreshold = 10.0;
+double discreteFalseStartHoldTime = 0.010;
 double discreteFalseStartFilterConstant = 1.0;
 
 double discreteMinMovementExtent = 15.0;	// Minimum amplitude along the movement direction (Y). Set to 1000.0 to simulate error.
