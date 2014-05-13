@@ -265,17 +265,17 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often." );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check if trial was completed as instructed.
 	apparatus->ShowStatus( "Checking movement directions ..." );
-	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction." );
+	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	// Check if collision forces were within range.
 	apparatus->ShowStatus( "Checking collision forces ..." );
-	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside acceptable range." );
+	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside acceptable range.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.

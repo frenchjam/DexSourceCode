@@ -734,7 +734,7 @@ int DexApparatus::fSignalNormalCompletion( const char *picture, const char* form
 	vsprintf(message, format, args);
 	va_end(args);
 
-	return( picture, SignalNormalCompletion( message ) );
+	return( picture, SignalNormalCompletion( message, "ok.bmp" ) );
 
 }
 

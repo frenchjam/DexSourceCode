@@ -37,7 +37,7 @@ int DexApparatus::CheckOverrun(  const char *msg ) {
 	if ( tracker->CheckAcquisitionOverrun() ) {
 		monitor->SendEvent( "Acquisition overrun." );
 		
-		int response = SignalError( MB_ABORTRETRYIGNORE, msg );
+		int response = SignalError( MB_ABORTRETRYIGNORE, msg, "alert.bmp" );
 		
 		if ( response == IDABORT ) return( ABORT_EXIT );
 		if ( response == IDRETRY ) return( RETRY_EXIT );

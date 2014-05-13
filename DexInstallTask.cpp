@@ -131,7 +131,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the LEFT position?\n- Reference markers in view?" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the LEFT position?\n- Reference markers in view?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
@@ -173,7 +173,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
-		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers occluded?" );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers occluded?", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -193,7 +193,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition();
 
 	apparatus->ShowStatus( "Check visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view." );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	apparatus->ShowStatus( "Visibility OK.", "ok.bmp" );
 	apparatus->Wait( 1.0 );
