@@ -23,3 +23,4 @@ copy /Y /V %ROOT%Pictures.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Pictures.tar"
 copy /Y /V %ROOT%.md5         "%DESTINATION%\%TIMESTAMP% %ROOT%.md5" 
 copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
 copy /Y /V ..\DexSourceCode\GripReleaseNotes.txt "%DESTINATION%\%TIMESTAMP% Release Notes.txt" 
+echo %TIMESTAMP% > ..\DexSourceCode\release
