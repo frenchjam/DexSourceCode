@@ -69,7 +69,7 @@ Vector3		expected_coda2_position_supine = { 0, 2600, 900};
 Quaternion	expected_coda2_orientation_supine = { 1.0, 0.0, 0.0, 0.0};
 
 // How close do we need to be to the expected position and orientation?
-double codaUnitPositionTolerance = 500.0;		// Allowable displacement wrt expected position, in mm.
+double codaUnitPositionTolerance = 900.0;		// Allowable displacement wrt expected position, in mm.
 double codaUnitOrientationTolerance = 90.0;		// Allowable rotation wrt expected orientation, in degrees.
 
 double codaUnitPositionRelaxed =  1000.0;		// Use this if all you really care about is upright vs. supine..
