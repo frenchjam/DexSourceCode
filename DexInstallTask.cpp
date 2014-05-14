@@ -247,20 +247,20 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Was CODA alignment performed?", "CalibrateSeated.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Was CODA alignment performed?", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Was CODA alignment performed?", "CalibrateSupine.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Was CODA alignment performed?", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Coda misalignment detected!\n - Are any markers occluded?\n - Did a CODA unit get bumped?", "alert.bmp" );
+			"Coda misalignment detected!\n- Are any markers occluded?\n- Did a CODA unit get bumped?", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -277,12 +277,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\nTarget bar in the LEFT-hand position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\nTarget bar in the RIGHT-hand position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\n- Target bar on the LEFT-hand side?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\n- Target bar on the RIGHT-hand side?\n- Reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n - Target bar in the LEFT-hand position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n - Target bar in the RIGHT-hand position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the LEFT-hand side?\n- Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n- Target bar on the RIGHT-hand side?\n- Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 
