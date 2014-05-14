@@ -102,8 +102,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for seated operation." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for supine operation." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for SEATED operation." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for SUPINE operation." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
@@ -160,7 +160,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "CalibrateSeated.bmp" );
+												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Are coda units arranged properly?", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
@@ -277,12 +277,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\nTarget bar in the LEFT position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\nTarget bar in the RIGHT position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\nTarget bar in the LEFT-hand position?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\nTarget bar in the RIGHT-hand position?\nReference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n - Target bar in the LEFT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n - Target bar in the RIGHT position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n - Target bar in the LEFT-hand position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n - Target bar in the RIGHT-hand position?\n - Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 
@@ -300,7 +300,7 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 
 	int status;
 
-	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware." );
+	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	char msg[1024];

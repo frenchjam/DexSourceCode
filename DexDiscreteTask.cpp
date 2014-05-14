@@ -55,7 +55,7 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right-side position, socket 'N', with tapping surfaces folded.%s", OkToContinue );
+			"Place the target bar in the right-side position, socket 'S', with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
