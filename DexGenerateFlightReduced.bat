@@ -20,8 +20,8 @@ set SOURCE=..\DexSourceCode
 REM Task Counter
 REM Here I am adopting a strategy by which all the protocols of the same type but for different size subjects
 REM  (small, medium and large) will use the same ID number for each task, but that the different protocols will 
-REM  start numbering from different values, i.e. Dynamics = 200, Upright = 300, Supine = 400.
-set task=200
+REM  start numbering from different values, i.e. Dynamics = 200, Upright = 300, Supine = 400, Reduced = 500.
+set task=500
 
 REM Write a header into the file.
 ECHO #DEX protocol file for Dynamics Flight Reduced protocol.
