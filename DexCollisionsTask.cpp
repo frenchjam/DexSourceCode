@@ -261,22 +261,29 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
-	int n_post_hoc_steps = 4;
+	int n_post_hoc_steps = 2;
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
-	// Check if trial was completed as instructed.
-	apparatus->ShowStatus( "Checking movement directions ..." );
+#if 0
+	// Check if there were false starts in the wrong direction.
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement directions ..." );
+	apparatus->ShowStatus( "Checking movement directions ...", "working.bmp" );
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
+#endif
 
 	// Check if collision forces were within range.
-	apparatus->ShowStatus( "Checking collision forces ..." );
-	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside acceptable range.", "alert.bmp" );
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking collision forces ..." );
+	apparatus->ShowStatus( "Checking collision forces ...", "working.bmp" );
+	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
+
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	status = apparatus->SignalNormalCompletion( "ok.bmp", "Trial terminated successfully.\n\nPress <OK> to continue ..." );
