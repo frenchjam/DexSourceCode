@@ -62,7 +62,7 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right position with tapping surfaces closed.%s", OkToContinue );
+			"Place the target bar in the RIGHT position (Socket S) with tapping surfaces closed.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 

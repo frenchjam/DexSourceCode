@@ -25,6 +25,9 @@ int collisionInitialTarget = 5;
 int collisionUpTarget = 10;
 int collisionDownTarget = 0;
 
+double collisionsContinuousDropoutTimeLimit = 0.900;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
+double collisionsCumulativeDropoutTimeLimit = 30.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
+
 int collisionSequenceN = 20;
 int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, DOWN, DOWN, UP, DOWN, UP, DOWN, UP, UP,DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, DOWN };
 double collisionTime = 1.5;
@@ -55,7 +58,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target bar in the correct position.
 	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
-		"Place the target bar in the right position and open the tapping surfaces.%s", OkToContinue );
+		"Place the target bar in the RIGHT position (Socket S) and open the tapping surfaces.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
@@ -261,7 +264,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Was the manipulandum obscured?
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
+	status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 #if 0
