@@ -52,7 +52,7 @@ int PrepFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	char msg[1024];
 
 	AddDirective( apparatus, "You will first pinch the manipulandum at the center between thumb and forefinger.", "coef_frict.bmp" );
-	AddDirective( apparatus, "Squeeze according to the instructions that you will receive (lightly, moderate, firmly).", "coef_frict.bmp" );
+	AddDirective( apparatus, "Squeeze according to the instructions that you will receive (firmly, moderately, lightly).", "coef_frict.bmp" );
 	AddDirective( apparatus, "When you hear the beep, rub the fingers up and down on the manipulandum. ", "coef_frict_osc.bmp");
 	sprintf( msg, "You will rub for %.0f seconds. Move from center to edge and back. Try to maintain pinch force.", duration );
 	AddDirective( apparatus, msg, "rub.bmp"  );
@@ -65,6 +65,7 @@ int PrepFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	
 	int status;
+	char *squeeze;
 
 	// DexNiDaqADC must be run in polling mode so that we can record the 
 	// continuous data, but also monitor the COP in real time.
@@ -97,6 +98,13 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	double duration = 15.0;
 	duration = ParseForDuration( apparatus, params );
 
+	if ( gripTarget < 0.75 ) squeeze = "LIGHTLY";
+	else if ( gripTarget > 1.5 ) squeeze = "FIRMLY";
+	else squeeze = "MODERATELY";
+
+    status = apparatus->fWaitSubjectReady( "Coef_frict.bmp", "On this trial you will squeeze %s.", squeeze  );
+	if ( status == ABORT_EXIT ) exit( status );
+
     // picture Remove Hand with manipulandum in the retainer.
 	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum and press <OK> to start." );
 
@@ -106,15 +114,14 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 
-    apparatus->ShowStatus( "Pinch the manipulandum at the center between thumb and index finger.", "Coef_frict.bmp" );
+
+    apparatus->fShowStatus( "Coef_frict.bmp", "Pinch the manipulandum %s at the center between thumb and index finger.", squeeze  );
 	apparatus->Beep();
 
 	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	if ( gripTarget < 0.75 ) apparatus->fShowStatus( "rub.bmp", "Squeeze as gently as possible and rub up and down for %.0f seconds.", duration );
-	else if ( gripTarget > 1.5 ) apparatus->fShowStatus( "rub.bmp", "Squeeze firmly and rub up and down for %.0f seconds..", duration );
-	else apparatus->fShowStatus( "rub.bmp", "Squeeze moderately and rub up and down for %.0f seconds." , duration );
+	apparatus->fShowStatus( "rub.bmp", "Squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
 
 	apparatus->Wait( duration );
 
