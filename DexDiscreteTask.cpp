@@ -333,8 +333,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
 		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
 #endif
+	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
