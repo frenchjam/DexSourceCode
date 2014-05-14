@@ -120,18 +120,18 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
 	apparatus->ShowStatus( "Checking field of view ...", "wait.bmp" );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-		"Markers not centered for CODA Unit #1.\n - Is the unit properly boresighted?\n - Are the box and bar markers visible?", "alert.bmp" );
+		"Markers not centered for CODA Unit #1.\n- Is the unit properly boresighted?\n- Are the box and bar markers visible?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	if ( apparatus->nCodas > 1 ) {
 		status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-			"Markers not centered for CODA Unit #2.\n - Is the unit properly boresighted?\n - Are the box and bar markers visible?", "alert.bmp" );
+			"Markers not centered for CODA Unit #2.\n- Is the unit properly boresighted?\n- Are the box and bar markers visible?", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment. - Target bar in the LEFT position?\n- Reference markers in view?", "alert.bmp" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment.\n-Target bar in the LEFT position?\n- Reference markers in view?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
@@ -141,13 +141,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionTolerance, 
 											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n -Is setup in SEATED configuration?\n -Are coda units arranged properly?", "CalibrateSeated.bmp" );
+											"Placement error - Coda Unit 1.\n- Is setup in SEATED configuration?\n- Are coda units arranged properly?", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionTolerance, 
 											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "CalibrateSupine.bmp" );
+											"Placement error - Coda Unit 1.\n- Is setup in SUPINE configuration?\n- Are coda units arranged properly?", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -160,20 +160,20 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n - Is setup in SEATED configuration?\n - Are coda units arranged properly?", "CalibrateSeated.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Are coda units arranged properly?", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionTolerance, 
 												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n - Is setup in SUPINE configuration?\n - Are coda units arranged properly?", "CalibrateSupine.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Are coda units arranged properly?", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
-		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n - Did a CODA unit get bumped?\n - Are the markers occluded?", "alert.bmp" );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n- Are the markers occluded?\n- Did a CODA unit get bumped?\n(Consult ground.)", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -228,13 +228,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for Seated?\n- Was CODA alignment performed?", "CalibrateSeated.bmp" );
+											"Unexpected Configuration\n- Configured for Seated?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for SUPINE?\n- Was CODA alignment performed?", "CalibrateSupine.bmp" );
+											"Unexpected Configuration\n- Configured for SUPINE?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -247,20 +247,20 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Was CODA alignment performed?", "CalibrateSeated.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Was CODA alignment performed?", "CalibrateSupine.bmp" );
+												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Coda misalignment detected!\n- Are any markers occluded?\n- Did a CODA unit get bumped?", "alert.bmp" );
+			"Coda misalignment detected!\n- Are any markers occluded?\nIf yes, correct and <Retry>.\nIf not, consult COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
