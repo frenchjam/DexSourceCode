@@ -49,24 +49,19 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 	char *target_filename = 0;
 
+	// Instruct subject to take the appropriate position in the apparatus
+	//  and wait for confimation that he or she is ready.
+	posture = ParseForPosture( params );
+
 	// Prompt the subject to put the target bar in the correct position.
 	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
 		"Place the target bar in the right position and open the tapping surfaces.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
-
-	// Instruct subject to take the appropriate position in the apparatus
-	//  and wait for confimation that he or she is ready.
-	posture = ParseForPosture( params );
-	direction = ParseForDirection( apparatus, params );
-//	if ( posture == PostureSeated ) {
-//		status = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", MsgQueryReadySeated, OkToContinue );
-//	}
-//	else if ( posture == PostureSupine ) {
-//		status = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", MsgQueryReadySupine, OkToContinue );
-//	}
-//	if ( status == ABORT_EXIT ) exit( status );
-
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
