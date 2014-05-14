@@ -64,6 +64,9 @@ REM
 REM Coefficient of Friction tests.
 REM
 
+REM Start the trial counter for the friction tests.
+set fric_seq=0
+
 call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep
 call %SOURCE%\DexCreateFrictionTask.bat 1.0
 call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
