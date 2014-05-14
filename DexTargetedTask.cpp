@@ -74,12 +74,19 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	for ( int tgt = 0; tgt < DEX_MAX_TARGETS; tgt++ ) lit_targets[tgt] = 0;
 	apparatus->TargetsOff();
 	for ( tgt = 0; tgt < targetSequenceN; tgt++ ) {
-		if ( direction == VERTICAL ) apparatus->VerticalTargetOn( targetSequence[tgt] );
-		else apparatus->HorizontalTargetOn( tgt );
-		lit_targets[targetSequence[tgt]] = 1;
+		if ( direction == VERTICAL && targetSequence[tgt] < apparatus->nVerticalTargets ) {
+			apparatus->VerticalTargetOn( targetSequence[tgt] );
+			lit_targets[targetSequence[tgt]] = 1;
+		}
+		else if ( direction == HORIZONTAL && targetSequence[tgt] < apparatus->nHorizontalTargets ) { 
+			apparatus->HorizontalTargetOn( targetSequence[tgt] );
+			lit_targets[targetSequence[tgt]] = 1;
+		}
 	}
 	int lit_target_count = 0;
-	for ( tgt = 0; tgt < DEX_MAX_TARGETS; tgt++ ) if ( lit_targets[tgt] ) lit_target_count++;
+	for ( tgt = 0; tgt < DEX_MAX_TARGETS; tgt++ ) {
+		if ( lit_targets[tgt] ) lit_target_count++;
+	}
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
