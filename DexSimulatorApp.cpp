@@ -797,6 +797,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 	}
 
+	if ( ParseForString( lpCmdLine, "-deploy" ) ) {
+		//need to change picture
+		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
+		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
+
+		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the retainer on the target frame and lock in place. Close the locker door on the chair." );
+		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
+	}
+
 	if ( instruct_to_sit ) {
 
 		DexSubjectPosture desired_posture = ParseForPosture( lpCmdLine );
@@ -811,15 +820,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 
-	}
-
-	if ( ParseForString( lpCmdLine, "-deploy" ) ) {
-		//need to change picture
-		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
-		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
-
-		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum up to the retainer on the target frame and lock in place. Close the locker door on the chair." );
-		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
 	}
 
 
