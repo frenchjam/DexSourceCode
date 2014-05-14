@@ -307,7 +307,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	// Check that we got a reasonable amount of movement.
 	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
-	status = apparatus->CheckMovementAmplitude( discreteMinMovementExtent, discreteMaxMovementExtent, discreteMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
+	status = apparatus->CheckMovementAmplitude( ( eyes == CLOSED ? 1.0 : discreteMinMovementExtent ), 
+												( eyes == CLOSED ? 1000.0 : discreteMaxMovementExtent ), 
+												discreteMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
