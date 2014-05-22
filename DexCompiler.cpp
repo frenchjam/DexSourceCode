@@ -325,6 +325,7 @@ int DexCompiler::SelectAndCheckConfiguration( const char *picture, const char *m
 	// Here I translate those to the 0 and 1 defined by DEX.
 	// Note that DEX has no way to check whether the tapping surfaces are deployed or not, so 
 	//  the tapping parameter is ignored.
+	AddStepNumber();
 	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
 		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
 	return( NORMAL_EXIT );
@@ -448,12 +449,12 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 }
 
 int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float threshold, float filter_constant, const char *msg, const char *picture ) {
-	AddStepNumber();
 	if (verbose ) fWarning( "CheckEarlyStarts()\nWhat about the filter constant?!?!" );
 	if ( threshold >= 2.0 ) {
 		fWarning( "CheckEarlyStarts()\nVelocity threshold %f exceeds limit.", threshold );
 		threshold = 1.999;
 	}
+	AddStepNumber();
 	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %.0f, %f, %s, %s\n", n_false_starts, hold_time * 1000, threshold * 1000, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -800,7 +801,7 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		}
 		else if ( !strcmp( token[0], "CMD_ACQ_START" ) ) {
-			apparatus->StartAcquisition( token[1] );
+			apparatus->StartAcquisition( token[1], 300.0 );
 		}
 		else if ( !strcmp( token[0], "CMD_ACQ_STOP" ) ) {
 			status = apparatus->StopAcquisition( token[1] );
