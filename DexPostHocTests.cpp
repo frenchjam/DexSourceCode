@@ -684,7 +684,7 @@ int DexApparatus::CheckForcePeaks( float min_amplitude, float max_amplitude, int
 			movements++;
 			// Find when the next movement started.
 			for ( j = i + 1; j < last - 1; j++ ) {
-				if ( eventList[i].event == TRIGGER_MOVE_UP || eventList[i].event == TRIGGER_MOVE_DOWN ) break;
+				if ( eventList[j].event == TRIGGER_MOVE_UP || eventList[j].event == TRIGGER_MOVE_DOWN ) break;
 			}
 
 			// Compute the average force through the movement.
