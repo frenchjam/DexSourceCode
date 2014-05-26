@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <io.h>
 #include <string.h>
+#include <process.h>
+
+#include "..\DexSimulatorApp\resource.h"
 
 #include <DexInterpreterFunctions.h>
 
@@ -28,6 +31,144 @@ enum { NORMAL_EXIT = 0, NO_USER_FILE, NO_LOG_FILE, ERROR_EXIT };
 char picture_path[1024] = "..\\DexPictures";
 FILE *log;
 
+// Store here temporarily the information that is to be displayed.
+// It gets put into the dialog by WM_INITDIALOG.
+ char _illustrated_message_picture_filename[256] = "";
+ HBITMAP _illustrated_message_picture_bitmap = NULL;
+
+static char _illustrated_message_text[256] = "";
+static char _illustrated_message_label[256] = "";
+static char _illustrated_message_type = IDD_OKCANCEL;
+
+// This callback is used for 'popups'. When they close, the APP keeps on going.
+BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+	char command[1024];
+	static int n_alerts = 0, n_states = 0, n_queries = 0;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		SetDlgItemText( hDlg, IDC_MESSAGE, _illustrated_message_text );
+		if ( _illustrated_message_picture_bitmap ) {
+			SendDlgItemMessage( hDlg, IDC_PICTURE, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) _illustrated_message_picture_bitmap );
+		}
+		SetTimer( hDlg, WM_TIMER, 10, NULL );
+   		return TRUE;
+		break;
+		
+	case WM_PAINT:
+  		return FALSE;
+		break;
+
+	case WM_TIMER:
+		switch ( _illustrated_message_type ) {
+		
+		case IDD_OKCANCEL:
+			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexQuery.%03d.bmp", n_queries++ );
+			break;
+
+		case IDD_ABORTRETRYIGNORE:
+			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexAlert.%03d.bmp", n_alerts++ );
+			break;
+
+		case IDD_STATUS:
+			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexState.%03d.bmp", n_states++ );
+			break;
+
+		}
+ 		system( command );
+		EndDialog(hDlg, LOWORD(wParam));
+		return TRUE;
+			break;
+
+	case WM_CLOSE:
+		EndDialog(hDlg, LOWORD(wParam));
+		return TRUE;
+		break;
+
+	case WM_SHOWWINDOW:
+		return TRUE;
+		break;
+
+    case WM_COMMAND:
+
+		switch ( LOWORD( wParam ) ) {
+		case IDCANCEL:
+		case IDOK:
+		case IDRETRY:
+		case IDABORT:
+		case IDIGNORE:
+			EndDialog(hDlg, LOWORD(wParam));
+			return TRUE;
+			break;
+		}
+	}
+    return FALSE;
+}
+
+char PictureFilenamePrefix[] = "..\\DexPictures\\";
+
+int GrabDialog( const char *message, const char *picture, const char *label, int buttons ) {
+
+	int return_code;
+
+	int code = GetLastError();
+	char *ptr;
+
+	// Store the information that is to be displayed temporarily, so that it can be put into the dialog by WM_INITDIALOG.
+	// Be careful not to excede the limits of the buffers and be careful to have a null-terminated string.
+	if ( picture ) {
+		strncpy(  _illustrated_message_picture_filename, PictureFilenamePrefix, sizeof( _illustrated_message_picture_filename ) );
+		strncpy( _illustrated_message_picture_filename + strlen( PictureFilenamePrefix ), 
+			picture, 
+			sizeof( _illustrated_message_picture_filename ) - strlen( PictureFilenamePrefix ) );
+		_illustrated_message_picture_filename[sizeof( _illustrated_message_picture_filename ) - 1] = 0;
+		_illustrated_message_picture_bitmap = (HBITMAP) LoadImage( NULL, _illustrated_message_picture_filename, IMAGE_BITMAP, (int) (.65 * 540), (int) (.65 * 405), LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
+	}
+	else {
+		_illustrated_message_picture_filename[0] = 0;
+		_illustrated_message_picture_bitmap = NULL;
+	}
+
+	if ( message ) {
+		strncpy( _illustrated_message_text, message, sizeof( _illustrated_message_text ) );
+		_illustrated_message_text[sizeof( _illustrated_message_text ) - 1] = 0;
+		// Strings coming from scripts have end of lines marked with "\n". Need to convert to a real newline.
+		for ( ptr = _illustrated_message_text; *ptr; ptr++ ) {
+			if ( *ptr == '\\' && *(ptr+1) == 'n' ) {
+				*ptr = '\r';
+				*(ptr+1) = '\n';
+			}
+		}
+	}
+	else _illustrated_message_text[0] = 0;
+
+	if ( label ) {
+		strncpy( _illustrated_message_label, label, sizeof( _illustrated_message_label ) );
+		_illustrated_message_label[sizeof( _illustrated_message_label ) - 1] = 0;
+	}
+	else _illustrated_message_label[0] = 0;
+
+	if ( ( buttons & 0x0000000f ) == MB_ABORTRETRYIGNORE ) {
+		_illustrated_message_type = IDD_ABORTRETRYIGNORE;
+		return_code = DialogBox( NULL, (LPCSTR) IDD_ABORTRETRYIGNORE, NULL, _lintGrabCallback );
+		//printf( "%s\t%s\n", picture, message );
+	}
+	else if ( ( buttons & 0x0000000f ) == MB_OKCANCEL ) {
+		_illustrated_message_type = IDD_OKCANCEL;
+		return_code = DialogBox( NULL, (LPCSTR) IDD_OKCANCEL, NULL, _lintGrabCallback );
+		//printf( "%s\t%s\n", picture, message );
+	}
+	else {
+		_illustrated_message_type = IDD_STATUS;
+		return_code = DialogBox( NULL, (LPCSTR) IDD_STATUS, NULL, _lintGrabCallback );
+		//printf( "%s\t%s\n", picture, message );
+	}
+
+	return( return_code );
+
+}
 /*********************************************************************************************************************************/
 
 #define MAX_FILELIST_SIZE	2560
@@ -70,6 +211,38 @@ void add_to_global_script_list ( const char *filename ) {
 
 }
 
+#define MAX_PAIRS 2048
+
+typedef struct {
+	char message[256];
+	char picture[256];
+} MessagePair;
+
+typedef struct {
+	int n;
+	MessagePair entry[MAX_PAIRS];
+} MessagePairList;
+
+MessagePairList	status = {0}, query = {0}, alert = {0};
+
+int add_to_message_pair ( MessagePairList *list, const char *message, const char *picture ) {
+
+	int i;
+
+	if ( !message || !picture ) return( FALSE );
+	for ( i = 0; i < list->n; i++ ) {
+		if ( !strcmp( list->entry[i].message, message ) && !strcmp( list->entry[i].picture, picture ) ) break;
+	}
+	if ( i >= list->n && list->n < MAX_PAIRS ) {
+		strcpy( list->entry[i].message, message );
+		strcpy( list->entry[i].picture, picture );
+		list->n++;
+		return( TRUE );
+	}
+	else return( FALSE );
+
+}
+
 /*********************************************************************************************************************************/
 
 int process_task_file ( char *filename, int verbose ) {
@@ -84,6 +257,8 @@ int process_task_file ( char *filename, int verbose ) {
 
 	char local_picture_file[2560][256];
 	char path[1024];
+
+	char hold_status_message[1024] = "";
 
 	int local_pictures = 0;
 
@@ -105,6 +280,74 @@ int process_task_file ( char *filename, int verbose ) {
 			fprintf( stderr, "Tokens: %d\n", tokens );
 			for ( i = 0; i < tokens; i++ ) fprintf( stderr, "%2d %s\n", i, token[i] );
 		}
+
+		if ( tokens ) {
+			if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) {
+				if ( add_to_message_pair( &query, token[1], token[2] ) ) GrabDialog( token[1], token[2], "", MB_OKCANCEL );
+			}
+			else if ( !strcmp( token[0], "CMD_LOG_MESSAGE" ) ) {
+				int value, items;
+				if ( !strcmp( token[1], "logmsg" ) ) value = 0;
+				else if ( !strcmp( token[1], "usermsg" ) ) value = 1;
+				else {
+					items = sscanf( token[1], "%d", &value );
+					value = items && value;
+				}
+				if ( value != 0 ) {
+					if ( token[2] ) strcpy( hold_status_message, token[2] );
+					else strcpy( hold_status_message, "" );
+				}
+			}
+			else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {
+				if ( add_to_message_pair( &status, hold_status_message, token[1] ) ) GrabDialog( hold_status_message, token[1],  "", MB_OK );
+			}
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_ATTARGET" ) ) {
+				if ( add_to_message_pair( &alert, token[13], token[14] ) ) GrabDialog( token[13], token[14],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) {
+				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIPFORCE" ) ) {
+				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_SLIP" ) ) {
+				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) {
+				if ( add_to_message_pair( &alert, "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp" ) ) GrabDialog( "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp",  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) {
+				if ( add_to_message_pair( &alert, token[1], token[2] ) ) GrabDialog( token[1], token[2],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_ALIGN_CODA" ) ) {
+				if ( add_to_message_pair( &alert, token[1], token[2] ) ) GrabDialog( token[1], token[2],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_ALIGNMENT" ) ) {
+				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_FIELDOFVIEW" ) ) {
+				if ( add_to_message_pair( &alert, token[9], token[10] ) ) GrabDialog( token[9], token[10],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_PLACEMENT" ) ) {
+				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_AMPL" ) ) {
+				if ( add_to_message_pair( &alert, token[6], token[7] ) ) GrabDialog( token[6], token[7],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_CYCLES" ) ) {
+				if ( add_to_message_pair( &alert, token[7], token[8] ) ) GrabDialog( token[7], token[8],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_START_POS" ) ) {
+				if ( add_to_message_pair( &alert, token[7], token[8] ) ) GrabDialog( token[7], token[8],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_DIR" ) ) {
+				if ( add_to_message_pair( &alert, token[6], token[7] ) ) GrabDialog( token[6], token[7],  "", MB_ABORTRETRYIGNORE );
+			}
+			else if ( !strcmp( token[0], "CMD_CHK_COLLISIONFORCE" ) ) {
+				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
+			}
+		}
+
 
 		for ( i = 1; i < tokens; i++ ) {
 			// Look for picture files. They are all .bmp.
@@ -559,7 +802,8 @@ int main ( int argc, char *argv[] ) {
 			
 		if ( popups ) {
 			char msg[2048];
-			sprintf( msg, "DexLint terminated successfully with 0 errors.\n\nNumber of unique script files:  %d\nNumber of unique picture files: %d", global_scripts, global_pictures );
+			sprintf( msg, "DexLint terminated successfully with 0 errors.\n\nNumber of unique script files:  %d\nNumber of unique picture files: %d\nNumber of unique queries: %d\nNumber of unique states: %d\nNumber of unique alerts: %d", 
+				global_scripts, global_pictures, query.n, status.n, alert.n );
 			MessageBox( NULL, msg, argv[0], MB_OK | MB_ICONINFORMATION );
 		}
 		return( NORMAL_EXIT );

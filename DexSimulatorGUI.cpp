@@ -337,6 +337,10 @@ BOOL CALLBACK dexDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		return TRUE;
 		break;
 		
+    case WM_PAINT:
+		return FALSE;
+		break;
+
     case WM_TIMER:
 		return TRUE;
 		break;
