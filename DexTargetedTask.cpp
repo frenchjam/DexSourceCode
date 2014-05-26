@@ -268,7 +268,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during saving." );
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "wait.bmp" );

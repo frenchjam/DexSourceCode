@@ -255,7 +255,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during file save." );
 	
 	// Check the quality of the data.
 	apparatus->ShowStatus( "Checking data ...", "working.bmp" );

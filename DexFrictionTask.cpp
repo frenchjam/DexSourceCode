@@ -139,7 +139,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	SignalEndOfRecording( apparatus );
 	apparatus->StopFilming();
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during file save." );
 
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );

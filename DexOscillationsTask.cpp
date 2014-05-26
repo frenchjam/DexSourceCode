@@ -221,14 +221,14 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered );
+	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Now wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( oscillationTargets[MIDDLE], desired_orientation );
-	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation );
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( oscillationTargets[MIDDLE] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
+	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget ); 
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Double check that the subject has the specified mass.
@@ -296,7 +296,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
 	apparatus->SignalEvent( "Acquisition terminated." );
 	apparatus->StopFilming();
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during saving." );
 
 	// Check the quality of the data.
 	int n_post_hoc_steps = 3;

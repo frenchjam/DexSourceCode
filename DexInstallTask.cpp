@@ -190,7 +190,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus( "Acquiring baseline data. Please wait.", "wait.bmp" );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during file save." );
 
 	apparatus->ShowStatus( "Check visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view.", "alert.bmp" );
@@ -222,7 +222,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operations to check the hardware configuration." );
 
-	apparatus->ShowStatus( "Checking hardware configuration ..." );
+	apparatus->ShowStatus( "Checking hardware configuration ...", "wait.bmp" );
 	if ( desired_posture == PostureSeated ) {
 
 		status = apparatus->CheckTrackerPlacement( 0, 
@@ -361,7 +361,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-		apparatus->StopAcquisition();
+		apparatus->StopAcquisition( "Error during file save." );
 
 		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
 		// Compute the offsets and insert them into force calculations.
@@ -369,14 +369,14 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
 		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch OFF center to desired force (see LEDs)." );
-		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip( 20.0, 0.5, 1.0, "Off-center grip detected (20 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip(  1.0, 0.5, 1.0, "Off-center grip detected (1 mm).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip( 20.0, 0.5, 1.0, "Off-center grip detected (20 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip(  1.0, 0.5, 1.0, "Off-center grip detected (1 mm).\nPress <IGNORE> to continue.", "info.bmp" );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
 
@@ -385,7 +385,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-		apparatus->StopAcquisition();
+		apparatus->StopAcquisition( "Error saving data." );
 
 		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
 		// Compute the offsets and insert them into force calculations.
@@ -393,13 +393,13 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
 		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
-		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		apparatus->fShowStatus( "working.bmp", "Maintian grip." );
 		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nPMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>." );
-		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nPress <IGNORE> to continue." );
+		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nPMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
+		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nPress <IGNORE> to continue.", "info.bmp" );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
 		if ( status != NORMAL_EXIT ) return( status );
 		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
@@ -415,7 +415,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-		apparatus->StopAcquisition();
+		apparatus->StopAcquisition( "Error during acquisition." );
 
 		apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
 		// Compute the offsets and insert them into force calculations.
@@ -423,14 +423,14 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
 		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
-		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected in 15 sec." );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected in 15 sec.", "alert.bmp" );
 		apparatus->Beep();
 		for ( int i = 1; i <= 5; i++ ) {
 			AnalysisProgress( apparatus, i, 5, "Keep rubbing. Need more slips." );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
 			if ( status != NORMAL_EXIT ) return( status );
-			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected in 5 sec." );
+			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected in 15 sec.", "alert.bmp" );
 			apparatus->Beep();
 			if ( status != NORMAL_EXIT ) return( status );
  			apparatus->Wait( 1.0 );
@@ -467,7 +467,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
 			for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt );
-				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target." );
+				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
 		}
@@ -475,7 +475,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
 			for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt );
-				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target." );
+				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
 		}
@@ -542,7 +542,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->StartFilming( tag );
 		apparatus->StartAcquisition( tag, duration );
 		apparatus->Wait( duration );
-		apparatus->StopAcquisition();
+		apparatus->StopAcquisition( "Error during saving." );
 		apparatus->StopFilming();
 		SignalEndOfRecording( apparatus );
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "Acquisition ended." );

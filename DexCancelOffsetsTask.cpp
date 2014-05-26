@@ -56,7 +56,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( offsetAcquireTime );
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-	apparatus->StopAcquisition();
+	apparatus->StopAcquisition( "Error during file save." );
 
 	apparatus->ShowStatus( "Processing data ...", "wait.bmp" );
 	// Compute the offsets and insert them into force calculations.

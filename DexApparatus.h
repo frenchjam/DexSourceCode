@@ -221,8 +221,8 @@ public:
 	virtual void Beep( int tone = BEEP_TONE, int volume = BEEP_VOLUME, float duration = BEEP_DURATION );
 	
 	// Acquisition
-	virtual void StartAcquisition( const char *tag, float max_duration = DEX_MAX_DURATION ); 
-	virtual int  StopAcquisition( const char *msg = "Error - Maybe file overrun." );
+	virtual void StartAcquisition( const char *tag, float max_duration ); 
+	virtual int  StopAcquisition( const char *msg );
 
 	virtual void SnapPhoto( void );
 	virtual void StartFilming( const char *tag );
@@ -230,40 +230,40 @@ public:
 	
 	// Flow control
 	virtual void Wait( double seconds );
-	virtual int  WaitSubjectReady( const char *picture = NULL, const char *message = "Ready to continue?" );
-	virtual int  fWaitSubjectReady( const char *picture = NULL, const char *format = "Ready to continue?", ... );
+	virtual int  WaitSubjectReady( const char *picture , const char *message );
+	virtual int  fWaitSubjectReady( const char *picture, const char *format, ... );
 	virtual int	 WaitUntilAtTarget( int target_id,  
-									const Quaternion desired_orientation = uprightNullOrientation, 
-									Vector3 position_tolerance = defaultPositionTolerance, 
-									double orientation_tolerance = defaultOrientationTolerance, 
-									double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-									const char *msg = NULL, const char *picture = "alert.bmp" );
+									const Quaternion desired_orientation, 
+									Vector3 position_tolerance, 
+									double orientation_tolerance, 
+									double hold_time, double timeout, 
+									const char *msg, const char *picture );
 	
 	virtual int  WaitUntilAtVerticalTarget( int target_id, 
 											const Quaternion desired_orientation = uprightNullOrientation, 
 											Vector3 position_tolerance = defaultPositionTolerance, 
 											double orientation_tolerance = defaultOrientationTolerance, 
 											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-											const char *msg = NULL, const char *picture = "alert.bmp" );
+											const char *msg = "Too long to achieve target.", const char *picture = "alert.bmp" );
 	virtual int  WaitUntilAtHorizontalTarget( int target_id, 
 											const Quaternion desired_orientation = uprightNullOrientation, 
 											Vector3 position_tolerance = defaultPositionTolerance, 
 											double orientation_tolerance = defaultOrientationTolerance, 
 											double hold_time = waitHoldPeriod, double timeout = waitTimeLimit, 
-											const char *msg = NULL, const char *picture = "alert.bmp" );
+											const char *msg = "Too long to achieve target.", const char *picture = "alert.bmp" );
 
-	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, const char *msg = NULL, const char *picture = "alert.bmp"  );
+	virtual int	 WaitCenteredGrip( float tolerance, float min_force, float timeout, const char *msg, const char *picture  );
 
 	virtual int	 WaitDesiredForces( float min_grip, float max_grip, 
 									 float min_load, float max_load,
 									 Vector3 direction, float filter_constant,
-									 float hold_time, float timeout, const char *msg = NULL, const char *picture = "alert.bmp" );
+									 float hold_time, float timeout, const char *msg, const char *picture );
 	virtual int WaitSlip( float min_grip, float max_grip, 
 									 float min_load, float max_load, 
 									 Vector3 direction,
 									 float filter_constant,
 									 float slip_threshold, 
-									 float timeout, const char *msg = NULL, const char *picture = "alert.bmp" );
+									 float timeout, const char *msg, const char *picture );
 
 	// Hardware configuration
 //	virtual int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
@@ -310,7 +310,7 @@ public:
 	virtual void FindAnalysisFrameRange( int &first, int &last );
 	
 	// Show status to subject.
-	virtual void DexApparatus::ShowStatus (const char *message = "", const char *picture = "blank.bmp" );
+	virtual void DexApparatus::ShowStatus (const char *message, const char *picture );
 	virtual void DexApparatus::HideStatus ( void );
 	virtual void DexApparatus::fShowStatus ( const char *picture, const char* format, ... );
 
