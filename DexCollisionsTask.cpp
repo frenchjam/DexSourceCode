@@ -35,8 +35,8 @@ double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of 
 double collisionMovementThreshold = 10.0;
 
 int collisionWrongDirectionTolerance = 5;
-double collisionMinForce = 1.0;
-double collisionMaxForce = 5.0;
+double collisionMinForce = 5.0;
+double collisionMaxForce = 35.0;
 int collisionWrongForceTolerance = 5;
 
 /*********************************************************************************/
