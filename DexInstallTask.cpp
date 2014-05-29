@@ -173,7 +173,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
-		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, "Coda misalignment detected!\n- Are the markers occluded?\n- Did a CODA unit get bumped?\n(Consult ground.)", "alert.bmp" );
+		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
+			"Coda misalignment detected!\n- Are any markers occluded?\nIf yes, correct and <Retry>.\nIf not, consult COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
