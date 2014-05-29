@@ -22,7 +22,6 @@
 #include "..\DexSimulatorApp\resource.h"
 
 #include <DexInterpreterFunctions.h>
-
 #define TRUE	1
 #define FALSE	0
 
@@ -326,9 +325,7 @@ int process_task_file ( char *filename, int verbose ) {
 					else strcpy( hold_status_message, "" );
 				}
 			}
-			else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {
-				add_to_message_pair( &status, hold_status_message, token[1] );
-			}
+			else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) add_to_message_pair( &status, hold_status_message, token[1] );
 
 			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_ATTARGET" ) ) add_to_message_pair( &alert, token[13], token[14] );			
 			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) add_to_message_pair( &alert, token[4], token[5] );
