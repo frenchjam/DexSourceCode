@@ -592,10 +592,11 @@ int main ( int argc, char *argv[] ) {
 
 	char script_batch[1024] = "";
 	char picture_batch[1024] = "";
-	char message_proofs[1024] = "";
+	char message_list[1024] = "";
 
 	int popups = TRUE;
 	int verbose = FALSE;
+	int generate_proofs = FALSE;
 
 	FILE *fp;
 
@@ -644,9 +645,18 @@ int main ( int argc, char *argv[] ) {
 			strcpy( picture_batch, argv[arg] + strlen( "-pbatch=" ) );
 		}
 
-		// Specify a file to store the list of proofs
+		// Specify a file to store the list of messages.
+		if ( !strncmp( argv[arg], "-messages=", strlen( "-messages=" ) ) ) {
+			strcpy( message_list, argv[arg] + strlen( "-messages=" ) );
+		}
+
+		// Specify if we should generate the proofs.
+		if ( !strcmp( argv[arg], "-proofs" ) ) generate_proofs = TRUE;
+
+		// Change the destination directory for the proofs.
 		if ( !strncmp( argv[arg], "-proofs=", strlen( "-proofs=" ) ) ) {
-			strcpy( message_proofs, argv[arg] + strlen( "-proofs=" ) );
+			strcpy( proofs_path, argv[arg] + strlen( "-proofs=" ) );
+			generate_proofs = TRUE;
 		}
 
 	}
@@ -773,38 +783,46 @@ int main ( int argc, char *argv[] ) {
 
 		int j;
 
-		if ( strlen( message_proofs ) ) {
-			fp = fopen( message_proofs, "w" );
-			fprintf( fp, "Proof\tPicture\tMessage\n" );
-			sort_message_pair_list( &query );
-			for ( j = 0; j < query.n; j++ ) {
+		// Generate a formatted list of messages and pictures.
+		fp = fopen( message_list, "w" );
+		fprintf( fp, "Proof\tPicture\tMessage\n" );
+		sort_message_pair_list( &query );
+		for ( j = 0; j < query.n; j++ ) {
+			if ( generate_proofs ) {
 				sprintf( proof, "DexQuery.%03d.bmp", j+1 );
 				strcpy( path, proofs_path );
 				strcat( path, proof );
 				GrabDialog( path, query.entry[j].message, query.entry[j].picture, "", MB_OKCANCEL );
-				fprintf( fp, "%s\t%s\t%s\n",  proof, query.entry[j].picture, query.entry[j].message );
 			}
-			fprintf( fp, "\n" );
-			sort_message_pair_list( &status );
-			for ( j = 0; j < status.n; j++ ) {
+			else strcpy( proof, "Query" );
+			fprintf( fp, "%s\t%s\t%s\n",  proof, query.entry[j].picture, query.entry[j].message );
+		}
+		fprintf( fp, "\n" );
+		sort_message_pair_list( &status );
+		for ( j = 0; j < status.n; j++ ) {
+			if ( generate_proofs ) {
 				sprintf( proof, "DexState.%03d.bmp", j+1 );
 				strcpy( path, proofs_path );
 				strcat( path, proof );
 				GrabDialog( path, status.entry[j].message, status.entry[j].picture, "", MB_OK );
-				fprintf( fp, "%s\t%s\t%s\n",  proof, status.entry[j].picture, status.entry[j].message );
 			}
-			fprintf( fp, "\n" );
-			sort_message_pair_list( &alert );
-			for ( j = 0; j < alert.n; j++ ) {
+			else strcpy( proof, "State" );
+			fprintf( fp, "%s\t%s\t%s\n",  proof, status.entry[j].picture, status.entry[j].message );
+		}
+		fprintf( fp, "\n" );
+		sort_message_pair_list( &alert );
+		for ( j = 0; j < alert.n; j++ ) {
+			if ( generate_proofs ) {
 				sprintf( proof, "DexAlert.%03d.bmp", j+1 );
 				strcpy( path, proofs_path );
 				strcat( path, proof );
 				GrabDialog( path, alert.entry[j].message, alert.entry[j].picture, "", MB_ABORTRETRYIGNORE );
-				fprintf( fp, "%s\t%s\t%s\n",  proof, alert.entry[j].picture, alert.entry[j].message );
 			}
-			fprintf( fp, "\n" );
-			fclose( fp );
+			else strcpy( proof, "Alert" );
+			fprintf( fp, "%s\t%s\t%s\n",  proof, alert.entry[j].picture, alert.entry[j].message );
 		}
+		fprintf( fp, "\n" );
+		fclose( fp );
 
 		// Create a batch file that will do the md5 sums for the script files and put them in an archive.
 		if ( strlen( script_batch ) ) {
