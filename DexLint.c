@@ -592,7 +592,7 @@ int main ( int argc, char *argv[] ) {
 
 	char script_batch[1024] = "";
 	char picture_batch[1024] = "";
-	char message_list[1024] = "";
+	char message_list[1024] = "DexMessageList.txt";
 
 	int popups = TRUE;
 	int verbose = FALSE;
