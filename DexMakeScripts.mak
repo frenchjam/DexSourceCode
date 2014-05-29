@@ -16,7 +16,7 @@ HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.ba
 STATICSCRIPTS	= ..\DexSourceCode
 # The following the path to picture files. 
 PICTURES		= ..\DexPictures
-PROOFS			= ..\DexProofs
+PROOFS			= ..\GripScreenShots
 
 LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
