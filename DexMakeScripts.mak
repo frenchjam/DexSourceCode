@@ -16,28 +16,34 @@ HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.ba
 STATICSCRIPTS	= ..\DexSourceCode
 # The following the path to picture files. 
 PICTURES		= ..\DexPictures
+PROOFS			= ..\DexProofs
 
 LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: all
+default: GripFlightProofs.txt
 
-all: GripFlightScripts.tar
+all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.txt GripFlight.md5
 
 ######################################################################################################################################
 
 GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
 	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLint.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -log=GripFlightLintScripts.log
 	CreateFlightScriptsTar.bat GripFlightScripts.tar
 
-# The following would be a better way, but I can't get tar to work like it should.
-#	$(TAR) --create --verbose --files-from=DexLintScripts.log --file=DexFlightScripts.tar 
-#	$(TAR) --create --verbose --directory=$(PICTURES) --files-from=DexLintPictures.log --file=DexFlightScripts.tar 
-
-GripFlightPictures.tar: GripFlightScripts.tar
+GripFlightPictures.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+	copy /Y /V users_flight.dex users.dex
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLintPictures.log
 	CreateFlightPicturesTar.bat GripFlightPictures.tar
+
+GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+	copy /Y /V users_flight.dex users.dex
+	echo echo this > $(PROOFS)\deletethis.txt
+	echo del /Q (PROOFS)\*.*
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -proofs=GripFlightProofs.txt -log=GripFlightLintProofs.log
+	copy /Y /V GripFlightProofs.txt $(PICTURES)
 
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5

@@ -28,7 +28,8 @@
 
 enum { NORMAL_EXIT = 0, NO_USER_FILE, NO_LOG_FILE, ERROR_EXIT };
 
-char picture_path[1024] = "..\\DexPictures";
+char picture_path[1024] = "..\\DexPictures\\";
+char proofs_path[1024] = "..\\GripScreenShots\\";
 FILE *log;
 
 // Store here temporarily the information that is to be displayed.
@@ -39,13 +40,13 @@ FILE *log;
 static char _illustrated_message_text[256] = "";
 static char _illustrated_message_label[256] = "";
 static char _illustrated_message_type = IDD_OKCANCEL;
+static char _illustrated_message_proof[256] = "";
 
 // This callback is used for 'popups'. When they close, the APP keeps on going.
 BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
 	char command[1024];
-	static int n_alerts = 0, n_states = 0, n_queries = 0;
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -65,19 +66,20 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		switch ( _illustrated_message_type ) {
 		
 		case IDD_OKCANCEL:
-			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexQuery.%03d.bmp", n_queries++ );
+			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
 			break;
 
 		case IDD_ABORTRETRYIGNORE:
-			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexAlert.%03d.bmp", n_alerts++ );
+			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
 			break;
 
 		case IDD_STATUS:
-			sprintf( command, "boxcutter -c 292,20,768,501 ..\\DexScreenshots\\DexState.%03d.bmp", n_states++ );
+			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
 			break;
 
 		}
  		system( command );
+		_sleep( 500 );
 		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;
 			break;
@@ -109,15 +111,18 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 char PictureFilenamePrefix[] = "..\\DexPictures\\";
 
-int GrabDialog( const char *message, const char *picture, const char *label, int buttons ) {
+int GrabDialog( const char *filename, const char *message, const char *picture, const char *label, int buttons ) {
 
 	int return_code;
 
 	int code = GetLastError();
 	char *ptr;
 
+
 	// Store the information that is to be displayed temporarily, so that it can be put into the dialog by WM_INITDIALOG.
 	// Be careful not to excede the limits of the buffers and be careful to have a null-terminated string.
+	strcpy( _illustrated_message_proof, filename );
+
 	if ( picture ) {
 		strncpy(  _illustrated_message_picture_filename, PictureFilenamePrefix, sizeof( _illustrated_message_picture_filename ) );
 		strncpy( _illustrated_message_picture_filename + strlen( PictureFilenamePrefix ), 
@@ -231,9 +236,12 @@ int add_to_message_pair ( MessagePairList *list, const char *message, const char
 
 	if ( !message || !picture ) return( FALSE );
 	for ( i = 0; i < list->n; i++ ) {
-		if ( !strcmp( list->entry[i].message, message ) && !strcmp( list->entry[i].picture, picture ) ) break;
+		if ( !strcmp( list->entry[i].message, message ) &&  !strcmp( list->entry[i].picture, picture ) ) break;
 	}
+
+	// If we got to the end of the list before finding a match, add it to the end.
 	if ( i >= list->n && list->n < MAX_PAIRS ) {
+		// Add to end of list.
 		strcpy( list->entry[i].message, message );
 		strcpy( list->entry[i].picture, picture );
 		list->n++;
@@ -241,6 +249,27 @@ int add_to_message_pair ( MessagePairList *list, const char *message, const char
 	}
 	else return( FALSE );
 
+}
+
+void sort_message_pair_list ( MessagePairList *list ) {
+
+	char hold_picture[1024];
+	char hold_message[1024];
+	int i, j;
+
+	for ( i = 0; i < list->n; i++ ) {
+		for ( j = i + 1; j < list->n; j++ ) {
+			if ( ( strcmp( list->entry[j].message, list->entry[i].message ) < 0 ) ||
+				 ( strcmp( list->entry[j].message, list->entry[i].message ) == 0 && strcmp( list->entry[j].picture, list->entry[i].picture ) < 0 ) )  {
+				strcpy( hold_picture, list->entry[j].picture );
+				strcpy( hold_message, list->entry[j].message );
+				strcpy( list->entry[j].picture, list->entry[i].picture );
+				strcpy( list->entry[j].message, list->entry[i].message );
+				strcpy( list->entry[i].picture, hold_picture );
+				strcpy( list->entry[i].message, hold_message );
+			}
+		}
+	}
 }
 
 /*********************************************************************************************************************************/
@@ -282,9 +311,8 @@ int process_task_file ( char *filename, int verbose ) {
 		}
 
 		if ( tokens ) {
-			if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) {
-				if ( add_to_message_pair( &query, token[1], token[2] ) ) GrabDialog( token[1], token[2], "", MB_OKCANCEL );
-			}
+			if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) add_to_message_pair( &query, token[1], token[2] );
+
 			else if ( !strcmp( token[0], "CMD_LOG_MESSAGE" ) ) {
 				int value, items;
 				if ( !strcmp( token[1], "logmsg" ) ) value = 0;
@@ -299,53 +327,24 @@ int process_task_file ( char *filename, int verbose ) {
 				}
 			}
 			else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {
-				if ( add_to_message_pair( &status, hold_status_message, token[1] ) ) GrabDialog( hold_status_message, token[1],  "", MB_OK );
+				add_to_message_pair( &status, hold_status_message, token[1] );
 			}
-			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_ATTARGET" ) ) {
-				if ( add_to_message_pair( &alert, token[13], token[14] ) ) GrabDialog( token[13], token[14],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) {
-				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIPFORCE" ) ) {
-				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_SLIP" ) ) {
-				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) {
-				if ( add_to_message_pair( &alert, "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp" ) ) GrabDialog( "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp",  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) {
-				if ( add_to_message_pair( &alert, token[1], token[2] ) ) GrabDialog( token[1], token[2],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_ALIGN_CODA" ) ) {
-				if ( add_to_message_pair( &alert, token[1], token[2] ) ) GrabDialog( token[1], token[2],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_CODA_ALIGNMENT" ) ) {
-				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_CODA_FIELDOFVIEW" ) ) {
-				if ( add_to_message_pair( &alert, token[9], token[10] ) ) GrabDialog( token[9], token[10],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_CODA_PLACEMENT" ) ) {
-				if ( add_to_message_pair( &alert, token[11], token[12] ) ) GrabDialog( token[11], token[12],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_AMPL" ) ) {
-				if ( add_to_message_pair( &alert, token[6], token[7] ) ) GrabDialog( token[6], token[7],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_CYCLES" ) ) {
-				if ( add_to_message_pair( &alert, token[7], token[8] ) ) GrabDialog( token[7], token[8],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_START_POS" ) ) {
-				if ( add_to_message_pair( &alert, token[7], token[8] ) ) GrabDialog( token[7], token[8],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_DIR" ) ) {
-				if ( add_to_message_pair( &alert, token[6], token[7] ) ) GrabDialog( token[6], token[7],  "", MB_ABORTRETRYIGNORE );
-			}
-			else if ( !strcmp( token[0], "CMD_CHK_COLLISIONFORCE" ) ) {
-				if ( add_to_message_pair( &alert, token[4], token[5] ) ) GrabDialog( token[4], token[5],  "", MB_ABORTRETRYIGNORE );
-			}
+
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_ATTARGET" ) ) add_to_message_pair( &alert, token[13], token[14] );			
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) add_to_message_pair( &alert, token[4], token[5] );
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIPFORCE" ) ) add_to_message_pair( &alert, token[11], token[12] );
+			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_SLIP" ) ) add_to_message_pair( &alert, token[11], token[12] );
+			else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) add_to_message_pair( &alert, "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp" );
+			else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) add_to_message_pair( &alert, token[1], token[2] );
+			else if ( !strcmp( token[0], "CMD_ALIGN_CODA" ) ) add_to_message_pair( &alert, token[1], token[2] );
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_ALIGNMENT" ) ) add_to_message_pair( &alert, token[4], token[5] );
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_FIELDOFVIEW" ) ) add_to_message_pair( &alert, token[9], token[10] );
+			else if ( !strcmp( token[0], "CMD_CHK_CODA_PLACEMENT" ) ) add_to_message_pair( &alert, token[11], token[12] );
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_AMPL" ) ) add_to_message_pair( &alert, token[6], token[7] );
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_CYCLES" ) ) add_to_message_pair( &alert, token[7], token[8] );
+			else if ( !strcmp( token[0], "CMD_CHK_START_POS" ) ) add_to_message_pair( &alert, token[7], token[8] );
+			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_DIR" ) ) add_to_message_pair( &alert, token[6], token[7] );
+			else if ( !strcmp( token[0], "CMD_CHK_COLLISIONFORCE" ) ) add_to_message_pair( &alert, token[4], token[5] );
 		}
 
 
@@ -596,6 +595,7 @@ int main ( int argc, char *argv[] ) {
 
 	char script_batch[1024] = "";
 	char picture_batch[1024] = "";
+	char message_proofs[1024] = "";
 
 	int popups = TRUE;
 	int verbose = FALSE;
@@ -647,6 +647,10 @@ int main ( int argc, char *argv[] ) {
 			strcpy( picture_batch, argv[arg] + strlen( "-pbatch=" ) );
 		}
 
+		// Specify a file to store the list of proofs
+		if ( !strncmp( argv[arg], "-proofs=", strlen( "-proofs=" ) ) ) {
+			strcpy( message_proofs, argv[arg] + strlen( "-proofs=" ) );
+		}
 
 	}
 
@@ -767,7 +771,43 @@ int main ( int argc, char *argv[] ) {
 
 	if ( errors == 0 ) {
 
+		char proof[1024];
+		char path[1024];
+
 		int j;
+
+		if ( strlen( message_proofs ) ) {
+			fp = fopen( message_proofs, "w" );
+			fprintf( fp, "Proof\tPicture\tMessage\n" );
+			sort_message_pair_list( &query );
+			for ( j = 0; j < query.n; j++ ) {
+				sprintf( proof, "DexQuery.%03d.bmp", j+1 );
+				strcpy( path, proofs_path );
+				strcat( path, proof );
+				GrabDialog( path, query.entry[j].message, query.entry[j].picture, "", MB_OKCANCEL );
+				fprintf( fp, "%s\t%s\t%s\n",  proof, query.entry[j].picture, query.entry[j].message );
+			}
+			fprintf( fp, "\n" );
+			sort_message_pair_list( &status );
+			for ( j = 0; j < status.n; j++ ) {
+				sprintf( proof, "DexState.%03d.bmp", j+1 );
+				strcpy( path, proofs_path );
+				strcat( path, proof );
+				GrabDialog( path, status.entry[j].message, status.entry[j].picture, "", MB_OK );
+				fprintf( fp, "%s\t%s\t%s\n",  proof, status.entry[j].picture, status.entry[j].message );
+			}
+			fprintf( fp, "\n" );
+			sort_message_pair_list( &alert );
+			for ( j = 0; j < alert.n; j++ ) {
+				sprintf( proof, "DexAlert.%03d.bmp", j+1 );
+				strcpy( path, proofs_path );
+				strcat( path, proof );
+				GrabDialog( path, alert.entry[j].message, alert.entry[j].picture, "", MB_ABORTRETRYIGNORE );
+				fprintf( fp, "%s\t%s\t%s\n",  proof, alert.entry[j].picture, alert.entry[j].message );
+			}
+			fprintf( fp, "\n" );
+			fclose( fp );
+		}
 
 		// Create a batch file that will do the md5 sums for the script files and put them in an archive.
 		if ( strlen( script_batch ) ) {
