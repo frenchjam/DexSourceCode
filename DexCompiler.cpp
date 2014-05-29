@@ -206,9 +206,10 @@ char *DexCompiler::quoteMessage( const char *message ) {
 			result[j++] = '\\';
 			result[j++] = 'n';
 		}
-		// The DEX parser is messing up on commas, even if they are in quotes.
+		// The DEX parser requires that commas be escaped.
 		else if ( message[i] == ',' ) {
-			result[j++] = ';';
+			result[j++] = '\\';
+			result[j++] = ',';
 		}
 		// Otherwise, just copy.
 		else result[j++] = message[i];

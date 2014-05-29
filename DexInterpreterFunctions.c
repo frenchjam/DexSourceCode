@@ -15,13 +15,22 @@ int ParseCommaDelimitedLine ( char *tokens[MAX_TOKENS], const char *line ) {
 
 
 	char *tkn, *chr;
-	int	 n = 0;
+	int	 n = 0, i, j;
 
 	if ( strlen( line ) > sizeof( return_tokens[circular] ) ) {
 		fprintf( stderr, "Line too long.\n%s\n", line );
 		exit( -1 );
 	}
-	strcpy( return_tokens[circular], line );
+
+	// Copy and replace escapted commas with semicolons. 
+	for ( i = 0, chr = return_tokens[circular]; i < strlen( line ); i++ ) {
+		if ( line[i] == '\\' && line[i+1] == ',' ) {
+			*chr++ = ';';
+			i++;
+		}
+		else  *chr++ = line[i];
+	}
+	*chr = 0;
 	
 	tkn = strtok( return_tokens[circular], "," );
 
@@ -44,6 +53,10 @@ int ParseCommaDelimitedLine ( char *tokens[MAX_TOKENS], const char *line ) {
 
 	/* Last token shall be a null pointer by definition. */
 	tokens[n] = NULL;
+	// Convert semicolons back to commas.
+	for ( i = 0; i < n; i++ ) {
+		for ( j = 0; j < strlen( tokens[i] ); j++ ) if ( tokens[i][j] == ';' ) tokens[i][j] = ',';
+	}
 
 	/* Next time around use a different buffer for the strings. */
 	circular = ( circular + 1 ) % BUFFERS;
