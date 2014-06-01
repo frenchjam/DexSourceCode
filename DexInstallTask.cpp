@@ -120,18 +120,18 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
 	apparatus->ShowStatus( "Checking field of view ...", "wait.bmp" );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-		"Tracking Camera #1 off center.\n- Unit properly boresighted?\n- Reference markers visible?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
+		"Tracking Camera #1 off center.\n- Check camera boresighted.\n- Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	if ( apparatus->nCodas > 1 ) {
 		status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-			"Tracking Camera #2 off center.\n- Unit properly boresighted?\n- Reference markers visible?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
+			"Tracking Camera #2 off center.\n- Check camera boresighted.\Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment.\n- Target bar on left?\n- Reference markers in view?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment.\n- Check target bar on LEFT.\n- Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
@@ -141,13 +141,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionTolerance, 
 											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Tracker Camera 1.\n- Configured for SEATED?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
+											"Placement error - Tracker Camera 1.\n- Check configured for SEATED.\n- Check camera arrangement.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionTolerance, 
 											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Tracker Camera 1.\n- Configured for SUPINE?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											"Placement error - Tracker Camera 1.\n- Check configured for SUPINE.\n- Check camera arrangement.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -160,13 +160,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Tracker Camera 2.\n- Configured for SEATED?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
+												"Placement error - Tracker Camera 2.\n- Check configured for SEATED.\n- Check camera arrangement.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionTolerance, 
 												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-												"Placement error - Tracker Camera 2.\n- Configured for SUPINE?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+												"Placement error - Tracker Camera 2.\n- Check configured for SUPINE.\n- Check camera arrangement.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -174,7 +174,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Tracker Camera misalignment detected!\n- Are any markers occluded?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
+			"Tracker Camera misalignment detected!\n- Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -229,13 +229,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for SEATED?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
+											"Unexpected Configuration\n- Check configured for SEATED.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											"Unexpected Configuration\n- Check configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -248,13 +248,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Unexpected Configuration.\n- Configured for SEATED?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
+												"Unexpected Configuration.\n- Check configured for SEATED.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Unexpected Configuration.\n- Configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+												"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -278,17 +278,15 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Configured for SUPINE?\n- Target mast on the LEFT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Configures for SUPINE?\n- Target mast on the RIGHT-hand side?\n- Reference markers visible?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Check configured for SUPINE.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Check configured for SUPINE.\n- Check target mast on RIGHT.\n- Check reference markers visible.\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the LEFT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the RIGHT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Check configured for SEATED.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Check configured for SEATED.\n- Check target mast on RIGHT?\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
-
 	apparatus->HideStatus();
-
 
 	return( status );
 }
@@ -431,7 +429,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
 			if ( status != NORMAL_EXIT ) return( status );
-			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected in 15 sec.", "alert.bmp" );
+			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected.", "alert.bmp" );
 			apparatus->Beep();
 			if ( status != NORMAL_EXIT ) return( status );
  			apparatus->Wait( 1.0 );
@@ -468,7 +466,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
 			for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt + 1 );
-				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
+				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Too long to reach blinkng Target LED.\nPress <Retry> to try again.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
 		}
@@ -476,7 +474,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
 			for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt + 1 );
-				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
+				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Too long to reach blinking Target LED.\nPress <Retry> to try again.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
 		}

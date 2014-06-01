@@ -323,7 +323,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( most < 1 ) most = 1;
 
 	apparatus->ShowStatus(  "Checking for number of movements ...", "wait.bmp" );
-	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?", "alert.bmp" );
+	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 #if 0

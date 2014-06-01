@@ -14,20 +14,20 @@ CMD_WAIT_SUBJ_READY,Alignment completed. Checking alignment validity for 20\, 10
 
 #Check whether reference frame markers are properly aligned now
 CMD_LOG_MESSAGE, usermsg, Running alignment check
-CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Alignment of ref frame markers >20mm fail,alert.bmp
-CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Alignment of ref frame markers >10mm fail,alert.bmp
-CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Alignment of ref frame markers >5mm fail,info.bmp
-CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Alignment of ref frame markers >3mm fail,info.bmp
-CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Alignment of ref frame markers >2mm fail,info.bmp
-CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Alignment of ref frame markers >1mm fail,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Misalignment of reference markers > 20mm.,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Misalignment of reference markers > 10mm.,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Misalignment of reference markers > 5mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Misalignment of reference markers > 3mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Misalignment of reference markers > 2mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Misalignment of reference markers > 1mm.,info.bmp
 
-CMD_WAIT_SUBJ_READY,Place manipulandum such that Visible status indicator is green. Press OK to continue.,ManipInChair.bmp,200
+CMD_WAIT_SUBJ_READY,Place manipulandum in seat locker holder such that Visible status indicator is green. Press OK to continue.,ManipInChair.bmp,200
 
 # Check whether manipulandum markers are properly aligned
 CMD_LOG_MESSAGE, usermsg, Running alignment check
-CMD_CHK_CODA_ALIGNMENT,manipmask,20,manipminvisible,Alignment of manipulandum markers >20mm fail,
-CMD_CHK_CODA_ALIGNMENT,manipmask,10,manipminvisible,Alignment of manipulandum markers >10mm fail,
-CMD_CHK_CODA_ALIGNMENT,manipmask,5,manipminvisible,Alignment of manipulandum markers >5mm fail,
-CMD_CHK_CODA_ALIGNMENT,manipmask,3,manipminvisible,Alignment of manipulandum markers >3mm fail,
-CMD_CHK_CODA_ALIGNMENT,manipmask,2,manipminvisible,Alignment of manipulandum markers >2mm fail,
-CMD_CHK_CODA_ALIGNMENT,manipmask,1,manipminvisible,Alignment of manipulandum markers >1mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Misalignment of manipulandum markers > 20mm.,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Misalignment of manipulandum markers > 10mm.,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Misalignment of manipulandum markers > 5mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Misalignment of manipulandum markers > 3mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Misalignment of manipulandum markers > 2mm.,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Misalignment of manipulandum markers > 1mm.,info.bmp
