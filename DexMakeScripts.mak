@@ -24,7 +24,7 @@ MD5TREE	=	..\bin\MD5Tree.exe
 
 default: GripFlightProofs.txt
 
-all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.txt GripFlight.md5
+all: GripFlightScripts.tar GripFlightPictures.tar DexFlightMessageList.txt GripFlight.md5
 
 ######################################################################################################################################
 
@@ -38,12 +38,18 @@ GripFlightPictures.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_f
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLintPictures.log
 	CreateFlightPicturesTar.bat GripFlightPictures.tar
 
-GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+GripFlightMessageList.txt: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+	copy /Y /V users_flight.dex users.dex
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -log=GripFlightLintProofs.log
+	copy /Y /V GripFlightMessageList.txt $(PICTURES)
+
+GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar
 	copy /Y /V users_flight.dex users.dex
 	echo echo this > $(PROOFS)\deletethis.txt
 	echo del /Q (PROOFS)\*.*
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -proofs=GripFlightProofs.txt -log=GripFlightLintProofs.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightProofs.txt -proofs -log=GripFlightLintProofs.log
 	copy /Y /V GripFlightProofs.txt $(PICTURES)
+
 
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
