@@ -57,8 +57,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 	posture = ParseForPosture( params );
 
 	// Prompt the subject to put the target bar in the correct position.
-	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Unfolded.bmp" : "Unfolded.bmp" ), 
-		"Place the target bar in the RIGHT position (Socket S) and open the tapping surfaces.%s", OkToContinue );
+	status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "TappingDeployed.bmp" : "TappingDeployed.bmp" ), PlaceTargetBarRightOpen, OkToContinue );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Verify that the apparatus is in the correct configuration, and if not, 
@@ -68,8 +67,8 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
-	AddDirective( apparatus, "You will move the manipulandum to the blinking target.", "MvToBlkV.bmp" );
-	AddDirective( apparatus, "You will then tap up or down according to the beeps and targets and return to the center.", "Collision.bmp" );
+	AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", "MvToBlkV.bmp" );
+	AddDirective( apparatus, "You will then tap up or down according to the beeps and targets, then return to the center.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -253,7 +252,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Stop acquiring.
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->SignalEvent( "Acquisition completed." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during file save." );
 	
@@ -263,28 +262,24 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
+	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 #if 0
 	// Check if there were false starts in the wrong direction.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement directions ..." );
-	apparatus->ShowStatus( "Checking movement directions ...", "working.bmp" );
+	apparatus->ShowStatus( "Checking movement directions ...", "wait.bmp" );
 	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 #endif
 
 	// Check if collision forces were within range.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking collision forces ..." );
-	apparatus->ShowStatus( "Checking collision forces ...", "working.bmp" );
+	apparatus->ShowStatus( "Checking collision forces ...", "wait.bmp" );
 	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
-
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	status = apparatus->SignalNormalCompletion( "ok.bmp", "Trial terminated successfully.\n\nPress <OK> to continue ..." );
+	status = apparatus->SignalNormalCompletion( "ok.bmp", "Trial completed successfully.\nPress <OK> to continue ..." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	return( NORMAL_EXIT );

@@ -10,18 +10,18 @@ DECL_CONST,manipminvisible,4
 CMD_LOG_MESSAGE, usermsg, Aligning CODA units
 CMD_ALIGN_CODA, CODA alignment failed,
 
-CMD_WAIT_SUBJ_READY,Alignment done. Will check 20\,10\,5\,3\,2\,1mm sequence,info.bmp,200
+CMD_WAIT_SUBJ_READY,Alignment completed. Checking alignment validity for 20\, 10\, 5\, 3\, 2\, 1 mm.,wait.bmp,200
 
 #Check whether reference frame markers are properly aligned now
 CMD_LOG_MESSAGE, usermsg, Running alignment check
-CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Alignment of ref frame markers >20mm fail,
-CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Alignment of ref frame markers >10mm fail,
-CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Alignment of ref frame markers >5mm fail,
-CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Alignment of ref frame markers >3mm fail,
-CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Alignment of ref frame markers >2mm fail,
-CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Alignment of ref frame markers >1mm fail,
+CMD_CHK_CODA_ALIGNMENT,refframemask,20,4,Alignment of ref frame markers >20mm fail,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,10,4,Alignment of ref frame markers >10mm fail,alert.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,5,4,Alignment of ref frame markers >5mm fail,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,3,4,Alignment of ref frame markers >3mm fail,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,2,4,Alignment of ref frame markers >2mm fail,info.bmp
+CMD_CHK_CODA_ALIGNMENT,refframemask,1,4,Alignment of ref frame markers >1mm fail,info.bmp
 
-CMD_WAIT_SUBJ_READY,Place manipulandum visibly and confirm,black.bmp,200
+CMD_WAIT_SUBJ_READY,Place manipulandum such that Visible status indicator is green. Press OK to continue.,ManipInChair.bmp,200
 
 # Check whether manipulandum markers are properly aligned
 CMD_LOG_MESSAGE, usermsg, Running alignment check

@@ -8,7 +8,7 @@
 	// TODO: Move this into a protocol, rather than here in a task, because the subject is likely to do multiple
 	//   blocks of trials in the same configuration.
 	status = apparatus->fWaitSubjectReady( 
-		"Install the DEX Target Frame in the %s Position.\nPlace the Target Bar in the %s position.\nPlace the tapping surfaces in the %s position.\nPress <OK> when ready.",
+		"Install the Workspace Tablet in the %s Position.\nPlace the Target Mast in the %s position.\nPlace the tapping surfaces in the %s position.\nPress <OK> when ready.",
 		PostureString[PostureSeated], TargetBarString[bar_position], TappingSurfaceString[TappingFolded] );
 	if ( status == ABORT_EXIT ) exit( status );
 

@@ -134,5 +134,11 @@ extern char *MsgTrialOver;
 extern char *MsgQueryReadySupine;
 extern char *MsgQueryReadySeated;
 extern char *OkToContinue;
+extern char *MsgReleaseAndOK;
+
+extern char *PlaceTargetBarRightOpen;
+extern char *PlaceTargetBarRightFolded;
+extern char *PlaceTargetBarLeft;
+
 
 extern char *InstructPickUpManipulandum;

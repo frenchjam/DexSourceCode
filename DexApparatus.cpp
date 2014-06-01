@@ -1882,7 +1882,7 @@ int DexApparatus::StopAcquisition( const char *msg ) {
 	MarkEvent( ACQUISITION_STOP );
 	tracker->StopAcquisition();
 	adc->StopAcquisition();
-	ShowStatus( "Acquisition terminated.\nComputing kinematic values ...", "wait.bmp" );
+	ShowStatus( "Acquisition completed.\nComputing kinematic values ...", "wait.bmp" );
 	// Retrieve the marker data.
 	for ( unit = 0; unit <= nCodas; unit++ ) {
 		nAcqFrames = tracker->RetrieveMarkerFrames( acquiredPosition[unit], DEX_MAX_MARKER_FRAMES, unit );

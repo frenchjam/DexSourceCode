@@ -61,8 +61,8 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the RIGHT position (Socket S) with tapping surfaces closed.%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "TappingFolded.bmp" : "TappingFolded.bmp" ), 
+			PlaceTargetBarRightFolded, OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
@@ -101,15 +101,15 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		AddDirective( apparatus, "You will move to the blinking target.", mtb );
-		AddDirective( apparatus, "You will then oscillate between targets, one full cycle per beep.", dsc );
-		AddDirective( apparatus, "When the beeps will stop, you will continue to oscillate.", dsc );
+		AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", mtb );
+		AddDirective( apparatus, "You will then oscillate between the lit targets, one full cycle per beep.", dsc );
+		AddDirective( apparatus, "When the beeps will stop, you should continue the oscillations.", dsc );
 	}
 		// If we delete oscillation in discrete, then we don't need this condition here below any more.
 	else {
-		AddDirective( apparatus, "You will move to the blinking target.", mtb );
-		AddDirective( apparatus, "You will then CLOSE your eyes and move between targets, one full cycle per beep.", dsc );
-		AddDirective( apparatus, "When the beeps will stop, you will continue to oscillate, keeping your eyes CLOSED.", dsc );
+		AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", mtb );
+		AddDirective( apparatus, "You will then CLOSE your eyes and oscillate between the targets, one full cycle per beep.", dsc );
+		AddDirective( apparatus, "When the beeps stop, you should continue the oscillations, keeping your eyes CLOSED.", dsc );
 	}
 
 	ShowDirectives( apparatus );
@@ -289,12 +289,12 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
-	apparatus->ShowStatus( "Acquiring baseline. Please wait ...", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 
 	// Stop acquiring.
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->SignalEvent( "Acquisition completed." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during saving." );
 
@@ -303,27 +303,27 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
+	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
-	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement extent out of range.", "alert.bmp" );
+	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
+	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement amplitude out of range.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of oscillations.
 	// Here I have set it to +/- 20% of the ideal number.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking number of oscillations ..." );
+	apparatus->ShowStatus( "Checking number of scillations ,..", "wait.bmp" );
 	oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
 	oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
 	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
+	apparatus->ShowStatus( "Post hoc tests completed.", "blank.bmp" );
 
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Task completed normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 		
 	return( NORMAL_EXIT );

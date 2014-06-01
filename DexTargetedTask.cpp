@@ -55,12 +55,12 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	// This is no longer able to handle the supine position, but since we are 
 	//  not currently planning to do this task in supine, it's OK.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right-hand position (Socket 'S') with tapping surfaces closed.%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "TappingFolded.bmp" : "TappingFolded.bmp" ), 
+			"Place the Target Mast in Socket 'S' (right side) with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
-			"Place the target bar in the left-hand position with tapping surfaces closed.%s", OkToContinue );
+			"Place the Target Mast in the Standby socket (left side) with tapping surfaces folded.%s", OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -99,12 +99,12 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 		dsc = "TargetedH.bmp";
 	}
 
-	AddDirective( apparatus, "You will place the manipulandum to the right of the blinking target.", mtb );
-	AddDirective( apparatus, "You will move quickly and accurately to the right of each lighted target.", dsc );
+	AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", mtb );
+	AddDirective( apparatus, "You will move quickly and accurately to each lighted Target LED.", dsc );
 	char msg[512];
-	sprintf( msg, "Targets will be one of the %d currently lit targets.", lit_target_count );
+	sprintf( msg, "The targets will be one of the %d currently lit Target LEDs.", lit_target_count );
 	AddDirective( apparatus, msg, dsc );
-	AddDirective( apparatus, "Be sure to hold the manipuladum upright and to the right of each target.", mtb );
+	AddDirective( apparatus, "Be sure to hold the manipuladum upright and to the right of each Target LED.", mtb );
 
 	ShowDirectives( apparatus );
 	apparatus->TargetsOff();
@@ -266,7 +266,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	
 	// Stop acquiring.
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->SignalEvent( "Acquisition completed." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during saving." );
 	
@@ -276,22 +276,22 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 	
 	// Was the manipulandum obscured?	
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
+	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
+	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
 	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// TODO: Are there more post hoc tests to be done here?
 
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
+	apparatus->ShowStatus( "Post hoc tests completed.", "blank.bmp" );
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
-	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Block completed normally." );
 	
 	return( NORMAL_EXIT );
 	

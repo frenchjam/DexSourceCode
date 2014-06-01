@@ -54,12 +54,12 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to put the target bar in the correct position.
 	if ( bar_position == TargetBarRight ) {
-		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "Folded.bmp" : "Folded.bmp" ), 
-			"Place the target bar in the right-side position, socket 'S', with tapping surfaces folded.%s", OkToContinue );
+		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "TappingFolded.bmp" : "TappingFolded.bmp" ), 
+			PlaceTargetBarRightFolded, OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 
-			"Place the target bar in the left-side position with tapping surfaces folded.%s", OkToContinue );
+			PlaceTargetBarLeft, OkToContinue );
 	}
 	if ( status == ABORT_EXIT ) exit( status );
 
@@ -91,16 +91,16 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 		dsc = "DiscreteH.bmp";
 	}
 
-	AddDirective( apparatus, "To start, you will move to the target that is blinking.", mtb );
+	AddDirective( apparatus, "To start, you will move the manipulandum to the blinking Target LED.", mtb );
 	// It would be good to have here pictures of the manipulandum properly aligned to the target.
-	if ( direction == VERTICAL ) AddDirective( apparatus, "Place the manipulandum to the right of the target mast and align the thumb with each target.", mtb );
-	else AddDirective( apparatus, "Place the manipulandum to the right of the target box and align the thumb with each target.", mtb );
-	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit target.", dsc );
+	if ( direction == VERTICAL ) AddDirective( apparatus, "Place manipulandum to the right of Target Mast and align center with each target.", mtb );
+	else AddDirective( apparatus, "Place manipulandum to the right of Workspace Tablet and align center with each target.", mtb );
+	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit Target LED.", dsc );
 	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
 	// It would be good to have a picture about eyes being open or closed.
-	AddDirective( apparatus, "Before each, you will be instructed to perform the movements with your eyes OPEN or CLOSED.", "EyesOpenClosed.bmp" );
+	AddDirective( apparatus, "Before each trial, you will be instructed to keep your eyes OPEN or CLOSED.", "EyesOpenClosed.bmp" );
 
-	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each target.", "alert.bmp" );
+	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each Target LED.", "info.bmp" );
 
 	ShowDirectives( apparatus );
 
@@ -291,7 +291,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	
 	// Stop acquiring.
 	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
-	apparatus->SignalEvent( "Acquisition terminated." );
+	apparatus->SignalEvent( "Acquisition completed." );
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during file save." );
 	
@@ -301,12 +301,12 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	int post_hoc_step = 0;
 
 	// Was the manipulandum obscured?
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking visibility ..." );
+	apparatus->ShowStatus(  "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for movement ..." );
+	apparatus->ShowStatus(  "Checking for movement ...", "wait.bmp" );
 	status = apparatus->CheckMovementAmplitude( ( eyes == CLOSED ? 1.0 : discreteMinMovementExtent ), 
 												( eyes == CLOSED ? 1000.0 : discreteMaxMovementExtent ), 
 												discreteMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
@@ -322,23 +322,23 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	int most = delaySequenceN / 2 + tolerance;
 	if ( most < 1 ) most = 1;
 
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for number of movements ..." );
+	apparatus->ShowStatus(  "Checking for number of movements ...", "wait.bmp" );
 	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Would you like to try again?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-#if 1
+#if 0
 	// Did the subject anticipate the starting signal too often?
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Checking for early starts ..." );
+	apparatus->ShowStatus(  "Checking for early starts ...", "wait.bmp" );
 	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
 		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 #endif
-	AnalysisProgress( apparatus, post_hoc_step++, n_post_hoc_steps, "Post hoc tests completed." );
+	apparatus->ShowStatus(  "Analysis completed.", "blank.bmp" );
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
-	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Task completed normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );

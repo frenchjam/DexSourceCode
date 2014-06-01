@@ -102,8 +102,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the target box for SEATED operation." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the target box for SUPINE operation." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the Workspace Tablet for SEATED operation." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the Workspace Tablet for SUPINE operation." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
@@ -114,24 +114,24 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Actually, this is not really necessary. The origin is the marker on the box and 
 	//  whether the bar is to the right or to the left, it points in the positive Y direction.
 	// So we could skip this step if we wanted to.
-	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the target bar\nis in the LEFT side position." );
+	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the target bar\nis in the Standby (left side) position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
 	apparatus->ShowStatus( "Checking field of view ...", "wait.bmp" );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-		"Markers not centered for CODA Unit #1.\n- Is the unit properly boresighted?\n- Are the box and bar markers visible?", "alert.bmp" );
+		"Tracking Camera #1 off center.\n- Unit properly boresighted?\n- Reference markers visible?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	if ( apparatus->nCodas > 1 ) {
 		status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-			"Markers not centered for CODA Unit #2.\n- Is the unit properly boresighted?\n- Are the box and bar markers visible?", "alert.bmp" );
+			"Tracking Camera #2 off center.\n- Unit properly boresighted?\n- Reference markers visible?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
-	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment.\n-Target bar in the LEFT position?\n- Reference markers in view?", "alert.bmp" );
+	status = apparatus->PerformTrackerAlignment( "Error performing tracker alignment.\n- Target bar on left?\n- Reference markers in view?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Are the Coda bars where we think they should be?
@@ -141,13 +141,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionTolerance, 
 											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n- Is setup in SEATED configuration?\n- Are coda units arranged properly?", "CalibrateSeated.bmp" );
+											"Placement error - Tracker Camera 1.\n- Configured for SEATED?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionTolerance, 
 											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Coda Unit 1.\n- Is setup in SUPINE configuration?\n- Are coda units arranged properly?", "CalibrateSupine.bmp" );
+											"Placement error - Tracker Camera 1.\n- Configured for SUPINE?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -160,13 +160,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Are coda units arranged properly?", "CalibrateSeated.bmp" );
+												"Placement error - Tracker Camera 2.\n- Configured for SEATED?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionTolerance, 
 												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Are coda units arranged properly?", "CalibrateSupine.bmp" );
+												"Placement error - Tracker Camera 2.\n- Configured for SUPINE?\n- Cameras arranged properly?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -174,7 +174,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		// Check that the trackers are still aligned with each other.
 		apparatus->ShowStatus( "Checking tracker alignment ...", "wait.bmp" );
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Coda misalignment detected!\n- Are any markers occluded?\nIf yes, correct and <Retry>.\nIf not, consult COL-CC.", "alert.bmp" );
+			"Tracker Camera misalignment detected!\n- Are any markers occluded?\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -188,12 +188,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Perform a short acquisition to measure where the manipulandum is.
-	apparatus->ShowStatus( "Acquiring baseline data. Please wait.", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition( "Error during file save." );
 
-	apparatus->ShowStatus( "Check visibility ...", "wait.bmp" );
+	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	apparatus->ShowStatus( "Visibility OK.", "ok.bmp" );
@@ -229,13 +229,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for Seated?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSeated.bmp" );
+											"Unexpected Configuration\n- Configured for SEATED?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Configured for SUPINE?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSupine.bmp" );
+											"Unexpected Configuration\n- Configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -248,20 +248,20 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n- Is setup in SEATED configuration?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSeated.bmp" );
+												"Unexpected Configuration.\n- Configured for SEATED?\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Placement error - Coda Unit 2.\n- Is setup in SUPINE configuration?\n- Was CODA alignment performed?\n(Consult with COL-CC.)", "CalibrateSupine.bmp" );
+												"Unexpected Configuration.\n- Configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 		// Check that the trackers are still aligned with each other.
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
-			"Coda misalignment detected!\n- Are any markers occluded?\nIf yes, correct and <Retry>.\nIf not, consult COL-CC.", "alert.bmp" );
+			"Coda misalignment detected!\n- Are reference markers in view?\\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	}
@@ -278,12 +278,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE ?\n- Target bar on the LEFT-hand side?\nReference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SUPINE?\n- Target bar on the RIGHT-hand side?\n- Reference markers occluded?\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Configured for SUPINE?\n- Target mast on the LEFT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Configures for SUPINE?\n- Target mast on the RIGHT-hand side?\n- Reference markers visible?\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfA.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the LEFT-hand side?\n- Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED ?\n- Target bar on the RIGHT-hand side?\n- Reference markers occluded?", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the LEFT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Configured for SEATED?\n- Target bar on the RIGHT-hand side?\n- Reference markers visible?", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 
@@ -305,7 +305,7 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) return( status );
 
 	char msg[1024];
-	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the volume until you hear them clearly.", audioCheckDuration );
+	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the audio level knob until you hear them clearly.", audioCheckDuration );
 	apparatus->ShowStatus( msg, "volume.bmp" );
 	for ( int i = 0; i < audioCheckDuration; i++ ) {
 		apparatus->Beep();
@@ -341,13 +341,13 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			id[i] = 0;
 		}
 
-		status = apparatus->fWaitSubjectReady("confirm.bmp", "Confirm Subject ID: %s\n\nIf not correct, press <OK>, then <Back>, then <Logout>.", id );
+		status = apparatus->fWaitSubjectReady("confirm.bmp", "Confirm Subject ID: %s\n\nIf not correct, press <OK>, then <Back>, then <Logout> and select your ID.", id );
 		if ( status != NORMAL_EXIT ) return( status );
 	}
 
 	// Place this at the end of a protocol to let the subject know that he or she is finished.
 	if( strstr( params, "-finish"  ) ) {
-		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated.\nPress <OK> | <Back> | <Logout>." );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Test completed.\nPress <OK> and go back to PODF." );
 		if ( status != NORMAL_EXIT ) return( status );
 	}
 
@@ -357,8 +357,8 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-ft"  ) ) {
 		double dir[3] = { 0.0, 1.0, 0.0};
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "*** Centered Grip Test ***\nRelease manipulandum and press OK." );
-		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->fWaitSubjectReady( "Offset.bmp", "********* Centered Grip Test *********\nRelease manipulandum and press OK." );
+		apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
@@ -378,11 +378,11 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
 		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
 		status = apparatus->WaitCenteredGrip(  1.0, 0.5, 1.0, "Off-center grip detected (1 mm).\nPress <IGNORE> to continue.", "info.bmp" );
-		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "If no other messages, a centered grip was detected." );
 		if ( status != NORMAL_EXIT ) return( status );
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "Release manipulandum and press OK." );
-		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->fWaitSubjectReady( "Offset.bmp", MsgReleaseAndOK );
+		apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
@@ -401,9 +401,9 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->WaitCenteredGrip( 15.0, 0.5, 1.0, "Off-center grip detected (15 mm).\nPMaintain grip and press <IGNORE>.", "info.bmp" );
 		status = apparatus->WaitCenteredGrip( 10.0, 0.5, 1.0, "Off-center grip detected (10 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
 		status = apparatus->WaitCenteredGrip(  5.0, 0.5, 1.0, "Off-center grip detected (5 mm).\nPress <IGNORE> to continue.", "info.bmp" );
-		status = apparatus->fWaitSubjectReady( "ok.bmp", "If no other message, centered grip detected." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "If no other messages, a centered grip was detected." );
 		if ( status != NORMAL_EXIT ) return( status );
-		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Test completed." );
 			
 
 	}
@@ -411,8 +411,8 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-slip"  ) ) {
 		double dir[3] = { 0.0, 1.0, 0.0};
 
-		apparatus->fWaitSubjectReady( "Offset.bmp", "Slip Test - Release manipulandum and press OK." );
-		apparatus->ShowStatus( "Acquiring offsets ...", "wait.bmp" );
+		apparatus->fWaitSubjectReady( "Offset.bmp", "*********     Slip Test     *********\nRelease manipulandum and press OK." );
+		apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
 		apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
@@ -424,7 +424,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
 		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
-		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected in 15 sec.", "alert.bmp" );
+		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		apparatus->Beep();
 		for ( int i = 1; i <= 5; i++ ) {
 			AnalysisProgress( apparatus, i, 5, "Keep rubbing. Need more slips." );
@@ -437,7 +437,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
  			apparatus->Wait( 1.0 );
 		}
 		AnalysisProgress( apparatus, i, 5, "Success!" );
-		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Test completed." );
 			
 
 	}
@@ -467,7 +467,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		if ( direction == VERTICAL ) {
 			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
 			for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
-				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt );
+				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt + 1 );
 				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
@@ -475,60 +475,61 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		else {
 			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
 			for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
-				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt );
+				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt + 1 );
 				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Time out waiting to reach target.", "alert.bmp" );
 				if ( status != NORMAL_EXIT ) return( status );
 			}
 		}
-		status = apparatus->WaitSubjectReady("ok.bmp", "Protocol Terminated." );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Test completed." );
 	}
 
 	// Check All Targets.
 	if( strstr( params, "-LEDs"  ) ) {
 		int tgt;
 		apparatus->TargetsOff();
-		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Verify that all targets are OFF." );
+		status = apparatus->fWaitSubjectReady( "AllTgtOff.bmp", "***** Target LED Hardware Tests  ****\nVerify that all targets are OFF.\nPress OK to continue." );
 		if ( status != NORMAL_EXIT ) return( status );
 		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 			apparatus->VerticalTargetOn( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is ON.\n(Vertical Target %d)", tgt + 1 );
+			status = apparatus->fWaitSubjectReady( "VertTgts.bmp", "Verify that Target LED is ON.\n(Vertical Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->VerticalTargetOff( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkV.bmp", "Verify that target is OFF again.\n(Vertical Target %d)", tgt + 1 );
+			status = apparatus->fWaitSubjectReady( "VertTgts.bmp", "Verify that target is OFF again.\n(Vertical Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 		}
 		for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
 			apparatus->HorizontalTargetOn( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is ON.\n(Horizontal Target %d)", tgt + 1 );
+			status = apparatus->fWaitSubjectReady( "HoriTgts.bmp", "Verify that Target LED is ON.\n(Horizontal Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 			apparatus->HorizontalTargetOff( tgt );
-			status = apparatus->fWaitSubjectReady( "MvToBlkH.bmp", "Verify that target is OFF again.\n(Horizontal Target %d)", tgt + 1 );
+			status = apparatus->fWaitSubjectReady( "HoriTgts.bmp", "Verify that Target LED is OFF again.\n(Horizontal Target %d)", tgt + 1 );
 			if ( status != NORMAL_EXIT ) return( status );
 		}
 		apparatus->SetTargetState( 0xFFFFFFFF );
-		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Verify that all targets are ON." );
+		status = apparatus->fWaitSubjectReady( "AllTgtOn.bmp", "Verify that all Target LEDs are ON." );
 		if ( status != NORMAL_EXIT ) return( status );
 
 		apparatus->TargetsOff();
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test completed." );
 
 	}
 
 	if( strstr( params, "-gm"  ) ) {
-		status = apparatus->fWaitSubjectReady( "needpic.bmp", "Mass selection tests." );
+		status = apparatus->fWaitSubjectReady( "blank.bmp", "*** Mass Selection Hardware Tests ***\nPress OK to start." );
 		if ( status != NORMAL_EXIT ) return( status );
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand. Shake it a bit to get a feel for its inertia." );
 		apparatus->SelectAndCheckMass( MassMedium );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
 		apparatus->SelectAndCheckMass( MassLarge );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand. Notify COL-CC if it does not appear to have a LOWER inertia than the previous." );
 		apparatus->SelectAndCheckMass( MassMedium );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
 		apparatus->SelectAndCheckMass( MassLarge );
-		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand." );
-		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test ended." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test completed." );
 	}
 
 
@@ -538,15 +539,15 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		char *tag = "FREEDATA";
 
 		double duration = ParseForDuration( apparatus, params );
-		apparatus->fWaitSubjectReady( "confirm.bmp", "Ready to record for %.2f seconds. Press <OK> to start.", duration );
-		apparatus->ShowStatus( "Acquiring.", "working.bmp" );
+		apparatus->fWaitSubjectReady( "go.bmp", "Ready to record for %.0f seconds.\nPress <OK> to start.", duration );
+		apparatus->ShowStatus( "Acquiring ...", "working.bmp" );
 		apparatus->StartFilming( tag );
 		apparatus->StartAcquisition( tag, duration );
 		apparatus->Wait( duration );
 		apparatus->StopAcquisition( "Error during saving." );
 		apparatus->StopFilming();
 		SignalEndOfRecording( apparatus );
-		status = apparatus->fWaitSubjectReady( "ok.bmp", "Acquisition ended." );
+		status = apparatus->fWaitSubjectReady( "ok.bmp", "Acquisition completed." );
 
 	}
 

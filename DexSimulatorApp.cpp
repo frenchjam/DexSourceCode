@@ -62,19 +62,23 @@ char inputSubject[256] = "users.dex";
 
 // Some common messages.
 
-char *MsgReadyToStart = "Place the manipulandum in any cradle and lock in place. Remove hand and press <OK> to start.";
-char *MsgReadyToStartOpen = "Place the manipulandum in any cradle.";
-char *MsgReadyToStartClosed = "Place the manipulandum in any cradle.";
+char *MsgReadyToStart = "Place the manipulandum in any mass cradle. Remove hand and press <OK> to start.";
+char *MsgReadyToStartOpen = "Place the manipulandum in any mass cradle.";
+char *MsgReadyToStartClosed = "Place the manipulandum in any mass cradle.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
 char *MsgTooLongToReachTarget = "Too long to reach desired target.";
 char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust until the grip is centered.";
 char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
-char *MsgTrialOver =        "*********  TASK TERMINATED  *********\nPlace the maniplandum in the empty cradle.";
-char *MsgAcquiringBaseline = "Acquiring baseline. Please wait ...";
-char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nVerify that you are seated with your seat belts fastened.%s";
-char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nVerify that you are lying down with your seat belts fastened.%s";
-char *InstructPickUpManipulandum = "You will first pick up the manipulandum with thumb and index finger centered.";
+char *MsgTrialOver =        "Place the maniplandum in the empty cradle and slide to lock.";
+char *MsgAcquiringBaseline = "Acquiring baseline ...";
+char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nYou should be sitting with the restraint belts fastened.%s";
+char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened.%s";
+char *InstructPickUpManipulandum = "You will first pick up the manipulandum at the center between thumb and forefinger.";
 char *OkToContinue ="";
+char *PlaceTargetBarRightOpen = "Place the target bar in Socket S (right side) and open the tapping surfaces.%s";
+char *PlaceTargetBarRightFolded = "Place the target bar in Socket S (right side) with the tapping surfaces folded.%s";
+char *PlaceTargetBarLeft = "Place the target bar in the Standby socket (left side) with tapping surfaces folded.%s";
+char *MsgReleaseAndOK = "Remove hand from manipulandum and press OK.";
 
 /*********************************************************************************/
 
@@ -799,10 +803,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( ParseForString( lpCmdLine, "-deploy" ) ) {
 		//need to change picture
-		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Deploy the retainer on the target frame." );
+		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Unfold the retainer on the Workspace Tablet." );
 		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
 
-		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the retainer on the target frame and lock in place. Close the locker door on the chair." );
+		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the retainer on the Workspace Tablet and lock in place (push pins). Close the locker door on the chair." );
 		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
 	}
 
@@ -813,7 +817,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Instruct subject to take the appropriate position in the apparatus
 		//  and wait for confimation that he or she is ready.
 		if ( desired_posture == PostureSeated ) {
-			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat. Attach the waist and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
+			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat in GRIP. Attach the restraint belts and attach the wrist cuff to your right wrist.", OkToContinue );
 		}
 		else if ( desired_posture == PostureSupine ) {
 			return_code = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lie down on the supine box, attach the waist, thigh and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
@@ -895,7 +899,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		return_code = apparatus->fWaitSubjectReady( "InHand.bmp", "Remove manipulandum from retainer.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
-		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Place in mass any cradle. Leave manipulandum and mass in cradle.", OkToContinue );
+		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Place mass any cradle and slide to lock. Leave manipulandum and mass in cradle.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		return_code = apparatus->fWaitSubjectReady( "CloseRetainer.bmp", "Fold down the retainer and lock in place.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );

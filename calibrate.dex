@@ -1,7 +1,7 @@
 #DEX sample task file
 CMD_LOG_MESSAGE,0, Starting screen calib task
 CMD_SHELL_KILL
-CMD_WAIT_SUBJ_READY,Press\, hold and release the\ntarget areas as requested on the\ncalibration screen.,info.bmp,300
+CMD_WAIT_SUBJ_READY,TASK PREVIEW: You will press\, hold and release each indicated location on Touch Screen. Press OK to start.,blank.bmp,300
 CMD_SHELL,"C:\\Progra~1\\Tsharc\\hwincal -q -i10"
 CMD_WAIT,10000
 #end

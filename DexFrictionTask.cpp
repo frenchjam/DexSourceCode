@@ -111,7 +111,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	// Start acquiring.
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->StartFilming( tag );
-	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 
 
@@ -128,11 +128,11 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->Beep();
 	apparatus->Beep();
 	BlinkAll( apparatus );
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand and press <OK> to continue." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", MsgReleaseAndOK );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Collect some data with zero force.
-	apparatus->ShowStatus( "Acquiring baseline ...", "wait.bmp" );
+	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 
 	// Terminate the acquisition. This will also close the data file.
@@ -142,7 +142,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition( "Error during file save." );
 
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( NULL, "Block terminated normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Task completed normally." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Apparently we were successful.
