@@ -116,7 +116,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Actually, this is not really necessary. The origin is the marker on the box and 
 	//  whether the bar is to the right or to the left, it points in the positive Y direction.
 	// So we could skip this step if we wanted to.
-	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the target bar\nis in the Standby (left side) position." );
+	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the Target Mast\nis in the Standby (left side) position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
@@ -127,7 +127,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	if ( apparatus->nCodas > 1 ) {
 		status = apparatus->CheckTrackerFieldOfView( 1, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
-			"Tracking Camera #2 off center.\n- Check boresighting.\nCheck reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
+			"Tracking Camera #2 off center.\n- Check boresighting.\n- Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
@@ -465,7 +465,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		if ( status != NORMAL_EXIT ) return( status );
 		
 		if ( direction == VERTICAL ) {
-			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
+//			apparatus->ShowStatus( "", "MvToBlkV.bmp" );
 			for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkV.bmp", "Move to blinking target.\n(Vertical Target %d)", tgt + 1 );
 				status = apparatus->WaitUntilAtVerticalTarget( tgt, uprightNullOrientation, v_tolerance, defaultOrientationTolerance, 1.0, timeout, "Too long to reach blinking Target LED.\nPress <Retry> to try again.", "alert.bmp" );
@@ -473,7 +473,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 			}
 		}
 		else {
-			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
+//			apparatus->ShowStatus( "", "MvToBlkH.bmp" );
 			for ( tgt = 0; tgt < apparatus->nHorizontalTargets; tgt++ ) {
 				apparatus->fShowStatus( "MvToBlkH.bmp", "Move to blinking target.\n(Horizontal Target %d)", tgt + 1 );
 				status = apparatus->WaitUntilAtHorizontalTarget( tgt, uprightNullOrientation, h_tolerance, defaultOrientationTolerance, 1.0, timeout, "Too long to reach blinking Target LED.\nPress <Retry> to try again.", "alert.bmp" );

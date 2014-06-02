@@ -239,6 +239,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	
 	// We're done.
 	apparatus->TargetsOff();
+	apparatus->ShowStatus( "", "blank.bmp" );
 
 	// Mark the ending point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( END_ANALYSIS );

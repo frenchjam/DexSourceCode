@@ -22,7 +22,7 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: release
+default: GripFlightScripts.tar
 
 all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt GripFlight.md5
 

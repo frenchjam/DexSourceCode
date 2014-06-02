@@ -70,7 +70,7 @@ char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers 
 char *MsgTooLongToReachTarget = "Too long to reach blinking Target LED.";
 char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust until the grip is centered.";
 char *MsgMoveToBlinkingTarget = "Move to blinking target.";
-char *MsgTrialOver =        "Place the maniplandum and mass in the empty cradle and slide to lock. Remove hand.";
+char *MsgTrialOver =        "Place the maniplandum and mass in the empty cradle and slide to lock. Remove hand and press <OK>.";
 char *MsgAcquiringBaseline = "Acquiring baseline ...";
 char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nYou should be sitting with the restraint belts fastened.%s";
 char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened.%s";
@@ -79,7 +79,7 @@ char *OkToContinue ="";
 char *PlaceTargetBarRightOpen = "Place the Target Mast in Socket N (right side) with the tapping surfaces open.%s";
 char *PlaceTargetBarRightFolded = "Place the Target Mast in Socket N (right side) with the tapping surfaces folded.%s";
 char *PlaceTargetBarLeft = "Place the Target Mast in the Standby socket (left side) with tapping surfaces folded.%s";
-char *MsgReleaseAndOK = "Remove hand from manipulandum";
+char *MsgReleaseAndOK = "Remove hand from manipulandum and press <OK>.";
 
 /*********************************************************************************/
 
@@ -807,7 +807,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		return_code = apparatus->WaitSubjectReady("OpenRetainer.bmp", "Unfold the retainer on the Workspace Tablet." );
 		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
 
-		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the retainer on the Workspace Tablet and lock in place (push pins). Close the locker door on the chair." );
+		return_code = apparatus->WaitSubjectReady("RetainerManip.bmp", "Move the manipulandum to the retainer on the Workspace Tablet and lock in place (push pins)." );
 		if ( return_code == ABORT_EXIT || return_code == RETRY_EXIT ) return( return_code );
 	}
 
