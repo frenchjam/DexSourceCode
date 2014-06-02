@@ -22,13 +22,13 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: GripFlightProofs.txt
+default: GripFlightMessageList.txt _check_messages.dex
 
-all: GripFlightScripts.tar GripFlightPictures.tar DexFlightMessageList.txt GripFlight.md5
+all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt GripFlight.md5
 
 ######################################################################################################################################
 
-GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(LINT) users_flight.dex _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -log=GripFlightLintScripts.log
 	CreateFlightScriptsTar.bat GripFlightScripts.tar
@@ -38,16 +38,16 @@ GripFlightPictures.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_f
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLintPictures.log
 	CreateFlightPicturesTar.bat GripFlightPictures.tar
 
-GripFlightMessageList.txt: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+GripFlightMessageList.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -log=GripFlightLintMessages.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -log=GripFlightLintMessages.log
 	copy /Y /V GripFlightMessageList.txt $(PICTURES)
 
 GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar
 	copy /Y /V users_flight.dex users.dex
 	echo echo this > $(PROOFS)\deletethis.txt
 	echo del /Q (PROOFS)\*.*
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -proofs -log=GripFlightLintProofs.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs -log=GripFlightLintProofs.log
 	copy /Y /V GripFlightProofs.txt $(PICTURES)
 
 
@@ -236,7 +236,8 @@ task_nullify.dex: $(STATICSCRIPTS)\task_nullify.dex
 	copy /Y $(STATICSCRIPTS)\task_nullify.dex .
 task_shutdown.dex: $(STATICSCRIPTS)\task_shutdown.dex
 	copy /Y $(STATICSCRIPTS)\task_shutdown.dex .
-
+_check_messages.dex: $(STATICSCRIPTS)\_check_messages.dex
+	copy /Y $(STATICSCRIPTS)\_check_messages.dex .
 
 ######################################################################################################################################
 

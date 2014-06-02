@@ -3,4 +3,5 @@
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
+CMD_PROTOCOL,999,_check_messages.dex,Debug Messages
 #end

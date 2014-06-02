@@ -1037,7 +1037,7 @@ int RunProtocol ( DexApparatus *apparatus, char *filename ) {
 			strcpy( task_file, token[2] );
 			// Check if it exists and is readable.
 			if ( _access( task_file, 0x00 ) ) {
-				fMessageBox( MB_OK, "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
+				fMessageBox( MB_OK, "Error", "  %s Line %03d Cannot access task file: %s\n", filename, line_n, task_file );
 			}	
 			else {
 				strcpy( TaskFilePath[tasks], token[2] );

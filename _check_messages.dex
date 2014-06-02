@@ -1,0 +1,7 @@
+# Special task for debugging scripts.
+CMD_TASK,990,_check_special_task.dex,Special Characters
+CMD_TASK,991,_check_a_e_task.dex,A - E
+CMD_TASK,992,_check_f_m_task.dex,F - M
+CMD_TASK,993,_check_n_s_task.dex,N - S
+CMD_TASK,994,_check_t_z_task.dex,T - Z
+#end

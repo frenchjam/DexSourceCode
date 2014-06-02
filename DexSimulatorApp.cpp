@@ -900,7 +900,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Remove manipulandum from retainer, place inside a mass in any cradle and slide to lock.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
-		return_code = apparatus->fWaitSubjectReady( "HandsOffCradle.bmp", ".Remove hand, leaving manipulandum and mass in cradle.", OkToContinue );
+		return_code = apparatus->fWaitSubjectReady( "HandsOffCradle.bmp", "Remove hand, leaving manipulandum and mass in cradle.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		return_code = apparatus->fWaitSubjectReady( "CloseRetainer.bmp", "Fold down the retainer and lock in place.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
