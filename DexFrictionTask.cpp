@@ -113,7 +113,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	// Start acquiring.
 	apparatus->StartAcquisition( tag, maxTrialDuration );
-	apparatus->StartFilming( tag );
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );
 

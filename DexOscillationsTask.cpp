@@ -212,7 +212,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Presumably the manipulandum is not in the hand. 
 	// It should have been left either in a cradle or the retainer at the end of the last action.
 	apparatus->SignalEvent( "Initiating set of oscillation movements." );
-	apparatus->StartFilming( tag );
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->Wait( baselineDuration );

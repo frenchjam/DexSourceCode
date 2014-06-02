@@ -541,7 +541,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		double duration = ParseForDuration( apparatus, params );
 		apparatus->fWaitSubjectReady( "go.bmp", "Ready to record for %.0f seconds.\nPress <OK> to start.", duration );
 		apparatus->ShowStatus( "Acquiring ...", "working.bmp" );
-		apparatus->StartFilming( tag );
+		apparatus->StartFilming( tag, defaultCameraFrameRate );
 		apparatus->StartAcquisition( tag, duration );
 		apparatus->Wait( duration );
 		apparatus->StopAcquisition( "Error during saving." );

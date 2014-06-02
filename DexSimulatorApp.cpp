@@ -51,6 +51,7 @@ double copTolerance = 10.0;					// Tolerance on how well the fingers are centere
 double copForceThreshold = 0.25;			// Threshold of grip force to test if the manipulandum is in the hand.
 double copWaitTime = 10.0;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
+int defaultCameraFrameRate = 2;
 
 char outputScript[256] = "DexSampleScript.dex";
 char inputScript[256] = "DexSampleScript.dex";

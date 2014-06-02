@@ -2057,15 +2057,14 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 /*********************************************************************************/
 
 void DexApparatus::SnapPhoto( void ) {
-	ShowWindow( camera_dlg, SW_SHOW );
-	Update();
-	Wait( 0.1 );
-	ShowWindow( camera_dlg, SW_HIDE );
-	Update();
+
+	StartFilming( "PIC", 1 );
+	Wait( 2.0 );
+	StopFilming();
 
 }
 
-void DexApparatus::StartFilming( const char *tag ) {
+void DexApparatus::StartFilming( const char *tag, int fps ) {
 	ShowWindow( camera_dlg, SW_SHOW );
 	Update();
 }

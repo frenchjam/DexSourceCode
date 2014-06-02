@@ -620,17 +620,16 @@ int DexCompiler::CheckAccelerationPeaks( float min_amplitude, float max_amplitud
 	return( NORMAL_EXIT ); 
 }
 
-void DexCompiler::SnapPhoto( void ) {}
-void DexCompiler::StartFilming( const char *tag ) {
-	AddStepNumber();
-	// Log the message and show it on the DEX screen.
+void DexCompiler::StartFilming( const char *tag, int fps ) {
 	strncpy( hold_film_tag, tag, 8 );
 	hold_film_tag[8] = 0;
+	AddStepNumber();
+	fprintf( fp, "CMD_CFG_CAMERA, %d\n", fps );
+	AddStepNumber();
 	fprintf( fp, "CMD_CTRL_CAMERA, 1, %8s\n", hold_film_tag );
 }
 void DexCompiler::StopFilming( void ) {
 	AddStepNumber();
-	// Log the message and show it on the DEX screen.
 	fprintf( fp, "CMD_CTRL_CAMERA, 0, %8s\n", hold_film_tag );
 }
 

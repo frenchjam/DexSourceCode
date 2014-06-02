@@ -225,7 +225,7 @@ public:
 	virtual int  StopAcquisition( const char *msg );
 
 	virtual void SnapPhoto( void );
-	virtual void StartFilming( const char *tag );
+	virtual void StartFilming( const char *tag, int fps );
 	virtual void StopFilming( void );
 	
 	// Flow control
@@ -483,8 +483,7 @@ public:
 
 	void AddStepNumber( void );
 
-	void SnapPhoto( void );
-	void StartFilming( const char *tag );
+	void StartFilming( const char *tag, int fps );
 	void StopFilming( void );
 
 };

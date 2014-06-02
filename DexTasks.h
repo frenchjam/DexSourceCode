@@ -51,6 +51,8 @@ extern double copWaitTime;					// Gives time to achieve the centered grip.
 extern unsigned long alignmentMarkerMask;	// A bit mask describing which markers are used to perform the alignment check.
 extern unsigned long fovMarkerMask;			// A bit mask describing which markers are used to check the fov of each CODA.
 
+extern int defaultCameraFrameRate;
+ 
 extern char *OkToContinue;					// A standardized message about pressing OK to continue. Could be set to "" if we don't think those messages are needed.
 
 // Some helper functions provided by DexSimulatorApp.
