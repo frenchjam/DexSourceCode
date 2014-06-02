@@ -22,7 +22,7 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: GripFlightMessageList.txt _check_messages.dex
+default: release
 
 all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt GripFlight.md5
 
@@ -50,11 +50,13 @@ GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs -log=GripFlightLintProofs.log
 	copy /Y /V GripFlightProofs.txt $(PICTURES)
 
+GripFlightProofs.tar: GripFlightProofs.txt
+	$(TAR) --create --verbose --directory=..\GripScreenShots\ *.bmp --file=GripFlightProofs.tar
 
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
 
-release: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5 
+release: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.txt GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
 	 
 ######################################################################################################################################

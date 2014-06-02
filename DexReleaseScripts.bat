@@ -20,6 +20,7 @@ REM Each release consists of a script tar file, a pictures tar file and md5 chec
 REM It also contains the installation instructions.
 copy /Y /V %ROOT%Scripts.tar  "%DESTINATION%\%TIMESTAMP% %ROOT%Scripts.tar"
 copy /Y /V %ROOT%Pictures.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Pictures.tar"
+copy /Y /V %ROOT%Proofs.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Proofs.tar"
 copy /Y /V %ROOT%.md5         "%DESTINATION%\%TIMESTAMP% %ROOT%.md5" 
 copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
 copy /Y /V ..\DexSourceCode\GripReleaseNotes.txt "%DESTINATION%\%TIMESTAMP% Release Notes.txt" 
