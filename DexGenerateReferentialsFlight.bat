@@ -22,6 +22,7 @@ REM  (small, medium and large) will use the same ID number for each task, but th
 REM  start numbering from different values, i.e. Dynamics = 200, Upright = 300, Supine = 400.
 set task=300
 if /I %posture% EQU supine SET task=400 
+if /I %posture% EQU Supine SET task=400 
 
 REM Write a header into the file.
 ECHO #DEX protocol file for Reference Frame Flight protocol.
@@ -55,7 +56,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -deploy
+call %SOURCE%\DexCreateOffsetTask.bat -deploy -%posture%
 
 REM ****************************************************************************
 
