@@ -213,8 +213,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	apparatus->ShowStatus( "Trial started ...", "working.bmp" );
-
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
@@ -302,14 +300,14 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Was the manipulandum obscured?
 	apparatus->ShowStatus(  "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance.", "alert.bmp" );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum out of view too often. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
 	apparatus->ShowStatus(  "Checking for movement ...", "wait.bmp" );
 	status = apparatus->CheckMovementAmplitude( ( eyes == CLOSED ? 1.0 : discreteMinMovementExtent ), 
 												( eyes == CLOSED ? 1000.0 : discreteMaxMovementExtent ), 
-												discreteMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
+												discreteMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of movements. 
@@ -323,7 +321,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	if ( most < 1 ) most = 1;
 
 	apparatus->ShowStatus(  "Checking for number of movements ...", "wait.bmp" );
-	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected.", "alert.bmp" );
+	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 #if 0
@@ -331,10 +329,11 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->ShowStatus(  "Checking for early starts ...", "wait.bmp" );
 	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
 		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
-		"Too many early starts.\nPlease wait for the beep each time.\nWould you like to try again?", "alert.bmp" );
+		"Too many early starts. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 #endif
-	apparatus->ShowStatus(  "Analysis completed.", "blank.bmp" );
+
+	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.

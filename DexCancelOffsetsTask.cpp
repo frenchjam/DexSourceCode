@@ -42,7 +42,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operation to cancel force sensor offsets." );
 	apparatus->SignalEvent( "Preparing for force offset acquisition ..." );
-	apparatus->ShowStatus( "Preparing for force offset acquisition ...", "wait.bmp" );
+	apparatus->ShowStatus( "Preparing for acquisition.", "wait.bmp" );
 
 	// Actually, the manipulandum is in the retainer only for friction test. So, as JL and PL suggested it, we could insert only one picture 
 	// with the manipulandum in a cradle for the offsetMeasurement and another for friction.

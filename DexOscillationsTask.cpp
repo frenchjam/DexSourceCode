@@ -304,23 +304,23 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Was the manipulandum obscured?
 	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often.", "alert.bmp" );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable amount of movement.
 	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
-	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement amplitude out of range.", "alert.bmp" );
+	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement amplitude out of range. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that we got a reasonable number of oscillations.
 	// Here I have set it to +/- 20% of the ideal number.
-	apparatus->ShowStatus( "Checking number of scillations ,..", "wait.bmp" );
+	apparatus->ShowStatus( "Checking number of Oscillations ...", "wait.bmp" );
 	oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
 	oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
-	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range.", "alert.bmp" );
+	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	apparatus->ShowStatus( "Post hoc tests completed.", "blank.bmp" );
+	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( NULL, "Task completed normally." );

@@ -106,7 +106,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) exit( status );
 
     // picture Remove Hand with manipulandum in the retainer.
-	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum and press <OK> to start." );
+	apparatus->WaitSubjectReady( "REMOVE_HAND.bmp", "*****     PREPARING TO START     *****\nRemove hand from the manipulandum." );
 
 	// Start acquiring.
 	apparatus->StartAcquisition( tag, maxTrialDuration );

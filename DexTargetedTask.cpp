@@ -277,21 +277,21 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	
 	// Was the manipulandum obscured?	
 	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occlusions exceed tolerance.", "alert.bmp" );
+	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 	// Check that we got a reasonable amount of movement.
 	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
-	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range.", "alert.bmp" );
+	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// TODO: Are there more post hoc tests to be done here?
 
-	apparatus->ShowStatus( "Post hoc tests completed.", "blank.bmp" );
+	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
-	status = apparatus->SignalNormalCompletion( NULL, "Block completed normally." );
+	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed normally." );
 	
 	return( NORMAL_EXIT );
 	

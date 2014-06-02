@@ -40,14 +40,14 @@ GripFlightPictures.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_f
 
 GripFlightMessageList.txt: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
 	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -log=GripFlightLintProofs.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -log=GripFlightLintMessages.log
 	copy /Y /V GripFlightMessageList.txt $(PICTURES)
 
 GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar
 	copy /Y /V users_flight.dex users.dex
 	echo echo this > $(PROOFS)\deletethis.txt
 	echo del /Q (PROOFS)\*.*
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightProofs.txt -proofs -log=GripFlightLintProofs.log
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -message=GripFlightMessageList.txt -proofs -log=GripFlightLintProofs.log
 	copy /Y /V GripFlightProofs.txt $(PICTURES)
 
 

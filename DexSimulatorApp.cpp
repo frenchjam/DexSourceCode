@@ -62,14 +62,14 @@ char inputSubject[256] = "users.dex";
 
 // Some common messages.
 
-char *MsgReadyToStart = "Place the manipulandum in any mass cradle. Remove hand and press <OK> to start.";
+char *MsgReadyToStart = "Place the manipulandum in any mass/cradle. Leave mass and and manipulandum in cradle and remove hand.";
 char *MsgReadyToStartOpen = "Place the manipulandum in any mass cradle.";
 char *MsgReadyToStartClosed = "Place the manipulandum in any mass cradle.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
-char *MsgTooLongToReachTarget = "Too long to reach desired target.";
+char *MsgTooLongToReachTarget = "Too long to reach blinking Target LED.";
 char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust until the grip is centered.";
-char *MsgMoveToBlinkingTarget = "Trial Started. Move to blinking target.";
-char *MsgTrialOver =        "Place the maniplandum in the empty cradle and slide to lock.";
+char *MsgMoveToBlinkingTarget = "Move to blinking target.";
+char *MsgTrialOver =        "Place the maniplandum and mass in the empty cradle and slide to lock. Remove hand.";
 char *MsgAcquiringBaseline = "Acquiring baseline ...";
 char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nYou should be sitting with the restraint belts fastened.%s";
 char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened.%s";
@@ -78,7 +78,7 @@ char *OkToContinue ="";
 char *PlaceTargetBarRightOpen = "Place the target bar in Socket S (right side) and open the tapping surfaces.%s";
 char *PlaceTargetBarRightFolded = "Place the target bar in Socket S (right side) with the tapping surfaces folded.%s";
 char *PlaceTargetBarLeft = "Place the target bar in the Standby socket (left side) with tapping surfaces folded.%s";
-char *MsgReleaseAndOK = "Remove hand from manipulandum and press OK.";
+char *MsgReleaseAndOK = "Remove hand from manipulandum";
 
 /*********************************************************************************/
 
@@ -897,9 +897,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( ParseForString( lpCmdLine, "-stow" ) ) {
 
-		return_code = apparatus->fWaitSubjectReady( "InHand.bmp", "Remove manipulandum from retainer.", OkToContinue );
+		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Remove manipulandum from retainer, place inside a mass in any cradle and slide to lock.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
-		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Place mass any cradle and slide to lock. Leave manipulandum and mass in cradle.", OkToContinue );
+		return_code = apparatus->fWaitSubjectReady( "HandsOffCradle.bmp", ".Remove hand, leaving manipulandum and mass in cradle.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		return_code = apparatus->fWaitSubjectReady( "CloseRetainer.bmp", "Fold down the retainer and lock in place.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
