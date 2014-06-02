@@ -1,3 +1,7 @@
+GRIP Release (2014.06.02 19.53.35) Released to CADMOS for installation on FM.
+
+	Numerous corrections to screens and messages.
+	Added tools to check screens and messages for easier reference and review.
 
 GRIP Release (2014.13.05 12.07.58) Second SVT delivered to CADMOS for second part of SVT.
 
