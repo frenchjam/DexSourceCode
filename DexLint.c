@@ -919,7 +919,7 @@ int main ( int argc, char *argv[] ) {
 		if ( strlen( script_batch ) ) {
 			fp = fopen( script_batch, "w" );
 			fprintf( fp, "@echo on\nSETLOCAL\n" );
-			fprintf( fp, "echo %date% %time% > ScriptsTimeStamp\n" );
+			fprintf( fp, "echo %%date%% %%time%% > ScriptsTimeStamp\n" );
 			fprintf( fp, "set FILES=" );
 			fprintf( fp, "%s", user_file );
 			for ( j = 0; j < global_scripts; j++ ) fprintf( fp, " %s", global_script_filenames[j] );
@@ -940,12 +940,12 @@ int main ( int argc, char *argv[] ) {
 		if ( strlen( picture_batch ) ) {
 			fp = fopen( picture_batch, "w" );
 			fprintf( fp, "@echo on\nSETLOCAL\n" );
-			fprintf( fp, "echo %date% %time% > PictureTimeStamp\n" );
+			fprintf( fp, "echo %%date%% %%time%% > PicturesTimeStamp\n" );
 			fprintf( fp, "set FILES=" );
 			for ( j = 0; j < global_pictures; j++ ) fprintf( fp, "%s ", global_picture_filenames[j] );
-			fprintf( fp, " PicturesTimeStamp\n" );
+			fprintf( fp, "\n" );
 			fprintf( fp, "..\\bin\\MD5Tree.exe %%FILES%% > Pictures.md5\n" );
-			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose Pictures.md5 --directory=%s %%FILES%% --file=%%1\n", picture_path );
+			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose Pictures.md5 PicturesTimeStamp --directory=%s %%FILES%% --file=%%1\n", picture_path );
 			fclose( fp );
 		}
 
