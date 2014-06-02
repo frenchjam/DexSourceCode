@@ -814,6 +814,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( instruct_to_sit ) {
 
 		DexSubjectPosture desired_posture = ParseForPosture( lpCmdLine );
+		
+		return_code = apparatus->fWaitSubjectReady( "confirm.bmp", "If open, close the locker.%s", OkToContinue );
 
 		// Instruct subject to take the appropriate position in the apparatus
 		//  and wait for confimation that he or she is ready.
