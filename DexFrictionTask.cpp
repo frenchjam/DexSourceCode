@@ -124,7 +124,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	apparatus->fShowStatus( "rub.bmp", "Continue squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
+	apparatus->fShowStatus( "rub.bmp", "Continue to squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
 
 	apparatus->Wait( duration );
 
