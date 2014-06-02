@@ -51,6 +51,9 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "Ensure that manipulandum is locked in the retainer (press locking pins). Remove hand for sensor offset measurement.%s", OkToContinue );
 	if ( status == ABORT_EXIT ) return( status );
 	
+	status = apparatus->SelfTest();
+	if ( status == ABORT_EXIT ) return( status );
+
 	// Acquire some data.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->StartAcquisition( tag, maxTrialDuration );

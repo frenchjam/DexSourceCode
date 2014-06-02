@@ -146,6 +146,9 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 
+	status = apparatus->SelfTest();
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Start acquisition and acquire a baseline.
 	// Presumably the manipulandum is not in the hand. 
 	// It should have been left either in a cradle or the retainer at the end of the last action.

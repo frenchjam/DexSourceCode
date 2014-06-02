@@ -272,6 +272,7 @@ public:
 	virtual DexTargetBarConfiguration BarPosition( void );
 	virtual DexTappingSurfaceConfiguration TappingDeployment( void );	
 	virtual int SelectAndCheckMass( int mass );
+	virtual int SelfTest( void );
 	
 	// Post hoc tests of data validity.
 	virtual int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg, const char *picture );
@@ -441,6 +442,8 @@ public:
 //	int SelectAndCheckConfiguration( int posture, int bar_position, int tapping );
 	int SelectAndCheckConfiguration( const char *picture, const char *message, int posture, int bar_position, int tapping );
 	int SelectAndCheckMass( int mass );
+	int SelfTest( void );
+
 
 	int CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg, const char *picture );
 	int CheckMovementAmplitude(  double min, double max, 

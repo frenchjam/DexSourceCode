@@ -228,6 +228,14 @@ char *DexCompiler::quoteMessage( const char *message ) {
 
 }
 
+/***************************************************************************/
+
+int DexCompiler::SelfTest( void ) {
+	AddStepNumber();
+	fprintf( fp, "CMD_SELFTEST\n" );
+	return( NORMAL_EXIT );
+}
+
 
 /***************************************************************************/
 

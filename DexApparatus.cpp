@@ -295,6 +295,12 @@ int DexApparatus::CalibrateTargets( void ) {
 
 /***************************************************************************/
 
+int DexApparatus::SelfTest( void ) {
+	return( NORMAL_EXIT );
+}
+
+/***************************************************************************/
+
 int DexApparatus::CheckTrackerFieldOfView( int unit, unsigned long marker_mask, 
 										   float min_x, float max_x,
 										   float min_y, float max_y,
