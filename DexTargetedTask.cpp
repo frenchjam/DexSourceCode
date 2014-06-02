@@ -56,7 +56,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	//  not currently planning to do this task in supine, it's OK.
 	if ( bar_position == TargetBarRight ) {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "TappingFolded.bmp" : "TappingFolded.bmp" ), 
-			"Place the Target Mast in Socket 'S' (right side) with tapping surfaces folded.%s", OkToContinue );
+			"Place the Target Mast in Socket N (right side) with tapping surfaces folded.%s", OkToContinue );
 	}
 	else {
 		status = apparatus->fWaitSubjectReady( ( posture == PostureSeated ? "BarLeft.bmp" : "BarLeft.bmp" ), 

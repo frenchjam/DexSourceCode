@@ -237,7 +237,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Check configured for SUPINE?\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											"Unexpected Configuration\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );

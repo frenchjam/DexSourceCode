@@ -76,9 +76,9 @@ char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nYou should b
 char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened.%s";
 char *InstructPickUpManipulandum = "You will first pick up the manipulandum at the center between thumb and forefinger.";
 char *OkToContinue ="";
-char *PlaceTargetBarRightOpen = "Place the target bar in Socket S (right side) and open the tapping surfaces.%s";
-char *PlaceTargetBarRightFolded = "Place the target bar in Socket S (right side) with the tapping surfaces folded.%s";
-char *PlaceTargetBarLeft = "Place the target bar in the Standby socket (left side) with tapping surfaces folded.%s";
+char *PlaceTargetBarRightOpen = "Place the Target Mast in Socket N (right side) with the tapping surfaces open.%s";
+char *PlaceTargetBarRightFolded = "Place the Target Mast in Socket N (right side) with the tapping surfaces folded.%s";
+char *PlaceTargetBarLeft = "Place the Target Mast in the Standby socket (left side) with tapping surfaces folded.%s";
 char *MsgReleaseAndOK = "Remove hand from manipulandum";
 
 /*********************************************************************************/
