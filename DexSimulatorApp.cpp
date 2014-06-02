@@ -67,7 +67,7 @@ char *MsgReadyToStart = "Place the manipulandum in any mass/cradle. Leave mass a
 char *MsgReadyToStartOpen = "Place the manipulandum in any mass cradle.";
 char *MsgReadyToStartClosed = "Place the manipulandum in any mass cradle.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
-char *MsgTooLongToReachTarget = "Too long to reach blinking Target LED.";
+char *MsgTooLongToReachTarget = "Too long to reach blinking Target LED.\nPress <Retry> to try again.";
 char *MsgCheckGripCentered = "Pick up the manipulandum with the mass. Adjust until the grip is centered.";
 char *MsgMoveToBlinkingTarget = "Move to blinking target.";
 char *MsgTrialOver =        "Place the maniplandum and mass in the empty cradle and slide to lock. Remove hand and press <OK>.";
@@ -818,7 +818,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		// Instruct subject to take the appropriate position in the apparatus
 		//  and wait for confimation that he or she is ready.
 		if ( desired_posture == PostureSeated ) {
-			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat in GRIP. Attach the restraint belts and attach the wrist cuff to your right wrist.", OkToContinue );
+			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat in GRIP. Attach the restraint belts and attach the cuffs to your right wrist and elbow.", OkToContinue );
 		}
 		else if ( desired_posture == PostureSupine ) {
 			return_code = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lie down on the supine box, attach the waist, thigh and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
@@ -898,7 +898,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( ParseForString( lpCmdLine, "-stow" ) ) {
 
-		return_code = apparatus->fWaitSubjectReady( "PlaceMass.bmp", "Remove manipulandum from retainer, place inside a mass in any cradle and slide to lock.", OkToContinue );
+		return_code = apparatus->fWaitSubjectReady( "PlaceMassNoSlide.bmp", "Remove manipulandum from retainer, place inside a mass in any cradle.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 		return_code = apparatus->fWaitSubjectReady( "HandsOffCradle.bmp", "Remove hand, leaving manipulandum and mass in cradle.", OkToContinue );
 		if ( return_code == ABORT_EXIT ) exit( return_code );

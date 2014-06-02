@@ -48,7 +48,7 @@ int RunTransducerOffsetCompensation( DexApparatus *apparatus, const char *params
 	// with the manipulandum in a cradle for the offsetMeasurement and another for friction.
 	// The offsets are cancelled only once, just after installation and just before the friction test. 
 	// So it makes more sense to have the manipulandum in the retainer.
-	status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "Remove hand for sensor offset measurement. Press <OK> to start." );
+	status = apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "Remove hand for sensor offset measurement. Press <OK> to start." );
 	if ( status == ABORT_EXIT ) return( status );
 	
 	status = apparatus->SelfTest();

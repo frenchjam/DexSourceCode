@@ -184,7 +184,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Collect some data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
-	apparatus->ShowStatus( "Tap upward or downward according to the beep and the lighted targets.", "working.bmp" );
+	apparatus->ShowStatus( "Tap upward or downward according to the beep and the lighted Target LEDs.", "working.bmp" );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
@@ -265,25 +265,25 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Was the manipulandum obscured?
 	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
+	status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	
 #if 0
 	// Check if there were false starts in the wrong direction.
 	apparatus->ShowStatus( "Checking movement directions ...", "wait.bmp" );
-	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
+	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 #endif
 
 	// Check if collision forces were within range.
 	apparatus->ShowStatus( "Checking collision forces ...", "wait.bmp" );
-	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range. Press <Retry> to repeat (once only) or call COL-CC.", "alert.bmp" );
+	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
 	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed successfully." );
+	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	return( NORMAL_EXIT );

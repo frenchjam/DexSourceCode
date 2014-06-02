@@ -102,8 +102,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Install the Workspace Tablet for SEATED operation." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Install the Workspace Tablet for SUPINE operation." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Check Workspace Tablet installed for SEATED operation." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
@@ -305,7 +305,7 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT ) return( status );
 
 	char msg[1024];
-	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the audio level knob until you hear them clearly.", audioCheckDuration );
+	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the audio control until you hear them clearly.", audioCheckDuration );
 	apparatus->ShowStatus( msg, "volume.bmp" );
 	for ( int i = 0; i < audioCheckDuration; i++ ) {
 		apparatus->Beep();
@@ -423,7 +423,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center to desired force (see LEDs)." );
+		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center until the desired force is achieved (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		apparatus->Beep();
 		for ( int i = 1; i <= 5; i++ ) {
@@ -437,7 +437,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
  			apparatus->Wait( 1.0 );
 		}
 		AnalysisProgress( apparatus, i, 5, "Completed." );
-		status = apparatus->WaitSubjectReady("ok.bmp", "Task successfully completed." );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Task completed." );
 			
 
 	}

@@ -1,5 +1,6 @@
 #DEX Generic Utilities
 #Format: "CMD_TASK", task id, task file, display name
+CMD_TASK,199,task_shutdown.dex,Shutdown System
 CMD_TASK,110,task_align.dex,Align CODAs
 CMD_TASK,120,task_nullify.dex,Nullify Forces
 CMD_TASK,130,TaskAcquire5s.dex,Acquire 5s
@@ -13,5 +14,4 @@ CMD_TASK,180,TaskCheckWaitAtTargetUpVe.dex,Wait@Targets UpVe
 CMD_TASK,181,TaskCheckWaitAtTargetUpHo.dex,Wait@Targets UpHo
 CMD_TASK,182,TaskCheckWaitAtTargetSuVe.dex,Wait@Targets SuVe
 CMD_TASK,183,TaskCheckWaitAtTargetSuHo.dex,Wait@Targets	SuHo
-CMD_TASK,199,task_shutdown.dex,Shutdown System
 #end 

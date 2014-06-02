@@ -118,13 +118,13 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 
 
-    apparatus->fShowStatus( "Coef_frict.bmp", "Pinch the manipulandum %s at the center between thumb and index finger.", squeeze  );
+    apparatus->fShowStatus( "Coef_frict.bmp", "Pinch the manipulandum %s at the center between thumb and forefinger.", squeeze  );
 	apparatus->Beep();
 
 	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	apparatus->fShowStatus( "rub.bmp", "Squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
+	apparatus->fShowStatus( "rub.bmp", "Continue squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
 
 	apparatus->Wait( duration );
 
@@ -145,7 +145,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition( "Error during file save." );
 
 	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( NULL, "Task completed normally." );
+	status = apparatus->SignalNormalCompletion( NULL, "Task completed." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Apparently we were successful.

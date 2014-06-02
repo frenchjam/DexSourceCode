@@ -10,7 +10,7 @@ DECL_CONST,manipminvisible,4
 CMD_LOG_MESSAGE, usermsg, Aligning CODA units
 CMD_ALIGN_CODA, CODA alignment failed,
 
-CMD_WAIT_SUBJ_READY,Alignment completed. Checking alignment validity for 20\, 10\, 5\, 3\, 2\, 1 mm.,wait.bmp,200
+CMD_WAIT_SUBJ_READY,Alignment completed. Checking alignment validity for 20\, 10\, 5\, 3\, 2\, 1 mm.,info.bmp,200
 
 #Check whether reference frame markers are properly aligned now
 CMD_LOG_MESSAGE, usermsg, Running alignment check
