@@ -133,6 +133,7 @@ REM
 
 set mass=400gm
 set nblocks=10
+set direction=Vertical
 call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************

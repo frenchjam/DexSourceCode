@@ -73,6 +73,16 @@ call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
 REM ****************************************************************************
 
 REM
+REM Collisions
+REM
+set direction=Vertical
+set mass=600gm
+set nblocks=10
+call %SOURCE%\DexCreateCollisionTasks.bat
+
+REM ****************************************************************************
+
+REM
 REM Discrete Movements
 REM
 
@@ -125,14 +135,8 @@ call %SOURCE%\DexCreateDiscreteTask.bat
 
 REM ****************************************************************************
 
-REM
-REM Collisions
-REM
-set mass=600gm
-set nblocks=10
-call %SOURCE%\DexCreateCollisionTasks.bat
-
 set mass=400gm
+set direction=Vertical
 set nblocks=10
 call %SOURCE%\DexCreateCollisionTasks.bat
 
