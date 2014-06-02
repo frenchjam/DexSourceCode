@@ -78,7 +78,7 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 		}
  		system( command );
-		_sleep( 500 );
+		_sleep( 750 );
 		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;
 			break;
