@@ -22,41 +22,43 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: release
+default: users_ground.dex
 
-all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt GripFlight.md5
+all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5
+almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt 
 
 ######################################################################################################################################
 
-GripFlightScripts.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe $(LINT) users_flight.dex _check_messages.dex
+GripFlightScripts.tar: $(LINT) users_flight.dex _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -log=GripFlightLintScripts.log
 	CreateFlightScriptsTar.bat GripFlightScripts.tar
 
-GripFlightPictures.tar: $(SOURCE)\DexMakeScripts.mak DexSimulatorApp.exe users_flight.dex
+GripFlightPictures.tar:  $(LINT) users_flight.dex _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLintPictures.log
 	CreateFlightPicturesTar.bat GripFlightPictures.tar
 
-GripFlightMessageList.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar _check_messages.dex
+GripFlightMessageList.txt: $(LINT) GripFlightScripts.tar _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -log=GripFlightLintMessages.log
 	copy /Y /V GripFlightMessageList.txt $(PICTURES)
 
-GripFlightProofs.txt: $(SOURCE)\DexMakeScripts.mak GripFlightScripts.tar
+GripFlightProofs: $(LINT) GripFlightScripts.tar
 	copy /Y /V users_flight.dex users.dex
-	echo echo this > $(PROOFS)\deletethis.txt
-	echo del /Q (PROOFS)\*.*
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs -log=GripFlightLintProofs.log
-	copy /Y /V GripFlightProofs.txt $(PICTURES)
+	echo this > $(PROOFS)\deletethis.txt
+	del (PROOFS)\*.*
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs=$(PROOFS) -log=GripFlightLintProofs.log
+	copy /Y /V GripFlightMessageList.txt $(PICTURES)
+	echo %date% %time% > GripFlightProofs
 
-GripFlightProofs.tar: GripFlightProofs.txt
-	$(TAR) --create --verbose ..\GripScreenShots\*.bmp --file=GripFlightProofs.tar
+GripFlightProofs.tar: GripFlightProofs
+	$(TAR) --create --verbose $(PROOFS)\*.bmp --file=GripFlightProofs.tar
 
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
 
-release: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5 
+release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
 	 
 ######################################################################################################################################
@@ -67,6 +69,10 @@ release: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripF
 
 users_flight.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionU.dex
 	$(SOURCE)\DexGenerateSubjects.bat Flight users_flight.dex
+
+users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionU.dex
+	$(SOURCE)\DexGenerateSubjects.bat Ground users_ground.dex
+
 
 ######################################################################################################################################
 
@@ -132,11 +138,11 @@ DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
 ### Reduced Flight
 
 DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Sml > $@
+	$(SOURCE)\DexGenerateReducedFlight.bat Upright Sml > $@
 DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Med > $@
+	$(SOURCE)\DexGenerateReducedFlight.bat Upright Med > $@
 DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateFlightReduced.bat Upright Lrg > $@
+	$(SOURCE)\DexGenerateReducedFlight.bat Upright Lrg > $@
 
 
 # ------------------------------------------------------------------------------------------------
@@ -170,14 +176,18 @@ DexSupineBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HE
 DexSupineBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Lrg > $@
 
-### Return Reduced
+### Reduced BDC Protocol
 
 DexReducedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Sml > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Sml > $@
 DexReducedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Med > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Med > $@
 DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReturnReduced.bat Upright Lrg > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg > $@
+
+# ------------------------------------------------------------------------------------------------
+# --            Some generally useful protocols for testing, hardware setup, etc.               --
+# ------------------------------------------------------------------------------------------------
 
 ### Utilities
 
@@ -196,38 +206,38 @@ ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex ForceOffse
 
 ### Configuration of DEX hardware.
 
-TaskInstallUpright.dex:	DexSimulatorApp.exe
+TaskInstallUpright.dex:	$(COMPILER)
 	$(COMPILER) -install -upright -compile=$@
-TaskInstallSupine.dex:	DexSimulatorApp.exe
+TaskInstallSupine.dex:	$(COMPILER)
 	$(COMPILER) -install -supine -compile=$@
-TaskFinishProtocol.dex: DexSimulatorApp.exe
+TaskFinishProtocol.dex: $(COMPILER)
 	$(COMPILER) -finish -compile=$@
-TaskCheckAudio.dex: DexSimulatorApp.exe
+TaskCheckAudio.dex: $(COMPILER)
 	$(COMPILER) -audio -compile=$@
-ForceOffsets.dex: DexSimulatorApp.exe
+ForceOffsets.dex: $(COMPILER)
 	$(COMPILER) -offsets -compile=$@
-TaskCheckMASS.dex: DexSimulatorApp.exe
+TaskCheckMASS.dex: $(COMPILER)
 	$(COMPILER) -gm -compile=$@
 
 ### Utilities
 
-TaskCheckFT.dex: DexSimulatorApp.exe
+TaskCheckFT.dex: $(COMPILER)
 	$(COMPILER) -deploy -ft -compile=$@
-TaskCheckSlip.dex: DexSimulatorApp.exe
+TaskCheckSlip.dex: $(COMPILER)
 	$(COMPILER) -deploy -slip -compile=$@
-TaskCheckLEDs.dex: DexSimulatorApp.exe
+TaskCheckLEDs.dex: $(COMPILER)
 	$(COMPILER) -LEDs -compile=$@
-TaskCheckWaitAtTargetUpVe.dex: DexSimulatorApp.exe
+TaskCheckWaitAtTargetUpVe.dex: $(COMPILER)
 	$(COMPILER) -upright -vertical -waits -compile=$@
-TaskCheckWaitAtTargetUpHo.dex: DexSimulatorApp.exe
+TaskCheckWaitAtTargetUpHo.dex: $(COMPILER)
 	$(COMPILER) -upright -horizontal -waits -compile=$@
-TaskCheckWaitAtTargetSuVe.dex: DexSimulatorApp.exe
+TaskCheckWaitAtTargetSuVe.dex: $(COMPILER)
 	$(COMPILER) -supine -vertical -waits -compile=$@
-TaskCheckWaitAtTargetSuHo.dex: DexSimulatorApp.exe
+TaskCheckWaitAtTargetSuHo.dex: $(COMPILER)
 	$(COMPILER) -supine -horizontal -waits -compile=$@
-TaskAcquire30s.dex: DexSimulatorApp.exe
+TaskAcquire30s.dex: $(COMPILER)
 	$(COMPILER) -rec -duration=30 -compile=$@
-TaskAcquire5s.dex: DexSimulatorApp.exe
+TaskAcquire5s.dex: $(COMPILER)
 	$(COMPILER) -rec -duration=5 -compile=$@
 
 calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
