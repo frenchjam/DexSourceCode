@@ -4,8 +4,8 @@
 # Protocols specific to large subjects in Flight: 40X
 # Protocols specific to large subjects in BDC: 41X
 CMD_PROTOCOL,401,DexDynamicsFlightLarge.dex,Dynamics
-CMD_PROTOCOL,402,DexSeatedFlightLarge.dex,Reference Seated
-CMD_PROTOCOL,403,DexSupineFlightLarge.dex,Reference Supine
+CMD_PROTOCOL,402,DexSeatedFlightLarge.dex,Seated
+CMD_PROTOCOL,403,DexSupineFlightLarge.dex,Supine
 CMD_PROTOCOL,404,DexReducedFlightLarge.dex,Reduced
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
