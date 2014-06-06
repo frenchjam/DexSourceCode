@@ -72,6 +72,9 @@ REM
 REM Oscillations
 REM
 
+REM Start the trial counter for the oscillations.
+set osc_seq=100
+
 REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
