@@ -3,9 +3,11 @@
 # Protocols general: 1XX
 # Protocols specific to small subjects in Flight: 20X
 # Protocols specific to small subjects in BDC: 21X
+CMD_PROTOCOL,299,DexDemoSmall.dex,Demo
+CMD_PROTOCOL,210,DexPracticeSmall.dex,Practice
 CMD_PROTOCOL,211,DexDynamicsBDCSmall.dex,Dynamics
-CMD_PROTOCOL,212,DexSeatedBDCSmall.dex,Reference Seated
-CMD_PROTOCOL,213,DexSupineBDCSmall.dex,Reference Supine
+CMD_PROTOCOL,212,DexSeatedBDCSmall.dex,Seated
+CMD_PROTOCOL,213,DexSupineBDCSmall.dex,Supine
 CMD_PROTOCOL,214,DexReducedBDCSmall.dex,Reduced
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
