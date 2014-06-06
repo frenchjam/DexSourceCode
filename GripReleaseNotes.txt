@@ -1,3 +1,8 @@
+GripGround Release (2014.06.05  8.48.51)  released to CADMOS for installation on EM prior to delivery to EAC.	
+	
+	Created first Ground release, including Demo and Practice sessions.
+	Reformulation of DexMakeScripts.mak to perform only what is necessary.
+
 GRIP Release (2014.06.02 19.53.35) Released to CADMOS for installation on FM.
 
 	Numerous corrections to screens and messages.
