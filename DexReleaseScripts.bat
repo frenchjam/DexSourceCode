@@ -1,4 +1,4 @@
-@echo ON
+@echo OFF
 SETLOCAL
 
 REM
@@ -14,14 +14,17 @@ REM Destination is a constant for the moment.
 set DESTINATION=..\GripReleases
 
 REM Give a common name and time stamp to associate the three files.
-set TIMESTAMP=GRIP Release (%date:~10,4%.%date:~4,2%.%date:~7,2% %time:~0,2%.%time:~3,2%.%time:~6,2%)
+set TIMESTAMP=%ROOT% Release (%date:~10,4%.%date:~4,2%.%date:~7,2% %time:~0,2%.%time:~3,2%.%time:~6,2%)
 
 REM Each release consists of a script tar file, a pictures tar file and md5 checks for each of them.
 REM It also contains the installation instructions.
+
+@echo ON
 copy /Y /V %ROOT%Scripts.tar  "%DESTINATION%\%TIMESTAMP% %ROOT%Scripts.tar"
 copy /Y /V %ROOT%Pictures.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Pictures.tar"
+echo Not all releases include proofs. If you get a file not found error here, it is OK.
 copy /Y /V %ROOT%Proofs.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Proofs.tar"
 copy /Y /V %ROOT%.md5         "%DESTINATION%\%TIMESTAMP% %ROOT%.md5" 
 copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
 copy /Y /V ..\DexSourceCode\GripReleaseNotes.txt "%DESTINATION%\%TIMESTAMP% Release Notes.txt" 
-echo %TIMESTAMP% > ..\DexSourceCode\release
+echo %TIMESTAMP% > ..\DexSourceCode\%ROOT%.release

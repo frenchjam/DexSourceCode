@@ -22,7 +22,10 @@ LINT	= ..\DexLint\debug\DexLint.exe
 TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
-default: users_ground.dex
+TOUCH = copy /b $@ +,,
+
+
+default: GripFlightScripts.tar
 
 all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5
 almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt 
@@ -63,6 +66,24 @@ release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.ta
 	 
 ######################################################################################################################################
 
+GripGroundScripts.tar: $(LINT) users_ground.dex _check_messages.dex
+	copy /Y /V users_ground.dex users.dex
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateGroundScriptsTar.bat -log=GripGroundLintScripts.log
+	CreateGroundScriptsTar.bat GripGroundScripts.tar
+
+GripGroundPictures.tar:  $(LINT) users_ground.dex _check_messages.dex
+	copy /Y /V users_ground.dex users.dex
+	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateGroundPicturesTar.bat -log=GripGroundLintPictures.log
+	CreateGroundPicturesTar.bat GripGroundPictures.tar
+
+GripGround.md5: GripGroundPictures.tar GripGroundScripts.tar
+	$(MD5TREE)  GripGroundPictures.tar GripGroundScripts.tar > GripGround.md5
+
+release_ground: GripGroundScripts.tar GripGroundPictures.tar GripGround.md5 
+	$(SOURCE)\DexReleaseScripts.bat GripGround
+
+######################################################################################################################################
+
 #
 # Users
 #
@@ -70,9 +91,8 @@ release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.ta
 users_flight.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionU.dex
 	$(SOURCE)\DexGenerateSubjects.bat Flight users_flight.dex
 
-users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionU.dex
+users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectGround.dex SessionMediumSubjectGround.dex SessionLargeSubjectGround.dex SessionU.dex
 	$(SOURCE)\DexGenerateSubjects.bat Ground users_ground.dex
-
 
 ######################################################################################################################################
 
@@ -82,24 +102,31 @@ users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectBDC.dex S
 
 SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .\$@
+	$(TOUCH)
 
 SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .\$@
+	$(TOUCH)
 
 SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .\$@
+	$(TOUCH)
 
-SessionSmallSubjectBDC.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
+SessionSmallSubjectGround.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDemoSmall.dex DexPracticeSmall.dex DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .\$@
+	$(TOUCH)
 
-SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
+SessionMediumSubjectGround.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDemoMedium.dex DexPracticeMedium.dex DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .\$@
+	$(TOUCH)
 
-SessionLargeSubjectBDC.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
+SessionLargeSubjectGround.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDemoLarge.dex DexPracticeLarge.dex DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .\$@
+	$(TOUCH)
 
 SessionU.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex $(PROTOCOLS) 
 	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .\$@
+	$(TOUCH)
 
 
 ######################################################################################################################################
@@ -137,11 +164,11 @@ DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat
 
 ### Reduced Flight
 
-DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Sml > $@
-DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Med > $@
-DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateFlightReduced.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Lrg > $@
 
 
@@ -185,6 +212,25 @@ DexReducedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPER
 DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg > $@
 
+### Practice Protocol
+
+DexPracticeSmall.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGeneratePractice.bat Upright Sml > $@
+DexPracticeMedium.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGeneratePractice.bat Upright Med > $@
+DexPracticeLarge.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGeneratePractice.bat Upright Lrg > $@
+
+### Demo Protocol
+
+DexDemoSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDemo.bat Upright Sml > $@
+DexDemoMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDemo.bat Upright Med > $@
+DexDemoLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDemo.bat Upright Lrg > $@
+
+
 # ------------------------------------------------------------------------------------------------
 # --            Some generally useful protocols for testing, hardware setup, etc.               --
 # ------------------------------------------------------------------------------------------------
@@ -192,11 +238,14 @@ DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS
 ### Utilities
 
 ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckLEDs.dex TaskCheckWaitAtTargetSuHo.dex TaskCheckWaitAtTargetSuVe.dex TaskCheckWaitAtTargetUpVe.dex TaskCheckWaitAtTargetUpHo.dex TaskCheckSlip.dex TaskCheckMASS.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex 
-	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex .\$@
+	$(TOUCH)
 ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOffsets.dex TaskInstallUpright.dex 
-	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolInstallUpright.dex .\$@
+	$(TOUCH)
 ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex ForceOffsets.dex TaskInstallSupine.dex 
-	copy /Y $(STATICSCRIPTS)\ProtocolInstallSupine.dex
+	copy /Y $(STATICSCRIPTS)\ProtocolInstallSupine.dex .\$@
+	$(TOUCH)
 
 ######################################################################################################################################
 
