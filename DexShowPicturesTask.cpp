@@ -20,7 +20,7 @@
 #include "Dexterous.h"
 #include "DexTasks.h"
 
-char *pictures[] = { "OK.bmp", "HandsOff.bmp", "Coef_frict_osc.bmp",  NULL };
+char *pictures[] = { "OK.bmp", "HandsOff.bmp", "coef_frict_osc.bmp",  NULL };
 
 /*********************************************************************************/
 

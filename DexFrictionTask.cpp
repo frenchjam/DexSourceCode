@@ -102,7 +102,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	else if ( gripTarget > 1.5 ) squeeze = "FIRMLY";
 	else squeeze = "MODERATELY";
 
-    status = apparatus->fWaitSubjectReady( "Coef_frict.bmp", "On this trial you will squeeze %s.", squeeze  );
+    status = apparatus->fWaitSubjectReady( "coef_frict.bmp", "On this trial you will squeeze %s.", squeeze  );
 	if ( status == ABORT_EXIT ) exit( status );
 
     // picture Remove Hand with manipulandum in the retainer.
@@ -118,7 +118,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 
 
-    apparatus->fShowStatus( "Coef_frict.bmp", "Pinch the manipulandum %s at the center between thumb and forefinger.", squeeze  );
+    apparatus->fShowStatus( "coef_frict.bmp", "Pinch the manipulandum %s at the center between thumb and forefinger.", squeeze  );
 	apparatus->Beep();
 
 	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
