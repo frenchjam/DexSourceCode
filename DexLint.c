@@ -940,12 +940,14 @@ int main ( int argc, char *argv[] ) {
 		if ( strlen( picture_batch ) ) {
 			fp = fopen( picture_batch, "w" );
 			fprintf( fp, "@echo on\nSETLOCAL\n" );
+			fprintf( fp, "pushd %s\n", picture_path );
 			fprintf( fp, "echo %%date%% %%time%% > PicturesTimeStamp\n" );
 			fprintf( fp, "set FILES=" );
 			for ( j = 0; j < global_pictures; j++ ) fprintf( fp, "%s ", global_picture_filenames[j] );
 			fprintf( fp, "\n" );
 			fprintf( fp, "..\\bin\\MD5Tree.exe %%FILES%% > Pictures.md5\n" );
-			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose Pictures.md5 PicturesTimeStamp --directory=%s %%FILES%% --file=%%1\n", picture_path );
+			fprintf( fp, "popd\n" );
+			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose --directory=%s Pictures.md5 PicturesTimeStamp %%FILES%% --file=%%1\n", picture_path );
 			fclose( fp );
 		}
 

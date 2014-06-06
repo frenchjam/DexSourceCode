@@ -25,7 +25,7 @@ MD5TREE	=	..\bin\MD5Tree.exe
 TOUCH = copy /b $@ +,,
 
 
-default: GripFlightScripts.tar
+default: GripFlightPictures.tar
 
 all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5
 almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt 
