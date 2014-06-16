@@ -22,8 +22,7 @@ REM It also contains the installation instructions.
 @echo ON
 copy /Y /V %ROOT%Scripts.tar  "%DESTINATION%\%TIMESTAMP% %ROOT%Scripts.tar"
 copy /Y /V %ROOT%Pictures.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Pictures.tar"
-echo Not all releases include proofs. If you get a file not found error here, it is OK.
-copy /Y /V %ROOT%Proofs.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Proofs.tar"
+if exist %ROOT%Proofs.tar copy /Y /V %ROOT%Proofs.tar "%DESTINATION%\%TIMESTAMP% %ROOT%Proofs.tar"
 copy /Y /V %ROOT%.md5         "%DESTINATION%\%TIMESTAMP% %ROOT%.md5" 
 copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
 copy /Y /V ..\DexSourceCode\GripReleaseNotes.txt "%DESTINATION%\%TIMESTAMP% Release Notes.txt" 
