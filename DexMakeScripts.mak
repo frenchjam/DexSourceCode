@@ -3,6 +3,19 @@
 #  the DexGenerate*.bat batch files to be executed.
 # This makefile and the batch files that do the work are kept in DexSourceCode so that it gets distributed in Git.
 
+# Uncomment one of these options or make up your own.
+# F7 will build the first 'default:' specification that it finds.
+# Careful - 'default' there can be no spaces before 'default:'
+#default:	clean					# Pick this if you want to clear out all the .dex files as rebuild everything.
+#default:	release_flight		# Generate a flight release.
+default:	release_ground		# Generate a ground release.
+
+# This is here to catch an error where you did not pick a default build.
+default_default:
+	@echo **********************************************************************************************************************************
+	@echo You need to pick the build that you want.
+	@echo See beginning of DexMakeScripts.mak.
+	@echo **********************************************************************************************************************************
 COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
@@ -23,9 +36,6 @@ TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
 TOUCH = copy /b $@ +,,
-
-
-default: GripFlightPictures.tar
 
 all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5
 almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt 
@@ -63,6 +73,7 @@ GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 
 release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
+	echo %date% %time% > $@
 	 
 ######################################################################################################################################
 
@@ -81,6 +92,7 @@ GripGround.md5: GripGroundPictures.tar GripGroundScripts.tar
 
 release_ground: GripGroundScripts.tar GripGroundPictures.tar GripGround.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripGround
+	echo %date% %time% > $@
 
 ######################################################################################################################################
 
