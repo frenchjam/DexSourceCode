@@ -342,4 +342,10 @@ $(COMPILER): ..\DexSimulatorApp\debug\DexSimulatorApp.exe
 clean:
 	echo nothing > __dummy.dex
 	del /Q *.dex
+	echo nothing > release_ground
+	del /Q release_ground
+	echo nothing > release_flight
+	del /Q release_flight
+
+
 
