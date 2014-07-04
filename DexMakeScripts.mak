@@ -60,18 +60,18 @@ GripFlightMessageList.txt: $(LINT) GripFlightScripts.tar _check_messages.dex
 GripFlightProofs: $(LINT) GripFlightScripts.tar
 	copy /Y /V users_flight.dex users.dex
 	echo this > $(PROOFS)\deletethis.txt
-	del (PROOFS)\*.*
+	del /Q $(PROOFS)\*.*
 	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs=$(PROOFS) -log=GripFlightLintProofs.log
 	copy /Y /V GripFlightMessageList.txt $(PICTURES)
 	echo %date% %time% > GripFlightProofs
 
 GripFlightProofs.tar: GripFlightProofs
-	$(TAR) --create --verbose $(PROOFS)\*.bmp --file=GripFlightProofs.tar
+	$(TAR) --create --verbose --file=GripFlightProofs.tar --directory=$(PROOFS) *.bmp
 
 GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
 	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
 
-release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5 
+release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5 
 	$(SOURCE)\DexReleaseScripts.bat GripFlight
 	echo %date% %time% > $@
 	 
