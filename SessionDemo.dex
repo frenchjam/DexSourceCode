@@ -1,0 +1,11 @@
+# Protocols to be proposed to a SMALL subject.
+# Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+# Protocols general: 1XX
+# Protocols specific to small subjects in Flight: 20X
+# Protocols specific to small subjects in BDC: 21X
+# Protocols specific to small subjects in Training: 22X
+# Protocols specific to Demo: 23X
+CMD_PROTOCOL,231,DexUprightDemo.dex,Seated Demo
+CMD_PROTOCOL,232,DexSupineDemo.dex,Supine Demo
+CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
+#end

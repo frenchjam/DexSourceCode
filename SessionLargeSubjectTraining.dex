@@ -1,0 +1,14 @@
+# Protocols to be proposed to a LARGE subject.
+# Format: "CMD_PROTOCOL", protocol id, protocol file, display name
+# Protocols general: 1XX
+# Protocols specific to large subjects in Flight: 40X
+# Protocols specific to large subjects in BDC: 41X
+# Protocols specific to large subjects in Training: 42X
+CMD_PROTOCOL,421,DexDynamicsTrainingLarge.dex,Dynamics
+CMD_PROTOCOL,422,DexSeatedTrainingLarge.dex,Reference Seated
+CMD_PROTOCOL,423,DexSupineTrainingLarge.dex,Reference Supine
+CMD_PROTOCOL,424,DexReducedTrainingLarge.dex,Reduced
+CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
+CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
+CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
+#end

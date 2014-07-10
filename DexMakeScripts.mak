@@ -6,9 +6,11 @@
 # Uncomment one of these options or make up your own.
 # F7 will build the first 'default:' specification that it finds.
 # Careful - 'default' there can be no spaces before 'default:'
+#
 #default:	clean					# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	release_flight		# Generate a flight release.
-default:	release_ground		# Generate a ground release.
+#default:	release_ground		# Generate a ground release.
+default:	GripGround.md5
 
 # This is here to catch an error where you did not pick a default build.
 default_default:
@@ -103,8 +105,8 @@ release_ground: GripGroundScripts.tar GripGroundPictures.tar GripGround.md5
 users_flight.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectFlight.dex SessionMediumSubjectFlight.dex SessionLargeSubjectFlight.dex SessionU.dex
 	$(SOURCE)\DexGenerateSubjects.bat Flight users_flight.dex
 
-users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectGround.dex SessionMediumSubjectGround.dex SessionLargeSubjectGround.dex SessionU.dex
-	$(SOURCE)\DexGenerateSubjects.bat Ground users_ground.dex
+users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionDemo.dex SessionSmallSubjectTraining.dex SessionMediumSubjectTraining.dex SessionLargeSubjectTraining.dex SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionU.dex
+	$(SOURCE)\DexGenerateSubjects.bat BDC users_ground.dex
 
 ######################################################################################################################################
 
@@ -124,16 +126,36 @@ SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionSmallSubjectGround.dex:	$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDemoSmall.dex DexPracticeSmall.dex DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
+SessionSmallSubjectBDC.dex:		$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .\$@
 	$(TOUCH)
 
-SessionMediumSubjectGround.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDemoMedium.dex DexPracticeMedium.dex DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
+SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .\$@
 	$(TOUCH)
 
-SessionLargeSubjectGround.dex:	$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDemoLarge.dex DexPracticeLarge.dex DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
+SessionLargeSubjectBDC.dex:		$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .\$@
+	$(TOUCH)
+
+SessionSmallSubjectTraining.dex:	$(STATICSCRIPTS)\SessionSmallSubjectTraining.dex $(PROTOCOLS) DexDynamicsTrainingSmall.dex DexSeatedTrainingSmall.dex DexSupineTrainingSmall.dex DexReducedTrainingSmall.dex
+	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectTraining.dex .\$@
+	$(TOUCH)
+
+SessionMediumSubjectTraining.dex:	$(STATICSCRIPTS)\SessionMediumSubjectTraining.dex $(PROTOCOLS) DexDynamicsTrainingMedium.dex DexSeatedTrainingMedium.dex DexSupineTrainingMedium.dex DexReducedTrainingMedium.dex
+	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectTraining.dex .\$@
+	$(TOUCH)
+
+SessionLargeSubjectTraining.dex:	$(STATICSCRIPTS)\SessionLargeSubjectTraining.dex $(PROTOCOLS) DexDynamicsTrainingLarge.dex DexSeatedTrainingLarge.dex DexSupineTrainingLarge.dex DexReducedTrainingLarge.dex
+	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectTraining.dex .\$@
+	$(TOUCH)
+
+SessionDemo.dex:	$(STATICSCRIPTS)\SessionDemo.dex $(PROTOCOLS) DexUprightDemo.dex DexSupineDemo.dex 
+	copy /Y $(STATICSCRIPTS)\SessionDemo.dex .\$@
+	$(TOUCH)
+
+SessionFlightOnGround.dex:	$(STATICSCRIPTS)\SessionFlightOnGround.dex $(PROTOCOLS)  DexSeatedFlightOnGround.dex DexSupineFlightOnGround.dex DexDynamicsFlightOnGround.dex
+	copy /Y $(STATICSCRIPTS)\SessionFlightOnGround.dex .\$@
 	$(TOUCH)
 
 SessionU.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex $(PROTOCOLS) 
@@ -224,24 +246,56 @@ DexReducedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPER
 DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg > $@
 
-### Practice Protocol
+### Dynamics Training Protocol
 
-DexPracticeSmall.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGeneratePractice.bat Upright Sml > $@
-DexPracticeMedium.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGeneratePractice.bat Upright Med > $@
-DexPracticeLarge.dex: $(SCRIPTS) $(SOURCE)\DexGeneratePractice.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGeneratePractice.bat Upright Lrg > $@
+DexDynamicsTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Sml > $@
+DexDynamicsTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Med > $@
+DexDynamicsTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Lrg > $@
+
+### Reference Seated Training Protocol
+
+DexSeatedTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Sml > $@
+DexSeatedTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Med > $@
+DexSeatedTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Lrg > $@
+
+### Reference Supine Training Protocol
+
+DexSupineTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Sml > $@
+DexSupineTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Med > $@
+DexSupineTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Lrg > $@
+
+### Reduced Training Protocol
+
+DexReducedTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedTraining.bat Upright Sml > $@
+DexReducedTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedTraining.bat Upright Med > $@
+DexReducedTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedTraining.bat Upright Lrg > $@
 
 ### Demo Protocol
 
-DexDemoSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateDemo.bat Upright Sml > $@
-DexDemoMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+DexUprightDemo.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDemo.bat Upright Med > $@
-DexDemoLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateDemo.bat Upright Lrg > $@
+DexSupineDemo.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDemo.bat Supine Med > $@
 
+### Flight Evaluation Protocol
+DexDynamicsFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med 400gm > $@
+DexSeatedFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateSeatedlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateSeatedlight.bat Upright Med 400gm > $@
+DexSupineFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateSupineFlight.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateSupineFlight.bat Supine  Med 400gm > $@
 
 # ------------------------------------------------------------------------------------------------
 # --            Some generally useful protocols for testing, hardware setup, etc.               --
