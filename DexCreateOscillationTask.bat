@@ -18,6 +18,6 @@ set tag=%sz%%task%O%post%%dir%%ms%
 REM Create a filename.
 REM set filename=%tag%Osc%dir%%mass%%os%.dex
 set filename=%tag%%os%.dex
-%COMPILER% -oscillations -%prep% -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% %*
+%COMPILER% -oscillations %prep% -%mass% -%posture% -%direction% -range=%range% -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% %*
 echo CMD_TASK,%task%,%filename%,%task% Oscillations %os%
 
