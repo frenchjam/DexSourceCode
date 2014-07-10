@@ -164,6 +164,9 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		apparatus->CopyVector( oscillationDirection, apparatus->kVector );
 	}
 
+	double cop_tolerance = copTolerance;
+	if ( ParseForNoCheck( params) ) cop_tolerance = 1000.0;
+
 	// Construct the results filename tag.
 	char tag[32];
 	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
@@ -224,7 +227,7 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
+	status = apparatus->WaitCenteredGrip( cop_tolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Now wait until the subject gets to the target before moving on.
@@ -301,29 +304,31 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during saving." );
 
-	// Check the quality of the data.
-	int n_post_hoc_steps = 3;
-	int post_hoc_step = 0;
+	if ( !ParseForNoCheck( params ) ) {
+		// Check the quality of the data.
+		int n_post_hoc_steps = 3;
+		int post_hoc_step = 0;
 
-	// Was the manipulandum obscured?
-	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// Was the manipulandum obscured?
+		apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
+		status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	// Check that we got a reasonable amount of movement.
-	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
-	status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// Check that we got a reasonable amount of movement.
+		apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
+		status = apparatus->CheckMovementAmplitude( oscillationMinMovementExtent, oscillationMaxMovementExtent, oscillationDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	// Check that we got a reasonable number of oscillations.
-	// Here I have set it to +/- 20% of the ideal number.
-	apparatus->ShowStatus( "Checking number of Oscillations ...", "wait.bmp" );
-	oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
-	oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
-	status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// Check that we got a reasonable number of oscillations.
+		// Here I have set it to +/- 20% of the ideal number.
+		apparatus->ShowStatus( "Checking number of Oscillations ...", "wait.bmp" );
+		oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+	}
 
 	// Indicate to the subject that they are done.
 	status = apparatus->SignalNormalCompletion( NULL, "Task completed." );

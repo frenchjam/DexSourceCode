@@ -85,6 +85,8 @@ char *ParseForDelayFile ( const char *cmd );
 char *ParseForRangeFile ( const char *cmd );
 char *ParseForTag( const char *cmd );
 
+bool ParseForNoCheck( const char *cmd );
+
 #define MAX_SEQUENCE_ENTRIES	1024
 #define N_SEQUENCES	8
 #define N_SIZES 3

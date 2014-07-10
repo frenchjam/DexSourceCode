@@ -91,6 +91,9 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	static Vector3 direction_vector = {0.0, 1.0, 0.0};
 	static Quaternion desired_orientation = {0.0, 0.0, 0.0, 1.0};
 
+	double cop_tolerance = copTolerance;
+	if ( ParseForNoCheck( params) ) cop_tolerance = 1000.0;
+
 	char *target_filename = 0;
 
 	int tone, tgt;
@@ -166,7 +169,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
+	status = apparatus->WaitCenteredGrip( cop_tolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Wait until the subject gets to the target before moving on.
@@ -258,29 +261,32 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during file save." );
 	
-	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ...", "working.bmp" );
-	int n_post_hoc_steps = 2;
-	int post_hoc_step = 0;
+	if ( !ParseForNoCheck( params ) ) {
+		// Check the quality of the data.
+		apparatus->ShowStatus( "Checking data ...", "working.bmp" );
+		int n_post_hoc_steps = 2;
+		int post_hoc_step = 0;
 
-	// Was the manipulandum obscured?
-	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
+		// Was the manipulandum obscured?
+		apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
+		status = apparatus->CheckVisibility( collisionsCumulativeDropoutTimeLimit, collisionsContinuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		
 #if 0
-	// Check if there were false starts in the wrong direction.
-	apparatus->ShowStatus( "Checking movement directions ...", "wait.bmp" );
-	status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
+		// Check if there were false starts in the wrong direction.
+		apparatus->ShowStatus( "Checking movement directions ...", "wait.bmp" );
+		status = apparatus->CheckMovementDirection( collisionWrongDirectionTolerance, direction_vector, collisionMovementThreshold, "Too many starts in the wrond direction. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 #endif
 
-	// Check if collision forces were within range.
-	apparatus->ShowStatus( "Checking collision forces ...", "wait.bmp" );
-	status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
+		// Check if collision forces were within range.
+		apparatus->ShowStatus( "Checking collision forces ...", "wait.bmp" );
+		status = apparatus->CheckForcePeaks( collisionMinForce, collisionMaxForce, collisionWrongForceTolerance, "Collision forces outside range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT ) exit( ABORT_EXIT );
 
-	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+
+	}
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed." );

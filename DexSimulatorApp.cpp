@@ -197,6 +197,10 @@ bool ParseForPrep ( const char *cmd ) {
 	return( ParseForBool( cmd, "-prep" ) );
 }
 
+bool ParseForNoCheck( const char *cmd ) {
+	return( ParseForBool( cmd, "-nochecks" ) );
+}
+
 #define BUFFER_N	64
 char *ParseForString ( const char *cmd, const char *key ) {
 

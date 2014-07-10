@@ -128,6 +128,9 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	fprintf( stderr, "     RunDiscrete: %s\n", params );
 
+	double cop_tolerance = copTolerance;
+	if ( ParseForNoCheck( params) ) cop_tolerance = 1000.0;
+
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 
@@ -213,7 +216,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
+	status = apparatus->WaitCenteredGrip( cop_tolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Wait until the subject gets to the target before moving on.
@@ -296,47 +299,49 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during file save." );
 	
-	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
-	int n_post_hoc_steps = 4;
-	int post_hoc_step = 0;
+	if ( !ParseForNoCheck( params ) ) {
+		// Check the quality of the data.
+		apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
+		int n_post_hoc_steps = 4;
+		int post_hoc_step = 0;
 
-	// Was the manipulandum obscured?
-	apparatus->ShowStatus(  "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum out of view too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	// Check that we got a reasonable amount of movement.
-	apparatus->ShowStatus(  "Checking for movement ...", "wait.bmp" );
-	status = apparatus->CheckMovementAmplitude( ( eyes == CLOSED ? 1.0 : discreteMinMovementExtent ), 
-												( eyes == CLOSED ? 1000.0 : discreteMaxMovementExtent ), 
-												discreteMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// Was the manipulandum obscured?
+		apparatus->ShowStatus(  "Checking visibility ...", "wait.bmp" );
+		status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum out of view too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		
+		// Check that we got a reasonable amount of movement.
+		apparatus->ShowStatus(  "Checking for movement ...", "wait.bmp" );
+		status = apparatus->CheckMovementAmplitude( ( eyes == CLOSED ? 1.0 : discreteMinMovementExtent ), 
+													( eyes == CLOSED ? 1000.0 : discreteMaxMovementExtent ), 
+													discreteMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	// Check that we got a reasonable number of movements. 
-	// We expect as many as there are items in the sequence. 
-	// But this post hoc test was designed for the oscillations protocol. 
-	// So we will have half as many cycles as the number of expected movements.
-	int tolerance = 5;
-	int fewest = delaySequenceN / 2 - tolerance;
-	if (fewest < 1) fewest = 1;
-	int most = delaySequenceN / 2 + tolerance;
-	if ( most < 1 ) most = 1;
+		// Check that we got a reasonable number of movements. 
+		// We expect as many as there are items in the sequence. 
+		// But this post hoc test was designed for the oscillations protocol. 
+		// So we will have half as many cycles as the number of expected movements.
+		int tolerance = 5;
+		int fewest = delaySequenceN / 2 - tolerance;
+		if (fewest < 1) fewest = 1;
+		int most = delaySequenceN / 2 + tolerance;
+		if ( most < 1 ) most = 1;
 
-	apparatus->ShowStatus(  "Checking for number of movements ...", "wait.bmp" );
-	status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		apparatus->ShowStatus(  "Checking for number of movements ...", "wait.bmp" );
+		status = apparatus->CheckMovementCycles( fewest, most, discreteMovementDirection, discreteCycleHysteresis, "Not as many movements as we expected. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 #if 0
-	// Did the subject anticipate the starting signal too often?
-	apparatus->ShowStatus(  "Checking for early starts ...", "wait.bmp" );
-	status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
-		discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
-		"Too many early starts. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		// Did the subject anticipate the starting signal too often?
+		apparatus->ShowStatus(  "Checking for early starts ...", "wait.bmp" );
+		status = apparatus->CheckEarlyStarts( discreteFalseStartTolerance, discreteFalseStartHoldTime, 
+			discreteFalseStartThreshold, discreteFalseStartFilterConstant, 
+			"Too many early starts. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 #endif
 
-	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+	}
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.

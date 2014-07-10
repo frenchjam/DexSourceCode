@@ -147,6 +147,9 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Which mass should be used for this set of trials?
 	mass = ParseForMass( params );
 
+	double cop_tolerance = copTolerance;
+	if ( ParseForNoCheck( params) ) cop_tolerance = 1000.0;
+
 	// Construct the results filename tag.
 	char tag[32];
 	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
@@ -207,7 +210,7 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 
 	// Check that the grip is properly centered.
 	apparatus->ShowStatus( MsgCheckGripCentered, "working.bmp" );
-	status = apparatus->WaitCenteredGrip( copTolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
+	status = apparatus->WaitCenteredGrip( cop_tolerance, copForceThreshold, copWaitTime, MsgGripNotCentered, "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Wait until the subject gets to the target before moving on.
@@ -273,24 +276,28 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during saving." );
 	
-	// Check the quality of the data.
-	apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
-	int n_post_hoc_steps = 2;
-	int post_hoc_step = 0;
-	
-	// Was the manipulandum obscured?	
-	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
-	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	
-	// Check that we got a reasonable amount of movement.
-	apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
-	status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	if ( !ParseForNoCheck( params ) ) {
 
-	// TODO: Are there more post hoc tests to be done here?
+		// Check the quality of the data.
+		apparatus->ShowStatus( "Checking data ...", "wait.bmp" );
+		int n_post_hoc_steps = 2;
+		int post_hoc_step = 0;
+		
+		// Was the manipulandum obscured?	
+		apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
+		status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+		
+		// Check that we got a reasonable amount of movement.
+		apparatus->ShowStatus( "Checking for movement ...", "wait.bmp" );
+		status = apparatus->CheckMovementAmplitude( targetedMinMovementExtent, targetedMaxMovementExtent, targetedMovementDirection, "Movement amplitude out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
-	apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+		// TODO: Are there more post hoc tests to be done here?
+
+		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
+
+	}
 
 	// Indicate to the subject that they are done.
 	// The first NULL parameter says to use the default picture.
