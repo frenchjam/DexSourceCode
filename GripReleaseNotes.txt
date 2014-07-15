@@ -1,3 +1,24 @@
+GripGround Release (2014.07.10 18.56.05) installed on EM at EAC for training
+
+	Restructured Subjects and Sessions for ground models:
+
+		- Subject 'Training DEMO' has two sessions 'Seated Demo' and 'Supine Demo'. 
+		  Each contains one repetition of each of the tasks.
+		  Data tests are suppressed so as to minimize chances of alerts occuring during demos.
+		  PIN code: 000
+
+		- Subjects 'Training S', 'Training M' and 'Trainin L' are to be used during training sessions.
+		  Sessions are organized as in flight, with protocols 'Dynamics', 'Reference Seated' and 'Reference Supine'.
+		  PIN codes:  S - 123, M - 456, L - 789
+		  Within each session, all the tasks are represented in the same order as for flight, 
+		  except that the number of repetitions of each task has been reduced.
+		  Tests of subject performance are the same as for flight, allowing for training on possible alert messages.
+
+		- Subject labels in the login menu have been changed to BDC Subject 1, BDC Subject 2, etc. 
+		  Subject IDs are the same as for the flight releases, as are the PIN codes.
+		  These sessions should not be used for training. 
+
+
 GripGround Release (2014.06.05  8.48.51)  released to CADMOS for installation on EM prior to delivery to EAC.	
 	
 	Created first Ground release, including Demo and Practice sessions.
