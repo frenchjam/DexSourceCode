@@ -142,7 +142,7 @@ void DexPlotData( DexApparatus *apparatus ) {
 	ViewBox( yz_view );
 	ViewTitle( yz_view, "YZ", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	ViewBox( cop_view );
-	ViewCircle( cop_view, 0.0, 0.0, copTolerance / 1000.0 );
+//	ViewCircle( cop_view, 0.0, 0.0, copTolerance / 1000.0 );
 	ViewTitle( cop_view, "CoP", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
 	int frames = apparatus->nAcqFrames;
@@ -277,9 +277,9 @@ void DexPlotData( DexApparatus *apparatus ) {
 		ViewTitle( view, "COP", INSIDE_LEFT, INSIDE_TOP, 0.0 );
 	
 		ViewSetXLimits( view, 0.0, max_time );
-		ViewSetYLimits( view, - 2.0 * copTolerance / 1000.0, 2.0 * copTolerance / 1000.0 );
-		ViewLine( view, 0.0,   copTolerance / 1000.0, max_time,   copTolerance / 1000.0 );
-		ViewLine( view, 0.0, - copTolerance / 1000.0, max_time, - copTolerance / 1000.0 );
+//		ViewSetYLimits( view, - 2.0 * copTolerance / 1000.0, 2.0 * copTolerance / 1000.0 );
+//		ViewLine( view, 0.0,   copTolerance / 1000.0, max_time,   copTolerance / 1000.0 );
+//		ViewLine( view, 0.0, - copTolerance / 1000.0, max_time, - copTolerance / 1000.0 );
 		for ( i = 0; i < N_FORCE_TRANSDUCERS; i++ ) {
 			for ( j = 0; j < 2; j++ ) {
 				ViewSelectColor( view, i * N_FORCE_TRANSDUCERS + j );
