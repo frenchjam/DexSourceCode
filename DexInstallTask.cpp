@@ -102,21 +102,14 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Check Workspace Tablet installed for SEATED operation." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeated.bmp", "Check Workspace Tablet installed for SEATED operation with Target Mast in socket N (right-hand side)." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation with Target Mast in socket N (right-hand side)." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
 	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet screen is green." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-
-	// Prompt the subject to place the target bar in the right side position.
-	// Actually, this is not really necessary. The origin is the marker on the box and 
-	//  whether the bar is to the right or to the left, it points in the positive Y direction.
-	// So we could skip this step if we wanted to.
-	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Make sure that the Target Mast\nis in the Standby (left side) position." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
@@ -130,6 +123,10 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			"Tracking Camera #2 off center.\n- Check boresighting.\n- Check reference markers in view.\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
+
+	// Prompt the subject to place the target bar in the left side position.
+	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Move the Target Mast to the Standby socket (left-hand side)." );
+	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
@@ -231,13 +228,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Check configured for SEATED.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
+											"Unexpected Configuration.\n- Check configured for SEATED.\nCorrect and <Retry> or call COL-CC.", "CalibrateSeated.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -280,12 +277,12 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Check configured for SUPINE.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration\n- Check configured for SUPINE.\n- Check target mast on RIGHT.\n- Check reference markers visible.\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on RIGHT.\n- Check reference markers visible.\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Check configured for SEATED.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration\n- Check configured for SEATED.\n- Check target mast on RIGHT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfDleft.bmp", "Unexpected Configuration.\n- Check configured for SEATED.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration.\n- Check configured for SEATED.\n- Check target mast on RIGHT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
 	apparatus->HideStatus();
