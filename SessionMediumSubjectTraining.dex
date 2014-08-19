@@ -4,9 +4,9 @@
 # Protocols specific to medium subjects in Flight: 30X
 # Protocols specific to medium subjects in BDC: 31X
 # Protocols specific to medium subjects in Training: 32X
-CMD_PROTOCOL,321,DexDynamicsTrainingMedium.dex,Dynamics
-CMD_PROTOCOL,322,DexSeatedTrainingMedium.dex,Reference Seated
-CMD_PROTOCOL,323,DexSupineTrainingMedium.dex,Reference Supine
+CMD_PROTOCOL,321,DexDynamicsTrainingMedium.dex,Dynamics Seated
+CMD_PROTOCOL,322,DexSeatedTrainingMedium.dex,References Seated
+CMD_PROTOCOL,323,DexSupineTrainingMedium.dex,References Supine
 CMD_PROTOCOL,324,DexReducedTrainingMedium.dex,Reduced
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine

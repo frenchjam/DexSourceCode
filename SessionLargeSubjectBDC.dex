@@ -4,9 +4,9 @@
 # Protocols specific to large subjects in Flight: 40X
 # Protocols specific to large subjects in BDC: 41X
 # Protocols specific to large subjects in Training: 42X
-CMD_PROTOCOL,411,DexDynamicsBDCLarge.dex,Dynamics
-CMD_PROTOCOL,412,DexSeatedBDCLarge.dex,Reference Seated
-CMD_PROTOCOL,413,DexSupineBDCLarge.dex,Reference Supine
+CMD_PROTOCOL,411,DexDynamicsBDCLarge.dex,Dynamics Seated
+CMD_PROTOCOL,412,DexSeatedBDCLarge.dex,References Seated
+CMD_PROTOCOL,413,DexSupineBDCLarge.dex,References Supine
 CMD_PROTOCOL,414,DexReducedBDCLarge.dex,Reduced
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine

@@ -3,9 +3,9 @@
 # Protocols general: 1XX
 # Protocols specific to medium subjects in Flight: 30X
 # Protocols specific to medium subjects in BDC: 31X
-CMD_PROTOCOL,301,DexDynamicsFlightMedium.dex,Dynamics
-CMD_PROTOCOL,302,DexSeatedFlightMedium.dex,Reference Seated
-CMD_PROTOCOL,303,DexSupineFlightMedium.dex,Reference Supine
+CMD_PROTOCOL,301,DexDynamicsFlightMedium.dex,Dynamics Seated
+CMD_PROTOCOL,302,DexSeatedFlightMedium.dex,References Seated
+CMD_PROTOCOL,303,DexSupineFlightMedium.dex,References Supine
 CMD_PROTOCOL,304,DexReducedFlightMedium.dex,Reduced
 CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
 CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
