@@ -57,9 +57,7 @@ REM
 REM Start the trial counter for the friction tests.
 set fric_seq=0
 
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep
-call %SOURCE%\DexCreateFrictionTask.bat 1.0
-call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
+call %SOURCE%\DexCreateFrictionTask.bat 0.5 -prep -stow
 
 REM ****************************************************************************
 
@@ -86,12 +84,6 @@ set prep=-prep
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
-set mass=400gm
-set frequency=1.00
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
 REM ****************************************************************************
 
 REM
@@ -102,7 +94,7 @@ REM
 REM Vertical Direction
 REM
 set mass=400gm
-set nblocks=2
+set nblocks=1
 set direction=Vertical
 call %SOURCE%\DexCreateTargetedTasks.bat
 
@@ -113,17 +105,6 @@ set mass=400gm
 set nblocks=1
 set direction=Horizontal
 call %SOURCE%\DexCreateTargetedTasks.bat
-
-
-REM ****************************************************************************
-
-REM
-REM Coefficient of Friction tests.
-REM
-REM !!! Need to define how many to be done and at what desired grip force.
-REM !!! We also need to decide on the method.
-
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep
 
 REM ****************************************************************************
 

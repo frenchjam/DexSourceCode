@@ -68,9 +68,14 @@ REM Start the trial counter for the friction tests.
 set fric_seq=0
 
 REM Inflight the subject will do three different levels.
-REM For training, we reduce it to 1 here. They train on all three in the Dynamics protocol.
+REM For training, we reduce it to 1 here. 
 
+if /I %posture% EQU supine GOTO :SUPINE1
 call %SOURCE%\DexCreateFrictionTask.bat 1.0 -prep -stow
+GOTO :NEXT1
+:SUPINE1
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -stow
+:NEXT1
 
 REM ****************************************************************************
 
@@ -108,16 +113,8 @@ REM ****************************************************************************
 
 set mass=400gm
 set direction=Vertical
-set nblocks=2
+set nblocks=1
 call %SOURCE%\DexCreateCollisionTasks.bat
-
-REM ****************************************************************************
-
-REM
-REM Coefficient of Friction tests.
-REM
-
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -deploy
 
 REM ****************************************************************************
 

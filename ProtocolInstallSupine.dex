@@ -2,6 +2,10 @@
 # Format: "CMD_TASK", task id, task file, display name
 # Instruct how to arrange the seat, target bar, etc. and do the CODA alignment.
 CMD_TASK,102,TaskInstallSupine.dex,Configure - Supine
+# Check that the sounds are audible.
+CMD_TASK,103,TaskCheckAudio.dex,Check Audio
 # Cancel the force offsets.
-CMD_TASK,103,ForceOffsets.dex,Force Offset Cancellation
+CMD_TASK,104,ForceOffsets.dex,Force Offset Cancellation
+# Show that we are done.
+CMD_TASK,105,TaskFinishProtocol.dex,(Done - press Back)
 #end

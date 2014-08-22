@@ -330,12 +330,12 @@ TaskFinishProtocol.dex: $(COMPILER)
 TaskCheckAudio.dex: $(COMPILER)
 	$(COMPILER) -audio -compile=$@
 ForceOffsets.dex: $(COMPILER)
-	$(COMPILER) -offsets -compile=$@
-TaskCheckMASS.dex: $(COMPILER)
-	$(COMPILER) -gm -compile=$@
+	$(COMPILER) -offsets -deploy -compile=$@
 
 ### Utilities
 
+TaskCheckMASS.dex: $(COMPILER)
+	$(COMPILER) -gm -compile=$@
 TaskCheckFT.dex: $(COMPILER)
 	$(COMPILER) -deploy -ft -compile=$@
 TaskCheckSlip.dex: $(COMPILER)
