@@ -1,9 +1,9 @@
 # Protocols to be used to demonstrate tasks as part of training.
 # Format: "CMD_PROTOCOL", protocol id, protocol file, display name
 # Protocols general: 1XX
-CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Prepare for Seated
 CMD_PROTOCOL,131,DexUprightDemo.dex,Seated Demo
-CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Prepare for Supine
 CMD_PROTOCOL,132,DexSupineDemo.dex,Supine Demo
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
+CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Prepare for Seated
+CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Prepare for Supine
 #end

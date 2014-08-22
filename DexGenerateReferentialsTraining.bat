@@ -45,18 +45,11 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 if /I %posture% EQU supine GOTO :SUPINE 
-call %SOURCE%\DexCreateInstallTask.bat Upright
+REM call %SOURCE%\DexCreateInstallTask.bat Upright
 GOTO :NEXT
 :SUPINE
 call %SOURCE%\DexCreateInstallTask.bat Supine
 :NEXT
-
-REM Make sure that the audio is set loud enough. Also tells subject to strap in.
-set /A "task=task+1"
-echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
-
-REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -deploy -%posture%
 
 REM ****************************************************************************
 
@@ -71,11 +64,25 @@ REM Inflight the subject will do three different levels.
 REM For training, we reduce it to 1 here. 
 
 if /I %posture% EQU supine GOTO :SUPINE1
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -prep -stow
+call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep -stow
 GOTO :NEXT1
 :SUPINE1
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -stow
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -deploy -prep -stow
 :NEXT1
+
+REM ****************************************************************************
+
+REM
+REM Collisions
+REM
+
+REM Normally, we do Discrete before Collisions. In training we put Collisions
+REM  first so that we can quit early without doing all the Discrete conditions.
+
+set mass=400gm
+set direction=Vertical
+set nblocks=1
+call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
 
@@ -108,13 +115,6 @@ set direction=Horizontal
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat 
-
-REM ****************************************************************************
-
-set mass=400gm
-set direction=Vertical
-set nblocks=1
-call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
 
