@@ -77,11 +77,11 @@ REM
 REM Discrete Movements
 REM
 REM we need to create a new list of sound target with a duration of 20 sec
+set mass=400gm
+set delays=DiscreteDelaySequences20.txt
 
 REM Start the trial counter for the discrete movements.
 set disc_seq=0
-
-set mass=400gm
 
 set direction=Vertical
 set eyes=open  
@@ -138,6 +138,8 @@ REM
 REM we need to create a new list of collision with a duration of 20 sec
 
 set mass=400gm
+set direction=Vertical
+set targets=CollisionSequences20.txt
 set nblocks=5
 call %SOURCE%\DexCreateCollisionTasks.bat
 

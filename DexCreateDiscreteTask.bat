@@ -17,5 +17,5 @@ set tag=%sz%%task%D%post%%dir%%ms%
 
 REM Create a filename.
 set filename=%tag%%ey%.dex
-%COMPILER% -discrete -%mass% -%posture% -%direction% -%eyes% -range=%range% -delays=DiscreteDelaySequences20.txt:%dsc_seq% -tag=%tag% -compile=%filename%  %*
+%COMPILER% -discrete -%mass% -%posture% -%direction% -%eyes% -range=%range% -delays=%delays%:%dsc_seq% -tag=%tag% -compile=%filename%  %*
 echo CMD_TASK,%task%,%filename%,%task% Discrete %dsc_seq% %dir%%eyes:~0,1%

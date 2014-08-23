@@ -75,6 +75,7 @@ REM
 
 REM All the trials mass.
 set mass=400gm
+set delays=DiscreteDelaySequences20.txt
 
 REM Start the trial counter for the oscillations.
 set dsc_seq=0
@@ -133,6 +134,8 @@ REM Collisions
 REM
 
 set mass=600gm
+set direction=Vertical
+set targets=CollisionSequences20.txt
 set nblocks=5
 call %SOURCE%\DexCreateCollisionTasks.bat
 

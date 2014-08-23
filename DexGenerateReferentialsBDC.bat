@@ -79,6 +79,7 @@ REM
 
 REM All the trials have the same range, frequency, duration and mass.
 set mass=400gm
+set delays=DiscreteDelaySequences20.txt
 
 REM Start the trial counter for the discrete movements.
 set dsc_seq=0
@@ -132,8 +133,9 @@ REM Collisions
 REM
 
 set mass=400gm
-set nblocks=10
 set direction=Vertical
+set targets=CollisionSequences20.txt
+set nblocks=10
 call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************

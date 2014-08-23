@@ -5,6 +5,8 @@ REM Create a set of Collision tasks for DEX.
 REM
 
 REM Assumes that task, mass, posture, direction,etc. are set already.
+
+REM Create a short version of the direction.
 set dir=%direction:~0,4%
 
 REM Provide instructions for first block.
@@ -38,7 +40,7 @@ goto :EOF
 	set tag=%sz%%task%C%post%%dir%%ms%
 
 	REM Put all the paramters together for the compiler.
-	set params=-collisions -%mass% -%posture% -tag=%tag% -delays=CollisionsSequences30.txt:%seq%
+	set params=-collisions -%mass% -%posture% -tag=%tag% -targets=%targets%:%seq%
 
 	REM Generate a script filename based on the parameters.
 	REM set filename=%tag%Col%mass%%sq%.dex
