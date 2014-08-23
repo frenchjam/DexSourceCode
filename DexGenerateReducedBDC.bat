@@ -152,6 +152,7 @@ REM We need to create a new list of target with a duration of 20 sec!!!
 
 set mass=400gm
 set nblocks=5
+set movements=20
 
 REM
 REM Vertical Direction

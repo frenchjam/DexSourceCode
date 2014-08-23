@@ -35,7 +35,7 @@ goto :EOF
 	set tag=%sz%%task%T%post%%dir%%ms%
 
 	REM Put all the paramters together for the compiler.
-	set params=-targeted -%mass% -%posture% -%direction% -tag=%tag% -targets=TargetedTargets%direction%30.txt:%seq%%sz%  
+	set params=-targeted -%mass% -%posture% -%direction% -tag=%tag% -targets=TargetedTargets%direction%%movements%.txt:%seq%%sz%  
 
 	REM Generate a script filename based on the parameters.
 	REM set filename=%tag%Tgt%dir%%mass%%seq%.dex

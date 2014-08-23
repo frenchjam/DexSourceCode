@@ -101,6 +101,7 @@ REM
 
 set mass=400gm
 set nblocks=5
+set movements=30
 
 REM
 REM Vertical Direction
