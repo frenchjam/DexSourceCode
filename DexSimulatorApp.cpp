@@ -902,6 +902,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		break;
 	}
 
+	if ( return_code == ABORT_EXIT ) exit( return_code );
+
 	if ( ParseForString( lpCmdLine, "-stow" ) ) {
 
 		return_code = apparatus->fWaitSubjectReady( "PlaceMassNoSlide.bmp", "Remove manipulandum from retainer, place inside a mass in any cradle.", OkToContinue );
@@ -912,6 +914,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		if ( return_code == ABORT_EXIT ) exit( return_code );
 
 	}
+
+	// Indicate to the subject that they are done.
+	return_code = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed." );
 
 	// Record the simulated state of the apparatus, so that the next trial starts from here.
 	if ( !compile ) SaveGUIState();

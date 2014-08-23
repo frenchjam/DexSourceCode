@@ -298,10 +298,6 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 
 	}
-
-	// Indicate to the subject that they are done.
-	// The first NULL parameter says to use the default picture.
-	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed." );
 	
 	return( NORMAL_EXIT );
 	

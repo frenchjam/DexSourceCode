@@ -288,10 +288,6 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 
 	}
 
-	// Indicate to the subject that they are done and that they can set down the maniplulandum.
-	status = apparatus->SignalNormalCompletion( "ok.bmp", "Task completed." );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	return( NORMAL_EXIT );
 	
 }

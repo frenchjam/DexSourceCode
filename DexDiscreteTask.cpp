@@ -342,11 +342,6 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 		apparatus->ShowStatus(  "Analysis completed.", "ok.bmp" );
 	}
-
-	// Indicate to the subject that they are done.
-	// The first NULL parameter says to use the default picture.
-	status = apparatus->SignalNormalCompletion( NULL, "Task completed." );
-	if ( status == ABORT_EXIT ) exit( status );
 	
 	return( NORMAL_EXIT );
 	

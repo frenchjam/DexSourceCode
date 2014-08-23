@@ -144,10 +144,6 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopFilming();
 	apparatus->StopAcquisition( "Error during file save." );
 
-	// Indicate to the subject that they are done.
-	status = apparatus->SignalNormalCompletion( NULL, "Task completed." );
-	if ( status == ABORT_EXIT ) exit( status );
-
 	// Apparently we were successful.
 	return( NORMAL_EXIT );
 
