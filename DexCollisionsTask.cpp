@@ -28,8 +28,8 @@ int collisionDownTarget = 0;
 double collisionsContinuousDropoutTimeLimit = 0.900;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 double collisionsCumulativeDropoutTimeLimit = 30.000;	// Duration in seconds of the maximum time for which the manipulandum can disappear.
 
-int collisionSequenceN = 20;
-int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP, DOWN, DOWN, UP, DOWN, UP, DOWN, UP, UP,DOWN, UP, UP, DOWN, DOWN, UP, UP, DOWN, UP, DOWN };
+int collisionSequenceN = 2;
+int collisionSequence[MAX_SEQUENCE_ENTRIES] = { DOWN, UP };
 double collisionTime = 1.5;
 double collisionMaxTrialTime = 120.0;		// Max time to perform the whole list of movements.
 double collisionMovementThreshold = 10.0;
