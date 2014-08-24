@@ -37,7 +37,7 @@ echo CMD_USER,29,456,%fn%,Training M  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Training M ***** > temp2
 copy temp2+SessionMediumSubjectTraining.dex %fn% 
 
-set fn=S6Lrg%Q%.dex
+set fn=SsLrg%Q%.dex
 echo CMD_USER,39,789,%fn%,Training L  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Training L ***** > temp2
 copy temp2+SessionLargeSubjectTraining.dex %fn% 
