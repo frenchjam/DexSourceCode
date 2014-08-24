@@ -56,7 +56,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -deploy -%posture%
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit 
 
 REM ****************************************************************************
 
