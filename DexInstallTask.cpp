@@ -109,7 +109,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Prompt the subject to place the manipulandum in the holder on the chair.
 	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
-	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet screen is green." );
+	status = apparatus->WaitSubjectReady("Visible.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet touchscreen is green." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
