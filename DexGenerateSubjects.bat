@@ -24,7 +24,7 @@ if /I %QUALIFIER% EQU Flight goto TESTS
 
 set fn=Demo.dex
 echo CMD_USER,98,000,%fn%,Training DEMO  >> temp1
-echo CMD_PROTOCOL,200,ignore,***  Training DEMO  *** > temp2
+echo CMD_PROTOCOL,200,ignore,*** Training DEMOS *** > temp2
 copy temp2+SessionDemo.dex %fn% 
 
 set fn=SsSml%Q%.dex
@@ -32,12 +32,12 @@ echo CMD_USER,19,123,%fn%,Training S  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Training S ***** > temp2
 copy temp2+SessionSmallSubjectTraining.dex %fn% 
 
-set fn=SsMed%Q%.dex
+set fn=SmMed%Q%.dex
 echo CMD_USER,29,456,%fn%,Training M  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Training M ***** > temp2
 copy temp2+SessionMediumSubjectTraining.dex %fn% 
 
-set fn=SsLrg%Q%.dex
+set fn=SlLrg%Q%.dex
 echo CMD_USER,39,789,%fn%,Training L  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Training L ***** > temp2
 copy temp2+SessionLargeSubjectTraining.dex %fn% 
