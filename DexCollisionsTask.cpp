@@ -67,7 +67,7 @@ int PrepCollisions( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
-	AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", "MvToBlkV.bmp" );
+	AddDirective( apparatus, "You will hold the manipulandum upright and to the right of the blinking Target LED.", "MvToBlkTap.bmp" );
 	AddDirective( apparatus, "You will then tap up or down according to the beeps and targets, then return to the center.", "Collision.bmp" );
 	ShowDirectives( apparatus );
 
