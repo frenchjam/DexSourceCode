@@ -102,8 +102,8 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, "You will hold the manipulandum upright and to the right of the blinking Target LED.", mtb );
 	AddDirective( apparatus, "You will move quickly and accurately to each lighted Target LED.", dsc );
 	char msg[512];
-	sprintf( msg, "The targets will be one of the %d currently lit Target LEDs.", lit_target_count );
-	AddDirective( apparatus, msg, dsc );
+	sprintf( msg, "The targets will be one of the %d currently lit Target LEDs (see target array).", lit_target_count );
+	AddDirective( apparatus, msg, "info.bmp" );
 	AddDirective( apparatus, "Be sure to hold the manipuladum upright and to the right of each Target LED.", mtb );
 
 	ShowDirectives( apparatus );
