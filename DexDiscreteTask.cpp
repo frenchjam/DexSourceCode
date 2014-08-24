@@ -93,15 +93,14 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	AddDirective( apparatus, "To start, you will move the manipulandum to the blinking Target LED.", mtb );
 	// It would be good to have here pictures of the manipulandum properly aligned to the target.
-	if ( direction == VERTICAL ) AddDirective( apparatus, "Place manipulandum to the right of Target Mast and align center with each target.", mtb );
-	else AddDirective( apparatus, "Place manipulandum to the right of Workspace Tablet and align center with each target.", mtb );
+	// I shorted the names wrt official OpNoms to make the messages fit with the word 'upright'.
 	AddDirective( apparatus, "On each beep, you will move quickly and accurately to the other lit Target LED.", dsc );
+	AddDirective( apparatus, "Before each trial, you will be instructed to keep your eyes OPEN or CLOSED.", "EyesOpenClosed.bmp" );
 	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
 	// It would be good to have a picture about eyes being open or closed.
-	AddDirective( apparatus, "Before each trial, you will be instructed to keep your eyes OPEN or CLOSED.", "EyesOpenClosed.bmp" );
-
 	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each Target LED.", "info.bmp" );
-
+	if ( direction == VERTICAL ) AddDirective( apparatus, "Place manipulandum upright and to the right of Mast and align center with each target.", mtb );
+	else AddDirective( apparatus, "Place manipulandum upright and to the right of Tablet and align center with each target.", mtb );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );

@@ -101,13 +101,13 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if ( eyes == OPEN )	{
-		AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", mtb );
+		AddDirective( apparatus, "You will hold the manipulandum upright and to the right of the blinking Target LED.", mtb );
 		AddDirective( apparatus, "You will then oscillate between the lit targets, one full cycle per beep.", dsc );
 		AddDirective( apparatus, "When the beeps will stop, you should continue the oscillations.", dsc );
 	}
 		// If we delete oscillation in discrete, then we don't need this condition here below any more.
 	else {
-		AddDirective( apparatus, "You will move the manipulandum to the right of the blinking Target LED.", mtb );
+		AddDirective( apparatus, "You will hold the manipulandum upright and to the right of the blinking Target LED.", mtb );
 		AddDirective( apparatus, "You will then CLOSE your eyes and oscillate between the targets, one full cycle per beep.", dsc );
 		AddDirective( apparatus, "When the beeps stop, you should continue the oscillations, keeping your eyes CLOSED.", dsc );
 	}
