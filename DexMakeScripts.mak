@@ -11,6 +11,7 @@
 #default:	release_flight		# Generate a flight release.
 #default:	release_ground		# Generate a ground release.
 default:	GripGround.md5
+#default:	GripFlight.md5
 
 # This is here to catch an error where you did not pick a default build.
 default_default:
