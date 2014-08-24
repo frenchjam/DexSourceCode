@@ -1,3 +1,10 @@
+
+
+	In the install procedure, the bar is put on the right for boresighting and on the left for alignment.
+	Modifications to allow for shorter task durations for demo and training tasks.
+	Corrected bug in script build files that caused the sequences of collisions to be ignored.
+	Fixed LINT to catch CMD_CHK_VISIBILTY screens and to detect if an unrecognized command is encountered.
+
 GripGround Release (2014.07.10 18.56.05) installed on EM at EAC for training
 
 	Restructured Subjects and Sessions for ground models:

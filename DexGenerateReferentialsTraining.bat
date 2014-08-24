@@ -45,9 +45,11 @@ REM Standard tasks at the start of a subsession.
 REM Perform the install of the equipment in the upright (seated) position.
 REM Each subject should do this, even the configuration has changed, to be sure that the CODAs are aligned.
 if /I %posture% EQU supine GOTO :SUPINE 
+REM Don't do the install because presumably we just did it in the Dynamics protocol.
 REM call %SOURCE%\DexCreateInstallTask.bat Upright
 GOTO :NEXT
 :SUPINE
+REM If we just moved to the Supine configuration we need to redo the Configuration step.
 call %SOURCE%\DexCreateInstallTask.bat Supine
 :NEXT
 
@@ -64,10 +66,11 @@ REM Inflight the subject will do three different levels.
 REM For training, we reduce it to 1 here. 
 
 if /I %posture% EQU supine GOTO :SUPINE1
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep -stow
+call %SOURCE%\DexCreateFrictionTask.bat 1.0 -%posture% -deploy -sit -prep -stow
 GOTO :NEXT1
 :SUPINE1
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -deploy -prep -stow
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit -prep
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -stow
 :NEXT1
 
 REM ****************************************************************************
@@ -81,6 +84,7 @@ REM  first so that we can quit early without doing all the Discrete conditions.
 
 set mass=400gm
 set direction=Vertical
+set targets=CollisionSequences10.txt
 set nblocks=1
 call %SOURCE%\DexCreateCollisionTasks.bat
 
@@ -92,6 +96,7 @@ REM
 
 REM All the trials have the same range, frequency, duration and mass.
 set mass=400gm
+set delays=DiscreteDelaySequences10.txt
 
 REM Start the trial counter for the discrete movements.
 set dsc_seq=0

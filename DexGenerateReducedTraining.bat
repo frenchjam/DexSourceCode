@@ -46,7 +46,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -deploy
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit
 
 REM ****************************************************************************
 
@@ -73,6 +73,7 @@ REM
 
 REM All the trials mass.
 set mass=400gm
+set delays=DiscreteDelaySequences10.txt
 
 REM Start the trial counter for the oscillations.
 set dsc_seq=0
@@ -81,21 +82,6 @@ set direction=Vertical
 set eyes=open  
 set range=DiscreteRangesVertical.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat -prep
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRangesVertical.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
-
-set direction=Horizontal
-set eyes=open  
-set range=DiscreteRangesHorizontal.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat -prep
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRangesHorizontal.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
 
 REM ****************************************************************************
 
@@ -106,7 +92,7 @@ REM
 REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
-set duration=30.0
+set duration=20.0
 
 REM Start the trial counter for the oscillations.
 set osc_seq=100
@@ -117,12 +103,6 @@ set prep=-prep
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
-set mass=400gm
-set frequency=1.00
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
 REM ****************************************************************************
 
 
@@ -130,8 +110,10 @@ REM
 REM Collisions
 REM
 
-set mass=600gm
-set nblocks=5
+set mass=400gm
+set direction=Vertical
+set targets=CollisionSequences10.txt
+set nblocks=1
 call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
@@ -142,21 +124,14 @@ REM
 
 REM Reduce mass to 400 gm for training.
 set mass=400gm
-set nblocks=3
+set nblocks=1
+set movements=20
 
 REM
 REM Vertical Direction
 REM
 set direction=Vertical
 call %SOURCE%\DexCreateTargetedTasks.bat
-
-REM ***************************************************************************
-
-REM
-REM Coefficient of Friction tests.
-REM
-
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep
 
 REM ****************************************************************************
 

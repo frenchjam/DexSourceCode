@@ -57,7 +57,7 @@ REM Create the script filename.
 set /A "task=task+1"
 set tag=D%task%FRIC
 set filename=%tag%.dex
-DexSimulatorApp %prep% -friction -filter=2.0 -duration=15.0 -tag=%tag% -pinch=1.0 -compile=%filename% 
+DexSimulatorApp %prep% -stow -friction -filter=2.0 -duration=8.0 -tag=%tag% -pinch=1.0 -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Friction
 
 REM ****************************************************************************
@@ -101,7 +101,7 @@ REM Construct a file tag.
 set tag=D%task%T%pstr%
 
 REM Put all the paramters together for the compiler.
-set params=-targeted %prep% -nochecks -%mass% -%posture% -%direction% -tag=%tag% -targets=TargetedTargets%direction%30.txt:6%sz%  
+set params=-targeted %prep% -nochecks -%mass% -%posture% -%direction% -tag=%tag% -targets=TargetedTargets%direction%10.txt:6%sz%  
 
 REM Generate a script filename based on the parameters.
 set filename=%tag%0.dex
@@ -122,6 +122,7 @@ REM
 set mass=400gm
 set direction=Vertical
 set range=DiscreteRanges%direction%.txt:%sz%
+set delays=DiscreteDelaySequences10.txt
 
 set /A "task=task+1"
 
@@ -129,7 +130,7 @@ set tag=D%task%D%
 set eyes=open  
 set ey=%eyes:~0,2%
 set filename=%tag%%ey%.dex
-%COMPILER% -discrete %prep% -nochecks -%mass% -%posture% -%direction% -%eyes% -range=%range% -delays=DiscreteDelaySequences20.txt:7 -tag=%tag% -compile=%filename%
+%COMPILER% -discrete %prep% -nochecks -%mass% -%posture% -%direction% -%eyes% -range=%range% -delays=%delays%:7 -tag=%tag% -compile=%filename%
 echo CMD_TASK,%task%,%filename%,%task% Discrete
 
 REM ****************************************************************************
@@ -141,12 +142,13 @@ set /A "task=task+1"
 
 set sq=8
 set mass=400gm
+set targets=CollisionSequences10.txt
 
 REM Construct a file tag.
 set tag=D%task%C
 
 REM Put all the paramters together for the compiler.
-set params=-collisions %prep% -nochecks -%mass% -%posture% -tag=%tag% -delays=CollisionsSequences30.txt:%sq%
+set params=-collisions %prep% -nochecks -%mass% -%posture% -tag=%tag% -targets=%targets%:%sq%
 
 REM Generate a script filename based on the parameters.
 REM set filename=%tag%Col%mass%%sq%.dex

@@ -46,7 +46,7 @@ set /A "task=task+1"
 echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -deploy
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit
 
 REM ****************************************************************************
 
@@ -76,7 +76,7 @@ set osc_seq=100
 REM All the oscillations are in the same direction and of the same duration.
 set direction=Vertical
 set dir=%direction:~0,4%
-set duration=30.0
+set duration=20.0
 
 set mass=400gm
 set frequency=1.00
@@ -90,19 +90,19 @@ REM
 REM Targeted Movements
 REM
 
+set mass=400gm
+set nblocks=1
+set movements=10
+
 REM
 REM Vertical Direction
 REM
-set mass=400gm
-set nblocks=1
 set direction=Vertical
 call %SOURCE%\DexCreateTargetedTasks.bat
 
 REM
 REM Horizontal Direction
 REM
-set mass=400gm
-set nblocks=1
 set direction=Horizontal
 call %SOURCE%\DexCreateTargetedTasks.bat
 
