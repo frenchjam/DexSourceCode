@@ -23,7 +23,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex $(COMPILER)
 PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
@@ -172,38 +172,38 @@ SessionU.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex $(PROTOCOLS)
 
 ### Dynamics Flight Protocol
 
-DexDynamicsFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsFlightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Sml > $@
-DexDynamicsFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med > $@
-DexDynamicsFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Lrg > $@
 
 ### Reference Seated Flight Protocol
 
-DexSeatedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSeatedFlightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Sml > $@
-DexSeatedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSeatedFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Med > $@
-DexSeatedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSeatedFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Upright Lrg > $@
 
 ### Reference Supine Flight Protocol
 
-DexSupineFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSupineFlightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Sml > $@
-DexSupineFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSupineFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Med > $@
-DexSupineFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
+DexSupineFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsFlight.bat Supine Lrg > $@
 
 ### Reduced Flight
 
-DexReducedFlightSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Sml > $@
-DexReducedFlightMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Med > $@
-DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
+DexReducedFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Lrg > $@
 
 
@@ -213,89 +213,89 @@ DexReducedFlightLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedFlight.bat $(H
 
 ### Dynamics BDC Protocol
 
-DexDynamicsBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Sml > $@
-DexDynamicsBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Med > $@
-DexDynamicsBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsBDC.bat Upright Lrg > $@
 
 ### Reference Seated BDC Protocol
 
-DexSeatedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSeatedBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Sml > $@
-DexSeatedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSeatedBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Med > $@
-DexSeatedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSeatedBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Upright Lrg > $@
 
 ### Reference Supine BDC Protocol
 
-DexSupineBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSupineBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Sml > $@
-DexSupineBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSupineBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Med > $@
-DexSupineBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
+DexSupineBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsBDC.bat Supine Lrg > $@
 
 ### Reduced BDC Protocol
 
-DexReducedBDCSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+DexReducedBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedBDC.bat Upright Sml > $@
-DexReducedBDCMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+DexReducedBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedBDC.bat Upright Med > $@
-DexReducedBDCLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+DexReducedBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg > $@
 
 ### Dynamics Training Protocol
 
-DexDynamicsTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsTrainingSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Sml > $@
-DexDynamicsTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsTrainingMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Med > $@
-DexDynamicsTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsTrainingLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsTraining.bat Upright Lrg > $@
 
 ### Reference Seated Training Protocol
 
-DexSeatedTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSeatedTrainingSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Sml > $@
-DexSeatedTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSeatedTrainingMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Med > $@
-DexSeatedTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSeatedTrainingLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Upright Lrg > $@
 
 ### Reference Supine Training Protocol
 
-DexSupineTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSupineTrainingSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Sml > $@
-DexSupineTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSupineTrainingMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Med > $@
-DexSupineTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
+DexSupineTrainingLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReferentialsTraining.bat Supine Lrg > $@
 
 ### Reduced Training Protocol
 
-DexReducedTrainingSmall.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+DexReducedTrainingSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedTraining.bat Upright Sml > $@
-DexReducedTrainingMedium.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+DexReducedTrainingMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedTraining.bat Upright Med > $@
-DexReducedTrainingLarge.dex: $(SCRIPTS) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
+DexReducedTrainingLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedTraining.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedTraining.bat Upright Lrg > $@
 
 ### Demo Protocol
 
-DexUprightDemo.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+DexUprightDemo.dex: $(COMPILER) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDemo.bat Upright Med > $@
-DexSupineDemo.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
+DexSupineDemo.dex: $(COMPILER) $(SOURCE)\DexGenerateDemo.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDemo.bat Supine Med > $@
 
 ### Flight Evaluation Protocol
-DexDynamicsFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
+DexDynamicsFlightOnGround.dex: $(COMPILER) $(SOURCE)\DexGenerateDynamicsFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateDynamicsFlight.bat Upright Med 400gm > $@
-DexSeatedFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateSeatedlight.bat $(HELPERS) $(SCRIPTS)
+DexSeatedFlightOnGround.dex: $(COMPILER) $(SOURCE)\DexGenerateSeatedlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateSeatedlight.bat Upright Med 400gm > $@
-DexSupineFlightOnGround.dex: $(SCRIPTS) $(SOURCE)\DexGenerateSupineFlight.bat $(HELPERS) $(SCRIPTS)
+DexSupineFlightOnGround.dex: $(COMPILER) $(SOURCE)\DexGenerateSupineFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateSupineFlight.bat Supine  Med 400gm > $@
 
 # ------------------------------------------------------------------------------------------------
