@@ -894,6 +894,20 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		else if ( !strcmp( token[0], "CMD_SET_PICTURE" ) ) {
 			apparatus->ShowStatus( hold_status_message,token[1] );
 		}
+		else if ( !strcmp( token[0], "CMD_SELFTEST" ) ) {
+		}
+		else if ( !strcmp( token[0], "CMD_CFG_CAMERA" ) ) {
+		}
+		else if ( !strcmp( token[0], "CMD_CTRL_CAMERA" ) ) {
+			int value, items;
+			items = sscanf( token[1], "%d", &value );
+			value = items && value;
+			if ( value ) apparatus->StartFilming( token[2], 2 );
+			else apparatus->StopFilming();
+		}
+		else {
+//			fMessageBox( MB_OK, "DEX Interpreter", "Unrecognize command:\n%s", line );
+		}
 
 		if ( status == RETRY_EXIT || status == ABORT_EXIT ) break;
 
