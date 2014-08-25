@@ -26,7 +26,7 @@ if /I %QUALIFIER% EQU Flight goto TESTS
 
 set fn=Demo.dex
 echo CMD_USER,98,000,%fn%,Training DEMO  >> temp1
-echo CMD_PROTOCOL,200,ignore,*** Training DEMOS *** > temp2
+echo CMD_PROTOCOL,200,ignore,** Training DEMOS ** > temp2
 copy temp2+SessionDemo.dex %fn% 
 
 set fn=SsSml%Q%.dex

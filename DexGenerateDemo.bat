@@ -57,7 +57,7 @@ REM Create the script filename.
 set /A "task=task+1"
 set tag=D%task%FRIC
 set filename=%tag%.dex
-DexSimulatorApp %prep% -stow -friction -filter=2.0 -duration=8.0 -tag=%tag% -pinch=1.0 -compile=%filename% 
+DexSimulatorApp %prep% -sit -stow -friction -filter=2.0 -duration=8.0 -tag=%tag% -pinch=1.0 -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Friction
 
 REM ****************************************************************************
