@@ -73,7 +73,7 @@ char *MsgMoveToBlinkingTarget = "Move to blinking target.";
 char *MsgTrialOver =        "Place the maniplandum and mass in the empty cradle and slide to lock. Remove hand and press <OK>.";
 char *MsgAcquiringBaseline = "Acquiring baseline ...";
 char *MsgQueryReadySeated = "***  PREPARING TO START THE TASK  ***\nYou should be sitting with the restraint belts fastened.%s";
-char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened.%s";
+char *MsgQueryReadySupine = "***  PREPARING TO START THE TASK  ***\nYou should be lying down with the restraint belts fastened and your legs stretched out.%s";
 char *InstructPickUpManipulandum = "You will first pick up the manipulandum at the center between thumb and forefinger.";
 char *OkToContinue ="";
 char *PlaceTargetBarRightOpen = "Place the Target Mast in Socket N (right side) with the tapping surfaces open.%s";
@@ -825,11 +825,14 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		//  and wait for confimation that he or she is ready.
 		if ( desired_posture == PostureSeated ) {
 			return_code = apparatus->fWaitSubjectReady( "BeltsSeated.bmp", "Take a seat in GRIP. Attach the restraint belts and attach the cuffs to your right wrist and elbow.", OkToContinue );
+			if ( return_code == ABORT_EXIT ) exit( return_code );
 		}
 		else if ( desired_posture == PostureSupine ) {
 			return_code = apparatus->fWaitSubjectReady( "BeltsSupine.bmp", "Lie down on the supine box, attach the waist, thigh and shoulder straps and attach the wrist box to your right wrist.", OkToContinue );
+			if ( return_code == ABORT_EXIT ) exit( return_code );
+			return_code = apparatus->fWaitSubjectReady( "Legs.bmp", "Legs should be stretched out with heels resting on step.", OkToContinue );
+			if ( return_code == ABORT_EXIT ) exit( return_code );
 		}
-		if ( return_code == ABORT_EXIT ) exit( return_code );
 
 	}
 
