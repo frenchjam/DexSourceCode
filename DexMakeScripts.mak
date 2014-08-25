@@ -9,8 +9,8 @@
 #
 #default:	clean					# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	release_flight		# Generate a flight release.
-default:	release_ground		# Generate a ground release.
-#default:	GripGround.md5
+#default:	release_ground		# Generate a ground release.
+default:	GripGround.md5
 #default:	GripFlight.md5
 
 # This is here to catch an error where you did not pick a default build.

@@ -118,7 +118,6 @@ REM
 REM Discrete Movements
 REM
 
-
 set mass=400gm
 set direction=Vertical
 set range=DiscreteRanges%direction%.txt:%sz%
