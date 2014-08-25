@@ -1,5 +1,8 @@
 
-
+	Only one block of Collisions in each References sub-session.
+	Better pictures for closing locker, VISIBLE indicator, etc.
+	Picture for taking a mass includes putting a mass.
+	Added reminder about legs.
 	In the install procedure, the bar is put on the right for boresighting and on the left for alignment.
 	Modifications to allow for shorter task durations for demo and training tasks.
 	Corrected bug in script build files that caused the sequences of collisions to be ignored.
