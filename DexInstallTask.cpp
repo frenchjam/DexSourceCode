@@ -309,6 +309,7 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 		apparatus->Wait( 0.9 );
 	}
 
+	apparatus->ShowStatus( "", "blank.bmp" );
 	status = apparatus->WaitSubjectReady("confirm.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
 	if ( status == ABORT_EXIT ) return( status );
 

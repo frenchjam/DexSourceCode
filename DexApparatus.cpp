@@ -710,6 +710,7 @@ int DexApparatus::SignalNormalCompletion( const char *picture, const char *messa
 	else ptr = picture;
 
 	Comment( "Signal Normal Completion." );
+	HideStatus();
 	for ( int blinks = 0; blinks < N_NORMAL_BLINKS; blinks++ ) {
 		
 		SoundOff();

@@ -7,11 +7,13 @@
 # F7 will build the first 'default:' specification that it finds.
 # Careful - 'default' there can be no spaces before 'default:'
 #
-#default:	clean					# Pick this if you want to clear out all the .dex files as rebuild everything.
+#default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
+
+#default:	GripGround.md5		# Generate local copy of ground scripts.
+default:	release_ground		# Generate a ground release.
+
+#default:	GripFlight.md5		# Generate local copy of flight scripts.
 #default:	release_flight		# Generate a flight release.
-#default:	release_ground		# Generate a ground release.
-default:	GripGround.md5
-#default:	GripFlight.md5
 
 # This is here to catch an error where you did not pick a default build.
 default_default:

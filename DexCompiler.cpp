@@ -224,6 +224,8 @@ char *DexCompiler::quoteMessage( const char *message ) {
 		fWarning( "WARNING: Message too long. Truncating.\n%s\n%s\n", original, result );
 	}
 
+	if ( strlen( result ) == 0 ) strcpy( result, " " );
+
 	return( result );
 
 }
