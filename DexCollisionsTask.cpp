@@ -175,7 +175,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
+	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkTap.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Double check that the subject has the specified mass.

@@ -216,8 +216,8 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0] , targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0] , targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVArrows.bmp"  );
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHArrows.bmp"  ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Double check that the subject has the specified mass.
