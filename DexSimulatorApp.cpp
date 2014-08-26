@@ -639,6 +639,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-ft"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-gm"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-slip"  ) ) task = MISC_INSTALL;
+	if ( strstr( lpCmdLine, "-selftest"  ) ) task = MISC_INSTALL;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.

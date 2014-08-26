@@ -98,5 +98,5 @@ REM copy temp2+SessionFlightOnGround.dex %fn%
 
 echo CMD_USER,99,987,SessionU.dex,Maintenance  >> temp1
 
-del /F /Q %OUTPUT%
+if exist %OUTPUT% del /F /Q %OUTPUT%
 rename temp1 %OUTPUT%

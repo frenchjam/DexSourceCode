@@ -7,7 +7,8 @@ CMD_TASK,110,task_align.dex,Align Tracker
 CMD_TASK,120,task_nullify.dex,Nullify Forces
 CMD_TASK,130,TaskAcquire5s.dex,Acquire 5s
 CMD_TASK,131,TaskAcquire30s.dex,Acquire 30s
-CMD_TASK,150,TaskCheckMASS.dex,Test Mass Selection
+CMD_TASK,150,TaskSelfTest.dex,Run Self Test
+CMD_TASK,151,TaskCheckMASS.dex,Test Mass Selection
 CMD_TASK,160,TaskCheckFT.dex,Test F/T Sensors
 CMD_TASK,165,TaskCheckSlip.dex,Test Slip
 CMD_TASK,170,TaskCheckLEDs.dex,Test Targets

@@ -275,7 +275,7 @@ DexSupineFlightOnGround.dex: $(COMPILER) $(SOURCE)\DexGenerateSupineFlight.bat $
 
 ### Utilities
 
-ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckLEDs.dex TaskCheckWaitAtTargetSuHo.dex TaskCheckWaitAtTargetSuVe.dex TaskCheckWaitAtTargetUpVe.dex TaskCheckWaitAtTargetUpHo.dex TaskCheckSlip.dex TaskCheckMASS.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex 
+ProtocolUtilities.dex: $(STATICSCRIPTS)\ProtocolUtilities.dex TaskCheckLEDs.dex TaskCheckWaitAtTargetSuHo.dex TaskCheckWaitAtTargetSuVe.dex TaskCheckWaitAtTargetUpVe.dex TaskCheckWaitAtTargetUpHo.dex TaskCheckSlip.dex TaskCheckMASS.dex TaskSelfTest.dex TaskCheckFT.dex TaskAcquire30s.dex TaskAcquire5s.dex calibrate.dex task_align.dex task_nullify.dex task_shutdown.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolUtilities.dex .\$@
 	$(TOUCH)
 ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOffsets.dex TaskInstallUpright.dex 
@@ -326,6 +326,8 @@ TaskAcquire30s.dex: $(COMPILER)
 	$(COMPILER) -rec -duration=30 -compile=$@
 TaskAcquire5s.dex: $(COMPILER)
 	$(COMPILER) -rec -duration=5 -compile=$@
+TaskSelfTest.dex: $(COMPILER)
+	$(COMPILER) -selftest -compile=$@
 
 calibrate.dex: $(STATICSCRIPTS)\calibrate.dex
 	copy /Y $(STATICSCRIPTS)\calibrate.dex .
