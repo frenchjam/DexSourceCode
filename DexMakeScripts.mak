@@ -8,11 +8,11 @@
 # Careful - 'default' there can be no spaces before 'default:'
 #
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
-#default:	flight_debug
+default:	flight_debug
 #default:	flight_draft
 #default:	flight_release
 #default:	ground_debug
-default:	ground_draft
+#default:	ground_draft
 #default:	ground_release
 
 # This is here to catch an error where you did not pick a default build.
@@ -25,7 +25,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex 
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex
 PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
@@ -337,6 +337,9 @@ task_shutdown.dex: $(STATICSCRIPTS)\task_shutdown.dex
 	copy /Y $(STATICSCRIPTS)\task_shutdown.dex .
 _check_messages.dex: $(STATICSCRIPTS)\_check_messages.dex
 	copy /Y $(STATICSCRIPTS)\_check_messages.dex .
+null_task.dex: $(STATICSCRIPTS)\null_task.dex
+	copy /Y $(STATICSCRIPTS)\null_task.dex .
+
 
 ######################################################################################################################################
 
