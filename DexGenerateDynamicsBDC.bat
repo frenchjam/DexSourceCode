@@ -92,6 +92,13 @@ set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
+REM ****************************************************************************
+
+REM 
+REM Show progress.
+REM 
+
+echo CMD_TASK,1,null_task.dex,** Halfway Point **
 
 REM ****************************************************************************
 

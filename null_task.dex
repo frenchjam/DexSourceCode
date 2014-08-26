@@ -1,1 +1,6 @@
 #Null task should just return.
+CMD_LOG_MESSAGE,0,NULL Task
+CMD_WAIT_SUBJ_READY,You have completed half of the procedure. Press OK to continue.,info.bmp,300
+#end
+
+

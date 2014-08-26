@@ -124,6 +124,13 @@ set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
 call %SOURCE%\DexCreateDiscreteTask.bat 
 
+REM ****************************************************************************
+
+REM 
+REM Show progress.
+REM 
+
+echo CMD_TASK,1,null_task.dex,** Halfway Point **
 
 REM ****************************************************************************
 
