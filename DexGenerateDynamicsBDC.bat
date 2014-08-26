@@ -87,25 +87,7 @@ set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
 set mass=400gm
-set frequency=1.00
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
-set mass=400gm
 set frequency=1.33
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
-set mass=400gm
-set frequency=1.33
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
-set mass=400gm
-set frequency=0.66
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
@@ -145,25 +127,6 @@ REM Horizontal Direction
 REM
 set direction=Horizontal
 call %SOURCE%\DexCreateTargetedTasks.bat
-
-REM ****************************************************************************
-
-REM All the oscillations are in the same direction and of the same duration.
-set direction=Vertical
-set dir=%direction:~0,4%
-set duration=30.0
-
-set mass=600gm
-set frequency=1.00
-set prep=-prep
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
-
-set mass=400gm
-set frequency=1.00
-set prep=
-set range=OscillationRangesNominalVertical.txt:%sz%
-call %SOURCE%\DexCreateOscillationTask.bat
 
 REM ****************************************************************************
 
