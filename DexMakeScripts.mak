@@ -8,12 +8,12 @@
 # Careful - 'default' there can be no spaces before 'default:'
 #
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
-
-#default:	GripGround.md5		# Generate local copy of ground scripts.
-default:	release_ground		# Generate a ground release.
-
-#default:	GripFlight.md5		# Generate local copy of flight scripts.
-#default:	release_flight		# Generate a flight release.
+#default:	flight_debug
+#default:	flight_draft
+#default:	flight_release
+#default:	ground_debug
+default:	ground_draft
+#default:	ground_release
 
 # This is here to catch an error where you did not pick a default build.
 default_default:
@@ -25,7 +25,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex $(COMPILER)
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex 
 PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
@@ -47,57 +47,26 @@ almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.t
 
 ######################################################################################################################################
 
-GripFlightScripts.tar: $(LINT) users_flight.dex _check_messages.dex
+flight_debug: users_flight.dex _check_messages.dex
 	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateFlightScriptsTar.bat -log=GripFlightLintScripts.log
-	CreateFlightScriptsTar.bat GripFlightScripts.tar
+	$(SOURCE)\DexReleaseScripts.bat GripFlight Debug
 
-GripFlightPictures.tar:  $(LINT) users_flight.dex _check_messages.dex
-	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateFlightPicturesTar.bat -log=GripFlightLintPictures.log
-	CreateFlightPicturesTar.bat GripFlightPictures.tar
+flight_draft: $(LINT) flight_debug
+	$(SOURCE)\DexReleaseScripts.bat GripFlight Draft
 
-GripFlightMessageList.txt: $(LINT) GripFlightScripts.tar _check_messages.dex
-	copy /Y /V users_flight.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -log=GripFlightLintMessages.log
-	copy /Y /V GripFlightMessageList.txt $(PICTURES)
-
-GripFlightProofs: $(LINT) GripFlightScripts.tar
-	copy /Y /V users_flight.dex users.dex
-	echo this > $(PROOFS)\deletethis.txt
-	del /Q $(PROOFS)\*.*
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -messages=GripFlightMessageList.txt -proofs=$(PROOFS) -log=GripFlightLintProofs.log
-	copy /Y /V GripFlightMessageList.txt $(PICTURES)
-	echo %date% %time% > GripFlightProofs
-
-GripFlightProofs.tar: GripFlightProofs
-	$(TAR) --create --verbose --file=GripFlightProofs.tar --directory=$(PROOFS) *.bmp
-
-GripFlight.md5: GripFlightPictures.tar GripFlightScripts.tar
-	$(MD5TREE)  GripFlightPictures.tar GripFlightScripts.tar > GripFlight.md5
-
-release_flight: GripFlightScripts.tar GripFlightPictures.tar GripFlight.md5 
-	$(SOURCE)\DexReleaseScripts.bat GripFlight
-	echo %date% %time% > $@
+flight_release: $(LINT) clean flight_debug
+	$(SOURCE)\DexReleaseScripts.bat GripFlight Release
 	 
-######################################################################################################################################
-
-GripGroundScripts.tar: $(LINT) users_ground.dex _check_messages.dex
+ground_debug: users_ground.dex _check_messages.dex
 	copy /Y /V users_ground.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -sbatch=CreateGroundScriptsTar.bat -log=GripGroundLintScripts.log
-	CreateGroundScriptsTar.bat GripGroundScripts.tar
+	$(SOURCE)\DexReleaseScripts.bat GripGround Debug
 
-GripGroundPictures.tar:  $(LINT) users_ground.dex _check_messages.dex
-	copy /Y /V users_ground.dex users.dex
-	$(LINT) -noquery -pictures=$(PICTURES) users.dex -pbatch=CreateGroundPicturesTar.bat -log=GripGroundLintPictures.log
-	CreateGroundPicturesTar.bat GripGroundPictures.tar
+ground_draft: $(LINT) ground_debug
+	$(SOURCE)\DexReleaseScripts.bat GripGround Draft
 
-GripGround.md5: GripGroundPictures.tar GripGroundScripts.tar
-	$(MD5TREE)  GripGroundPictures.tar GripGroundScripts.tar > GripGround.md5
-
-release_ground: GripGroundScripts.tar GripGroundPictures.tar GripGround.md5 
-	$(SOURCE)\DexReleaseScripts.bat GripGround
-	echo %date% %time% > $@
+ground_release: $(LINT) clean ground_debug
+	$(SOURCE)\DexReleaseScripts.bat GripGround Release
+	 
 
 ######################################################################################################################################
 
