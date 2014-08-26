@@ -63,7 +63,7 @@ char inputSubject[256] = "users.dex";
 
 // Some common messages.
 
-char *MsgReadyToStart = "Place the manipulandum in any mass/cradle. Leave mass and and manipulandum in cradle and remove hand.";
+char *MsgReadyToStart = "Place the manipulandum in any mass/cradle. Leave mass and manipulandum in cradle and remove hand.";
 char *MsgReadyToStartOpen = "Place the manipulandum in any mass cradle.";
 char *MsgReadyToStartClosed = "Place the manipulandum in any mass cradle.";
 char *MsgGripNotCentered = "Manipulandum not in hand \n      Or      \n Fingers not centered.";
