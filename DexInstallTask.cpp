@@ -112,6 +112,10 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady("Visible.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet touchscreen is green." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
+	// Run the self test.
+	status = apparatus->SelfTest();
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Check that the 4 reference markers and the manipulandum are in the ideal field-of-view of each Coda unit.
 	apparatus->ShowStatus( "Checking field of view ...", "wait.bmp" );
 	status = apparatus->CheckTrackerFieldOfView( 0, fovMarkerMask, fov_min_x, fov_max_x, fov_min_y, fov_max_y, fov_min_z, fov_max_z,
@@ -350,6 +354,18 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	}
 
 	////// Hardware Tests ////////
+
+	// Run the self test in isolation.
+	if( strstr( params, "-selftest"  ) ) {
+
+		apparatus->fWaitSubjectReady( "info.bmp", "********* Run Self Test *********\nPress OK to start test." );
+
+		status = apparatus->SelfTest();
+		if ( status != NORMAL_EXIT ) return( status );
+		status = apparatus->WaitSubjectReady("ok.bmp", "Test completed." );
+
+	}
+
 
 	// Check Force/Torque routines.
 	if( strstr( params, "-ft"  ) ) {
