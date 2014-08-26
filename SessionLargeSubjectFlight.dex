@@ -7,7 +7,5 @@ CMD_PROTOCOL,401,DexDynamicsFlightLarge.dex,Dynamics Seated
 CMD_PROTOCOL,402,DexSeatedFlightLarge.dex,References Seated
 CMD_PROTOCOL,403,DexSupineFlightLarge.dex,References Supine
 CMD_PROTOCOL,404,DexReducedFlightLarge.dex,Reduced
-CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
-CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

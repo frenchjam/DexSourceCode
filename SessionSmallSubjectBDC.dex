@@ -7,7 +7,5 @@ CMD_PROTOCOL,211,DexDynamicsBDCSmall.dex,Dynamics Seated
 CMD_PROTOCOL,212,DexSeatedBDCSmall.dex,References Seated
 CMD_PROTOCOL,213,DexSupineBDCSmall.dex,References Supine
 CMD_PROTOCOL,214,DexReducedBDCSmall.dex,Reduced
-CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
-CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

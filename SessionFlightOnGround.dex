@@ -6,7 +6,5 @@
 CMD_PROTOCOL,341,DexDynamicsFlightOnGround.dex,Dynamics
 CMD_PROTOCOL,342,DexSeatedFlightOnGround.dex,Reference Seated
 CMD_PROTOCOL,343,DexSupineFlightOnGround.dex,Reference Supine
-CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
-CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

@@ -8,8 +8,8 @@
 # Careful - 'default' there can be no spaces before 'default:'
 #
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
-default:	flight_debug
-#default:	flight_draft
+#default:	flight_debug
+default:	flight_draft
 #default:	flight_release
 #default:	ground_debug
 #default:	ground_draft

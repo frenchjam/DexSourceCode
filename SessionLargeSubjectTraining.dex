@@ -8,7 +8,5 @@ CMD_PROTOCOL,421,DexDynamicsTrainingLarge.dex,Dynamics Seated
 CMD_PROTOCOL,422,DexSeatedTrainingLarge.dex,References Seated
 CMD_PROTOCOL,423,DexSupineTrainingLarge.dex,References Supine
 CMD_PROTOCOL,424,DexReducedTrainingLarge.dex,Reduced
-CMD_PROTOCOL,101,ProtocolInstallUpright.dex,Configure for Seated
-CMD_PROTOCOL,102,ProtocolInstallSupine.dex,Configure for Supine
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end
