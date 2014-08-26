@@ -62,7 +62,7 @@ echo CMD_USER,23,941,%fn%,%prefix%Subject 3  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 3 ***** > temp2
 copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
-set fn=S4SMed%Q%.dex
+set fn=S4Med%Q%.dex
 echo CMD_USER,24,510,%fn%,%prefix%Subject 4  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 4 ***** > temp2
 copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
