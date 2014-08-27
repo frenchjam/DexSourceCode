@@ -274,6 +274,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->SetSoundState( 4, 0 );
 
 	// Mark the starting point in the recording where post hoc tests should be applied.
+	// We do the analysis only on the part of the recorded movement that occurs after
+	//  the beeps stops in order to detect if the subject mistakenly stopped as well.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
 
 	// Now finish out the trial
@@ -305,9 +307,12 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition( "Error during saving." );
 
 	if ( !ParseForNoCheck( params ) ) {
+
 		// Check the quality of the data.
-		int n_post_hoc_steps = 3;
-		int post_hoc_step = 0;
+		// Note that for the oscillations protocol we perform the post-hoc test only on the
+		//  part of the recorded movement after the beep stops (see above). This is to 
+		//  detect whether the subject mistakenly stops moving when the beeps stop.
+		//  This should be taken into account when defining the test criteria below.
 
 		// Was the manipulandum obscured?
 		apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
@@ -322,8 +327,11 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		// Check that we got a reasonable number of oscillations.
 		// Here I have set it to +/- 20% of the ideal number.
 		apparatus->ShowStatus( "Checking number of Oscillations ...", "wait.bmp" );
-		oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
-		oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		// oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		// oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		// Widened range on oscillations so as not to constrain the subject.
+		oscillationMinCycles = 3;
+		oscillationMaxCycles = 50;
 		status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
