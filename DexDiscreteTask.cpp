@@ -306,7 +306,7 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 		// Was the manipulandum obscured?
 		apparatus->ShowStatus(  "Checking visibility ...", "wait.bmp" );
-		status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum out of view too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
+		status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum occluded too often. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 		
 		// Check that we got a reasonable amount of movement.

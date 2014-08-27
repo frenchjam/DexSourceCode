@@ -184,6 +184,7 @@ set frequency=0.66
 set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
+
 REM ****************************************************************************
 
 REM
