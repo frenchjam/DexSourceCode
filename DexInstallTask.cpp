@@ -100,8 +100,18 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	fprintf( stderr, "     RunInstall: %s\n", params );
 
-	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
+
+	// Check which configuration is to be used and compute a tag accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
+	char tag[32];
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else {
+		strcpy( tag, "GripCfg" );
+		if ( desired_posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+		else strcat( tag, "S" ); // S is for supine.
+	}
+
+	// Prompt the subject to install the apparatus accordingly.
 	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeatedR.bmp", "Check Workspace Tablet installed for SEATED operation with Target Mast in socket N (right-hand side)." );
 	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation with Target Mast in socket N (right-hand side)." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -111,6 +121,9 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	status = apparatus->WaitSubjectReady("Visible.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet touchscreen is green." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+
+	// Get pictures of the configuration during the tests.
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
 
 	// Run the self test.
 	status = apparatus->SelfTest();
@@ -182,19 +195,13 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	}
 	
-	char tag[32];
-	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
-	else {
-		strcpy( tag, "GripCfg" );
-		if ( desired_posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
-		else strcat( tag, "S" ); // S is for supine.
-	}
 
 	// Perform a short acquisition to measure where the manipulandum is.
 	apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	apparatus->Wait( alignmentAcquisitionDuration );
 	apparatus->StopAcquisition( "Error during file save." );
+	apparatus->StopFilming();
 
 	apparatus->ShowStatus( "Checking visibility ...", "wait.bmp" );
 	status = apparatus->CheckVisibility( cumulativeDropoutTimeLimit, continuousDropoutTimeLimit, "Manipulandum obscured from view.", "alert.bmp" );
@@ -230,6 +237,9 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operations to check the hardware configuration." );
+
+	// Get pictures of the configuration during the tests.
+	apparatus->StartFilming( "GripCfgC", defaultCameraFrameRate );
 
 	apparatus->ShowStatus( "Checking hardware configuration ...", "wait.bmp" );
 	if ( desired_posture == PostureSeated ) {
@@ -294,6 +304,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		else status = apparatus->SelectAndCheckConfiguration( "HdwConfD.bmp", "Unexpected Configuration.\n- Check configured for SEATED.\n- Check target mast on RIGHT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	
+	apparatus->StopFilming();
 	apparatus->HideStatus();
 
 	return( status );
@@ -310,6 +321,14 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware." );
 	if ( status == ABORT_EXIT ) return( status );
 
+	char tag[32];
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else strcpy( tag, "GripSND" );
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+
+	
+	
 	char msg[1024];
 	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the audio control until you hear them clearly.", audioCheckDuration );
 	apparatus->ShowStatus( msg, "volume.bmp" );
@@ -317,6 +336,8 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 		apparatus->Beep();
 		apparatus->Wait( 0.9 );
 	}
+	apparatus->StopAcquisition( "Error during file save." );
+	apparatus->StopFilming();
 
 	apparatus->ShowStatus( "", "blank.bmp" );
 	status = apparatus->WaitSubjectReady("confirm.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
