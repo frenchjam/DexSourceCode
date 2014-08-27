@@ -103,6 +103,7 @@ int PrepOscillations( DexApparatus *apparatus, const char *params ) {
 	if ( eyes == OPEN )	{
 		AddDirective( apparatus, "You will hold the manipulandum upright and to the right of the blinking Target LED.", mtb );
 		AddDirective( apparatus, "You will then oscillate between the lit targets, one full cycle per beep.", dsc );
+		// Need to change pictures to remove beeps.
 		AddDirective( apparatus, "When the beeps will stop, you should continue the oscillations.", dsc );
 	}
 		// If we delete oscillation in discrete, then we don't need this condition here below any more.
@@ -233,8 +234,8 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	// Now wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( oscillationTargets[MIDDLE] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVArrows.bmp"  );
-	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHArrows.bmp"  ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( oscillationTargets[MIDDLE] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVA.bmp"  );
+	else status = apparatus->WaitUntilAtHorizontalTarget( oscillationTargets[MIDDLE], desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHA.bmp"  ); 
 	if ( status == IDABORT ) exit( ABORT_EXIT );
 	
 	// Double check that the subject has the specified mass.

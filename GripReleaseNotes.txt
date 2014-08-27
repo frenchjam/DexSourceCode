@@ -1,5 +1,6 @@
 
-	Only one block of Collisions in each References sub-session.
+	Lots of changes (see GitHub).
+	Reorganized blocks of Collisions in each References sub-session.
 	Better pictures for closing locker, VISIBLE indicator, etc.
 	Picture for taking a mass includes putting a mass.
 	Added reminder about legs.

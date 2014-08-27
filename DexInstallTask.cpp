@@ -102,7 +102,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Check which configuration is to be used and prompt the subject to install the apparatus accordingly.
 	DexSubjectPosture desired_posture = ParseForPosture( params );
-	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeatedRight.bmp", "Check Workspace Tablet installed for SEATED operation with Target Mast in socket N (right-hand side)." );
+	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeatedR.bmp", "Check Workspace Tablet installed for SEATED operation with Target Mast in socket N (right-hand side)." );
 	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation with Target Mast in socket N (right-hand side)." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
@@ -144,7 +144,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionTolerance, 
 											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Tracker Camera 1\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedLeft.bmp" );
+											"Placement error - Tracker Camera 1\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedL.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
@@ -163,7 +163,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionTolerance, 
 												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Tracker Camera 2\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedLeft.bmp" );
+												"Placement error - Tracker Camera 2\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedL.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
@@ -220,8 +220,8 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// Tune the picture depending on the expected position of the bar.
 	// Only applies to seated, because the pictures don't really show the bar position in the supine case.
-	char *seated_pic = "CalibrateSeatedRight.bmp";
-	if ( desired_bar_position == TargetBarLeft ) seated_pic = "CalibrateSeatedLeft.bmp";
+	char *seated_pic = "CalibrateSeatedR.bmp";
+	if ( desired_bar_position == TargetBarLeft ) seated_pic = "CalibrateSeatedL.bmp";
 
 	// Are the CODA bars where we think they should be, given the desired postural configuration?
 	// Here we are mainly concerned with checking if the alignment was done in the desired configuration.

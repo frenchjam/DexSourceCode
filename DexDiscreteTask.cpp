@@ -99,8 +99,8 @@ int PrepDiscrete( DexApparatus *apparatus, const char *params ) {
 	// According to the astronaut representative, it would be better if the picture changed at each new instruction.
 	// It would be good to have a picture about eyes being open or closed.
 	AddDirective( apparatus, "Remember to wait for each beep and come to a full stop at each Target LED.", "info.bmp" );
-	if ( direction == VERTICAL ) AddDirective( apparatus, "Place manipulandum upright and to the right of Mast and align center with each target.", "MvToBlkVArrows.bmp" );
-	else AddDirective( apparatus, "Place manipulandum upright and to the right of Tablet and align center with each target.", "MvToBlkHArrows.bmp" );
+	if ( direction == VERTICAL ) AddDirective( apparatus, "Place manipulandum upright and to the right of Mast and align center with each target.", "MvToBlkVA.bmp" );
+	else AddDirective( apparatus, "Place manipulandum upright and to the right of Tablet and align center with each target.", "MvToBlkHA.bmp" );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -223,8 +223,8 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 	apparatus->TargetsOff();
 	// Light up the pair of targets.
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVArrows.bmp" );
-	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHArrows.bmp"  ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVA.bmp" );
+	else status = apparatus->WaitUntilAtHorizontalTarget( discreteTargets[LOWER] , desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHA.bmp"  ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Double check that the subject has the specified mass.

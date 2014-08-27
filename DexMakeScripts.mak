@@ -11,9 +11,9 @@
 #default:	flight_debug
 #default:	flight_draft
 #default:	flight_release
-default:	ground_debug
+#default:	ground_debug
 #default:	ground_draft
-#default:	ground_release
+default:	ground_release
 
 # This is here to catch an error where you did not pick a default build.
 default_default:

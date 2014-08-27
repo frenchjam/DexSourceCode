@@ -41,7 +41,7 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
 	char *target_filename = 0;
-	char *mtb, *dsc;
+	char *mtb, *mta, *dsc;
 	
 	int	direction = ParseForDirection( apparatus, params );
 	int eyes = ParseForEyeState( params );
@@ -92,10 +92,12 @@ int PrepTargeted( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, InstructPickUpManipulandum, "InHand.bmp" );
 	if ( direction == VERTICAL ) {
 		mtb = "MvToBlkV.bmp";
+		mta = "MvToBlkVA.bmp";
 		dsc = "TargetedV.bmp";
 	}
 	else {
 		mtb = "MvToBlkH.bmp";
+		mta = "MvToBlkHA.bmp";
 		dsc = "TargetedH.bmp";
 	}
 
@@ -216,8 +218,8 @@ int RunTargeted( DexApparatus *apparatus, const char *params ) {
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0] , targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVArrows.bmp"  );
-	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHArrows.bmp"  ); 
+	if ( direction == VERTICAL ) status = apparatus->WaitUntilAtVerticalTarget( targetSequence[0] , targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkVA.bmp"  );
+	else status = apparatus->WaitUntilAtHorizontalTarget( targetSequence[0], targetedMovementOrientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkHA.bmp"  ); 
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Double check that the subject has the specified mass.
