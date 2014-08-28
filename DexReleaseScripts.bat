@@ -40,7 +40,7 @@ REM Don't do the proofs if it is a ground release.
 if %ROOT% EQU GripGround goto DRAFT
 
 %LINT%  -noquery -pictures=%PICTURES% users.dex -proofs=%PROOFS% -sbatch=CreateScriptsTar.bat -pbatch=CreatePicturesTar.bat -messages=MessageList.txt -log=Lint.log
-%TAR% --create --verbose --file=Proofs.tar --directory=$(PROOFS) *.bmp
+%TAR% --create --verbose --file=Proofs.tar --directory=%PROOFS% *.bmp
 copy /Y /V Proofs.tar "%DESTINATION%\%TIMESTAMP% Proofs.tar"
 goto NEXT
 
