@@ -38,6 +38,7 @@ int collisionWrongDirectionTolerance = 5;
 double collisionMinForce = 5.0;
 double collisionMaxForce = 35.0;
 int collisionWrongForceTolerance = 5;
+Vector3 collisionPositionTolerance = { 150.0, 50.0, 100.0 };	// Zone considered to be at the target. 
 
 /*********************************************************************************/
 
@@ -175,7 +176,7 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	// Wait until the subject gets to the target before moving on.
 	apparatus->ShowStatus( MsgMoveToBlinkingTarget, "working.bmp" );
 	apparatus->TargetsOff();
-	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, defaultPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkTapA.bmp" );
+	apparatus->WaitUntilAtVerticalTarget( collisionInitialTarget, desired_orientation, collisionPositionTolerance, defaultOrientationTolerance, waitHoldPeriod, waitTimeLimit, MsgTooLongToReachTarget, "MvToBlkTapA.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Double check that the subject has the specified mass.
