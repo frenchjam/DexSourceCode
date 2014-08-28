@@ -1,3 +1,7 @@
+GripFlight Draft (2014.08.28 12.58.00) 
+
+	Fixed file tag in DexCreateSensorTest.bat
+
 GripFlight Draft (2014.08.28 12.27.47) 
 GripGround Release (2014.08.28 10.07.31) used for SC BDC Supine
 
