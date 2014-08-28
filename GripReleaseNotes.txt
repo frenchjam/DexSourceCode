@@ -1,5 +1,8 @@
+	Added acquisitions and filming to setup and audio.
 
-	Lots of changes (see GitHub).
+GripGround Release (2014.08.27 09.12.45) used for SC BDC Dynamics Seated
+
+	Lots of other changes (see GitHub).
 	Reorganized blocks of Collisions in each References sub-session.
 	Better pictures for closing locker, VISIBLE indicator, etc.
 	Picture for taking a mass includes putting a mass.
