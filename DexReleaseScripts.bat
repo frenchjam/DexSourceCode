@@ -51,6 +51,12 @@ goto NEXT
 :NEXT
 call CreateScriptsTar.bat Scripts.tar
 call CreatePicturesTar.bat Pictures.tar
+
+echo %TIMESTAMP% > relnotes1
+copy /b relnotes1+..\DexSourceCode\GripReleaseNotes.txt relnotes2
+rename ..\DexSourceCode\GripReleaseNotes.txt GripReleaseNotes.bak
+copy relnotes2 ..\DexSourceCode\GripReleaseNotes.txt
+
 copy /Y /V Scripts.tar  "%DESTINATION%\%TIMESTAMP% Scripts.tar"
 copy /Y /V Pictures.tar "%DESTINATION%\%TIMESTAMP% Pictures.tar"
 copy /Y /V ..\DexSourceCode\GripInstallationInstructions.txt "%DESTINATION%\%TIMESTAMP% Installation Note.txt" 
