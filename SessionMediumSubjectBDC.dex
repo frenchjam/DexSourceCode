@@ -7,5 +7,6 @@ CMD_PROTOCOL,311,DexDynamicsBDCMedium.dex,Dynamics Seated
 CMD_PROTOCOL,312,DexSeatedBDCMedium.dex,References Seated
 CMD_PROTOCOL,313,DexSupineBDCMedium.dex,References Supine
 CMD_PROTOCOL,314,DexReducedBDCMedium.dex,Reduced
+CMD_PROTOCOL,101,ProtocolSensorTests.dex,Evaluate Sensors
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

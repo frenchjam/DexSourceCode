@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { SENSOR_TEST, AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -109,6 +109,7 @@ void LoadTargetRange( int limits[3], const char *filename );
 DexMass ParseForMass ( const char *cmd );
 DexSubjectPosture ParseForPosture( const char *cmd );
 bool ParseForPrep ( const char *cmd );
+bool ParseForBool( const char *cmd, const char *flag );
 
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
@@ -123,6 +124,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 int ShowPictures( DexApparatus *apparatus, const char *params );
 int CheckAudio( DexApparatus *apparatus, const char *params );
 int MiscInstall ( DexApparatus *apparatus, const char *params );
+int RunSensorTest ( DexApparatus *apparatus, const char *params );
 
 // Some common messages.
 

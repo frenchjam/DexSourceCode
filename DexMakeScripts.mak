@@ -8,11 +8,11 @@
 # Careful - 'default' there can be no spaces before 'default:'
 #
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
-#default:	flight_debug
+default:	flight_debug
 #default:	flight_draft
 #default:	flight_release
 #default:	ground_debug
-default:	ground_draft
+#default:	ground_draft
 #default:	ground_release
 
 # This is here to catch an error where you did not pick a default build.
@@ -26,7 +26,7 @@ SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
 SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex
-PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex
+PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex ProtocolSensorTests.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
 
@@ -284,6 +284,8 @@ ProtocolInstallUpright.dex: $(STATICSCRIPTS)\ProtocolInstallUpright.dex ForceOff
 ProtocolInstallSupine.dex: $(STATICSCRIPTS)\ProtocolInstallSupine.dex ForceOffsets.dex TaskInstallSupine.dex 
 	copy /Y $(STATICSCRIPTS)\ProtocolInstallSupine.dex .\$@
 	$(TOUCH)
+ProtocolSensorTests.dex: $(COMPILER) $(SOURCE)\DexGenerateSensorTests.bat
+	$(SOURCE)\DexGenerateSensorTests.bat > $@
 
 ######################################################################################################################################
 

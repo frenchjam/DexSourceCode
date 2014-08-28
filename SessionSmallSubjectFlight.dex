@@ -7,5 +7,6 @@ CMD_PROTOCOL,201,DexDynamicsFlightSmall.dex,Dynamics Seated
 CMD_PROTOCOL,202,DexSeatedFlightSmall.dex,References Seated
 CMD_PROTOCOL,203,DexSupineFlightSmall.dex,References Supine
 CMD_PROTOCOL,204,DexReducedFlightSmall.dex,Reduced
+CMD_PROTOCOL,101,ProtocolSensorTests.dex,Evaluate Sensors
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

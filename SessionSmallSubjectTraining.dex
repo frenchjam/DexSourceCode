@@ -8,5 +8,6 @@ CMD_PROTOCOL,221,DexDynamicsTrainingSmall.dex,Dynamics Seated
 CMD_PROTOCOL,222,DexSeatedTrainingSmall.dex,References Seated
 CMD_PROTOCOL,223,DexSupineTrainingSmall.dex,References Supine
 CMD_PROTOCOL,224,DexReducedTrainingSmall.dex,Reduced
+CMD_PROTOCOL,101,ProtocolSensorTests.dex,Evaluate Sensors
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end
