@@ -239,7 +239,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	apparatus->Comment( "Operations to check the hardware configuration." );
 
 	// Get pictures of the configuration during the tests.
-	apparatus->StartFilming( "GripCfgC", defaultCameraFrameRate );
+	apparatus->StartFilming( "GripCHCK", defaultCameraFrameRate );
 
 	apparatus->ShowStatus( "Checking hardware configuration ...", "wait.bmp" );
 	if ( desired_posture == PostureSeated ) {
@@ -323,11 +323,9 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 
 	char tag[32];
 	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
-	else strcpy( tag, "GripSND" );
-	apparatus->StartFilming( tag, defaultCameraFrameRate );
+	else strcpy( tag, "GripSOND" );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
-
-	
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
 	
 	char msg[1024];
 	sprintf( msg, "A series of beeps is being played for %.0f seconds. Adjust the audio control until you hear them clearly.", audioCheckDuration );
@@ -336,13 +334,12 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 		apparatus->Beep();
 		apparatus->Wait( 0.9 );
 	}
-	apparatus->StopAcquisition( "Error during file save." );
 	apparatus->StopFilming();
+	apparatus->StopAcquisition( "Error during file save." );
 
 	apparatus->ShowStatus( "", "blank.bmp" );
 	status = apparatus->WaitSubjectReady("confirm.bmp", "Test complete. If you did not hear the beeps, check the hardware and then repeat this task." );
 	if ( status == ABORT_EXIT ) return( status );
-
 
 	return( NORMAL_EXIT );
 

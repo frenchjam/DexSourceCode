@@ -46,9 +46,8 @@ GOTO :NEXT
 call %SOURCE%\DexCreateInstallTask.bat Supine
 :NEXT
 
-REM Make sure that the audio is set loud enough. Also tells subject to strap in.
-set /A "task=task+1"
-echo CMD_TASK,%task%,TaskCheckAudio.dex,%task% Check Audio
+REM Make sure that the audio is set loud enough.
+call %SOURCE%\DexCreateAudioTask.bat 
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
 call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit

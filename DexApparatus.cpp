@@ -2058,8 +2058,7 @@ void DexApparatus::SaveAcquisition( const char *tag ) {
 /*********************************************************************************/
 
 void DexApparatus::SnapPhoto( void ) {
-
-	StartFilming( "PIC", 1 );
+	StartFilming( "GripPICT", 1 );
 	Wait( 2.0 );
 	StopFilming();
 
