@@ -1,5 +1,6 @@
+GripFlight Draft (2014.08.28 07.00.50) 
 
-	Evalution of sensor calibration
+	Scripts to evaluate sensors were added.
 
 GripGround Draft (2014.08.28 03.35.49) 
 
