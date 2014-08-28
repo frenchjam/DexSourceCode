@@ -1,3 +1,10 @@
+GripFlight Release (2014.08.28 14.23.17) 
+
+	Additional testing performed by JLT.
+	Test of self-test.
+	Identification of behavior when an unexpected config is detected.
+	All issues in GitHub critical to the flight release have been resolved.
+
 GripFlight Draft (2014.08.28 12.58.00) 
 
 	Fixed file tag in DexCreateSensorTest.bat
