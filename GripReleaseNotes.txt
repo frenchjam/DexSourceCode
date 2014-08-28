@@ -1,3 +1,7 @@
+GripGround Release (2014.08.28 10.07.31) 
+
+	Cosmetic Changes
+
 GripGround Release (2014.08.28 09.57.40) 
 
 	Increase tolerance for MvToBlk for collisions.
