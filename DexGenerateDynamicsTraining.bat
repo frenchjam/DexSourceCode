@@ -111,7 +111,7 @@ REM
 REM Show that protocol is finished.
 REM
 set /A "task=task+1"
-echo CMD_TASK,%task%,TaskFinishProtocol.dex,(Done - press Back)
+echo CMD_TASK,%task%,TaskFinishProtocol.dex,(Done: press Back)
 
 
 ENDLOCAL

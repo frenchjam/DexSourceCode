@@ -7,7 +7,7 @@
 CMD_PROTOCOL,421,DexDynamicsTrainingLarge.dex,Dynamics Seated
 CMD_PROTOCOL,422,DexSeatedTrainingLarge.dex,References Seated
 CMD_PROTOCOL,423,DexSupineTrainingLarge.dex,References Supine
-CMD_PROTOCOL,424,DexReducedTrainingLarge.dex,Reduced
-CMD_PROTOCOL,101,ProtocolSensorTests.dex,Evaluate Sensors
+CMD_PROTOCOL,424,DexReducedTrainingLarge.dex,Reduced Protocol
+CMD_PROTOCOL,101,ProtocolSensorTests.dex,Test Sensors
 CMD_PROTOCOL,100,ProtocolUtilities.dex,Utilities
 #end

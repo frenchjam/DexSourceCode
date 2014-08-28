@@ -7,5 +7,5 @@ CMD_TASK,103,TaskCheckAudio.dex,Check Audio
 # Cancel the force offsets.
 CMD_TASK,104,ForceOffsets.dex,Force Offset Cancellation
 # Show that we are done.
-CMD_TASK,105,TaskFinishProtocol.dex,(Done - press Back)
+CMD_TASK,105,TaskFinishProtocol.dex,(Done: press Back)
 #end

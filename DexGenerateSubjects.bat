@@ -96,7 +96,7 @@ REM echo CMD_USER,97,111,%fn%,Eval  >> temp1
 REM echo CMD_PROTOCOL,200,ignore,***** Eval ***** > temp2
 REM copy temp2+SessionFlightOnGround.dex %fn% 
 
-echo CMD_USER,99,000,SessionU.dex,Maintenance  >> temp1
+echo CMD_USER,99,987,SessionU.dex,Maintenance  >> temp1
 
 if exist %OUTPUT% del /F /Q %OUTPUT%
 rename temp1 %OUTPUT%
