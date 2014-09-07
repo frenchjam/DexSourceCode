@@ -27,19 +27,19 @@
 
 enum { NORMAL_EXIT = 0, NO_USER_FILE, NO_LOG_FILE, ERROR_EXIT };
 
-char picture_path[1024] = "..\\DexPictures\\";
-char proofs_path[1024] = "..\\GripScreenShots\\";
+char picture_directory[1024] = "..\\DexPictures\\";
+char proofs_directory[1024] = "..\\GripScreenShots\\";
 FILE *log;
 
 // Store here temporarily the information that is to be displayed.
 // It gets put into the dialog by WM_INITDIALOG.
- char _illustrated_message_picture_filename[256] = "";
+// I haven't found any other way to pass information to the WM_INITDIALOG than by global variables.
+// There aught to be a better way.
  HBITMAP _illustrated_message_picture_bitmap = NULL;
-
-static char _illustrated_message_text[256] = "";
-static char _illustrated_message_label[256] = "";
+static char _illustrated_message_text[1024] = "";
+static char _illustrated_message_label[1024] = "";
+static char _illustrated_message_proof[1024] = "";
 static char _illustrated_message_type = IDD_OKCANCEL;
-static char _illustrated_message_proof[256] = "";
 
 // This callback is used for 'popups'. When they close, the APP keeps on going.
 BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -65,15 +65,15 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		switch ( _illustrated_message_type ) {
 		
 		case IDD_OKCANCEL:
-			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
+			sprintf( command, "boxcutter.exe -c 292,20,768,668 %s", _illustrated_message_proof );
 			break;
 
 		case IDD_ABORTRETRYIGNORE:
-			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
+			sprintf( command, "boxcutter.exe -c 292,20,768,668 %s", _illustrated_message_proof );
 			break;
 
 		case IDD_STATUS:
-			sprintf( command, "boxcutter.exe -c 292,20,768,501 %s", _illustrated_message_proof );
+			sprintf( command, "boxcutter.exe -c 292,20,768,668 %s", _illustrated_message_proof );
 			break;
 
 		}
@@ -115,27 +115,20 @@ int GrabDialog( const char *filename, const char *message, const char *picture, 
 	int code = GetLastError();
 	char *ptr;
 
+	char picture_path[1024];
 
-	// Store the information that is to be displayed temporarily, so that it can be put into the dialog by WM_INITDIALOG.
-	// Be careful not to excede the limits of the buffers and be careful to have a null-terminated string.
+	// Store the information that is to be displayed in global variables, so that it can be put into the dialog by WM_INITDIALOG.
 	strcpy( _illustrated_message_proof, filename );
 
 	if ( picture ) {
-		strncpy(  _illustrated_message_picture_filename, picture_path, sizeof( _illustrated_message_picture_filename ) );
-		strncpy( _illustrated_message_picture_filename + strlen( picture_path ), 
-			picture, 
-			sizeof( _illustrated_message_picture_filename ) - strlen( picture_path ) );
-		_illustrated_message_picture_filename[sizeof( _illustrated_message_picture_filename ) - 1] = 0;
-		_illustrated_message_picture_bitmap = (HBITMAP) LoadImage( NULL, _illustrated_message_picture_filename, IMAGE_BITMAP, (int) (.65 * 540), (int) (.65 * 405), LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
+		strcpy(  picture_path, picture_directory );
+		strcat( picture_path, picture );
+		_illustrated_message_picture_bitmap = (HBITMAP) LoadImage( NULL, picture_path, IMAGE_BITMAP, (int) (.65 * 540), (int) (.65 * 405), LR_CREATEDIBSECTION | LR_LOADFROMFILE | LR_VGACOLOR );
 	}
-	else {
-		_illustrated_message_picture_filename[0] = 0;
-		_illustrated_message_picture_bitmap = NULL;
-	}
+	else _illustrated_message_picture_bitmap = NULL;
 
 	if ( message ) {
-		strncpy( _illustrated_message_text, message, sizeof( _illustrated_message_text ) );
-		_illustrated_message_text[sizeof( _illustrated_message_text ) - 1] = 0;
+		strcpy( _illustrated_message_text, message );
 		// Strings coming from scripts have end of lines marked with "\n". Need to convert to a real newline.
 		for ( ptr = _illustrated_message_text; *ptr; ptr++ ) {
 			if ( *ptr == '\\' && *(ptr+1) == 'n' ) {
@@ -146,26 +139,20 @@ int GrabDialog( const char *filename, const char *message, const char *picture, 
 	}
 	else _illustrated_message_text[0] = 0;
 
-	if ( label ) {
-		strncpy( _illustrated_message_label, label, sizeof( _illustrated_message_label ) );
-		_illustrated_message_label[sizeof( _illustrated_message_label ) - 1] = 0;
-	}
+	if ( label ) strcpy( _illustrated_message_label, label );
 	else _illustrated_message_label[0] = 0;
 
 	if ( ( buttons & 0x0000000f ) == MB_ABORTRETRYIGNORE ) {
 		_illustrated_message_type = IDD_ABORTRETRYIGNORE;
 		return_code = DialogBox( NULL, (LPCSTR) IDD_ABORTRETRYIGNORE, NULL, _lintGrabCallback );
-		//printf( "%s\t%s\n", picture, message );
 	}
 	else if ( ( buttons & 0x0000000f ) == MB_OKCANCEL ) {
 		_illustrated_message_type = IDD_OKCANCEL;
 		return_code = DialogBox( NULL, (LPCSTR) IDD_OKCANCEL, NULL, _lintGrabCallback );
-		//printf( "%s\t%s\n", picture, message );
 	}
 	else {
 		_illustrated_message_type = IDD_STATUS;
 		return_code = DialogBox( NULL, (LPCSTR) IDD_STATUS, NULL, _lintGrabCallback );
-		//printf( "%s\t%s\n", picture, message );
 	}
 
 	return( return_code );
@@ -356,8 +343,6 @@ int process_task_file ( char *filename, int verbose ) {
 			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIP" ) ) add_to_message_pair( &alert, token[4], token[5] );
 			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_GRIPFORCE" ) ) add_to_message_pair( &alert, token[11], token[12] );
 			else if ( !strcmp( token[0], "CMD_WAIT_MANIP_SLIP" ) ) add_to_message_pair( &alert, token[11], token[12] );
-			else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) add_to_message_pair( &alert, "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp" );
-			else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) add_to_message_pair( &alert, token[1], token[2] );
 			else if ( !strcmp( token[0], "CMD_ALIGN_CODA" ) ) add_to_message_pair( &alert, token[1], token[2] );
 			else if ( !strcmp( token[0], "CMD_CHK_CODA_ALIGNMENT" ) ) add_to_message_pair( &alert, token[4], token[5] );
 			else if ( !strcmp( token[0], "CMD_CHK_CODA_FIELDOFVIEW" ) ) add_to_message_pair( &alert, token[9], token[10] );
@@ -368,6 +353,13 @@ int process_task_file ( char *filename, int verbose ) {
 			else if ( !strcmp( token[0], "CMD_CHK_MOVEMENTS_DIR" ) ) add_to_message_pair( &alert, token[6], token[7] );
 			else if ( !strcmp( token[0], "CMD_CHK_COLLISIONFORCE" ) ) add_to_message_pair( &alert, token[4], token[5] );
 			else if ( !strcmp( token[0], "CMD_CHK_MANIP_VISIBILITY" ) ) add_to_message_pair( &alert, token[3], token[4] );
+
+			// The following two act like alerts in the sense that message is displayed depending on a test or condition.
+			// But the response buttons are OK, CANCEL, STATUS, not IGNORE, RETRY, CANCEL, STATUS. 
+			// And unlike Retry for an Alert, OK here will retry the step, not the entire task.
+			// In that respect, the commands are more like queries than alerts.
+			else if ( !strcmp( token[0], "CMD_CHK_MASS_SELECTION" ) ) add_to_message_pair( &query, "Put mass in cradle X and pick up mass from cradle Y.", "TakeMass.bmp" );
+			else if ( !strcmp( token[0], "CMD_CHK_HW_CONFIG" ) ) add_to_message_pair( &query, token[1], token[2] );
 
 			else if ( strstr( line, ".bmp" ) ) {
 				fprintf( log, "     %s Line %3d Picture file in unrecognized command: %s\n", filename, line_n, token[0] );
@@ -395,7 +387,7 @@ int process_task_file ( char *filename, int verbose ) {
 					strcpy( local_picture_file[j], token[i] );
 					local_pictures++;
 
-					strcpy( path, picture_path );
+					strcpy( path, picture_directory );
 					strcat( path, token[i] );
 					if ( _access( path, 0x00 ) ) {
 						fprintf( log, "     %s Line %3d Picture file not found: %s\n", filename, line_n, path );
@@ -740,9 +732,9 @@ int main ( int argc, char *argv[] ) {
 
 		// Defines where to look for the picture files.
 		if ( !strncmp( argv[arg], "-pictures=", strlen( "-pictures=" ) ) ) {
-			strcpy( picture_path, argv[arg] + strlen( "-pictures=" ) );
+			strcpy( picture_directory, argv[arg] + strlen( "-pictures=" ) );
 			// Add a trailing backslash if it is not present already.
-			if ( picture_path[ strlen( picture_path ) - 1 ] != '\\' ) strcat( picture_path, "\\" );
+			if ( picture_directory[ strlen( picture_directory ) - 1 ] != '\\' ) strcat( picture_directory, "\\" );
 		}
 
 		// Specify an alternate user.dex file, which is the root of the file structure.
@@ -772,8 +764,8 @@ int main ( int argc, char *argv[] ) {
 
 		// Change the destination directory for the proofs.
 		if ( !strncmp( argv[arg], "-proofs=", strlen( "-proofs=" ) ) ) {
-			strcpy( proofs_path, argv[arg] + strlen( "-proofs=" ) );
-			if ( proofs_path[ strlen( proofs_path ) - 1 ] != '\\' ) strcat( proofs_path, "\\" );
+			strcpy( proofs_directory, argv[arg] + strlen( "-proofs=" ) );
+			if ( proofs_directory[ strlen( proofs_directory ) - 1 ] != '\\' ) strcat( proofs_directory, "\\" );
 			generate_proofs = TRUE;
 		}
 
@@ -915,7 +907,7 @@ int main ( int argc, char *argv[] ) {
 		for ( j = 0; j < query.n; j++ ) {
 			if ( generate_proofs ) {
 				sprintf( proof, "DexQuery.%03d.bmp", j+1 );
-				strcpy( path, proofs_path );
+				strcpy( path, proofs_directory );
 				strcat( path, proof );
 				GrabDialog( path, query.entry[j].message, query.entry[j].picture, "", MB_OKCANCEL );
 			}
@@ -928,7 +920,7 @@ int main ( int argc, char *argv[] ) {
 		for ( j = 0; j < status.n; j++ ) {
 			if ( generate_proofs ) {
 				sprintf( proof, "DexState.%03d.bmp", j+1 );
-				strcpy( path, proofs_path );
+				strcpy( path, proofs_directory );
 				strcat( path, proof );
 				GrabDialog( path, status.entry[j].message, status.entry[j].picture, "", MB_OK );
 			}
@@ -941,7 +933,7 @@ int main ( int argc, char *argv[] ) {
 		for ( j = 0; j < alert.n; j++ ) {
 			if ( generate_proofs ) {
 				sprintf( proof, "DexAlert.%03d.bmp", j+1 );
-				strcpy( path, proofs_path );
+				strcpy( path, proofs_directory );
 				strcat( path, proof );
 				GrabDialog( path, alert.entry[j].message, alert.entry[j].picture, "", MB_ABORTRETRYIGNORE );
 			}
@@ -977,14 +969,14 @@ int main ( int argc, char *argv[] ) {
 		if ( strlen( picture_batch ) ) {
 			fp = fopen( picture_batch, "w" );
 			fprintf( fp, "@echo on\nSETLOCAL\n" );
-			fprintf( fp, "pushd %s\n", picture_path );
+			fprintf( fp, "pushd %s\n", picture_directory );
 			fprintf( fp, "echo %%date%% %%time%% > PicturesTimeStamp\n" );
 			fprintf( fp, "set FILES=" );
 			for ( j = 0; j < global_pictures; j++ ) fprintf( fp, "%s ", global_picture_filenames[j] );
 			fprintf( fp, "\n" );
 			fprintf( fp, "..\\bin\\MD5Tree.exe %%FILES%% > Pictures.md5\n" );
 			fprintf( fp, "popd\n" );
-			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose --directory=%s Pictures.md5 PicturesTimeStamp %%FILES%% --file=%%1\n", picture_path );
+			fprintf( fp, "\"C:\\Program Files\\GnuWin32\\bin\\tar.exe\" --create --verbose --directory=%s Pictures.md5 PicturesTimeStamp %%FILES%% --file=%%1\n", picture_directory );
 			fclose( fp );
 		}
 
