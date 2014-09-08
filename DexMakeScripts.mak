@@ -10,10 +10,12 @@
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	flight_debug
 #default:	flight_draft
-default:	flight_release
+#default:	flight_release
 #default:	ground_debug
 #default:	ground_draft
 #default:	ground_release
+#default:	parabolic_debug
+default:	parabolic_draft
 
 # This is here to catch an error where you did not pick a default build.
 default_default:
@@ -67,6 +69,12 @@ ground_draft: $(LINT) ground_debug
 ground_release: $(LINT) clean ground_debug
 	$(SOURCE)\DexReleaseScripts.bat GripGround Release
 	 
+parabolic_debug: users_parabolic.dex _check_messages.dex
+	copy /Y /V users_parabolic.dex users.dex
+
+parabolic_draft: $(LINT) parabolic_debug
+	$(SOURCE)\DexReleaseScripts.bat GripParabolic Draft
+
 
 ######################################################################################################################################
 
@@ -79,6 +87,9 @@ users_flight.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionSmallSubjectFlight.de
 
 users_ground.dex:	$(SOURCE)\DexGenerateSubjects.bat SessionDemo.dex SessionSmallSubjectTraining.dex SessionMediumSubjectTraining.dex SessionLargeSubjectTraining.dex SessionSmallSubjectBDC.dex SessionMediumSubjectBDC.dex SessionLargeSubjectBDC.dex SessionU.dex
 	$(SOURCE)\DexGenerateSubjects.bat BDC users_ground.dex
+
+users_parabolic.dex:	$(SOURCE)\users_parabolic.dex SessionU.dex PFSession1.dex PFSession2.dex PFSession3.dex PFSession4.dex PFSession5.dex PFSession6.dex PFSession7.dex PFSession1.dex PFSession8.dex PFSession9.dex
+	copy /Y $(STATICSCRIPTS)\users_parabolic.dex .
 
 ######################################################################################################################################
 
@@ -133,6 +144,33 @@ SessionFlightOnGround.dex:	$(STATICSCRIPTS)\SessionFlightOnGround.dex $(PROTOCOL
 SessionU.dex:	$(STATICSCRIPTS)\SessionUtilitiesOnly.dex $(PROTOCOLS) 
 	copy /Y $(STATICSCRIPTS)\SessionUtilitiesOnly.dex .\$@
 	$(TOUCH)
+
+PFSession1.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF1 > $@
+
+PFSession2.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF2 > $@
+
+PFSession3.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF3 > $@
+
+PFSession4.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF4 > $@
+
+PFSession5.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF5 > $@
+
+PFSession6.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF6 > $@
+
+PFSession7.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF7 > $@
+
+PFSession8.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF8 > $@
+
+PFSession9.dex:  $(PROTOCOLS) $(SCRIPTS) $(SOURCE)\DexGeneratePFProtocol.bat
+	$(SOURCE)\DexGeneratePFProtocol.bat PF9 > $@
 
 
 ######################################################################################################################################

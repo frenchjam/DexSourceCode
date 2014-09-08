@@ -1,4 +1,10 @@
-GripFlight Release (2014.08.28 14.23.17) 
+GripParabolic Draft (2014.09.08 01.49.52) 
+GripParabolic Draft (2014.09.08 01.47.14) 
+GripParabolic Draft (2014.09.08 01.41.33) 
+GripParabolic Draft (2014.09.08 01.39.37) 
+GripParabolic Draft (2014.09.08 01.35.15) 
+
+GripFlight Release (2014.08.28 14.23.17) Released to CADMOS for upload to FM.
 
 	Additional testing performed by JLT.
 	Test of self-test.

@@ -1,0 +1,16 @@
+# DEX user file for Parabolic Flight.
+# Format: "CMD_USER", user id, pin code, session file, display name
+# Subject IDs:  10-19 small subjects; 20-29 medium subjects; 30-39 large subjects.
+# Subject codes should be the same between Flight and Ground. 
+# It's the session files that change between models.
+CMD_USER,81,111,PFSession1.dex,PF Suj 1
+CMD_USER,82,222,PFSession2.dex,PF Suj 2
+CMD_USER,83,333,PFSession3.dex,PF Suj 3
+CMD_USER,84,444,PFSession4.dex,PF Suj 4
+CMD_USER,85,555,PFSession5.dex,PF Suj 5
+CMD_USER,86,666,PFSession6.dex,PF Suj 6
+CMD_USER,87,777,PFSession7.dex,PF Suj 7
+CMD_USER,88,888,PFSession8.dex,PF Suj 8
+CMD_USER,89,999,PFSession9.dex,PF Suj 9
+CMD_USER,99,987,SessionU.dex,Maintenance
+#end

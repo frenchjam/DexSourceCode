@@ -292,3 +292,109 @@ int RunCollisions( DexApparatus *apparatus, const char *params ) {
 	return( NORMAL_EXIT );
 	
 }
+
+/*********************************************************************************/
+
+int RunCollisionsEssential ( DexApparatus *apparatus, const char *params ) {
+
+	int status = 0;
+	
+	// These are static so that if the params string does not specify a value,
+	//  whatever was used the previous call will be used again.
+	static DexSubjectPosture posture = PostureSeated;
+
+	char *target_filename = 0;
+	int tone, tgt;
+
+	fprintf( stderr, "     RunCollisionsEssential: %s\n", params );
+
+	// Construct the results filename tag.
+	char tag[32];
+	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
+	else {
+		strcpy( tag, "Grip" );
+		strcat( tag, "C" ); // C for Collisions.
+		if ( posture == PostureSeated ) strcat( tag, "U" ); // U is for upright (seated).
+		else strcat( tag, "S" ); // S is for supine.
+		strcat( tag, "V" );	// Collisions are always vertical.
+		strcat( tag, "u" ); // Mass is 'unspecified'
+	}
+
+	// What is the target sequence? If not specified in the command line, use the default.
+	// Here we expect a sequence of +1 or -1 values, corresponding to an upward or downward tap.
+	// Note that we use the same mechanism as that used to define the target sequence for targeted,
+	//  movements, i.e. one can use a qualifier :# to specify which sequence in a file with multiple sequences.
+	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( collisionSequence, target_filename );
+
+	// Wait for go signal to start acquiring.
+	status = apparatus->WaitSubjectReady( "go.bmp", "Press OK to start acquiring." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	apparatus->StartFilming( tag, defaultCameraFrameRate );
+	apparatus->StartAcquisition( tag, maxTrialDuration );
+	
+	// Wait for go signal to start tapping sequence.
+	status = apparatus->WaitSubjectReady( "Collision.bmp", "Press OK to start tapping sequence." );
+	if ( status == ABORT_EXIT ) exit( status );
+
+	apparatus->ShowStatus( "Tap upward or downward according to the beep and the lighted Target LEDs.", "working.bmp" );
+	for ( int target = 0; target < collisionSequenceN; target++ ) {
+		
+		// Ready to start, so light up starting point target.
+		apparatus->TargetsOff();
+		apparatus->TargetOn( collisionInitialTarget );
+						
+		apparatus->TargetsOff();
+		if ( collisionSequence[target] == UP ) {
+			tone = 2;
+			apparatus->SetSoundStateInternal( tone, 1 );
+			for ( tgt = collisionInitialTarget; tgt <= collisionUpTarget; tgt++ ) apparatus->VerticalTargetOn( tgt );
+			apparatus->MarkEvent( TRIGGER_MOVE_UP );
+		}
+		else if ( collisionSequence[target] == DOWN ) {
+			tone = 3; // Why was this 3.9 and not 3?
+			apparatus->SetSoundStateInternal( tone, 1 );
+			for ( tgt = collisionInitialTarget; tgt >= collisionDownTarget; tgt--) apparatus->VerticalTargetOn( tgt );
+			apparatus->MarkEvent( TRIGGER_MOVE_DOWN );
+		}
+		// If the direction is neither UP nor DOWN, go to the center.
+		// This option may never be used, but who knows.
+		else {
+			tone = 1;
+			apparatus->SetSoundStateInternal( tone, 1 );
+			apparatus->TargetOn( collisionInitialTarget );
+		}
+
+		// Turn off the sound after a brief instant.
+		apparatus->Wait( 0.5 );
+		apparatus->SetSoundState( 4, 0 );
+		// Then turn off the targets after the sound finishes.
+        apparatus->Wait( 0.25 );
+		apparatus->TargetsOff();
+		apparatus->TargetOn(collisionInitialTarget);
+	
+		// Wait a fixed time to finish the movement.
+		// The 0.74 compensates for the two Wait() calls above.
+		apparatus->Wait( collisionTime - 0.74 );
+
+		// Light the center target to bring the hand back to the starting point.
+		//apparatus->TargetOn( collisionInitialTarget );
+
+	
+	}
+	
+	// We're done.
+	apparatus->TargetsOff();
+	apparatus->ShowStatus( ".", "blank.bmp" );
+
+	// Take an extra second of data so we get another zero measurement.
+	apparatus->Wait( 1.0 );
+
+	// Stop acquiring.
+	apparatus->ShowStatus( "Saving data ...", "wait.bmp" );
+	apparatus->StopFilming();
+	apparatus->StopAcquisition( "Error during file save." );
+	
+	return( NORMAL_EXIT );
+	
+}

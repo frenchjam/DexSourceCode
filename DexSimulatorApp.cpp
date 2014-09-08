@@ -625,6 +625,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-discrete"    ) ) task = DISCRETE_TASK;
 	if ( strstr( lpCmdLine, "-coll"   ) ) task = COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-collisions"   ) ) task = COLLISION_TASK;
+	if ( strstr( lpCmdLine, "-collisionsX"   ) ) task = ESSENTIAL_COLLISION_TASK;
 	if ( strstr( lpCmdLine, "-friction"   ) ) task = FRICTION_TASK;
 	if ( strstr( lpCmdLine, "-calib"  ) ) task = CALIBRATE_TARGETS;
 	if ( strstr( lpCmdLine, "-install"  ) ) task = INSTALL_PROCEDURE;
@@ -876,6 +877,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case COLLISION_TASK:
 		while ( RETRY_EXIT == ( return_code = RunCollisions( apparatus, lpCmdLine ) ) );
+		break;
+
+	case ESSENTIAL_COLLISION_TASK:
+		while ( RETRY_EXIT == ( return_code = RunCollisionsEssential( apparatus, lpCmdLine ) ) );
 		break;
 
 	case FRICTION_TASK:

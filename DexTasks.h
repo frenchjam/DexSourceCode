@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { SENSOR_TEST, AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { SENSOR_TEST, AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, ESSENTIAL_COLLISION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -47,7 +47,6 @@ extern double copTolerance;					// Tolerance on how well the fingers are centere
 extern double copForceThreshold;			// Threshold of grip force to test if the manipulandum is in the hand.
 extern double copWaitTime;					// Gives time to achieve the centered grip. 
 											// If it is short (eg 1s) it acts like a test of whether a centered grip is already achieved.
-
 extern unsigned long alignmentMarkerMask;	// A bit mask describing which markers are used to perform the alignment check.
 extern unsigned long fovMarkerMask;			// A bit mask describing which markers are used to check the fov of each CODA.
 
@@ -115,6 +114,7 @@ bool ParseForBool( const char *cmd, const char *flag );
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
 int RunOscillations( DexApparatus *apparatus, const char *params = NULL );
 int RunCollisions( DexApparatus *apparatus, const char *params = NULL );
+int RunCollisionsEssential ( DexApparatus *apparatus, const char *params );
 int RunDiscrete( DexApparatus *apparatus, const char *params = NULL );
 
 int RunFrictionMeasurement( DexApparatus *apparatus, const char *params = NULL );
