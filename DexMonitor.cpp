@@ -228,7 +228,7 @@ void DexMonitor::PlotAcquisition( float *position, float *orientation,
 	
 	double p[3] = { 0.2, 0.0, 1.0 };
 	
-	ActivateDisplayWindow();
+	ActivateOglWindow();
 	Erase( display );
 	
 	
@@ -477,7 +477,7 @@ int DexMonitor::Update( void ) {
 	}
 	
 	if ( display ) {
-		if ( RunDisplayWindowOnce() ) exit_status = ESCAPE_EXIT;
+		if ( RunOglWindowOnce() ) exit_status = ESCAPE_EXIT;
 	}
 	int input = window->GetInput( 0.001 );
 	if ( input == WM_QUIT ) {
@@ -508,7 +508,7 @@ void DexMonitor::RunWindow( void ) {
 		
 		if ( exit_status = Update() ) {
 			// Shutdown the 2D graphics window.
-			ShutdownWindow();
+			ShutdownOglWindow();
 			// Shutdown the OpenGL 3D window.
 			window->Destroy();
 			// This kills everything - not very nice!
