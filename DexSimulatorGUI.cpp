@@ -98,10 +98,10 @@ void DexInitPlots ( void ) {
 	layout = CreateLayout( display, _n_plots, 1 );
 	LayoutSetDisplayEdgesRelative( layout, 0.31, 0.01, 0.99, 0.99 );
 
-	ActivateDisplayWindow();
+	ActivateOglWindow();
 	Erase( display );
 	DisplaySwap( display );
-	HideDisplayWindow();
+	HideOglWindow();
 
 }
 
@@ -134,8 +134,8 @@ void DexPlotData( DexApparatus *apparatus ) {
 
 	max_time = apparatus->acquiredManipulandumState[apparatus->nAcqFrames-1].time;
 
-	ShowDisplayWindow();
-	ActivateDisplayWindow();
+	ShowOglWindow();
+	ActivateOglWindow();
 	Erase( display );
 		
 	ViewColor( yz_view, GREY4 );
@@ -314,8 +314,8 @@ void DexPlotData( DexApparatus *apparatus ) {
 	
 	DisplaySwap( display );
 	
-	RunWindow();
-	HideDisplayWindow();
+	RunOglWindow();
+	HideOglWindow();
 	
 	
 }
