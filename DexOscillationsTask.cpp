@@ -25,6 +25,12 @@
 
 //#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 
+// Choose which part of the movement is used for verifying the number of cycles.
+// By default, we check the entire movement. You can choose to check only during 
+// the beeps or only after the beeps stop by defining one of the following constants.
+//#define BEEPS_ONLY
+//#define SILENT_ONLY
+
 /*********************************************************************************/
 
 // Oscillation trial parameters.
@@ -260,7 +266,15 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		apparatus->HorizontalTargetOn( oscillationTargets[LOWER] );
 		apparatus->HorizontalTargetOn( oscillationTargets[UPPER] );
 	}
+
 	
+	
+#ifndef SILENT_ONLY
+	// Mark the starting point in the recording where post hoc tests should be applied.
+	// In this version we analyze the entire movement, with and without beeps.
+	apparatus->MarkEvent( BEGIN_ANALYSIS );
+#endif
+
 	// Output a sound pattern to establish the oscillation frequency.
 	// This will play for the first part of each trial trial.
 	double time;
@@ -274,17 +288,29 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 	apparatus->MarkEvent( END_ENTRAIN );
 	apparatus->SetSoundState( 4, 0 );
 
+#ifdef BEEPS_ONLY
+	// Mark the ending point in the recording where post hoc tests should be applied.
+	// Here we do the analysis only on the part of the recorded movement that occurs 
+	//  when the beeps were occuring.
+	apparatus->MarkEvent( END_ANALYSIS );
+#endif
+
+#ifdef SILENT_ONLY
 	// Mark the starting point in the recording where post hoc tests should be applied.
 	// We do the analysis only on the part of the recorded movement that occurs after
 	//  the beeps stops in order to detect if the subject mistakenly stopped as well.
 	apparatus->MarkEvent( BEGIN_ANALYSIS );
+#endif
 
 	// Now finish out the trial
 	apparatus->ShowStatus( "Continue oscillating movements.\nMaintain the same rhythm.", "working.bmp" );
 	apparatus->Wait( oscillationDuration - oscillationEntrainDuration );
 	  
+#ifndef BEEPS_ONLY
 	// Mark the ending point in the recording where post hoc tests should be applied.
+	// This is the end if we choose either the entire movement or the silent part only.
 	apparatus->MarkEvent( END_ANALYSIS );
+#endif
 
 	// Collect one final bit of data.
 	apparatus->Wait( baselineDuration );
@@ -328,11 +354,25 @@ int RunOscillations( DexApparatus *apparatus, const char *params ) {
 		// Check that we got a reasonable number of oscillations.
 		// Here I have set it to +/- 20% of the ideal number.
 		apparatus->ShowStatus( "Checking number of Oscillations ...", "wait.bmp" );
-		// oscillationMinCycles = 0.8 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
-		// oscillationMaxCycles = 1.2 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+
+		// By default we compute a percentage of the number of oscillations over the entire movement.
+		oscillationMinCycles = 0.6 * ( oscillationDuration ) * frequency;
+		oscillationMaxCycles = 1.5 * ( oscillationDuration ) * frequency;	
+#ifdef SILENT_ONLY
+		// Adjust the calculation if we are checking only in the silent part.
+		oscillationMinCycles = 0.6 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+		oscillationMaxCycles = 1.5 * ( oscillationDuration - oscillationEntrainDuration ) * frequency;
+#endif
+#ifdef BEEPS_ONLY
+		// Adjust the calculation if we are checking only in the part with beeps.
+		oscillationMinCycles = 0.6 * ( oscillationEntrainDuration ) * frequency;
+		oscillationMaxCycles = 1.5 * ( oscillationEntrainDuration ) * frequency;
+#endif
+		// Here is what was used in the first official flight release.
+		// The range was too large to catch a subject that did a half cycle per beep.
 		// Widened range on oscillations so as not to constrain the subject.
-		oscillationMinCycles = 3;
-		oscillationMaxCycles = 50;
+		// oscillationMinCycles = 3;
+		// oscillationMaxCycles = 50;
 		status = apparatus->CheckMovementCycles( oscillationMinCycles, oscillationMaxCycles, oscillationDirection, oscillationCycleHysteresis, "Number of oscillations out of range. Press <Retry> to repeat (once or twice) or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
