@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <io.h>
+#include <time.h> 
 #include <string.h>
 #include <process.h>
 
@@ -721,6 +722,9 @@ int main ( int argc, char *argv[] ) {
 	int passcode[256];
 	int subjects = 0;
 
+	char date_str [9];
+	char time_str [9];
+
 	int arg;
 
 	// Parse the command line arguments.
@@ -786,7 +790,11 @@ int main ( int argc, char *argv[] ) {
 		if ( popups ) MessageBox( NULL, msg, argv[0], MB_OK | MB_ICONERROR );
 		exit( NO_LOG_FILE );
 	}
-	fprintf( log, "%s\nRoot file: %s\n", argv[0], user_file );
+
+	_strdate( date_str);
+	_strtime( time_str );
+
+	fprintf( log, "%s\nDate: %s %s\nRoot file: %s\n", argv[0], date_str, time_str, user_file );
 	printf( "%s\nRoot file: %s\n", argv[0], user_file );
 
 	// Open the root file, if we can.
