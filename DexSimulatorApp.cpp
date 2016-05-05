@@ -653,7 +653,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-preconfig"  ) ) preconfigure = true;
 
 	// This should invoke the command interpreter on the specified script.
-	// For the moment, the interpreter is not working.
 	if ( strstr( lpCmdLine, "-script" ) ) {
 		char *ptr;
 		if ( ( ptr = strstr( lpCmdLine, "-script=" ) ) ) {

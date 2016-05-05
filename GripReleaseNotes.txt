@@ -1,3 +1,30 @@
+GripGround Release (2016.04.18 21.42.07) 
+GripGround Release (2016.04.18 21.32.59) 
+GripGround Release (2016.04.18 20.32.29) 
+GripGround Release (2016.04.18 20.00.34) 
+GripGround Release (2016.04.18 19.54.25) 
+GripGround Release (2016.04.18 19.49.42) 
+GripGround Release (2016.04.18 19.38.09) 
+GripGround Release (2016.04.18 19.33.36) 
+GripGround Release (2016.04.18 19.25.53) 
+GripGround Release (2016.04.18 19.19.25) 
+GripGround Release (2016.04.13 10.50.50) 
+GripGround Release (2016.04.13 10.38.24) released to CADMOS for installation at EAC
+
+	Corrected tolerances for oscillations to catch erroneous execution.
+	Adjusted tolerances for achieving the target position when supine.
+	Modified the picture showing the oscillations during friction test to remove ambiguity when supine.
+
+
+GripFlight Draft (2016.04.13 10.32.08) 
+GripFlight Draft (2016.04.13 08.58.58) 
+GripFlight Draft (2016.04.13 08.07.59) 
+GripFlight Draft (2016.04.13 08.05.40) 
+GripFlight Draft (2016.04.13 07.59.24) 
+GripFlight Draft (2016.04.13 07.45.57) 
+GripFlight Draft (2016.04.13 07.37.40) 
+GripFlight Draft (2016.04.08 17.28.27) 
+GripFlight Draft (2016.04.08 16.47.24) 
 GripFlight Draft (2015.11.17 16.57.27) 
 GripFlight Draft (2015.11.17 16.20.59) 
 GripFlight Draft (2015.11.17 01.18.57) 
