@@ -53,9 +53,9 @@ int PrepFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 
 	AddDirective( apparatus, "You will first pinch the manipulandum at the center between thumb and forefinger.", "coef_frict.bmp" );
 	AddDirective( apparatus, "Squeeze according to the instructions that you will receive (firmly, moderately, lightly).", "coef_frict.bmp" );
-	AddDirective( apparatus, "When you hear the beep, rub the fingers up and down on the manipulandum. ", "coef_frict_osc.bmp");
+	AddDirective( apparatus, "When you hear the beep, rub the fingers up and down on the manipulandum. ", "coef_frict_fp.bmp");
 	sprintf( msg, "You will rub for %.0f seconds. Move from center to edge and back. Try to maintain pinch force.", duration );
-	AddDirective( apparatus, msg, "rub.bmp"  );
+	AddDirective( apparatus, msg, "coef_frict_fp.bmp"  );
 	ShowDirectives( apparatus );
 
 	return( NORMAL_EXIT );
@@ -124,7 +124,7 @@ int RunFrictionMeasurement( DexApparatus *apparatus, const char *params ) {
 	status = apparatus->WaitCenteredGrip( 20.0, copForceThreshold, copWaitTime, "Manipulandum not in hand \n      Or      \n Fingers not centered.", "alert.bmp" );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	apparatus->fShowStatus( "rub.bmp", "Continue to squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
+	apparatus->fShowStatus( "coef_frict_fp.bmp", "Continue to squeeze %s and rub up and down for %.0f seconds.", squeeze, duration );
 
 	apparatus->Wait( duration );
 
