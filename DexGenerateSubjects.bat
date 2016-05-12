@@ -55,7 +55,7 @@ copy temp2+SessionSmallSubject%QUALIFIER%.dex %fn%
 set fn=S2Sml%Q%.dex
 echo CMD_USER,12,467,%fn%,%prefix%Subject 2  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 2 ***** > temp2
-copy temp2+SessionSmallSubject%QUALIFIER%.dex %fn% 
+copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
 set fn=S3Med%Q%.dex
 echo CMD_USER,23,941,%fn%,%prefix%Subject 3  >> temp1
@@ -75,7 +75,7 @@ copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn%
 set fn=S6Lrg%Q%.dex
 echo CMD_USER,36,931,%fn%,%prefix%Subject 6  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 6 ***** > temp2
-copy temp2+SessionLargeSubject%QUALIFIER%.dex %fn% 
+copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
 set fn=S7Lrg%Q%.dex
 echo CMD_USER,37,036,%fn%,%prefix%Subject 7  >> temp1
