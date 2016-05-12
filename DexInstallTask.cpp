@@ -113,7 +113,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 	// Prompt the subject to install the apparatus accordingly.
 	if ( desired_posture == PostureSeated ) status = apparatus->WaitSubjectReady("CalibrateSeatedR.bmp", "Check Workspace Tablet installed for SEATED operation with Target Mast in socket N (right-hand side)." );
-	else status = apparatus->WaitSubjectReady("CalibrateSupine.bmp", "Check Workspace Tablet installed for SUPINE operation with Target Mast in socket N (right-hand side)." );
+	else status = apparatus->WaitSubjectReady("CalibrateSupFVrs.bmp", "Check Workspace Tablet installed for SUPINE operation with Target Mast in socket N (right-hand side)." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
