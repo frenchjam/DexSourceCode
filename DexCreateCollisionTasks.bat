@@ -13,10 +13,6 @@ REM Provide instructions for first block.
 REM Subroutine will disable it for subsequent blocks.
 set prep=-prep
 
-REM Initialize the block counter. 
-REM It gets incremented by the subroutine.
-set seq=0
-
 REM Procuce the required number of blocks.
 FOR /L %%s IN ( 1,1,%nblocks% ) DO CALL :DO_ONE_COLLISION
 
@@ -29,9 +25,9 @@ goto :EOF
 	set /A "task=task+1"
 
 	REM Each repetition uses a different target sequence.
-	set /A "seq=seq+1"
-	set /A "sseq=seq+100"
-	set sq=%sseq:~1,2%
+	set /A "col_seq=col_seq+1"
+	set /A "colsseq=col_seq+100"
+	set sq=%colsseq:~1,2%
 
 	REM Construct a file tag.
 	set dir=%direction:~0,1%
@@ -40,7 +36,7 @@ goto :EOF
 	set tag=%sz%%task%C%post%%dir%%ms%
 
 	REM Put all the paramters together for the compiler.
-	set params=-collisions -%mass% -%posture% -tag=%tag% -targets=%targets%:%seq%
+	set params=-collisions -%mass% -%posture% -tag=%tag% -targets=%targets%:%col_seq%
 
 	REM Generate a script filename based on the parameters.
 	REM set filename=%tag%Col%mass%%sq%.dex
