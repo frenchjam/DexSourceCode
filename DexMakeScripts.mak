@@ -10,10 +10,10 @@
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	flight_debug
 #default:	flight_draft
-#default:	flight_release
+default:	flight_release
 #default:	ground_debug
 #default:	ground_draft
-default:	ground_release
+#default:	ground_release
 #default:	parabolic_debug
 #default:	parabolic_draft
 
@@ -34,8 +34,9 @@ HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.ba
 
 # The following the path to hand-edited scripts. 
 STATICSCRIPTS	= ..\DexSourceCode
-# The following the path to picture files. 
+# The following the path to picture files sources.
 PICTURES		= ..\DexPictures
+# The place to put the proofs.
 PROOFS			= ..\GripScreenShots
 
 LINT	= ..\DexLint\debug\DexLint.exe
@@ -43,9 +44,6 @@ TAR		=	"C:\Program Files\GnuWin32\bin\tar.exe"
 MD5TREE	=	..\bin\MD5Tree.exe
 
 TOUCH = copy /b $@ +,,
-
-all: GripFlightScripts.tar GripFlightPictures.tar GripFlightProofs.tar GripFlight.md5
-almost_all: GripFlightScripts.tar GripFlightPictures.tar GripFlightMessageList.txt 
 
 ######################################################################################################################################
 
@@ -417,6 +415,10 @@ clean:
 	del /Q release_ground
 	echo nothing > release_flight
 	del /Q release_flight
+	echo nothing > __dummy.md5
+	del /Q *.md5
+	echo nothing > __dummy.tar
+	del /Q *.tar
 
 
 

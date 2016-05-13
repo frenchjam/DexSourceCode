@@ -5,6 +5,7 @@ Unzip the distribution file to extract:
 
 	- a tar archive including the script files (xxxScripts.tar)
 	- a tar archive including the picture files (xxxPictures.tar)
+	- a tar archive including the proofs files (xxxProofs.tar)
 	- an MD5 file containing the checksums for the above archives
 	- a release note (*.txt)
 	- this installation report
@@ -19,6 +20,7 @@ Extract the pictures by double clicking xxxPictures.tar:
 	- a directory will be created containing the full set of scripts (*.dex)
 	- you can check the integrity of the scripts by double-clicking Pictures.md5
 
+
 Using Filezilla or another FTP client program, copy the files to the DEX hardware:
 
 	- the contents of xxxScripts replace the contents of ASW\scripts
@@ -29,4 +31,6 @@ Examine the contents of ASW.ini and verify the following configuration parameter
 	- SlipCoPThresholdGripForce = 0.25
 
   NB: If this is not the case, edit ASW.ini to the settings as above and 
-      inform J. McIntyre and Qinetiq about the discrepency.
+      inform J. McIntyre and Qinetiq about the discrepancy.
+
+If desired, you can extract the set of “Proofs”. These are screen shots of the simulated DEX user interface showing the full set of possible messages and pictures that the user might encounter. These screen shots are not to be installed on DEX but are provided to support ground operations.
