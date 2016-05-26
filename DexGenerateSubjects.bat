@@ -47,13 +47,20 @@ copy temp2+SessionLargeSubjectTraining.dex %fn%
 
 :TESTS
 
+REM **********************   READ ME  ************************
+REM If you want to change the size that corresponds to a given 
+REM subject ID you must change the fn definition in line 1, 
+REM the ID number in line 2 and the Session name in line 4 of
+REM each defintion below.
+REM **********************   READ ME  ************************
+
 set fn=S1Sml%Q%.dex
 echo CMD_USER,11,138,%fn%,%prefix%Subject 1  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 1 ***** > temp2
 copy temp2+SessionSmallSubject%QUALIFIER%.dex %fn% 
 
-set fn=S2Sml%Q%.dex
-echo CMD_USER,12,467,%fn%,%prefix%Subject 2  >> temp1
+set fn=S2Med%Q%.dex
+echo CMD_USER,22,467,%fn%,%prefix%Subject 2  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 2 ***** > temp2
 copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
@@ -72,8 +79,8 @@ echo CMD_USER,25,301,%fn%,%prefix%Subject 5  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 5 ***** > temp2
 copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
-set fn=S6Lrg%Q%.dex
-echo CMD_USER,36,931,%fn%,%prefix%Subject 6  >> temp1
+set fn=S6Med%Q%.dex
+echo CMD_USER,26,931,%fn%,%prefix%Subject 6  >> temp1
 echo CMD_PROTOCOL,200,ignore,***** Subject 6 ***** > temp2
 copy temp2+SessionMediumSubject%QUALIFIER%.dex %fn% 
 
