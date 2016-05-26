@@ -406,7 +406,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Pinch away from the center until the desired force is achieved. (Watch blinking Target LED.)" );
+		apparatus->fShowStatus( "ShowPinch.bmp", "Pinch away from the center until the desired force is achieved. (Watch blinking Target LED.)" );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		if ( status != NORMAL_EXIT ) return( status );
 		status = apparatus->WaitCenteredGrip( 25.0, 0.5, 1.0, "Off-center grip detected (25 mm).\nMaintain grip and press <IGNORE>.", "info.bmp" );
@@ -430,7 +430,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center until the desired force is achieved (see LEDs)." );
+		apparatus->fShowStatus( "ShowPinch.bmp", "Now pinch in the center until the desired force is achieved (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		apparatus->fShowStatus( "working.bmp", "Maintian grip." );
 		if ( status != NORMAL_EXIT ) return( status );
@@ -460,13 +460,13 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->ComputeAndNullifyStrainGaugeOffsets();
 		apparatus->ShowStatus( "Force offsets nullified.", "ok.bmp" );
 
-		apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pinch in the center until the desired force is achieved (see LEDs)." );
+		apparatus->fShowStatus( "ShowPinch.bmp", "Now pinch in the center until the desired force is achieved (see LEDs)." );
 		status = apparatus->WaitDesiredForces( 2.0, 10.0, 0.0, 0.0, dir, 4.0, 0.1, 15.0, "No grip detected.", "alert.bmp" );
 		apparatus->Beep();
 		for ( int i = 1; i <= 5; i++ ) {
 			AnalysisProgress( apparatus, i, 5, "Keep rubbing. Need more slips." );
 			if ( status != NORMAL_EXIT ) return( status );
-			apparatus->fShowStatus( "WaitSubjectReady.bmp", "Now pull until slip." );
+			apparatus->fShowStatus( "ShowPinch.bmp", "Now pull until slip." );
 			if ( status != NORMAL_EXIT ) return( status );
 			status = apparatus->WaitSlip( 2.0, 10.0, 0.0, 0.0, dir, 2.0, 0.5, 15.0, "No slip detected.", "alert.bmp" );
 			apparatus->Beep();
