@@ -54,7 +54,7 @@ REM Make sure that the audio is set loud enough.
 call %SOURCE%\DexCreateAudioTask.bat 
 
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit 
 
 REM ****************************************************************************
 
@@ -68,6 +68,19 @@ set fric_seq=0
 call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep
 call %SOURCE%\DexCreateFrictionTask.bat 1.0
 call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
+
+REM ****************************************************************************
+
+REM First set of collisions
+
+REM Start the trial counter for the collision movements.
+set col_seq=0
+
+set mass=400gm
+set direction=Vertical
+set targets=CollisionSequences20.txt
+set nblocks=4
+call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
 
@@ -90,17 +103,23 @@ call %SOURCE%\DexCreateDiscreteTask.bat -prep
 set direction=Vertical
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Vertical
 set eyes=open  
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Vertical
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
+
+REM 
+REM Show progress.
+REM 
+
+echo CMD_TASK,1,null_task.dex,** Halfway Point **
 
 set direction=Horizontal
 set eyes=open  
@@ -110,36 +129,27 @@ call %SOURCE%\DexCreateDiscreteTask.bat -prep
 set direction=Horizontal
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Horizontal
 set eyes=open  
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
 
 set direction=Horizontal
 set eyes=closed
 set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
+call %SOURCE%\DexCreateDiscreteTask.bat 
+
 
 REM ****************************************************************************
 
-REM 
-REM Show progress.
-REM 
-
-echo CMD_TASK,1,null_task.dex,** Halfway Point **
-
-REM ****************************************************************************
-
-REM
-REM Collisions
-REM
+REM Second set of collisions
 
 set mass=400gm
 set direction=Vertical
 set targets=CollisionSequences20.txt
-set nblocks=10
+set nblocks=4
 call %SOURCE%\DexCreateCollisionTasks.bat
 
 REM ****************************************************************************
@@ -148,7 +158,7 @@ REM
 REM Coefficient of Friction tests.
 REM
 
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -deploy -prep
+call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep -deploy
 call %SOURCE%\DexCreateFrictionTask.bat 1.0
 call %SOURCE%\DexCreateFrictionTask.bat 0.5
 
