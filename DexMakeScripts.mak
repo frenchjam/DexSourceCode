@@ -10,10 +10,10 @@
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	flight_debug
 #default:	flight_draft
-#default:	flight_release
+default:	flight_release
 #default:	ground_debug
 #default:	ground_draft
-default:	ground_release
+#default:	ground_release
 #default:	parabolic_debug
 #default:	parabolic_draft
 
@@ -95,15 +95,15 @@ users_parabolic.dex:	$(SOURCE)\users_parabolic.dex SessionU.dex PFSession1.dex P
 # Sessions
 #
 
-SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
+SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS)  CommSupineSmall.dex CommUprightSmall.dex DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
+SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) CommSupineMedium.dex CommUprightMedium.dex DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
+SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) CommSupineLarge.dex CommUprightLarge.dex DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .\$@
 	$(TOUCH)
 
@@ -212,6 +212,22 @@ DexReducedFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Med > $@
 DexReducedFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Lrg > $@
+
+### Commissioning
+
+CommUprightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Sml > $@
+CommUprightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Med > $@
+CommUprightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Lrg > $@
+
+CommSupineSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Sml > $@
+CommSupineMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Med > $@
+CommSupineLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Lrg > $@
 
 
 # ------------------------------------------------------------------------------------------------
