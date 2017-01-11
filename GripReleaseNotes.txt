@@ -1,3 +1,7 @@
+GripFlightRelease (2017.01.09 17.21.48) Released to CADMOS for update in preparation for Comissioning
+GripFlightDraft (2017.01.09 17.14.49) First release with Commissioning sessions.
+
+GripGroundRelease (2016.12.19 06.19.26) 
 GripGroundRelease (2016.09.26 12.50.58) Installed at EAC for BDC
 GripGroundRelease (2016.09.26 12.38.54) 
 GripFlightDraft (2016.05.26 06.40.48) 
