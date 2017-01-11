@@ -642,6 +642,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	if ( strstr( lpCmdLine, "-slip"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-selftest"  ) ) task = MISC_INSTALL;
 	if ( strstr( lpCmdLine, "-sensors"  ) ) task = SENSOR_TEST;
+	if ( strstr( lpCmdLine, "-tracker"  ) ) task = CODA_TEST;
 
 	// Resetting the offsets on the force sensors can be considered as a task in itself 
 	//  by specifying -offsets in the command line.
@@ -904,6 +905,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	case SENSOR_TEST:
 		while ( RETRY_EXIT == ( return_code = RunSensorTest( apparatus, lpCmdLine ) ) );
+		break;
+
+	case CODA_TEST:
+		while ( RETRY_EXIT == ( return_code = RunCodaTest( apparatus, lpCmdLine ) ) );
 		break;
 
 	case MISC_INSTALL:
