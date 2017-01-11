@@ -545,14 +545,13 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->SetTargetState( 0xFFFFFFFF );
 		status = apparatus->fWaitSubjectReady( "AllTgtOn.bmp", "Verify that all Target LEDs are ON." );
 		if ( status != NORMAL_EXIT ) return( status );
-
 		apparatus->TargetsOff();
 		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test completed." );
 
 	}
 
 	if( strstr( params, "-gm"  ) ) {
-		status = apparatus->fWaitSubjectReady( "blank.bmp", "*** Mass Selection Hardware Tests ***\nPress OK to start." );
+		status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "*** Mass Selection Hardware Tests *** Manipulandum should be in retainer. Press OK to start." );
 		if ( status != NORMAL_EXIT ) return( status );
 		apparatus->SelectAndCheckMass( MassSmall );
 		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand. Shake it a bit to get a feel for its inertia." );
@@ -561,12 +560,8 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 		apparatus->SelectAndCheckMass( MassLarge );
 		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand. Notify COL-CC if it does not appear to have a LOWER inertia than the previous." );
-		apparatus->SelectAndCheckMass( MassMedium );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the medium mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
-		apparatus->SelectAndCheckMass( MassLarge );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
-		status = apparatus->fWaitSubjectReady( "ok.bmp", "Test completed." );
+		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand again. Notify COL-CC if it does not appear to have a LOWER inertia than the previous." );
+		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Replace the manipulandum in the holder as shown." );
 	}
 
 
