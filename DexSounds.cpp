@@ -129,7 +129,7 @@ DexScreenSounds::DexScreenSounds( int tones ) {
 
 void DexScreenSounds::SetSoundStateInternal( int tone, int volume ) {
 
-	static int tone_to_color[N_TONES] = { BLACK, MAGENTA, BLUE, CYAN, GREEN, YELLOW, ORANGE, RED };
+	static int tone_to_color[N_TONES] = { BLACK, MAGENTA, CYAN, GREEN, YELLOW, ORANGE, RED, WHITE };
 
 	speaker->SetRadius( volume + 0.5 );
 	speaker->SetColor( tone_to_color[tone] );

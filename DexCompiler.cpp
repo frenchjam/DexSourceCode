@@ -687,9 +687,12 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 			apparatus->Wait( duration );
 		}
 		else if ( !strcmp( token[0], "CMD_CTRL_TONE" ) ) {
-			int volume = atoi( token[1] ) * 7;
+			// CMD_CTRL_TONE on DEX takes a mute flag (0 or 1) and a tone selection (1=7).
+			// Here we convert that to the simulator's API where the parameters
+			//  are tone and volume.
+			int mute = atoi( token[1] );
 			int tone = atoi( token[2] );
-			apparatus->SetSoundStateInternal( tone, volume );
+			apparatus->SetSoundStateInternal( tone, ( mute ? 0 : N_VOLUMES - 1 ));
 		}
 		else if ( !strcmp( token[0], "CMD_CTRL_TARGETS" ) ) {
 			unsigned int h;
