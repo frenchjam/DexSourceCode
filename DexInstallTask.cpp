@@ -553,15 +553,20 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-gm"  ) ) {
 		status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "*** Mass Selection Hardware Tests *** Manipulandum should be in retainer. Press OK to start." );
 		if ( status != NORMAL_EXIT ) return( status );
+
+		status = apparatus->SelfTest();
+		if ( status != NORMAL_EXIT ) return( status );
+
 		apparatus->SelectAndCheckMass( MassSmall );
 		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand. Shake it a bit to get a feel for its inertia." );
 		apparatus->SelectAndCheckMass( MassMedium );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the medium mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
+		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the medium mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
 		apparatus->SelectAndCheckMass( MassLarge );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if it does not appear to have a GREATER inertia than the previous." );
+		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand again. Notify COL-CC if it does not appear to have a LOWER inertia than the previous." );
-		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Replace the manipulandum in the holder as shown." );
+		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand again. Notify COL-CC if inertia does not feel LOWER than previous." );
+		status = apparatus->WaitSubjectReady("PlaceMass.bmp", "Place the mass from the manipulandum in the empty cradle and lock in place." );
+		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Return the manipulandum without mass to the retainer as shown and lock in place (push pins)." );
 	}
 
 

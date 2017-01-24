@@ -27,6 +27,13 @@
 
 //#define SKIP_PREP	// Skip over some of the setup checks just to speed up debugging.
 
+// Use two different tone frequencies, one for each extreme of 
+// the oscillation. I took these values from the Collisions task
+// where I believe that up should be a high tone and down should be
+// a low tone. I don't know why 3 is low and 2 is high.
+int low_tone = 3; 
+int high_tone = 2;
+
 /*********************************************************************************/
 
 int PrepCodaTest( DexApparatus *apparatus, const char *params ) {
@@ -36,17 +43,16 @@ int PrepCodaTest( DexApparatus *apparatus, const char *params ) {
 	DexTargetBarConfiguration bar_position = TargetBarRight;
 	DexSubjectPosture posture = PostureSeated;
 
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
+	// Indicate to the subject that we are ready to start and wait for their go signal.
+	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Place Target Mast in Socket N on right. Press OK to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, "To verify the accuracy of the tracker, you will perform a test using the Target Mast.", "baton_ready.bmp" );
 	AddDirective( apparatus, "You will start with the Target Mast in socket N (right side) with Tapping Surfaces folded.", "baton_ready.bmp" );
 	AddDirective( apparatus, "You will then remove the Target Mast from the socket and rotate it +/- 45° like a baton.", "baton_roll.bmp" );
 	AddDirective( apparatus, "In another trial you will rotate the Target Mast in pitch, as instructed.", "baton_pitch.bmp" );
-	AddDirective( apparatus, "Movements should be slow, with one full cycle per beep.", "baton_beep.bmp" );
+	AddDirective( apparatus, "Movements should be slow, one half-cycle per note.", "baton_notes.bmp" );
 	AddDirective( apparatus, "Reference markers should face toward Tracking Cameras, Target LEDs toward chair.", "alert.bmp" );
 	AddDirective( apparatus, "You can remove the wrist strap, if you wish, to perform this task.", "BeltsSeated.bmp" );
 
@@ -70,6 +76,9 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	char *direction_prompt = "";
 	char *direction_picture = "blank.bmp";
 	char *direction_picture2 = "blank.bmp";
+
+	DexTargetBarConfiguration bar_position = TargetBarRight;
+	DexSubjectPosture posture = PostureSeated;
 
 	fprintf( stderr, "     RunCodaTest: %s\n", params );
 
@@ -96,15 +105,18 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	if ( ParseForTag( params ) ) strcpy( tag, ParseForTag( params ) );
 	else strcpy( tag, "CodaCHK" );
 
+	// Do a generic hardware test before we go any further.
+	status = apparatus->SelfTest();
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) status = PrepCodaTest( apparatus, params );
 
-	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Place Target Mast in Socket N on right. Press OK to continue." );
-	if ( status == ABORT_EXIT ) exit( status );
-
-	status = apparatus->SelfTest();
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do. If Prep was called, this was
+	//  already done, but it does not hurt to do it again.
+	status = CheckInstall( apparatus, posture, bar_position );
 	if ( status != NORMAL_EXIT ) return( status );
 
 	// Start acquisition and acquire a baseline.
@@ -125,7 +137,7 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	apparatus->Wait( baselineDuration );
 	
 	// Indicate what to do next.
-	status = apparatus->fWaitSubjectReady( direction_picture, "Perform %s oscillatory movements as shown in time with beeps.\nPress OK to start.", direction_prompt );
+	status = apparatus->fWaitSubjectReady( direction_picture2, "Perform %s oscillatory movements as shown in time with beeps.\nPress OK to start.", direction_prompt );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Continue to oscillate in time with beeps.", direction_picture2 );
@@ -138,12 +150,22 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	// Output a sound pattern to establish the oscillation frequency.
 	double time;
 	for ( time = 0.0; time < duration; time += period ) {
-		int tone = 3.9; //floor( 3.9 * ( sin( time * 2.0 * PI ) + 1.0 ) );
-		apparatus->SetSoundState( tone, 1 );
-		apparatus->Wait( period / 2.0 - 0.01 );
-		apparatus->SetSoundState( tone, 0 );
-        apparatus->Wait( period / 2.0 - 0.01 );
+
+		apparatus->SetSoundState( high_tone, 1 );
+		apparatus->Wait( 0.250 );
+		apparatus->SetSoundState( high_tone, 0 );
+        apparatus->Wait( period / 2.0 - 0.250 );
+
+		apparatus->SetSoundState( low_tone, 1 );
+		apparatus->Wait( 0.250 );
+		apparatus->SetSoundState( low_tone, 0 );
+        apparatus->Wait( period / 2.0 - 0.250 );
+
 	}
+	// A last beep to complete the cycle.
+	apparatus->SetSoundState( high_tone, 1 );
+	apparatus->Wait( 0.250 );
+	// Silence the sound generator.
 	apparatus->SetSoundState( 4, 0 );
 	apparatus->MarkEvent( END_ANALYSIS );
 

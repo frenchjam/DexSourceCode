@@ -42,6 +42,9 @@ int PrepSensorTest( DexApparatus *apparatus, const char *params ) {
 	DexTargetBarConfiguration bar_position = TargetBarLeft;
 	DexSubjectPosture posture = PostureSeated;
 
+	status = apparatus->WaitSubjectReady( "BarLeft.bmp", "If necessary, move Target Mast to Standby position (left side). Press OK to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
+
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
 	status = CheckInstall( apparatus, posture, bar_position );
