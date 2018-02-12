@@ -1,3 +1,12 @@
+GripFlightRelease (2017.01.24 12.01.27) Released to CADMOS for upload to ISS (to be confirmed by CADMOS)
+GripFlightRelease (2017.01.20 20.06.13) 
+GripFlightRelease (2017.01.20 14.48.05) 
+GripFlightRelease (2017.01.20 10.08.44) 
+GripFlightRelease (2017.01.20 09.37.50) 
+GripFlightRelease (2017.01.20 09.23.00) 
+GripFlightRelease (2017.01.20 09.10.08) 
+GripFlightRelease (2017.01.20 08.07.32) 
+GripFlightRelease (2017.01.19 21.37.11) 
 GripFlightRelease (2017.01.09 17.21.48) Released to CADMOS for update in preparation for Comissioning
 GripFlightDraft (2017.01.09 17.14.49) First release with Commissioning sessions.
 
