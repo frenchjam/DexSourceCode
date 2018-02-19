@@ -1,0 +1,6 @@
+#Null task should just return.
+CMD_LOG_MESSAGE,0,SENSORCHK Task
+CMD_WAIT_SUBJ_READY,You will perform steps to validate the force sensor. Press OK to continue.,SensorTestAll.bmp,300
+#end
+
+

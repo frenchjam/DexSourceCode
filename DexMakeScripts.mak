@@ -27,7 +27,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex sensorchk_task.dex
 PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex ProtocolSensorTests.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
@@ -395,7 +395,8 @@ _check_messages.dex: $(STATICSCRIPTS)\_check_messages.dex
 	copy /Y $(STATICSCRIPTS)\_check_messages.dex .
 null_task.dex: $(STATICSCRIPTS)\null_task.dex
 	copy /Y $(STATICSCRIPTS)\null_task.dex .
-
+sensorchk_task.dex: $(STATICSCRIPTS)\sensorchk_task.dex
+	copy /Y $(STATICSCRIPTS)\sensorchk_task.dex .
 
 ######################################################################################################################################
 
