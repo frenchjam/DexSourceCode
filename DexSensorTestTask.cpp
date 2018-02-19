@@ -39,16 +39,12 @@ int PrepSensorTest( DexApparatus *apparatus, const char *params ) {
 
 	int status = 0;
 	
-	DexTargetBarConfiguration bar_position = TargetBarLeft;
-	DexSubjectPosture posture = PostureSeated;
+
+	status = apparatus->WaitSubjectReady( "PlaceAndFold.bmp", "If necessary, place maniplulandum in any cradle and stow retainer. Press OK to continue." );
+	if ( status == ABORT_EXIT ) exit( status );
 
 	status = apparatus->WaitSubjectReady( "BarLeft.bmp", "If necessary, move Target Mast to Standby position (left side). Press OK to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
-
-	// Verify that the apparatus is in the correct configuration, and if not, 
-	//  give instructions to the subject about what to do.
-	status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
 
 	// Instruct the subject on the task to be done.
 	AddDirective( apparatus, "You will move the manipulandum in a specific manner to test the sensors.", "diagnostics.bmp" );
@@ -111,6 +107,13 @@ int RunSensorTest( DexApparatus *apparatus, const char *params ) {
 	// If this is the first block, we should do this. If not, it can be skipped.
 	if ( ParseForPrep( params ) ) status = PrepSensorTest( apparatus, params );
 
+	// Verify that the apparatus is in the correct configuration, and if not, 
+	//  give instructions to the subject about what to do.
+	DexTargetBarConfiguration bar_position = TargetBarLeft;
+	DexSubjectPosture posture = PostureSeated;
+	status = CheckInstall( apparatus, posture, bar_position );
+	if ( status != NORMAL_EXIT ) return( status );
+
 	// Indicate to the subject that we are ready to start and wait for their go signal.
 	status = apparatus->WaitSubjectReady( "HandsOffCradle.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
@@ -163,7 +166,7 @@ int RunSensorTest( DexApparatus *apparatus, const char *params ) {
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	SignalEndOfRecording( apparatus );
-	status = apparatus->WaitSubjectReady( "PlaceMass.bmp", MsgTrialOver );
+	status = apparatus->WaitSubjectReady( "PlaceMassNoSlide.bmp", MsgReadyToStart );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the manipulandum in the cradle so we get another zero measurement.
