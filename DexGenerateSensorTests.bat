@@ -40,17 +40,17 @@ set frequency=1.0
 set /A "task=task+1"
 set tag=X%task%VSLW
 set filename=%tag%.dex
-%COMPILER% -sensors -prep -vertical -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+%COMPILER% -sensors -vertical -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Up-Down Slow
 
 set /A "task=task+1"
-set tag=%sz%%task%DSLW
+set tag=X%task%DSLW
 set filename=%tag%.dex
 %COMPILER% -sensors -depth -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Front-Back Slow
 
 set /A "task=task+1"
-set tag=%sz%%task%SSLW
+set tag=X%task%SSLW
 set filename=%tag%.dex
 %COMPILER% -sensors -sideways -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Left-Right Slow
@@ -59,19 +59,19 @@ set duration=10.0
 set frequency=1.33
 
 set /A "task=task+1"
-set tag=%sz%%task%VFST
+set tag=X%task%VFST
 set filename=%tag%.dex
 %COMPILER% -sensors -vertical -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Up-Down Fast
 
 set /A "task=task+1"
-set tag=%sz%%task%DFST
+set tag=X%task%DFST
 set filename=%tag%.dex
 %COMPILER% -sensors -depth -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Front-Back Fast
 
 set /A "task=task+1"
-set tag=%sz%%task%SFST
+set tag=X%task%SFST
 set filename=%tag%.dex
 %COMPILER% -sensors -sideways -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
 echo CMD_TASK,%task%,%filename%,%task% Left-Right Fast

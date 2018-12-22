@@ -1,3 +1,44 @@
+GripGroundRelease (2018.12.17 06.38.23) Released to CADMOS for validation and installation at EAC
+GripGroundDraft (2018.12.17 05.45.06) 
+GripGroundDraft (2018.12.17 05.00.02) 
+GripGroundDraft (2018.12.17 04.55.30) 
+GripGroundRelease (2018.12.13 11.31.14) 
+GripGroundRelease (2018.03.15 18.03.12) 
+GripGroundDraft (2018.03.15 17.55.52) 
+GripGroundDraft (2018.03.15 17.47.57) 
+GripFlightRelease (2018.02.19 04.00.30) Released to CADMOS
+GripFlightRelease (2018.02.19 03.36.57) 
+GripFlightRelease (2018.02.19 03.15.58) 
+GripFlightRelease (2018.02.19 02.20.39) 
+GripFlightRelease (2018.02.19 02.06.06) 
+GripFlightRelease (2018.02.19 01.43.16) 
+GripFlightRelease (2018.02.19 01.15.07) 
+GripFlightRelease (2018.02.19 00.58.54) 
+GripFlightRelease (2018.02.15 16.22.30) 
+GripFlightRelease (2018.02.15 15.59.47) 
+GripFlightRelease (2018.02.15 15.51.10) 
+GripFlightRelease (2018.02.15 15.27.02) 
+GripFlightRelease (2018.02.12 06.39.42) Sent to CADMOS for precheck
+GripFlightRelease (2018.02.12 06.35.48) 
+GripFlightDraft (2018.02.12 06.09.31) 
+GripFlightDraft (2018.02.11 23.59.31) 
+GripFlightDraft (2018.02.11 23.56.55) 
+GripFlightDraft (2018.02.11 23.26.21) 
+GripFlightRelease (2017.01.24 12.01.27) Released to CADMOS for upload to ISS (to be confirmed by CADMOS)
+GripFlightRelease (2017.01.20 20.06.13) 
+GripFlightRelease (2017.01.20 14.48.05) 
+GripFlightRelease (2017.01.20 10.08.44) 
+GripFlightRelease (2017.01.20 09.37.50) 
+GripFlightRelease (2017.01.20 09.23.00) 
+GripFlightRelease (2017.01.20 09.10.08) 
+GripFlightRelease (2017.01.20 08.07.32) 
+GripFlightRelease (2017.01.19 21.37.11) 
+GripFlightRelease (2017.01.09 17.21.48) Released to CADMOS for update in preparation for Comissioning
+GripFlightDraft (2017.01.09 17.14.49) First release with Commissioning sessions.
+
+GripGroundRelease (2016.12.19 06.19.26) 
+GripGroundRelease (2016.09.26 12.50.58) Installed at EAC for BDC
+GripGroundRelease (2016.09.26 12.38.54) 
 GripFlightDraft (2016.05.26 06.40.48) 
 GripFlightRelease (2016.05.26 06.34.42) 
 GripFlightRelease (2016.05.13 15.39.10) Released to CADMOS for installation on FM2

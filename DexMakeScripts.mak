@@ -9,11 +9,11 @@
 #
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	flight_debug
-default:	flight_draft
+#default:	flight_draft
 #default:	flight_release
 #default:	ground_debug
 #default:	ground_draft
-#default:	ground_release
+default:	ground_release
 #default:	parabolic_debug
 #default:	parabolic_draft
 
@@ -27,7 +27,7 @@ COMPILER	= DexSimulatorApp.exe
 SOURCE		= ..\DexSourceCode
 DESTINATION	= ..\GripReleases
 
-SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex
+SCRIPTS		= TaskCheckAudio.dex TaskFinishProtocol.dex null_task.dex sensorchk_task.dex
 PROTOCOLS	= ProtocolInstallUpright.dex ProtocolInstallSupine.dex ProtocolUtilities.dex ProtocolSensorTests.dex
 
 HELPERS		= $(SOURCE)\DexCreateFrictionTask.bat $(SOURCE)\DexCreateInstallTask.bat $(SOURCE)\DexCreateOffsetTask.bat $(SOURCE)\DexCreateOscillationTask.bat $(SOURCE)\DexCreateDiscreteTask.bat $(SOURCE)\DexCreateTargetedTasks.bat $(SOURCE)\DexCreateCollisionTasks.bat
@@ -95,27 +95,27 @@ users_parabolic.dex:	$(SOURCE)\users_parabolic.dex SessionU.dex PFSession1.dex P
 # Sessions
 #
 
-SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
+SessionSmallSubjectFlight.dex:	$(STATICSCRIPTS)\SessionSmallSubjectFlight.dex $(PROTOCOLS)  CommSupineSmall.dex CommUprightSmall.dex DexDynamicsFlightSmall.dex DexSeatedFlightSmall.dex DexSupineFlightSmall.dex DexReducedFlightSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
+SessionMediumSubjectFlight.dex:	$(STATICSCRIPTS)\SessionMediumSubjectFlight.dex $(PROTOCOLS) CommSupineMedium.dex CommUprightMedium.dex DexDynamicsFlightMedium.dex DexSeatedFlightMedium.dex DexSupineFlightMedium.dex DexReducedFlightMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
+SessionLargeSubjectFlight.dex:	$(STATICSCRIPTS)\SessionLargeSubjectFlight.dex $(PROTOCOLS) CommSupineLarge.dex CommUprightLarge.dex DexDynamicsFlightLarge.dex DexSeatedFlightLarge.dex DexSupineFlightLarge.dex DexReducedFlightLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectFlight.dex .\$@
 	$(TOUCH)
 
-SessionSmallSubjectBDC.dex:		$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex
+SessionSmallSubjectBDC.dex:		$(STATICSCRIPTS)\SessionSmallSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCSmall.dex DexSeatedBDCSmall.dex DexSupineBDCSmall.dex DexReducedBDCSmall.dex DexLeanBDCSmall.dex
 	copy /Y $(STATICSCRIPTS)\SessionSmallSubjectBDC.dex .\$@
 	$(TOUCH)
 
-SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex
+SessionMediumSubjectBDC.dex:	$(STATICSCRIPTS)\SessionMediumSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCMedium.dex DexSeatedBDCMedium.dex DexSupineBDCMedium.dex DexReducedBDCMedium.dex DexLeanBDCMedium.dex
 	copy /Y $(STATICSCRIPTS)\SessionMediumSubjectBDC.dex .\$@
 	$(TOUCH)
 
-SessionLargeSubjectBDC.dex:		$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex
+SessionLargeSubjectBDC.dex:		$(STATICSCRIPTS)\SessionLargeSubjectBDC.dex $(PROTOCOLS) DexDynamicsBDCLarge.dex DexSeatedBDCLarge.dex DexSupineBDCLarge.dex DexReducedBDCLarge.dex DexLeanBDCLarge.dex
 	copy /Y $(STATICSCRIPTS)\SessionLargeSubjectBDC.dex .\$@
 	$(TOUCH)
 
@@ -213,6 +213,22 @@ DexReducedFlightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $
 DexReducedFlightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedFlight.bat $(HELPERS) $(SCRIPTS)
 	$(SOURCE)\DexGenerateReducedFlight.bat Upright Lrg > $@
 
+### Commissioning
+
+CommUprightSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Sml > $@
+CommUprightMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Med > $@
+CommUprightLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Upright Lrg > $@
+
+CommSupineSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Sml > $@
+CommSupineMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Med > $@
+CommSupineLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateCommissioningProtocol.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateCommissioningProtocol.bat Supine Lrg > $@
+
 
 # ------------------------------------------------------------------------------------------------
 # -- Protocols BDC (Dynamics BDC; Reference Seated BDC; Reference Supine BDC ; Return Reduced) --
@@ -248,11 +264,20 @@ DexSupineBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReferentialsBDC.bat $(HE
 ### Reduced BDC Protocol
 
 DexReducedBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReducedBDC.bat Upright Sml > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Sml FULL > $@
 DexReducedBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReducedBDC.bat Upright Med > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Med FULL > $@
 DexReducedBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
-	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg > $@
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg FULL > $@
+
+### Lean BDC Protocol
+
+DexLeanBDCSmall.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Sml LEAN > $@
+DexLeanBDCMedium.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Med LEAN > $@
+DexLeanBDCLarge.dex: $(COMPILER) $(SOURCE)\DexGenerateReducedBDC.bat $(HELPERS) $(SCRIPTS)
+	$(SOURCE)\DexGenerateReducedBDC.bat Upright Lrg LEAN > $@
 
 ### Dynamics Training Protocol
 
@@ -379,7 +404,8 @@ _check_messages.dex: $(STATICSCRIPTS)\_check_messages.dex
 	copy /Y $(STATICSCRIPTS)\_check_messages.dex .
 null_task.dex: $(STATICSCRIPTS)\null_task.dex
 	copy /Y $(STATICSCRIPTS)\null_task.dex .
-
+sensorchk_task.dex: $(STATICSCRIPTS)\sensorchk_task.dex
+	copy /Y $(STATICSCRIPTS)\sensorchk_task.dex .
 
 ######################################################################################################################################
 

@@ -2,7 +2,7 @@
 SETLOCAL
 
 
-REM Generate the Dynamics Flight Reduced protocol. (From a copy of the DexGenerateDynamics.bat)
+REM Generate the Reduced R§1 protocol. (From a copy of the DexGenerateDynamics.bat)
 
 REM This script allows one to select -upright or -supine with the first parameter.
 set posture=%1
@@ -13,6 +13,9 @@ REM so that the targets can be tuned to different size subject. It also inserts 
 set size=%2
 set sz=%size:~0,1%
 
+REM Finally, if the third parameter is "LEAN" we do a version that has minimal instructions to the subject.
+set lean=%3
+
 REM Alias to the compiler.
 set COMPILER=DexSimulatorApp.exe
 set SOURCE=..\DexSourceCode
@@ -22,6 +25,7 @@ REM Here I am adopting a strategy by which all the protocols of the same type bu
 REM  (small, medium and large) will use the same ID number for each task, but that the different protocols will 
 REM  start numbering from different values, i.e. Dynamics = 200, Upright = 300, Supine = 400.
 set task=900
+if %lean%==LEAN set task=920
 
 REM Write a header into the file.
 ECHO #DEX protocol file for Dynamics Flight Reduced protocol.
@@ -49,8 +53,13 @@ call %SOURCE%\DexCreateInstallTask.bat Supine
 REM Make sure that the audio is set loud enough.
 call %SOURCE%\DexCreateAudioTask.bat 
 
+set prep=
+if %lean%==LEAN goto :NL0
+set prep= -deploy -prep
+:NL0
+
 REM The force sensor offsets are also measured and suppressed at the start for each subject.
-call %SOURCE%\DexCreateOffsetTask.bat -%posture% -deploy -sit
+call %SOURCE%\DexCreateOffsetTask.bat -%posture% %prep%
 
 REM ****************************************************************************
 
@@ -61,48 +70,19 @@ REM
 REM Start the trial counter for the friction tests.
 set fric_seq=0
 
-call %SOURCE%\DexCreateFrictionTask.bat 2.5 -prep
-call %SOURCE%\DexCreateFrictionTask.bat 1.0
-call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
+set prep=
+if %lean%==LEAN goto :NL1
+set prep= -prep -stow
+:NL1
+
+
+call %SOURCE%\DexCreateFrictionTask.bat 1.0 %prep%
+
 
 REM ****************************************************************************
 
 REM Now we start generating the science task scripts specific to this protocol.
 REM Here we build the scripts as we go and we create the entries in the protocol file.
-
-REM ****************************************************************************
-
-REM
-REM Discrete Movements
-REM
-REM we need to create a new list of sound target with a duration of 20 sec
-set mass=400gm
-set delays=DiscreteDelaySequences20.txt
-
-REM Start the trial counter for the discrete movements.
-set disc_seq=0
-
-set direction=Vertical
-set eyes=open  
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
-
-set direction=Vertical
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
-
-set direction=Horizontal
-set eyes=open  
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat -prep
-
-set direction=Horizontal
-set eyes=closed
-set range=DiscreteRanges%direction%.txt:%sz%
-call %SOURCE%\DexCreateDiscreteTask.bat
-
-
 
 REM ****************************************************************************
 
@@ -120,7 +100,18 @@ set osc_seq=100
 
 set mass=400gm
 set frequency=1.00
+
+set prep=
+if %lean%==LEAN goto :NL2
 set prep=-prep
+:NL2
+
+set range=OscillationRangesNominalVertical.txt:%sz%
+call %SOURCE%\DexCreateOscillationTask.bat
+
+set mass=400gm
+set frequency=1.00
+set prep=
 set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
@@ -131,40 +122,74 @@ set range=OscillationRangesNominalVertical.txt:%sz%
 call %SOURCE%\DexCreateOscillationTask.bat
 
 REM ****************************************************************************
-REM
-REM Collisions
-REM
-REM we need to create a new list of collision with a duration of 20 sec
 
+REM
+REM Discrete Movements
+REM
+REM we need to create a new list of sound target with a duration of 20 sec
 set mass=400gm
+set delays=DiscreteDelaySequences20.txt
+
+REM Start the trial counter for the discrete movements.
+set disc_seq=0
+
+set prep=
+if %lean%==LEAN goto :NL3
+set prep=-prep
+:NL3
+
 set direction=Vertical
-set targets=CollisionSequences20.txt
-set nblocks=5
-call %SOURCE%\DexCreateCollisionTasks.bat
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat %prep%
 
-REM ***************************************************************************
-
-REM
-REM Targeted Movements
-REM
-REM We need to create a new list of target with a duration of 20 sec!!!
-
-set mass=400gm
-set nblocks=5
-set movements=20
-
-REM
-REM Vertical Direction
-REM
 set direction=Vertical
-call %SOURCE%\DexCreateTargetedTasks.bat
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
 
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
+set direction=Vertical
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
+
+set direction=Horizontal
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat %prep%
+
+set direction=Horizontal
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
+set direction=Horizontal
+set eyes=open  
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
+
+set direction=Horizontal
+set eyes=closed
+set range=DiscreteRanges%direction%.txt:%sz%
+call %SOURCE%\DexCreateDiscreteTask.bat
 
 REM ****************************************************************************
 REM
 REM Coefficient of Friction tests.
 
-call %SOURCE%\DexCreateFrictionTask.bat 1.0 -prep -deploy
+set prep=
+if %lean%==LEAN goto :NL4
+set prep=-deploy -prep
+:NL4
+
+call %SOURCE%\DexCreateFrictionTask.bat 1.0 %prep%
+call %SOURCE%\DexCreateFrictionTask.bat 2.5
+call %SOURCE%\DexCreateFrictionTask.bat 0.5 -stow
 
 REM ****************************************************************************
 

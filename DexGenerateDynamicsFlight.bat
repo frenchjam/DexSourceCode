@@ -195,6 +195,56 @@ call %SOURCE%\DexCreateFrictionTask.bat 1.0 -deploy -prep
 REM ****************************************************************************
 
 REM
+REM Check the calibration of the inertial and force sensors.
+REM
+
+echo CMD_TASK,2,sensorchk_task.dex,** Sensor Verification **
+
+set duration=15.0
+set frequency=1.0
+
+set /A "task=task+1"
+set tag=X%task%VSLW
+set filename=%tag%.dex
+%COMPILER% -sensors -prep -vertical -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Up-Down Slow
+
+set /A "task=task+1"
+set tag=X%task%DSLW
+set filename=%tag%.dex
+%COMPILER% -sensors -depth -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Front-Back Slow
+
+set /A "task=task+1"
+set tag=X%task%SSLW
+set filename=%tag%.dex
+%COMPILER% -sensors -sideways -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Left-Right Slow
+
+set duration=10.0
+set frequency=1.33
+
+set /A "task=task+1"
+set tag=X%task%VFST
+set filename=%tag%.dex
+%COMPILER% -sensors -vertical -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Up-Down Fast
+
+set /A "task=task+1"
+set tag=X%task%DFST
+set filename=%tag%.dex
+%COMPILER% -sensors -depth -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Front-Back Fast
+
+set /A "task=task+1"
+set tag=X%task%SFST
+set filename=%tag%.dex
+%COMPILER% -sensors -sideways -frequency=%frequency% -duration=%duration% -tag=%tag% -compile=%filename% 
+echo CMD_TASK,%task%,%filename%,%task% Left-Right Fast
+
+REM ****************************************************************************
+
+REM
 REM Show that protocol is finished.
 REM
 set /A "task=task+1"
