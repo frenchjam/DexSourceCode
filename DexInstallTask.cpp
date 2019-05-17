@@ -117,7 +117,7 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Prompt the subject to place the manipulandum in the holder on the chair.
-	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the holder as shown. Check that locker door is fully open." );
+	status = apparatus->WaitSubjectReady("ManipInChair.bmp", "Place the manipulandum in the Manipulandum Calibration Cradle as shown. Check that locker door is fully open." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	status = apparatus->WaitSubjectReady("Visible.bmp", "Check that the 'VISIBLE' status indicator on the Workspace Tablet touchscreen is green." );
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
