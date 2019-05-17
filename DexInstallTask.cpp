@@ -142,8 +142,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	}
 
 	// Prompt the subject to place the target bar in the left side position.
-	status = apparatus->WaitSubjectReady("BarLeft.bmp", "Move the Target Mast to the Standby socket (left-hand side)." );
-	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+	// status = apparatus->WaitSubjectReady("BarLeft.bmp", "Move the Target Mast to the Standby socket (left-hand side)." );
+	// if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 
 	// Perform the alignment based on those markers.
 	apparatus->ShowStatus( "Performing alignment ...", "wait.bmp" );
