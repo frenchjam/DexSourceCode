@@ -10,10 +10,10 @@
 #default:	clean				# Pick this if you want to clear out all the .dex files as rebuild everything.
 #default:	flight_debug
 #default:	flight_draft
-#default:	flight_release
+default:	flight_release
 #default:	ground_debug
 #default:	ground_draft
-default:	ground_release
+#default:	ground_release
 #default:	parabolic_debug
 #default:	parabolic_draft
 
