@@ -155,15 +155,15 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( desired_posture == PostureSeated ) {
 
 		status = apparatus->CheckTrackerPlacement( 0, 
-											expected_coda1_position_upright, codaUnitPositionTolerance, 
-											expected_coda1_orientation_upright, codaUnitOrientationTolerance, 
-											"Placement error - Tracker Camera 1\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedL.bmp" );
+											expected_coda1_position_upright, codaUnitPositionRelaxed, 
+											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
+											"Placement error - Tracker Camera 1\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedR.bmp" );
 	}
 	else {
 		status = apparatus->CheckTrackerPlacement( 0, 
-											expected_coda1_position_supine, codaUnitPositionTolerance, 
-											expected_coda1_orientation_supine, codaUnitOrientationTolerance, 
-											"Placement error - Tracker Camera 1\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											expected_coda1_position_supine, codaUnitPositionRelaxed, 
+											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
+											"Placement error - Tracker Camera 1\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSupineM.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -174,15 +174,15 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		if ( desired_posture == PostureSeated ) {
 
 			status = apparatus->CheckTrackerPlacement( 1, 
-												expected_coda2_position_upright, codaUnitPositionTolerance, 
-												expected_coda2_orientation_upright, codaUnitOrientationTolerance, 
-												"Placement error - Tracker Camera 2\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedL.bmp" );
+												expected_coda2_position_upright, codaUnitPositionRelaxed, 
+												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
+												"Placement error - Tracker Camera 2\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSeatedR.bmp" );
 		}
 		else {
 			status = apparatus->CheckTrackerPlacement( 1, 
-												expected_coda2_position_supine, codaUnitPositionTolerance, 
-												expected_coda2_orientation_supine, codaUnitOrientationTolerance, 
-												"Placement error - Tracker Camera 2\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+												expected_coda2_position_supine, codaUnitPositionRelaxed, 
+												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
+												"Placement error - Tracker Camera 2\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalibrateSupineM.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
