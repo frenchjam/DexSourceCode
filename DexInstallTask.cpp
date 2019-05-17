@@ -253,7 +253,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+											"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupineM.bmp" );
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -272,7 +272,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupine.bmp" );
+												"Unexpected Configuration.\n- Check configured for SUPINE.\nCorrect and <Retry> or call COL-CC.", "CalibrateSupineM.bmp" );
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -296,8 +296,8 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
-		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
-		else status = apparatus->SelectAndCheckConfiguration( "HdwConfB.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on RIGHT.\n- Check reference markers visible.\n", PostureSeated, desired_bar_position, DONT_CARE );
+		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfBM.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
+		else status = apparatus->SelectAndCheckConfiguration( "HdwConfBM.bmp", "Unexpected Configuration.\n- Check configured for SUPINE.\n- Check target mast on RIGHT.\n- Check reference markers visible.\n", PostureSeated, desired_bar_position, DONT_CARE );
 	}
 	else {
 		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( "HdwConfDleft.bmp", "Unexpected Configuration.\n- Check configured for SEATED.\n- Check target mast on LEFT.\n- Check reference markers visible.", PostureSeated, desired_bar_position, DONT_CARE );
