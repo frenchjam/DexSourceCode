@@ -54,7 +54,7 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		if ( _illustrated_message_picture_bitmap ) {
 			SendDlgItemMessage( hDlg, IDC_PICTURE, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM) _illustrated_message_picture_bitmap );
 		}
-		SetTimer( hDlg, WM_TIMER, 10, NULL );
+		SetTimer( hDlg, WM_TIMER, 1000, NULL );
    		return TRUE;
 		break;
 		
@@ -79,7 +79,7 @@ BOOL CALLBACK _lintGrabCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 		}
  		system( command );
-		_sleep( 750 );
+		_sleep( 1000 );
 		EndDialog(hDlg, LOWORD(wParam));
 		return TRUE;
 			break;
