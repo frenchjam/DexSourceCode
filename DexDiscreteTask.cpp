@@ -172,11 +172,18 @@ int RunDiscrete( DexApparatus *apparatus, const char *params ) {
 
 	// If told to do so in the command line, give the subject explicit instructions to prepare the task.
 	// If this is the first block, we should do this. If not, it can be skipped.
-	if ( ParseForPrep( params ) ) status = PrepDiscrete( apparatus, params );
+	if ( ParseForPrep( params ) ) {
+		status = PrepDiscrete( apparatus, params );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
+#ifndef INHIBIT_SUBSEQUENT_CHECKS
 	// Verify that the apparatus is in the correct configuration, and if not, 
 	//  give instructions to the subject about what to do.
-	else status = CheckInstall( apparatus, posture, bar_position );
-	if ( status != NORMAL_EXIT ) return( status );
+	else {
+		status = CheckInstall( apparatus, posture, bar_position );
+		if ( status != NORMAL_EXIT ) return( status );
+	}
+#endif
 
 	// Verify that the subject is ready, in case they did something unexpected.
 	if ( posture == PostureSeated ) {

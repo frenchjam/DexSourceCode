@@ -73,7 +73,7 @@ double codaUnitPositionTolerance = 900.0;		// Allowable displacement wrt expecte
 double codaUnitOrientationTolerance = 90.0;		// Allowable rotation wrt expected orientation, in degrees.
 
 double codaUnitPositionRelaxed =  2000.0;		// Use this if all you really care about is upright vs. supine..
-double codaUnitOrientationIgnore = 180.0;		// Use this if you don't care what the orientation is.
+double codaUnitOrientationIgnore = 180.0;		// Use this if you don't care what the orientation is. Must be 180 or less.
 
 double audioCheckDuration = 10.0;
 
@@ -141,6 +141,8 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
 	}
 
+	// We used to move the mast to the left (standby) position to improve the alignment, but that has proved problematic for visibility.
+	// So now we leave it on the right.
 	// Prompt the subject to place the target bar in the left side position.
 	// status = apparatus->WaitSubjectReady("BarLeft.bmp", "Move the Target Mast to the Standby socket (left-hand side)." );
 	// if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
@@ -153,27 +155,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	// Are the Coda bars where we think they should be?
 	apparatus->ShowStatus( "Checking tracker placement ...", "wait.bmp" );
 	if ( desired_posture == PostureSeated ) {
-
-		// TESTING TESTING TESTING
-		// Here we implement with two different criteria for testing purposes.
-		// One will go away.
-		status = apparatus->CheckTrackerPlacement( 0, 
-											expected_coda1_position_upright, codaUnitPositionTolerance, 
-											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
-											"Placement error - Tracker Camera 1\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalSeatedCR.bmp" );
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_upright, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_upright, codaUnitOrientationIgnore, 
 											"Placement error - Tracker Camera 1\n- Check configured for SEATED\nCorrect and <Retry> or call COL-CC.", "CheckSeatedR.bmp" );
 	}
 	else {
-		// TESTING TESTING TESTING
-		// Here we implement with two different criteria for testing purposes.
-		// One will go away.
-		status = apparatus->CheckTrackerPlacement( 0, 
-											expected_coda1_position_supine, codaUnitPositionTolerance, 
-											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
-											"Placement error - Tracker Camera 1\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalSupineCM.bmp" );
 		status = apparatus->CheckTrackerPlacement( 0, 
 											expected_coda1_position_supine, codaUnitPositionRelaxed, 
 											expected_coda1_orientation_supine, codaUnitOrientationIgnore, 
@@ -186,27 +173,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 	if ( apparatus->nCodas > 1 ) {
 
 		if ( desired_posture == PostureSeated ) {
-
-			// TESTING TESTING TESTING
-			// Here we implement with two different criteria for testing purposes.
-			// One will go away.
-			status = apparatus->CheckTrackerPlacement( 1, 
-												expected_coda2_position_upright, codaUnitPositionTolerance, 
-												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
-												"Placement error - Tracker Camera 2\n- Check configured for SEATED\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalSeatedCR.bmp" );
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
 												"Placement error - Tracker Camera 2\n- Check configured for SEATED\nCorrect and <Retry> or call COL-CC.", "CheckSeatedR.bmp" );
 		}
 		else {
-			// TESTING TESTING TESTING
-			// Here we implement with two different criteria for testing purposes.
-			// One will go away.
-			status = apparatus->CheckTrackerPlacement( 1, 
-												expected_coda2_position_supine, codaUnitPositionTolerance, 
-												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
-												"Placement error - Tracker Camera 2\n- Check configured for SUPINE\n- Check camera placement\nCorrect and <Retry> or call COL-CC.", "CalSupineCM.bmp" );
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_supine, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_supine, codaUnitOrientationIgnore, 
@@ -251,7 +223,12 @@ int RunInstall( DexApparatus *apparatus, const char *params ) {
 
 int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, DexTargetBarConfiguration desired_bar_position ) {
 
-	int status = 0;
+	int status = NORMAL_EXIT;
+
+	
+#ifdef INHIBIT_ALL_INSTALLATION_CHECKS
+	return status;
+#endif
 
 	// Tune the picture depending on the expected position of the bar.
 	// Only applies to seated, because the pictures don't really show the bar position in the supine case.
@@ -260,11 +237,6 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	char *supine_pic = "CheckSupineR.bmp";
 	if ( desired_bar_position == TargetBarLeft ) supine_pic = "CheckSupineL.bmp";
 
-	// Are the CODA bars where we think they should be, given the desired postural configuration?
-	// Here we are mainly concerned with checking if the alignment was done in the desired configuration.
-	// We don't care so much if the CODAs are swapped or installed in a different configuration.
-	// So we use a relaxed constraint on the position of each unit and we ignore the orientation of the units.
-
 	apparatus->Comment( "################################################################################" );
 	apparatus->Comment( "Operations to check the hardware configuration." );
 
@@ -272,6 +244,14 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	apparatus->StartFilming( "GripCHCK", defaultCameraFrameRate );
 
 	apparatus->ShowStatus( "Checking hardware configuration ...", "wait.bmp" );
+
+#ifndef INHIBIT_PLACEMENT_CHECKS
+
+	// Are the CODA bars where we think they should be, given the desired postural configuration?
+	// Here we are mainly concerned with checking if the alignment was done in the desired configuration.
+	// We don't care so much if the CODAs are swapped or installed in a different configuration.
+	// So we use a relaxed constraint on the position of each unit and we ignore the orientation of the units.
+
 	if ( desired_posture == PostureSeated ) {
 
 		status = apparatus->CheckTrackerPlacement( 0, 
@@ -287,12 +267,13 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 	}
 	if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+#endif
 
 
 	if ( apparatus->nCodas > 1 ) {
 
+#ifndef INHIBIT_PLACEMENT_CHECKS
 		if ( desired_posture == PostureSeated ) {
-
 			status = apparatus->CheckTrackerPlacement( 1, 
 												expected_coda2_position_upright, codaUnitPositionRelaxed, 
 												expected_coda2_orientation_upright, codaUnitOrientationIgnore, 
@@ -306,15 +287,19 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 
 		}
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+#endif
 
+#ifndef INHIBIT_ALIGNMENT_CHECKS
 		// Check that the trackers are still aligned with each other.
 		status = apparatus->CheckTrackerAlignment( alignmentMarkerMask, alignmentTolerance, alignmentRequiredGood, 
 			"Coda misalignment detected!\n- Are reference markers in view?\\nCorrect and <Retry> or call COL-CC.", "alert.bmp" );
 		if ( status == ABORT_EXIT || status == RETRY_EXIT ) return( status );
+#endif
 
 	}
 		
 
+#ifndef INHIBIT_MAST_CHECKS
 	// The current implementation of SelectAndCheckConfiguration() does not handle doing the aligment in the supine configuration. 
 	// The test to decide if the hdw is in the upright or supine configuration assumes that the alignment was done in the upright 
 	//  configuration. If the alignment is done in the supine configuration, then the test will say that it is in the upright 
@@ -323,8 +308,6 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 	//  configuation and that the alignment was done in that configuration. So what we do here is set the desired configuration 
 	//  to be upright (seated), which will appear to be true in both the supine and upright cases. Nevertheless, the error message
 	//  and picture displayed to the subject if the test fails should be what we really want.
-
-	// TODO: Create pictures specific to each configuration (upright/supine X bar left/bar right).
 	if ( desired_posture == PostureSupine ) {
 		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( supine_pic, "Unexpected Configuration.\n- Check configured for SUPINE\n- Check target mast on LEFT\n- Check reference markers visible", PostureSeated, desired_bar_position, DONT_CARE );
 		else status = apparatus->SelectAndCheckConfiguration( supine_pic, "Unexpected Configuration.\n- Check configured for SUPINE\n- Check target mast on RIGHT\n- Check reference markers visible\n", PostureSeated, desired_bar_position, DONT_CARE );
@@ -333,6 +316,7 @@ int CheckInstall( DexApparatus *apparatus, DexSubjectPosture desired_posture, De
 		if ( desired_bar_position == TargetBarLeft ) status = apparatus->SelectAndCheckConfiguration( seated_pic, "Unexpected Configuration.\n- Check configured for SEATED\n- Check target mast on LEFT\n- Check reference markers visible", PostureSeated, desired_bar_position, DONT_CARE );
 		else status = apparatus->SelectAndCheckConfiguration( seated_pic, "Unexpected Configuration.\n- Check configured for SEATED\n- Check target mast on RIGHT\n- Check reference markers visible", PostureSeated, desired_bar_position, DONT_CARE );
 	}
+#endif
 	
 	apparatus->StopFilming();
 	apparatus->HideStatus();

@@ -621,6 +621,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	if ( strstr( lpCmdLine, "-osc"    ) ) task = OSCILLATION_TASK;
 	if ( strstr( lpCmdLine, "-oscillations"    ) ) task = OSCILLATION_TASK;
+	if ( strstr( lpCmdLine, "-Poscillations"    ) ) task = OSCILLATION_PREP;
 	if ( strstr( lpCmdLine, "-targeted"    ) ) task = TARGETED_TASK;
 	if ( strstr( lpCmdLine, "-discrete"    ) ) task = DISCRETE_TASK;
 	if ( strstr( lpCmdLine, "-coll"   ) ) task = COLLISION_TASK;
@@ -873,6 +874,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		
 	case OSCILLATION_TASK:
 		while ( RETRY_EXIT == ( return_code = RunOscillations( apparatus, lpCmdLine ) ) );
+		break;
+		
+	case OSCILLATION_PREP:
+		while ( RETRY_EXIT == ( return_code = PrepOscillations( apparatus, lpCmdLine ) ) );
 		break;
 		
 	case COLLISION_TASK:

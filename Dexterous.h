@@ -10,6 +10,36 @@
 
 #pragma once
 
+
+/*********************************************************************************/
+
+// Decide if we want to perform checks of the CODA installation and alignment
+// on every block of trials. If none of the following 3 constants are defined,
+// configuration checks will be performed at the start of each block of trials.
+
+// Set the following flag if there should be no checks on CODA placement,
+// CODA alignment, tablet configuration or mast placement. It overrides 
+// the following two options for more limited checks.
+// #define INHIBIT_ALL_INSTALLATION_CHECKS
+
+// Setting the following flag inhibits checks of CODA placement and
+// tablet configuration within experiment tasks. There will still be a check 
+// during the installation task itself.
+#define INHIBIT_PLACEMENT_CHECKS
+
+// Setting the following flag inhibits checks of CODA alignment and
+// within experiment tasks. There will still be a check during the installation task itself.
+// #define INHIBIT_ALIGNMENT_CHECKS
+
+// Setting the following flag inhibits checks of target mast placement.
+// #define INHIBIT_MAST_CHECKS
+
+// Setting the following flag inhibits the configuration checks for blocks
+// without the -prep option, i.e. blocks after the first one in each type of task.
+#define INHIBIT_SUBSEQUENT_CHECKS
+
+/*********************************************************************************/
+
 #include "DexUDPServices.h"
 #include "VectorsMixin.h"
 

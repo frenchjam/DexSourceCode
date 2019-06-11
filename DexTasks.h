@@ -29,7 +29,7 @@ typedef enum { SCREEN_SOUNDS, GLM_SOUNDS, SOUNDBLASTER_SOUNDS } SoundType;
 enum { FORCE_OK = 0, SLIP };
 
 // Possible protocols.
-enum { CODA_TEST, SENSOR_TEST, AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, ESSENTIAL_COLLISION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
+enum { CODA_TEST, SENSOR_TEST, AUDIO_CHECK, MISC_INSTALL, SHOW_PICTURES, OFFSETS_TASK, TARGETED_TASK, DISCRETE_TASK, OSCILLATION_TASK, OSCILLATION_PREP, ESSENTIAL_COLLISION_TASK, COLLISION_TASK, FRICTION_TASK, RUN_SCRIPT, RUN_PROTOCOL, RUN_SESSION, RUN_SUBJECT, CALIBRATE_TARGETS, INSTALL_PROCEDURE };
 
 // Common parameters.
 extern double maxTrialDuration;				// The maximum time for a single recording.
@@ -113,6 +113,7 @@ bool ParseForBool( const char *cmd, const char *flag );
 // Here are the different tasks.
 int RunTargeted( DexApparatus *apparatus, const char *params = NULL );
 int RunOscillations( DexApparatus *apparatus, const char *params = NULL );
+int PrepOscillations( DexApparatus *apparatus, const char *params = NULL );
 int RunCollisions( DexApparatus *apparatus, const char *params = NULL );
 int RunCollisionsEssential ( DexApparatus *apparatus, const char *params );
 int RunDiscrete( DexApparatus *apparatus, const char *params = NULL );
