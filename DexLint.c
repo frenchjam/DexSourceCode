@@ -306,7 +306,7 @@ int process_task_file ( char *filename, int verbose ) {
 		if ( verbose ) {
 			fprintf( stderr, "\n  Line:   %s", line );
 			fprintf( stderr, "Tokens: %d\n", tokens );
-			for ( i = 0; i < tokens; i++ ) fprintf( stderr, "%2d %s\n", i, token[i] );
+			for ( i = 0; i < tokens; i++ ) fprintf( stderr, "%2d %03d %s\n", i, sizeof( token[i] ), token[i] );
 		}
 
 		// Look for commands that generate message/picture combinations and add new ones to the lists.

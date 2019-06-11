@@ -217,11 +217,11 @@ char *DexCompiler::quoteMessage( const char *message ) {
 	}
 	result[j++] = 0;
 
-	if ( strlen( result ) > 128 ) {
+	if ( strlen( result ) > DEX_MAX_MESSAGE_LENGTH ) {
 		char original[10240];
 		strcpy( original, result );
-		result[127] = 0;
-		fWarning( "WARNING: Message too long. Truncating.\n%s\n%s\n", original, result );
+		result[DEX_MAX_MESSAGE_LENGTH - 1] = 0;
+		fWarning( "WARNING: Message too long. Truncating.\n%s\n%s\n" , original, result );
 	}
 
 	if ( strlen( result ) == 0 ) strcpy( result, " " );
@@ -268,7 +268,7 @@ int DexCompiler::WaitUntilAtTarget( int target_id,
 									const char *msg, const char *picture  ) {
 
 	AddStepNumber();
-	fprintf( fp, "CMD_WAIT_MANIP_ATTARGET, 0x%04x, 0x%04x, %f, %f, %f, %f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %s, %s\n",
+	fprintf( fp, "CMD_WAIT_MANIP_ATTARGET, 0x%04x, 0x%04x, %f, %f, %f, %f, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f,%s,%s\n",
 		horizontalTargetBit( target_id ), verticalTargetBit( target_id ), 
 		desired_orientation[X], desired_orientation[Y], desired_orientation[Z], desired_orientation[M], 
 		position_tolerance[X], position_tolerance[Y], position_tolerance[Z], orientation_tolerance,
@@ -289,7 +289,7 @@ int	 DexCompiler::WaitCenteredGrip( float tolerance, float min_force, float time
 		if ( verbose ) fWarning( "Warning - Timeout cannot be negative." );
 	}
 	AddStepNumber();
-	fprintf( fp, "CMD_WAIT_MANIP_GRIP, %f, %.0f, %f, %s, \n", min_force, tolerance, timeout, quoteMessage( msg ), ( picture ? picture : "" ) );
+	fprintf( fp, "CMD_WAIT_MANIP_GRIP, %f, %.0f, %f,%s, \n", min_force, tolerance, timeout, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 
@@ -299,7 +299,7 @@ int	DexCompiler::WaitDesiredForces( float min_grip, float max_grip,
 								 float hold_time, float timeout, const char *msg, const char *picture ) {
 
 	AddStepNumber();
-	fprintf( fp, "CMD_WAIT_MANIP_GRIPFORCE, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f, %s, %s\n",
+	fprintf( fp, "CMD_WAIT_MANIP_GRIPFORCE, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f,%s,%s\n",
 		min_grip, max_grip, min_load, max_load, direction[X], direction[Y], direction[Z], 
 		hold_time * 1000.0, timeout, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 
@@ -316,7 +316,7 @@ int DexCompiler::WaitSlip( float min_grip, float max_grip,
 								 float timeout, const char *msg, const char *picture ) {
 
 	AddStepNumber();
-	fprintf( fp, "CMD_WAIT_MANIP_SLIP, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f, %s, %s\n",
+	fprintf( fp, "CMD_WAIT_MANIP_SLIP, %f, %f, %f, %f, %f, %f, %f, %.0f, %.0f, %f,%s,%s\n",
 		min_grip, max_grip, min_load, max_load, direction[X], direction[Y], direction[Z], 
 		slip_threshold, timeout, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 
@@ -337,7 +337,7 @@ int DexCompiler::SelectAndCheckConfiguration( const char *picture, const char *m
 	// Note that DEX has no way to check whether the tapping surfaces are deployed or not, so 
 	//  the tapping parameter is ignored.
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
+	fprintf( fp, "CMD_CHK_HW_CONFIG,%s,%s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
 		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
 	return( NORMAL_EXIT );
 }
@@ -372,7 +372,7 @@ int DexCompiler::SelectAndCheckConfiguration( int posture, int bar_position, int
 	// Here I translate those to the 0 and 1 defined by DEX.
 	// Note that DEX has no way to check whether the tapping surfaces are deployed or not, so 
 	//  the tapping parameter is ignored.
-	fprintf( fp, "CMD_CHK_HW_CONFIG, %s, %s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
+	fprintf( fp, "CMD_CHK_HW_CONFIG,%s,%s, %d, %d, %.0f \n", quoteMessage( message ), picture, 
 		( posture == PostureSeated ? 0 : 1 ), ( bar_position == TargetBarLeft ? 1 : 0 ), timeout );
 	return( NORMAL_EXIT );
 }
@@ -390,7 +390,7 @@ int DexCompiler::SelectAndCheckMass( int mass ) {
 	else mass_id = 1;
 
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass, TakeMass.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
+	fprintf( fp, "CMD_CHK_MASS_SELECTION, Select mass,TakeMass.bmp, %d, %.0f\n", mass_id, DEX_MAX_TIMEOUT );
 	return( NORMAL_EXIT );
 }
 
@@ -436,7 +436,7 @@ void DexCompiler::SetSoundStateInternal( int tone, int volume ) {
 
 int DexCompiler::CheckVisibility( double max_cumulative_dropout_time, double max_continuous_dropout_time, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MANIP_VISIBILITY, %f, %f, %s, %s\n", 
+	fprintf( fp, "CMD_CHK_MANIP_VISIBILITY, %f, %f,%s,%s\n", 
 		max_cumulative_dropout_time, max_continuous_dropout_time, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -445,7 +445,7 @@ int DexCompiler::CheckMovementAmplitude(  double min, double max,
 										   double dirX, double dirY, double dirZ,
 										   const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MOVEMENTS_AMPL, %.0f, %.0f, %f, %f, %f, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_MOVEMENTS_AMPL, %.0f, %.0f, %f, %f, %f,%s,%s \n", 
 		min, max, dirX, dirY, dirZ, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -454,7 +454,7 @@ int DexCompiler::CheckMovementCycles(  int min_cycles, int max_cycles,
 							float dirX, float dirY, float dirZ,
 							float hysteresis, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MOVEMENTS_CYCLES, %d, %d, %f, %f, %f, %.0f, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_MOVEMENTS_CYCLES, %d, %d, %f, %f, %f, %.0f,%s,%s \n", 
 		min_cycles, max_cycles, dirX, dirY, dirZ, hysteresis, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -466,7 +466,7 @@ int DexCompiler::CheckEarlyStarts(  int n_false_starts, float hold_time, float t
 		threshold = 1.999;
 	}
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %.0f, %f, %s, %s\n", n_false_starts, hold_time * 1000, threshold * 1000, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
+	fprintf( fp, "CMD_CHK_EARLYSTARTS, %d, %.0f, %.0f, %f,%s,%s\n", n_false_starts, hold_time * 1000, threshold * 1000, filter_constant, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckCorrectStartPosition( int target_id, float tolX, float tolY, float tolZ, int max_n_bad, const char *msg, const char *picture ) {
@@ -475,20 +475,20 @@ int DexCompiler::CheckCorrectStartPosition( int target_id, float tolX, float tol
 	unsigned short vertical = verticalTargetBit( target_id );
 
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_START_POS, 0x%04x, 0x%04x, %.0f, %.0f, %.0f, %d, %s, %s\n", 
+	fprintf( fp, "CMD_CHK_START_POS, 0x%04x, 0x%04x, %.0f, %.0f, %.0f, %d,%s,%s\n", 
 		horizontal, vertical, tolX, tolY, tolZ, max_n_bad, quoteMessage( msg ), ( picture ? picture : "" ) );
 	
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckMovementDirection(  int n_false_directions, float dirX, float dirY, float dirZ, float threshold, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_MOVEMENTS_DIR, %d, %f, %f, %f, %.1f, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_MOVEMENTS_DIR, %d, %f, %f, %f, %.1f,%s,%s \n", 
 		n_false_directions, dirX, dirY, dirZ, threshold, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 int DexCompiler::CheckForcePeaks( float min_force, float max_force, int max_bad_peaks, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_COLLISIONFORCE, %f, %f, %d, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_COLLISIONFORCE, %f, %f, %d,%s,%s \n", 
 		min_force, max_force, max_bad_peaks, quoteMessage( msg ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 };
@@ -511,7 +511,7 @@ void DexCompiler::StartAcquisition( const char *tag, float max_duration ) {
 	}
 
 	AddStepNumber();
-	fprintf( fp, "CMD_ACQ_START, %s\n", truncated );  // Need to confirm if the tag should be quoted or not.
+	fprintf( fp, "CMD_ACQ_START,%s\n", truncated );  // Need to confirm if the tag should be quoted or not.
 	// Note the time of the acqisition start.
 	MarkEvent( ACQUISITION_START );
 }
@@ -519,7 +519,7 @@ void DexCompiler::StartAcquisition( const char *tag, float max_duration ) {
 int DexCompiler::StopAcquisition( const char *msg ) {
 	MarkEvent( ACQUISITION_STOP );
 	AddStepNumber();
-	fprintf( fp, "CMD_ACQ_STOP, %s\n", quoteMessage( msg ) );
+	fprintf( fp, "CMD_ACQ_STOP,%s\n", quoteMessage( msg ) );
 	return( NORMAL_EXIT );
 }
 
@@ -529,13 +529,13 @@ int DexCompiler::PerformTrackerAlignment( const char *message, const char *pictu
 
 
 	AddStepNumber();
-	fprintf( fp, "CMD_ALIGN_CODA, %s, %s \n", quoteMessage( message ), ( picture ? picture : "" ) );
+	fprintf( fp, "CMD_ALIGN_CODA,%s,%s \n", quoteMessage( message ), ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
 
 int DexCompiler::CheckTrackerAlignment( unsigned long marker_mask, float tolerance, int n_good, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_CODA_ALIGNMENT, 0x%08lx, %.0f, %d, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_CODA_ALIGNMENT, 0x%08lx, %.0f, %d,%s,%s \n", 
 		marker_mask, tolerance, n_good, quoteMessage( msg ),  ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -545,7 +545,7 @@ int DexCompiler::CheckTrackerFieldOfView( int unit, unsigned long marker_mask,
 										   float min_y, float max_y,
 										   float min_z, float max_z, const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_CODA_FIELDOFVIEW, %d, 0x%08lx, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f, %s, %s\n", 
+	fprintf( fp, "CMD_CHK_CODA_FIELDOFVIEW, %d, 0x%08lx, %.0f, %.0f, %.0f, %.0f, %.0f, %.0f,%s,%s\n", 
 		unit + 1, marker_mask, min_x, max_x, min_y, max_y, min_z, max_z, quoteMessage( msg ),  ( picture ? picture : "" ) );
 	return( NORMAL_EXIT );
 }
@@ -555,7 +555,7 @@ int DexCompiler::CheckTrackerPlacement( int unit,
 										const Quaternion expected_ori, float o_tolerance,
 										const char *msg, const char *picture ) {
 	AddStepNumber();
-	fprintf( fp, "CMD_CHK_CODA_PLACEMENT, %d, %.0f, %.0f, %.0f, %f, %f, %f, %f, %.0f, %.0f, %s, %s \n", 
+	fprintf( fp, "CMD_CHK_CODA_PLACEMENT, %d, %.0f, %.0f, %.0f, %f, %f, %f, %f, %.0f, %.0f,%s,%s \n", 
 		unit + 1, expected_pos[X], expected_pos[Y], expected_pos[Z],  
 		expected_ori[X], expected_ori[Y], expected_ori[Z], expected_ori[M], 
 		p_tolerance, o_tolerance, quoteMessage( msg ),  ( picture ? picture : "" ) );
@@ -573,19 +573,19 @@ void DexCompiler::MarkEvent( int event, unsigned long param ) {
 void DexCompiler::SignalEvent( const char *event ) {
 	AddStepNumber();
 	// Log a message, without showing it to the subject.
-	fprintf( fp, "CMD_LOG_MESSAGE, 0, %s\n", quoteMessage( event ) );
+	fprintf( fp, "CMD_LOG_MESSAGE, 0,%s\n", quoteMessage( event ) );
 }
 
 void DexCompiler::ShowStatus (const char *message, const char *picture ) {
 	AddStepNumber();
 	// Log the message and show it on the DEX screen.
-	fprintf( fp, "CMD_LOG_MESSAGE, 1, %s\n", quoteMessage( message ) );
+	fprintf( fp, "CMD_LOG_MESSAGE, 1,%s\n", quoteMessage( message ) );
 	AddStepNumber();
-	fprintf( fp, "CMD_SET_PICTURE, %s\n", ( picture ? picture : "") );
+	fprintf( fp, "CMD_SET_PICTURE,%s\n", ( picture ? picture : "") );
 }
 
 void DexCompiler::Comment( const char *txt ) {
-	fprintf( fp, "\n# %s\n", txt );
+	fprintf( fp, "\n#%s\n", txt );
 }
 
 void DexCompiler::AddStepNumber( void ) {
@@ -676,7 +676,14 @@ int RunScript( DexApparatus *apparatus, const char *filename ) {
 		fOutputDebugString( "\n\n" );
 		fOutputDebugString( "Line:   %s", line );
 		fOutputDebugString( "Tokens: %d\n", tokens );
-		for ( i = 0; i < tokens; i++ ) fOutputDebugString( "%2d %s\n", i, token[i] );
+		for ( i = 0; i < tokens; i++ ) {
+			fOutputDebugString( "%2d %03d %s %s\n", i, strlen( token[i] ), ( strlen( token[i] ) > DEX_MAX_MESSAGE_LENGTH ? "!!!" : "   " ), token[i] );
+			if ( strlen( token[i] ) > DEX_MAX_MESSAGE_LENGTH ) {
+				char message[1024];
+				sprintf( message, "Token exceeds max length:  %d  %s", strlen( token[i] ), token[i] );
+				MessageBox( NULL, message, "DEX Error", MB_OK );
+			}
+		}
 
 		if ( tokens < 1 ) {}
 		else if ( !strcmp( token[0], "CMD_WAIT_SUBJ_READY" ) ) {

@@ -35,10 +35,10 @@ int ParseCommaDelimitedLine ( char *tokens[MAX_TOKENS], const char *line ) {
 	tkn = strtok( return_tokens[circular], "," );
 	while ( tkn && n < MAX_TOKENS - 1 ) {
 		/* Skip to first non-white character. */
-		while ( iswhite( *tkn ) && *tkn ) tkn++;
+		/* while ( iswhite( *tkn ) && *tkn ) tkn++; */
 		/* Strip off any trailing whitespace. */
-		chr = tkn + strlen( tkn );
-		while ( iswhite( *chr ) && chr >= tkn ) *chr-- = 0;
+		chr = tkn + strlen( tkn ); 
+		while ( iswhite( *chr ) && chr >= tkn ) *chr-- = 0; 
 		/* Break out if we have hit a comment or the end of the line. */
 		if ( *tkn == '#' || *tkn == 0 ) break;
 		/* Record this as a valid token. */
