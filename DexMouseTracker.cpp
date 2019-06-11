@@ -29,7 +29,7 @@
 // These are taken from a real DEX file, rounded to 90° rotations. 
 
 Vector3		SimulatedUprightCodaOffset[2] = {
-	{  -600.0,  700.0,  2200.0 }, 
+	{  -900.0,  700.0,  2200.0 }, 
 	{     0.0, 1200.0,  2000.0 }
 };
 
@@ -40,7 +40,7 @@ Matrix3x3	SimulatedUprightCodaRotation[2] = {
 
 // Values returned when the alignment is assumed to have been done in the supine configuration.
 Vector3		SimulatedSupineCodaOffset[2] = {
-	{  550.0, 2600.0,    400.0 }, 
+	{  850.0, 2600.0,    400.0 }, 
 	{    0.0, 2500.0,    900.0 }
 };
 
@@ -83,7 +83,7 @@ void DexMouseTracker::Quit( void ) {
 void DexMouseTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &rotation ) {
 
 	// Simulate a placement error by swapping the units;
-	if ( !IsDlgButtonChecked( dlg, IDC_CODA_POSITIONED ) ) {
+	if ( IsDlgButtonChecked( dlg, IDC_CODA_SWAPPED ) ) {
 		unit = 1 - unit;
 	}
 
@@ -97,6 +97,7 @@ void DexMouseTracker::GetUnitTransform( int unit, Vector3 &offset, Matrix3x3 &ro
 		CopyVector( offset, SimulatedUprightCodaOffset[unit] );
 		CopyMatrix( rotation, SimulatedUprightCodaRotation[unit] );
 	}
+	if ( IsDlgButtonChecked( dlg, IDC_CODA_MIRRORED ) ) offset[X] = - offset[X];
 
 
 }

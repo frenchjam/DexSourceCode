@@ -629,7 +629,8 @@ HWND DexCreateMouseTrackerGUI( void ) {
 	CheckRadioButton( mouse_tracker_dlg, IDC_LEFT, IDC_RIGHT, IDC_LEFT ); 
 	CheckRadioButton( mouse_tracker_dlg, IDC_HORIZ, IDC_VERT, IDC_VERT );
 	CheckRadioButton( mouse_tracker_dlg, IDC_FOLDED, IDC_EXTENDED, IDC_FOLDED );
-	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED, true );
+	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_SWAPPED, false );
+	CheckDlgButton( mouse_tracker_dlg, IDC_CODA_MIRRORED, false );
 
 	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_UNALIGNED,       (LPARAM) "  <not aligned>  " );
 	SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_INSERTSTRING, TRACKER_ALIGNED_UPRIGHT, (LPARAM) "Aligned Seated" );
@@ -688,21 +689,22 @@ void SaveGUIState( void ) {
 
 		fprintf( fp, "%d ", SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_GETCURSEL, NULL, NULL ) );
 		
-		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_POSITIONED ) ); 
+		fprintf( fp, " %d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_MIRRORED ) ); 
+		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_SWAPPED ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_NOISY ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mouse_tracker_dlg, IDC_CODA_WOBBLY ) ); 
 
-		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1A ) ); 
+		fprintf( fp, " %d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1A ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1B ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1C ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS1M ) ); 
 
-		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2A ) ); 
+		fprintf( fp, " %d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2A ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2B ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2C ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS2M ) ); 
 
-		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3A ) ); 
+		fprintf( fp, " %d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3A ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3B ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3C ) ); 
 		fprintf( fp, "%d ", IsDlgButtonChecked( mass_dlg, IDC_MASS3M ) ); 
@@ -757,8 +759,11 @@ void LoadGUIState( void ) {
 		else SendDlgItemMessage( mouse_tracker_dlg, IDC_ALIGNMENT, CB_SETCURSEL, 2, NULL );
 
 		items = fscanf( fp, "%d", &value );
-		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , value );
-		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_POSITIONED , true );
+		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_MIRRORED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_MIRRORED , true );
+		items = fscanf( fp, "%d", &value );
+		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_SWAPPED , value );
+		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_SWAPPED , true );
 		items = fscanf( fp, "%d", &value );
 		if ( items == 1 ) CheckDlgButton( mouse_tracker_dlg, IDC_CODA_NOISY , value );
 		else CheckDlgButton( mouse_tracker_dlg, IDC_CODA_NOISY , false );
