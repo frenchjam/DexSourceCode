@@ -955,7 +955,7 @@ BOOL CALLBACK _dexTaskListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	{
 	case WM_INITDIALOG:
 
-		SetDlgItemText( hDlg, IDC_MESSAGE, "Select task and press OK." );
+		SetDlgItemText( hDlg, IDC_MESSAGE, "Select task and Press <OK>." );
 		hFont = CreateFont (36, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
 		SendDlgItemMessage( hDlg, IDC_LIST, WM_SETFONT, WPARAM (hFont), TRUE);
 		for ( i = 0; i < _dex_task_menu_list_items; i++ ) {
@@ -1221,7 +1221,7 @@ int RunSession ( DexApparatus *apparatus, char *filename ) {
 		}
 	}
 
-	fill_protocol_menu( ProtocolLabel, ProtocolFilePath, "Select protocol and press OK.", protocols );
+	fill_protocol_menu( ProtocolLabel, ProtocolFilePath, "Select protocol and Press <OK>.", protocols );
 	do {
 		protocol = select_protocol_from_menu();
 	} while ( !strcmp( protocol, "ignore" ));
@@ -1288,7 +1288,7 @@ int RunSubject ( DexApparatus *apparatus, char *filename ) {
 		}
 	}
 
-	fill_protocol_menu( SubjectLabel, SubjectFilePath, "Select subject ID and press OK.", subjects );
+	fill_protocol_menu( SubjectLabel, SubjectFilePath, "Select subject ID and Press <OK>.", subjects );
 	session = select_protocol_from_menu();
 	fOutputDebugString( "Selected session path: %s\n", session );
 	if ( session ) RunSession( apparatus, session );

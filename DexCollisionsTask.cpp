@@ -333,14 +333,14 @@ int RunCollisionsEssential ( DexApparatus *apparatus, const char *params ) {
 	if ( target_filename = ParseForTargetFile( params ) ) collisionSequenceN = LoadSequence( collisionSequence, target_filename );
 
 	// Wait for go signal to start acquiring.
-	status = apparatus->WaitSubjectReady( "go.bmp", "Press OK to start acquiring." );
+	status = apparatus->WaitSubjectReady( "go.bmp", "Press <OK> to start acquiring." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->StartFilming( tag, defaultCameraFrameRate );
 	apparatus->StartAcquisition( tag, maxTrialDuration );
 	
 	// Wait for go signal to start tapping sequence.
-	status = apparatus->WaitSubjectReady( "Collision.bmp", "Press OK to start tapping sequence." );
+	status = apparatus->WaitSubjectReady( "Collision.bmp", "Press <OK> to start tapping sequence." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Tap upward or downward according to the beep and the lighted Target LEDs.", "working.bmp" );

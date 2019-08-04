@@ -1,3 +1,7 @@
+GripFlightRelease (2019.06.15 07.17.15) Released to CADMOS for flight following NASA comments on screens.
+GripFlightRelease (2019.06.15 06.47.51) 
+GripFlightRelease (2019.06.15 06.17.45) 
+GripFlightRelease (2019.06.12 05.42.14) 
 GripFlightDraft (2019.06.11 06.20.08) 
 GripFlightDraft (2019.06.03 10.58.50) Successful test of CODA placement tests at CADMOS.
 GripFlightDraft (2019.06.03 10.55.50) 

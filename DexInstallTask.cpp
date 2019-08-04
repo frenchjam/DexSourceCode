@@ -39,7 +39,7 @@ double fov_min_y =  1500.0, fov_max_y = 4000.0;
 double fov_min_z = -1500.0, fov_max_z = 1500.0;
 
 // Paramters used to test if the tracker units are still aligned.
-double	alignmentTolerance = 5.0;				// Allowable misalignment of marker positions between CODAs.
+double	alignmentTolerance = 10.0;				// Allowable misalignment of marker positions between CODAs.
 int		alignmentRequiredGood = 2;				// How many of the markers used to check the alignment must be within threshold?
 												// If the alignment is off, all will be off. If the alignment is good,
 												//  some might nevertheless be bad.
@@ -332,7 +332,7 @@ int CheckAudio( DexApparatus *apparatus, const char *params ) {
 
 	int status;
 
-	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the GRIP hardware." );
+	status = apparatus->WaitSubjectReady("headphones.bmp", "Don the headphones and connect to the Grip hardware." );
 	if ( status == ABORT_EXIT ) return( status );
 
 	char tag[32];
@@ -395,7 +395,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	// Run the self test in isolation.
 	if( strstr( params, "-selftest"  ) ) {
 
-		apparatus->fWaitSubjectReady( "info.bmp", "********* Run Self Test *********\nPress OK to start test." );
+		apparatus->fWaitSubjectReady( "info.bmp", "********* Run Self Test *********\nPress <OK> to start test." );
 
 		status = apparatus->SelfTest();
 		if ( status != NORMAL_EXIT ) return( status );
@@ -408,7 +408,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-ft"  ) ) {
 		double dir[3] = { 0.0, 1.0, 0.0};
 
-		apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "********* Centered Grip Test *********\nRelease manipulandum and press OK." );
+		apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "********* Centered Grip Test *********\nRelease manipulandum and Press <OK>." );
 		apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
@@ -462,7 +462,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-slip"  ) ) {
 		double dir[3] = { 0.0, 1.0, 0.0};
 
-		apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "*********     Slip Test     *********\nRelease manipulandum and press OK." );
+		apparatus->fWaitSubjectReady( "REMOVE_HAND.bmp", "*********     Slip Test     *********\nRelease manipulandum and Press <OK>." );
 		apparatus->ShowStatus( MsgAcquiringBaseline, "wait.bmp" );
 		apparatus->StartAcquisition( "FTChk", maxTrialDuration );
 		apparatus->Wait( 0.5 );
@@ -538,7 +538,7 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	if( strstr( params, "-LEDs"  ) ) {
 		int tgt;
 		apparatus->TargetsOff();
-		status = apparatus->fWaitSubjectReady( "AllTgtOff.bmp", "***** Target LED Hardware Tests  ****\nVerify that all targets are OFF.\nPress OK to continue." );
+		status = apparatus->fWaitSubjectReady( "AllTgtOff.bmp", "***** Target LED Hardware Tests  ****\nVerify that all targets are OFF.\nPress <OK> to continue." );
 		if ( status != NORMAL_EXIT ) return( status );
 		for ( tgt = 0; tgt < apparatus->nVerticalTargets; tgt++ ) {
 			apparatus->VerticalTargetOn( tgt );
@@ -565,20 +565,20 @@ int MiscInstall ( DexApparatus *apparatus, const char *params ) {
 	}
 
 	if( strstr( params, "-gm"  ) ) {
-		status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "*** Mass Selection Hardware Tests *** Manipulandum should be in retainer. Press OK to start." );
+		status = apparatus->fWaitSubjectReady( "RetainerManip.bmp", "*** Mass Selection Hardware Tests *** Manipulandum should be in retainer. Press <OK> to start." );
 		if ( status != NORMAL_EXIT ) return( status );
 
 		status = apparatus->SelfTest();
 		if ( status != NORMAL_EXIT ) return( status );
 
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand. Shake it a bit to get a feel for its inertia." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand. Shake it a bit to get a feel for its inertia." );
 		apparatus->SelectAndCheckMass( MassMedium );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the medium mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the medium mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
 		apparatus->SelectAndCheckMass( MassLarge );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the heaviest mass in your hand. Notify COL-CC if inertia does not feel GREATER than previous." );
 		apparatus->SelectAndCheckMass( MassSmall );
-		status = apparatus->fWaitSubjectReady( "confirm.bmp", "You should have the lightest mass in your hand again. Notify COL-CC if inertia does not feel LOWER than previous." );
+		status = apparatus->fWaitSubjectReady( "info.bmp", "You should have the lightest mass in your hand again. Notify COL-CC if inertia does not feel LOWER than previous." );
 		status = apparatus->WaitSubjectReady("PlaceMass.bmp", "Place the mass from the manipulandum in the empty cradle and lock in place." );
 		status = apparatus->WaitSubjectReady("RetainerManip.bmp", "Return the manipulandum without mass to the retainer as shown and lock in place (push pins)." );
 	}

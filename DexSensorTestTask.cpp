@@ -40,10 +40,10 @@ int PrepSensorTest( DexApparatus *apparatus, const char *params ) {
 	int status = 0;
 	
 
-	status = apparatus->WaitSubjectReady( "PlaceAndFold.bmp", "If necessary, place maniplulandum in any cradle and stow retainer. Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "PlaceAndFold.bmp", "If necessary, place maniplulandum in any cradle and stow retainer. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "BarLeft.bmp", "If necessary, move Target Mast to Standby position (left side). Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "BarLeft.bmp", "If necessary, move Target Mast to Standby position (left side). Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
@@ -132,17 +132,17 @@ int RunSensorTest( DexApparatus *apparatus, const char *params ) {
 
 	// Instruct subject to take the manipulandum.
 	//  and wait for confimation that he or she is ready.
-	status = apparatus->WaitSubjectReady( "TakeEmpty.bmp", "Pick up manipulandum, leaving mass in cradle. Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "TakeEmpty.bmp", "Pick up manipulandum, leaving mass in cradle. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
-	status = apparatus->WaitSubjectReady( "SensorTestGrip.bmp", "Take manipulandum between fingers as shown and hold steady. Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "SensorTestGrip.bmp", "Take manipulandum between fingers as shown and hold steady. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
 	// Indicate what to do next.
-	status = apparatus->fWaitSubjectReady( direction_picture, "Perform %s oscillatory movements as shown in time with beeps.\nPress OK to start.", direction_prompt );
+	status = apparatus->fWaitSubjectReady( direction_picture, "Perform %s oscillatory movements as shown in time with beeps.\nPress <OK> to start.", direction_prompt );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Continue to oscillate in time with beeps.", "OscillateST.bmp" );

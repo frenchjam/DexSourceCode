@@ -44,7 +44,7 @@ int PrepCodaTest( DexApparatus *apparatus, const char *params ) {
 	DexSubjectPosture posture = PostureSeated;
 
 	// Indicate to the subject that we are ready to start and wait for their go signal.
-	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Place Target Mast in Socket N on right. Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Place Target Mast in Socket N on right. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Instruct the subject on the task to be done.
@@ -53,7 +53,7 @@ int PrepCodaTest( DexApparatus *apparatus, const char *params ) {
 	AddDirective( apparatus, "You will then remove the Target Mast from the socket and rotate it +/- 45° like a baton.", "baton_roll.bmp" );
 	AddDirective( apparatus, "In another trial you will rotate the Target Mast in pitch, as instructed.", "baton_pitch.bmp" );
 	AddDirective( apparatus, "Movements should be slow, one half-cycle per note.", "baton_notes.bmp" );
-	AddDirective( apparatus, "Reference markers should face toward Tracking Cameras, Target LEDs toward chair.", "alert.bmp" );
+	AddDirective( apparatus, "Reference markers should face toward Tracking Cameras, Target LEDs toward chair.", "info.bmp" );
 	AddDirective( apparatus, "You can remove the wrist strap, if you wish, to perform this task.", "BeltsSeated.bmp" );
 
 	ShowDirectives( apparatus );
@@ -130,14 +130,14 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	// Instruct subject to take the manipulandum.
 	//  and wait for confimation that he or she is ready.
 
-	status = apparatus->WaitSubjectReady( "baton.bmp", "Remove Target Mast from socket and hold steady in hand. Press OK to continue." );
+	status = apparatus->WaitSubjectReady( "baton.bmp", "Remove Target Mast from socket and hold steady in hand. Press <OK> to continue." );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	// Collect one second of data while holding at the starting position.
 	apparatus->Wait( baselineDuration );
 	
 	// Indicate what to do next.
-	status = apparatus->fWaitSubjectReady( direction_picture2, "Perform %s oscillatory movements as shown in time with beeps.\nPress OK to start.", direction_prompt );
+	status = apparatus->fWaitSubjectReady( direction_picture2, "Perform %s oscillatory movements as shown in time with beeps.\nPress <OK> to start.", direction_prompt );
 	if ( status == ABORT_EXIT ) exit( status );
 
 	apparatus->ShowStatus( "Continue to oscillate in time with beeps.", direction_picture2 );
@@ -171,7 +171,7 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 
 	// Indicate to the subject that they are done and that they can set down the maniplulandum.
 	SignalEndOfRecording( apparatus );
-	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Replace Target Mast in Socket N (right side). Press OK." );
+	status = apparatus->WaitSubjectReady( "baton_ready.bmp", "Replace Target Mast in Socket N (right side). Press <OK>." );
 	if ( status == ABORT_EXIT ) exit( status );
 	
 	// Take a couple of seconds of extra data with the mast in the socket so we get another reference measurement.
@@ -185,7 +185,7 @@ int RunCodaTest( DexApparatus *apparatus, const char *params ) {
 	apparatus->StopAcquisition( "Error during saving." );
 
 	if ( ParseForBool( params, "-done" ) ) {
-		status = apparatus->WaitSubjectReady( "BarLeft.bmp", "Place Target Mast in Standby socket on left. Press OK to continue." );
+		status = apparatus->WaitSubjectReady( "BarLeft.bmp", "Place Target Mast in Standby socket on left. Press <OK> to continue." );
 		if ( status == ABORT_EXIT ) exit( status );
 		status = apparatus->WaitSubjectReady( "BeltsSeated.bmp", "If you removed the wrist strap, please don it again now. " );
 		if ( status == ABORT_EXIT ) exit( status );
